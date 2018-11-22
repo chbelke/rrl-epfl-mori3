@@ -1,15 +1,18 @@
 /**********************************************************************************
 Written by Kevin Holdcroft (kevin.holdcroft@epfl.ch). All rights reserved RRL EPFL. 
 
-Used to test OAT programming functionality. Used in conjunction with wifiHandler.py
+Tool to compare signal strength between two ESP8266 modules. 
 
-Checks version, and if version is not up to date, enters loop where it waits for an
-update.
+Scans for modules with SSID "helloThere", and then relays the measured signal 
+strength and corresponding MAC address over the network.
 
-Before flashing to ESP8266, please change clientName, publishName, recieveName, and 
-softwareVersion to their appropriate values.
+Used in conjunction with wifiHandler.py, distanceRanger.py, getData.py, and
+mqttAnalyzer.py
 
-/**********************************************************************************/
+Before flashing to ESP8266, please change clientName, publishName, and recieveName
+to their appropriate values.
+
+**********************************************************************************/
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -20,7 +23,7 @@ const char* esp_password =  "generalKenobi1";
 const char* brn_ssid = "rrl_wifi";
 const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.51";
-const int mqttPort = 1883; 
+const int mqttPort = 1883;
 
 const char* clientName  = "esp0";
 const char* publishName = "esp0/pub";
@@ -30,31 +33,32 @@ const float softwareVersion = 1.0;
 bool verCheck = false;  //assumes we don't know the version
 bool verGood = true;   //assumes we are up to date unless otherwise
 
+unsigned long lastMessage;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-
-//----------------------- Wifi and MQTT--------------------------------------//
-void setup() {  
+ 
+ //--------------------------- Start ----------------------------------------//
+void setup() {
   Serial.begin(115200);
-// WiFi.setOutputPower(5.0);
+  // WiFi.setOutputPower(5.0);
   WiFi.begin(brn_ssid, brn_password);
-
-  while (WiFi.status() != WL_CONNECTED)
+  
+  while (WiFi.status() != WL_CONNECTED) 
   {
     delay(500);
     Serial.println("Connecting to WiFi..");
   }
   Serial.println("Connected to the WiFi network");
-
+  
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
-
+ 
   while (!client.connected()) {
     Serial.println("Connecting to MQTT...");
-    if (client.connect(clientName))
-    {
-      Serial.println("connected");
+    if (client.connect(clientName)) 
+    { 
+      Serial.println("connected");  
     } else {
       Serial.print("failed with state ");
       Serial.print(client.state());
@@ -62,11 +66,12 @@ void setup() {
     }
   }
 
+  //--------------------------- MQTT -----------------------------------------//
+ 
   client.publish(publishName, "Hello from ESP8266");
   client.subscribe("esp/rec");
 
-  //  WiFi.softAP(esp_ssid, esp_password);
-
+  WiFi.softAP(esp_ssid, esp_password);
 
   //----------------------- OAT Handling--------------------------------------//
   ArduinoOTA.onStart([]()
@@ -107,18 +112,29 @@ void setup() {
       Serial.println("End Failed");
     }
   });
-
 }
+ 
+
 
 //----------------------- Loooooooop--------------------------------------//
 void loop()
 {
-  if (verCheck == true)
+  if (verCheck == true) //have checked version
   {
-    if (verGood == false)
+    if (verGood == true)
+    {
+      scanWifis();
+      if(lastMessage - millis() > 1000)
+      {
+        client.publish(publishName, "ERR: SSID not found within 10s");
+        lastMessage = millis();
+      }
+    }
+    else //Version is old
     {
       client.publish(publishName, "Out of Date");
       ArduinoOTA.handle();
+      delay(50);
     }
   }
   else
@@ -131,7 +147,8 @@ void loop()
 
 
 
-//----------------------- Recieved Message --------------------------------------//
+
+//----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
   Serial.print("Message arrived in topic: ");
@@ -163,7 +180,9 @@ void callback(char* topic, byte* payload, unsigned int len)
 
 }
 
-//----------------------- Recieved Message --------------------------------------//
+
+
+//----------------------- Recieved Message -----------------------------//
 void pubVersion()
 {
   char buff[100];
@@ -171,4 +190,50 @@ void pubVersion()
                                     + String(" ") + WiFi.localIP();
   IPstring.toCharArray(buff, 100);
   client.publish(publishName, buff);
+}
+
+
+//--------------------------- Scans Network -----------------------------//
+void scanWifis()
+{
+  int n = WiFi.scanNetworks();
+  while(WiFi.scanComplete()<0)
+  {
+    delay(50);
+  }
+  for (int i = 0; i < n; i++)
+  {
+    char buff[100];
+    String SSIDstring = WiFi.SSID(i);
+    SSIDstring.toCharArray(buff,100);
+    if(strcmp(buff,"helloThere")==0)
+    {
+      Serial.println("GENERAL KENOBI");
+
+      uint8_t* bssid = WiFi.BSSID(i);
+      char message[32];
+      
+      char* msgPtr = &message[0];
+      snprintf(msgPtr,6,"DST: ");
+      msgPtr += 5;
+      for (byte j = 0; j < 6; j++){
+        snprintf(msgPtr,3,"%02x",bssid[j]); 
+        msgPtr += 2;
+      }
+      snprintf(msgPtr,3,", ");
+      msgPtr += 2;
+
+      char cstr[5];
+      itoa(WiFi.RSSI(i), cstr, 10);
+
+      snprintf(msgPtr,6,cstr);
+
+      Serial.print("Message: ");
+      Serial.println(message);      
+
+      client.publish(publishName, message);
+
+      lastMessage = millis();
+    }
+  }
 }

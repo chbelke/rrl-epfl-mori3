@@ -18,7 +18,7 @@ If you use Mori v3 within an academic work, please cite:
 # Overview
  - MoriController.x: Internal electronics control
  - ESP8266: Control for ESP8266EX wifi chip
- - GlobalCtrl: Overall external control
+ - External: Overall external control
 
 
 # Prerequisites
@@ -42,3 +42,8 @@ Implemented in Python 3.6.6
 
 Nonstandard libraries:
 `paho.mqtt.client` (https://pypi.org/project/paho-mqtt/)
+`termcolor` (https://pypi.org/project/termcolor/)
+
+ ## Other:
+ MQTT broker is handled by a Raspberry Pi B+
+ (simple tutorial [HERE](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/))

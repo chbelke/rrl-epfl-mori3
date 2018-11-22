@@ -1,3 +1,19 @@
+/**********************************************************************************
+Written by Kevin Holdcroft (kevin.holdcroft@epfl.ch). All rights reserved RRL EPFL. 
+
+Tool to compare signal strength between two ESP8266 modules. 
+
+Scans for modules with SSID "helloThere", and then relays the measured signal 
+strength and corresponding MAC address over the network.
+
+Used in conjunction with wifiHandler.py, distanceRanger.py, getData.py, and
+mqttAnalyzer.py
+
+Before flashing to ESP8266, please change clientName, publishName, and recieveName
+to their appropriate values.
+
+**********************************************************************************/
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
@@ -8,9 +24,9 @@ const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.51";
 const int mqttPort = 1883;
 
-const char* clientName  = "esp2";
-const char* publishName = "esp2/pub";
-const char* recieveName = "esp2/rec";
+const char* clientName  = "esp0";
+const char* publishName = "esp0/pub";
+const char* recieveName = "esp0/rec";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
