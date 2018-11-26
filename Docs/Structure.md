@@ -29,9 +29,9 @@ _Options:_
  - Determines which module goes where
  	- Can walk each module through tranistions
 
-#Examples
+# Examples
 
-##Configuration Change Option 1
+## Configuration Change Option 1
 Computer has control, ESP just a relay
 
 Computer:
@@ -46,12 +46,12 @@ ESP8266:
  - Sends handshake to computer
  - Relays angle and connection information to MCU
 
-MCU
+MCU:
  - Recieves angle and connection information
  - Configures motors and SMA to appropriate configuration
 
 
-##Configuration Change Option 2
+## Configuration Change Option 2
 State transitions stored in ESP memory (state machine style)
 
 Computer:
