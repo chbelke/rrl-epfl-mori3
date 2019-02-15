@@ -31,7 +31,7 @@ from termcolor import colored
 
 
 clientName = "boss"
-mqttServer = "192.168.0.51";
+mqttServer = "192.168.0.50";
 mqttPort = 1883;
 Connected = False
 
@@ -43,10 +43,11 @@ data = []
 macCallTime = time.time()
 verCallTime = time.time()
 
-distance = 1.0
+distance = 0.8
 
-version = 1.5
+version = 0.50
 
+print(mqttServer)
 
 def getArgs():
 	parser = argparse.ArgumentParser(description='Process MQTT information from Mori.')
@@ -79,9 +80,9 @@ def on_message(client, userdata, msg):
 	# print(msg.topic+" "+str(msg.payload))
 	if(msg.topic[:3]=="esp"):
 		espNum = int(msg.topic[3])
-		pyld = str(msg.payload)
-		pyld = pyld[2:-1]
-		pyld = pyld.rsplit(' ')
+		msgld = str(msg.payload)
+		msgld = msgld[2:-1]
+		pyld = msgld.rsplit(' ')
 		cmd = pyld[0]
 
 		if(pyld[0] == 'DST:'):
@@ -120,6 +121,7 @@ def on_message(client, userdata, msg):
 				print("ESP{}: {}".format(espNum,espVer))
 				print("Curr: {}".format(version))
 				client.publish("esp{}/rec".format(espNum),"vb")   #version bad
+				
 			elif(espVer > version):
 				print("Kevin is an idiot and forgot to update this to match newest version")
 				print("ESP{}: {}".format(espNum,espVer))
@@ -129,8 +131,7 @@ def on_message(client, userdata, msg):
 				sys.exit()
 
 		elif(pyld[0] == 'ERR:'):
-			print(pyld[1])
-			print(colored('hello', 'red'))
+			print(colored(msgld, 'red'))
 
 
 

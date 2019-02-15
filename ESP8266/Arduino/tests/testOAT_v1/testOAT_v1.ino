@@ -19,13 +19,13 @@ const char* esp_ssid = "helloThere";
 const char* esp_password =  "generalKenobi1";
 const char* brn_ssid = "rrl_wifi";
 const char* brn_password =  "Bm41254126";
-const char* mqttServer = "192.168.0.51";
+const char* mqttServer = "192.168.0.54";
 const int mqttPort = 1883; 
 
 const char* clientName  = "esp0";
 const char* publishName = "esp0/pub";
 const char* recieveName = "esp0/rec";
-const float softwareVersion = 1.0;
+const float softwareVersion = 0.5;
 
 bool verCheck = false;  //assumes we don't know the version
 bool verGood = true;   //assumes we are up to date unless otherwise
@@ -38,12 +38,14 @@ PubSubClient client(espClient);
 void setup() {  
   Serial.begin(115200);
 // WiFi.setOutputPower(5.0);
+  delay(100);
   WiFi.begin(brn_ssid, brn_password);
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     Serial.println("Connecting to WiFi..");
+    Serial.println("Life is Pain");
   }
   Serial.println("Connected to the WiFi network");
 
@@ -65,7 +67,7 @@ void setup() {
   client.publish(publishName, "Hello from ESP8266");
   client.subscribe("esp/rec");
 
-  //  WiFi.softAP(esp_ssid, esp_password);
+  WiFi.softAP(esp_ssid, esp_password);
 
 
   //----------------------- OAT Handling--------------------------------------//
@@ -117,7 +119,6 @@ void loop()
   {
     if (verGood == false)
     {
-      client.publish(publishName, "Out of Date");
       ArduinoOTA.handle();
     }
   }
@@ -154,7 +155,10 @@ void callback(char* topic, byte* payload, unsigned int len)
     if ('g' == char(payload[1]))
       verGood = true;
     if ('b' == char(payload[1]))
+    {
       verGood = false;
+      client.publish(publishName, "Out of Date");  
+    }
     verCheck = true;
   }
 
