@@ -25,9 +25,9 @@ const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
 
-const char* clientName  = "esp3";
-const char* publishName = "esp3/pub";
-const char* recieveName = "esp3/rec";
+char* clientName;
+char* publishName;
+char* recieveName;
 const float softwareVersion = 0.5;
 
 bool verCheck = false;  //assumes we don't know the version
@@ -40,9 +40,16 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 //--------------------------- Start ----------------------------------------//
-void setup() 
+void setup()
 {
+//  iota(ESP.getChipId(), clientName, 10);
+  sprintf(clientName,"%d",ESP.getChipId());
+  publishName = concatID(clientName,"/pub");
+  recieveName = concatID(clientName,"/rec");
+
+
   Serial.begin(115200);
+  Serial.println(clientName);
   // WiFi.setOutputPower(5.0);
   WiFi.begin(brn_ssid, brn_password);
 
@@ -71,6 +78,7 @@ void setup()
   //--------------------------- MQTT -----------------------------------------//
 
   client.publish(publishName, "Hello from ESP8266");
+  client.publish(publishName, clientName);
   client.subscribe(recieveName);
   client.subscribe("esp/rec");
 
@@ -147,15 +155,15 @@ void loop()
         delay(250);
         WiFi.mode(WIFI_STA);
         delay(250);
-//        ArduinoOTA.begin();
+        //        ArduinoOTA.begin();
         Serial.println("Ready");
         Serial.print("IP address: ");
         Serial.println(WiFi.localIP());
-//        Serial.flush();
+        //        Serial.flush();
         delay(1000);
         stopLoop = true;
       }
-//      Serial.println("GODDAMN SNAKES ON THIS GODDAMN PLANE");
+      //      Serial.println("GODDAMN SNAKES ON THIS GODDAMN PLANE");
       ArduinoOTA.handle();
     }
   }
@@ -261,4 +269,14 @@ void scanWifis()
       lastMessage = millis();
     }
   }
+}
+
+
+char* concatID(char* header, char* footer) {
+//  char* header = String(ESP.getChipId()).c_str();
+  char buf[30];
+  strcpy(buf, "esp");
+  strcpy(buf, header);
+  strcat(buf, footer);
+  return buf;
 }

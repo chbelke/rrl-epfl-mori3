@@ -35,15 +35,15 @@ mqttServer = "192.168.0.50";
 mqttPort = 1883;
 Connected = False
 
-macIds = [None]*10
+# macIds = [None]*10
+numberModules = 0
 macDict = {}
+macOrder = {}
 
 data = []
 
 macCallTime = time.time()
 verCallTime = time.time()
-
-distance = 0.8
 
 version = 0.50
 
@@ -66,8 +66,8 @@ def on_connect(client, userdata, flags, rc):
 	# reconnect then subscriptions will be renewed.
 	# client.subscribe("$SYS/#")
 	Connected = True
-	# subTopics(args.numModules)
-	subTopics(10)
+	# client.subscribe("esp/pub")
+	client.subscribe("esp/#")
 	client.publish("esp/rec","mac")
 	print("Calling for MAC addresses")
 	macCallTime = time.time()
@@ -76,13 +76,17 @@ def on_connect(client, userdata, flags, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 	global macCallTime
-	global distance
-	# print(msg.topic+" "+str(msg.payload))
+	global numberModules
+	print(msg.topic)
 	if(msg.topic[:3]=="esp"):
+		print(msg.topic[5])
+		print("ESP message")
+		print(msg.topic[3])
 		espNum = int(msg.topic[3])
 		msgld = str(msg.payload)
 		msgld = msgld[2:-1]
 		pyld = msgld.rsplit(' ')
+		print(pyld)
 		cmd = pyld[0]
 
 		if(pyld[0] == 'DST:'):
@@ -90,7 +94,7 @@ def on_message(client, userdata, msg):
 			rssi = int(pyld[2])
 			if(macDict.get(macaddr) is not None):	#check if we know other mac
 				# print(espNum, macDict[macaddr], rssi)
-				data[espNum][macDict[macaddr]].append(rssi)
+				data[espNum][macOrder[macaddr]].append(rssi)
 
 			else:
 				if time.time() - macCallTime > 3.0:
@@ -104,6 +108,8 @@ def on_message(client, userdata, msg):
 			mac = mac[:1] + 'e' + mac[2:] #Hack
 			if macDict.get(mac) is None:
 				macDict[mac] = espNum
+				macOrder[mac] = numberModules
+				numberModules += 1
 				data.append([])
 				for i in range(len(data)):
 					data[i].append([])
@@ -115,12 +121,12 @@ def on_message(client, userdata, msg):
 			if(espVer == version):
 				print("ESP{} Software up to date".format(espNum))
 				# client.publish("esp{}/rec".format(espNum),"vg")   #version good
-				client.publish("esp/rec","vg")   #version good
+				client.publish("esp/{}/rec","vg")   #version good
 			elif(espVer < version):
 				print("ESP{} Software out date".format(espNum))
 				print("ESP{}: {}".format(espNum,espVer))
 				print("Curr: {}".format(version))
-				client.publish("esp{}/rec".format(espNum),"vb")   #version bad
+				client.publish("esp/{}/rec".format(espNum),"vb")   #version bad
 				
 			elif(espVer > version):
 				print("Kevin is an idiot and forgot to update this to match newest version")
@@ -161,6 +167,7 @@ def calcResults(fileName):
 
 	print("Saving...")
 	np.save('test.npy', data)
+	np.save(macOrder)
 
 
 
