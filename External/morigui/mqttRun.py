@@ -42,7 +42,8 @@ class MqttHost(threading.Thread):
       self.Connected = False
       self.numberModules = 0
       self.macDict = {}
-      self.macOrder = {}
+      self.idDict = {}
+      self.macOrder = []
       self.data = []
       self.macCallTime = time.time()
       self.verCallTime = time.time()
@@ -50,7 +51,7 @@ class MqttHost(threading.Thread):
       self.version = 0.50
       self.event = threading.Event()
 
-      print(self.mqttServer)
+      print("Server IP: " + self.mqttServer)
       self.client = mqtt.Client(self.clientName)
       self.client.on_connect = self.on_connect
       self.client.on_message = self.on_message  
@@ -73,28 +74,28 @@ class MqttHost(threading.Thread):
 
    # The callback for when a PUBLISH message is received from the server.
    def on_message(self, client, userdata, msg):
-      print(msg.topic)
-      if(msg.topic[:3]=="esp"):
-         print("ESP message")
-         print(msg.topic[3])
-         espNum = int(msg.topic[3])
-         msgld = str(msg.payload)
-         msgld = msgld[2:-1]
+      topic = msg.topic.rsplit('/')
+      if(topic[0]=="esp"):
+         if(topic[-1] != "pub"):
+            return
+         print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+         espNum = topic[1]
+         msgld = msg.payload.decode('UTF-8')
          pyld = msgld.rsplit(' ')
-         print(pyld)
          cmd = pyld[0]
 
          if(pyld[0] == 'DST:'):
             macaddr = pyld[1][:-1]
             rssi = int(pyld[2])
-            if(self.macDict.get(macaddr) is not None):  #check if we know other mac
-               # print(espNum, macDict[macaddr], rssi)
-               self.data[espNum][self.macOrder[macaddr]].append(rssi)
+            if(macaddr in self.macDict):  #check if we know other mac
+               localMacPos = self.macOrder.index(macaddr)
+               foreignMacPos = self.macOrder.index(self.idDict[espNum])
+               self.data[localMacPos][foreignMacPos].append(rssi)
 
             else:
                if time.time() - self.macCallTime > 3.0:
                   self.client.publish("esp/rec","mac")
-                  print("Calling for MAC addresses")
+                  print("Calling all for MAC address".format(macaddr))
                   self.macCallTime = time.time()
 
          elif(pyld[0] == 'MAC:'):
@@ -103,8 +104,9 @@ class MqttHost(threading.Thread):
             mac = mac[:1] + 'e' + mac[2:] #Hack
             if self.macDict.get(mac) is None:
                self.macDict[mac] = espNum
-               self.macOrder[mac] = self.numberModules
+               self.macOrder.append(mac)
                self.numberModules += 1
+               self.idDict[espNum] = mac
                self.data.append([])
                for i in range(len(data)):
                   self.data[i].append([])
@@ -114,18 +116,17 @@ class MqttHost(threading.Thread):
          elif(pyld[0] == 'VER:'):
             espVer = float(pyld[1])
             if(espVer == self.version):
-               print("ESP{} Software up to date".format(espNum))
-               # self.client.publish("esp{}/rec".format(espNum),"vg")   #version good
-               self.client.publish("esp{}/rec".format(espNum),"vg")   #version good
+               print("ESP/{} Software up to date".format(espNum))
+               self.client.publish("esp/{}/rec".format(espNum),"vg")   #version good
             elif(espVer < elf.version):
-               print("ESP{} Software out date".format(espNum))
-               print("ESP{}: {}".format(espNum,espVer))
+               print("ESP/{} Software out date".format(espNum))
+               print("ESP/{}: {}".format(espNum,espVer))
                print("Curr: {}".format(self.version))
-               self.client.publish("esp{}/rec".format(espNum),"vb")   #version bad
+               self.client.publish("esp/{}/rec".format(espNum),"vb")   #version bad
                
             elif(espVer > self.version):
                print("Kevin is an idiot and forgot to update this to match newest version")
-               print("ESP{}: {}".format(espNum,espVer))
+               print("ESP/{}: {}".format(espNum,espVer))
                print("Curr: {}".format(self.version))        
                self.client.disconnect()
                self.client.loop_stop()
@@ -137,10 +138,17 @@ class MqttHost(threading.Thread):
    def publishGlobal(self, message):
       self.client.publish("esp/rec",message)
 
-   def printConnected(self):
-      while(True):
-         self.event.wait(0.5)
-         return time.time()
+   def publishLocal(self, addr, message):
+      self.client.publish("esp/{}/rec".format(addr),message)
+
+   def getNumberConnected(self):
+      return self.numberModules
+
+   def getMoriIds(self):
+      return self.macDict
+
+   def getMoriOrder(self):
+      return self.macOrder      
 
    def run(self):
       startTime = time.time()
@@ -150,13 +158,15 @@ class MqttHost(threading.Thread):
       self.client.connect(self.mqttServer, self.mqttPort)   
       self.client.loop_start()       
       while not self.event.is_set():
-         if time.time() - loopTime > 3:
-             loopTime = time.time()
-             print("Time Elapsed: {:.3f}".format(loopTime-startTime))
-             self.client.publish("esp/rec","mac")
-             # print("")
+         if time.time() - loopTime > 10:
+            loopTime = time.time()
+            print("Time Elapsed: {:.3f}".format(loopTime-startTime))
+            # self.client.publish("esp/rec","mac")
+            print("")
+            print(self.macDict)
+            print(self.macOrder)
              # calcResults(args.fileName)
-             # print("")
+            print("")
          self.event.wait(0.5)
  
    def exit(self):

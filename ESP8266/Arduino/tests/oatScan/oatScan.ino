@@ -25,9 +25,14 @@ const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
 
-char* clientName;
-char* publishName;
-char* recieveName;
+//char* clientName = (char*)malloc(8*sizeof(char));
+//char* publishName = (char*)malloc(16*sizeof(char));
+//char* recieveName = (char*)malloc(16*sizeof(char));
+
+char clientName[16];
+char publishName[36];
+char recieveName[36];
+
 const float softwareVersion = 0.5;
 
 bool verCheck = false;  //assumes we don't know the version
@@ -42,14 +47,22 @@ PubSubClient client(espClient);
 //--------------------------- Start ----------------------------------------//
 void setup()
 {
-//  iota(ESP.getChipId(), clientName, 10);
-  sprintf(clientName,"%d",ESP.getChipId());
-  publishName = concatID(clientName,"/pub");
-  recieveName = concatID(clientName,"/rec");
-
-
   Serial.begin(115200);
+  delay(500);
+  Serial.print("ChipID: ");
+  Serial.println(ESP.getChipId());
+  Serial.print("WifiID: ");
+  Serial.println(WiFi.macAddress());
+  sprintf(clientName,"%08X",ESP.getChipId());
+  sprintf(publishName, "esp/%s/pub", clientName);
+  sprintf(recieveName, "esp/%s/rec", clientName);
   Serial.println(clientName);
+  Serial.println(publishName);
+  Serial.println(recieveName);
+  
+
+  
+//  Serial.println(clientName);
   // WiFi.setOutputPower(5.0);
   WiFi.begin(brn_ssid, brn_password);
 
@@ -192,10 +205,9 @@ void callback(char* topic, byte* payload, unsigned int len)
 
   if ('m' == (char)payload[0])
   {
-    Serial.println("Made it!");
-    char buff[100];
+    char buff[30];
     String SSIDstring = String("MAC: ") + WiFi.macAddress();
-    SSIDstring.toCharArray(buff, 100);
+    SSIDstring.toCharArray(buff, 30);
     client.publish(publishName, buff);
   }
   else if ('v' == char(payload[0]))
@@ -275,7 +287,7 @@ void scanWifis()
 char* concatID(char* header, char* footer) {
 //  char* header = String(ESP.getChipId()).c_str();
   char buf[30];
-  strcpy(buf, "esp");
+  strcpy(buf, "esp/");
   strcpy(buf, header);
   strcat(buf, footer);
   return buf;

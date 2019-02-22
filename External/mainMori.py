@@ -59,6 +59,7 @@ class mainGui(Thread):
 
         # label = tk.Label(self.root, text="Hello World")
         # label.pack()
+        self.gui.updateConnected()
 
         self.gui.mainloop()
         
