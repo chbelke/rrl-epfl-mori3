@@ -78,7 +78,7 @@ class MqttHost(threading.Thread):
       if(topic[0]=="esp"):
          if(topic[-1] != "pub"):
             return
-         print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+         # print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
          espNum = topic[1]
          msgld = msg.payload.decode('UTF-8')
          pyld = msgld.rsplit(' ')
@@ -91,14 +91,16 @@ class MqttHost(threading.Thread):
                localMacPos = self.macOrder.index(macaddr)
                foreignMacPos = self.macOrder.index(self.idDict[espNum])
                self.data[localMacPos][foreignMacPos].append(rssi)
-
+               print('RSSI of ['+ macaddr + '] according to [' + self.idDict[espNum] + '] is: ' + rssi)
             else:
                if time.time() - self.macCallTime > 3.0:
+                  print(macaddr + " is not found. Calling all for MAC addresses.")
                   self.client.publish("esp/rec","mac")
-                  print("Calling all for MAC address".format(macaddr))
+                  # print("Calling all for MAC address".format(macaddr))
                   self.macCallTime = time.time()
 
          elif(pyld[0] == 'MAC:'):
+            print(colored("MAC address recieved: " + pyld[1], 'green'))
             mac = pyld[1].replace(":", "")
             mac = mac.lower()
             mac = mac[:1] + 'e' + mac[2:] #Hack
@@ -118,7 +120,7 @@ class MqttHost(threading.Thread):
             if(espVer == self.version):
                print("ESP/{} Software up to date".format(espNum))
                self.client.publish("esp/{}/rec".format(espNum),"vg")   #version good
-            elif(espVer < elf.version):
+            elif(espVer < self.version):
                print("ESP/{} Software out date".format(espNum))
                print("ESP/{}: {}".format(espNum,espVer))
                print("Curr: {}".format(self.version))
@@ -134,6 +136,9 @@ class MqttHost(threading.Thread):
 
          elif(pyld[0] == 'ERR:'):
             print(colored(msgld, 'red'))
+
+         elif(pyld[0] == 'INFO:'):   
+            print(colored(msgld, 'yellow'))         
 
    def publishGlobal(self, message):
       self.client.publish("esp/rec",message)
