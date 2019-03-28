@@ -121,7 +121,7 @@ void setup()
     client.publish(publishName, "Finished Updating");
     Serial.println("\nEnd");
     client.loop();
-    delay(1000);
+    delay(500);
     ESP.restart();
   });
 
