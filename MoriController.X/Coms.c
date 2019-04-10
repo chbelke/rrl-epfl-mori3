@@ -11,9 +11,11 @@ uint16_t MotLinTemp[3] = {0, 0, 0}; // Linear motor set value (temporary)
 uint16_t MotRotTemp[3] = {0, 0, 0}; // Rotary motor set value (temporary)
 
 /* EspInAlloc: 
- * 0bxx000000
- * xx = indicator
- * 00 = MotLin + MotRot
+ * 0bxx000000, where xx = indicator
+ * 00 = motor commands
+ * - 0b00xxxxxx in order: linear indicators 1,2,3, rotary indicators 1,2,3
+ * 01 = tbd
+ * - 0b01xxxxxx tbd
  */
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
@@ -32,13 +34,13 @@ uint16_t MotRotTemp[3] = {0, 0, 0}; // Rotary motor set value (temporary)
 void Coms_ESP_Eval() {
     uint8_t EspIn = UART4_Read(); // Incoming byte
     switch (EspInCase) {
-        case 0: // check for start verification byte
+        case 0: // CHECK START BYTE
             if (EspIn == ESP_Beg) {
                 EspInCase = 1;
                 EspInBytes = 1;
             }
             break;
-        case 1: // check what will be received
+        case 1: // INPUT ALLOCATION
             EspInAlloc = EspIn;
             // if xx == 00, count bits 
             if (((EspInAlloc >> 6) & 0x03) == 0) {
@@ -52,7 +54,7 @@ void Coms_ESP_Eval() {
             EspInBytes = EspInBytes + 1;
             break;
 
-        case 2: /* *** LINEAR MOTOR EVALUATION ****************************** */
+        case 2: // LINEAR MOTOR INPUTS
             /* cases 2 to 7, two bytes per motor input */
             if (EspInAlloc & 0b00100000) {
                 MotLinTemp[1] = ((uint16_t) (EspIn) << 8) & 0xFF00;
@@ -96,7 +98,7 @@ void Coms_ESP_Eval() {
                 break;
             }
             
-        case 8: /* *** ROTARY MOTOR EVALUATION ****************************** */
+        case 8: // ROTARY MOTOR INPUTS
             /* cases 8 to 13, two bytes per motor input */
             if (EspInAlloc & 0b00000100) {
                 MotRotTemp[1] = ((uint16_t) (EspIn) << 8) & 0xFF00;
@@ -140,8 +142,8 @@ void Coms_ESP_Eval() {
                 break;
             }
 
-            /* *** MOTs INPUT VERIFICATION ********************************** */
-        case 14:
+
+        case 14: // VERIFY MOTOR INPUTS
             if (EspIn == ESP_End) {
                 if (EspInBytes == (2 + EspInBits * 2)) {
                     Coms_ESP_SetMots();
