@@ -52,16 +52,17 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "uart4.h"
+#include "reset.h"
+#include "tmr5.h"
 #include "tmr1.h"
 #include "tmr3.h"
 #include "pwm.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "reset.h"
 #include "adc1.h"
 #include "watchdog.h"
 #include "i2c1.h"
+#include "uart4.h"
 
 #define _XTAL_FREQ  7372800UL
 

@@ -1,25 +1,25 @@
 
 /**
-  TMR3 Generated Driver API Source File 
+  TMR5 Generated Driver API Source File 
 
   @Company
     Microchip Technology Inc.
 
   @File Name
-    tmr3.c
+    tmr5.c
 
   @Summary
-    This is the generated source file for the TMR3 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated source file for the TMR5 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This source file provides APIs for driver for TMR3. 
+    This source file provides APIs for driver for TMR5. 
     Generation Information : 
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
         Compiler          :  XC16 v1.35
         MPLAB             :  MPLAB X v5.05
- */
+*/
 
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -41,30 +41,25 @@
 
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
- */
+*/
 
 /**
   Section: Included Files
- */
+*/
 
 #include <xc.h>
-#include "tmr3.h"
-#include "adc1.h"
-#include "../MotLin.h"
+#include "tmr5.h"
 #include "uart4.h"
 #include "../define.h"
-#include "../MotRot.h"
-#include "../AS5048B.h"
-#include "../TLC59208.h"
-#include "../MMA8452Q.h"
+#include "adc1.h"
+#include "../MotLin.h"
 
-//uint16_t desired = 500;
-//uint8_t stepcount = 0;
-//uint8_t flag = 0;
+uint8_t stepcount = 0;
+uint8_t casecount = 0;
 
 /**
   Section: Data Type Definitions
- */
+*/
 
 /** TMR Driver Hardware Instance Object
 
@@ -77,7 +72,7 @@
 
   Remarks:
     None.
- */
+*/
 
 typedef struct _TMR_OBJ_STRUCT
 {
@@ -88,32 +83,32 @@ typedef struct _TMR_OBJ_STRUCT
 
 } TMR_OBJ;
 
-static TMR_OBJ tmr3_obj;
+static TMR_OBJ tmr5_obj;
 
 /**
   Section: Driver Interface
- */
+*/
 
-void TMR3_Initialize (void)
+void TMR5_Initialize (void)
 {
-    //TMR3 0; 
-    TMR3 = 0x00;
-    //Period = 0.05 s; Frequency = 3686400 Hz; PR3 2880; 
-    PR3 = 0xB40;
+    //TMR5 0; 
+    TMR5 = 0x00;
+    //Period = 1 s; Frequency = 3686400 Hz; PR5 57600; 
+    PR5 = 0xE100;
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T3CON = 0x8020;
+    T5CON = 0x8020;
 
-
-    IFS0bits.T3IF = false;
-    IEC0bits.T3IE = true;
-
-    tmr3_obj.timerElapsed = false;
+    
+    IFS1bits.T5IF = false;
+    IEC1bits.T5IE = true;
+	
+    tmr5_obj.timerElapsed = false;
 
 }
 
 
 
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _T5Interrupt (  )
 {
     /* Check if the Timer Interrupt/Status is set */
 
@@ -121,114 +116,142 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
 
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes
-    TMR3_CallBack();
+    TMR5_CallBack();
 
     //***User Area End
 
-    tmr3_obj.count++;
-    tmr3_obj.timerElapsed = true;
-    IFS0bits.T3IF = false;
+    tmr5_obj.count++;
+    tmr5_obj.timerElapsed = true;
+    IFS1bits.T5IF = false;
 }
 
 
-void TMR3_Period16BitSet( uint16_t value )
+void TMR5_Period16BitSet( uint16_t value )
 {
     /* Update the counter values */
-    PR3 = value;
+    PR5 = value;
     /* Reset the status information */
-    tmr3_obj.timerElapsed = false;
+    tmr5_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Period16BitGet( void )
+uint16_t TMR5_Period16BitGet( void )
 {
-    return( PR3 );
+    return( PR5 );
 }
 
-void TMR3_Counter16BitSet ( uint16_t value )
+void TMR5_Counter16BitSet ( uint16_t value )
 {
     /* Update the counter values */
-    TMR3 = value;
+    TMR5 = value;
     /* Reset the status information */
-    tmr3_obj.timerElapsed = false;
+    tmr5_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Counter16BitGet( void )
+uint16_t TMR5_Counter16BitGet( void )
 {
-    return( TMR3 );
+    return( TMR5 );
 }
 
 
-void __attribute__ ((weak)) TMR3_CallBack(void)
+void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
-    // read analog pot inputs
-    ADC1_Update();
     
-//    stepcount++;
-//    if (stepcount >= 200){
-//        if (flag == 0){
-//            desired = desired + 100;
-//            if (desired >= 800){
-//                flag = 1;
-//            }
-//        } else if (flag == 1){
-//            desired = desired - 100;
-//            if (desired <= 300){
-//                flag = 0;
-//            }
-//        }
+    stepcount++;
+//    if (stepcount >= 16){
 //        stepcount = 0;
+//        switch (casecount){
+//            case 0:
+//                MotLin_Set(0,200);
+//                MotLin_Set(1,200);
+//                MotLin_Set(2,200);
+//                casecount++;
+//                break;
+//            case 1:
+//                MotLin_Set(0,900);
+//                MotLin_Set(1,200);
+//                MotLin_Set(2,200);
+//                casecount++;
+//                break;
+//            case 2:
+//                MotLin_Set(0,900);
+//                MotLin_Set(1,900);
+//                MotLin_Set(2,200);
+//                casecount++;
+//                break;
+//            case 3:
+//                MotLin_Set(0,900);
+//                MotLin_Set(1,900);
+//                MotLin_Set(2,900);
+//                casecount++;
+//                break;
+//            case 4:
+//                MotLin_Set(0,200);
+//                MotLin_Set(1,900);
+//                MotLin_Set(2,900);
+//                casecount++;
+//                break;
+//            case 5:
+//                MotLin_Set(0,200);
+//                MotLin_Set(1,200);
+//                MotLin_Set(2,900);
+//                casecount = 0;
+//                break;
+//        }
 //    }
     
-    MotLin_PID(0, ADC1_Return(0), MotLin_Get(0));
-    MotLin_PID(1, ADC1_Return(1), MotLin_Get(1));
-    MotLin_PID(2, ADC1_Return(2), MotLin_Get(2));
+    // BLAST STATUS TO ESP
+    UART4_Write(ESP_Beg);
+    UART4_Write16(ADC1_Return(0));
+    UART4_Write16(ADC1_Return(1));
+    UART4_Write16(ADC1_Return(2));
+    UART4_Write(ESP_End);
 }
 
-void TMR3_Start( void )
+void TMR5_Start( void )
 {
     /* Reset the status information */
-    tmr3_obj.timerElapsed = false;
+    tmr5_obj.timerElapsed = false;
 
     /*Enable the interrupt*/
-    IEC0bits.T3IE = true;
+    IEC1bits.T5IE = true;
 
     /* Start the Timer */
-    T3CONbits.TON = 1;
+    T5CONbits.TON = 1;
 }
 
-void TMR3_Stop( void )
+void TMR5_Stop( void )
 {
     /* Stop the Timer */
-    T3CONbits.TON = false;
+    T5CONbits.TON = false;
 
     /*Disable the interrupt*/
-    IEC0bits.T3IE = false;
+    IEC1bits.T5IE = false;
 }
 
-bool TMR3_GetElapsedThenClear(void)
+bool TMR5_GetElapsedThenClear(void)
 {
     bool status;
-
-    status = tmr3_obj.timerElapsed;
+    
+    status = tmr5_obj.timerElapsed;
 
     if(status == true)
     {
-        tmr3_obj.timerElapsed = false;
+        tmr5_obj.timerElapsed = false;
     }
     return status;
 }
 
-int TMR3_SoftwareCounterGet(void)
+int TMR5_SoftwareCounterGet(void)
 {
-    return tmr3_obj.count;
+    return tmr5_obj.count;
 }
 
-void TMR3_SoftwareCounterClear(void)
+void TMR5_SoftwareCounterClear(void)
 {
-    tmr3_obj.count = 0;
+    tmr5_obj.count = 0; 
 }
 
 /**
  End of File
- */
+*/

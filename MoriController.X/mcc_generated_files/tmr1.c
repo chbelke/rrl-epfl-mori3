@@ -157,12 +157,11 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     // Add your custom callback code here
     static int k = 0;
     k++;
-    if (k >= 100){
+    if (k >= 25){
         k = 0;
-        LED_O ^= 1; //toggle yellow LED
+        LED_Y ^= 1; //toggle yellow LED
     }
     
-//    ADC1_Update();
 //    static float angle;
 //    angle = ENC_Read(0);
     

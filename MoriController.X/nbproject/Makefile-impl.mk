@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=CHB_MoriV3_05.X
+PROJECTNAME=MoriController.X
 
 # Active Configuration
 DEFAULTCONF=default

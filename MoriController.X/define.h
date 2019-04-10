@@ -24,9 +24,13 @@ static volatile bool Flg_LiveAngle;
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
-#define LED_B LATBbits.LATB0      // Blue LED
-#define LED_O LATBbits.LATB1      // Orange LED
+#define LED_R LATBbits.LATB0        // Blue LED - 1 is off
+#define LED_Y LATBbits.LATB1        // Orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
+
+/* ******************** EPS COMMUNICATION************************************ */
+#define ESP_Beg 13                  // Start verification byte
+#define ESP_End 14                  // End verification byte
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
@@ -58,12 +62,14 @@ static volatile bool Flg_LiveAngle;
 #define LIN_DIR_B LATBbits.LATB12
 #define LIN_DIR_C LATBbits.LATB14
 
-#define MotLin_MIN_A 72             // 62 + 10
-#define MotLin_MAX_A 970            // 980 -10
-#define MotLin_MIN_B 200
-#define MotLin_MAX_B 800
-#define MotLin_MIN_C 200
-#define MotLin_MAX_C 800
+#define MotLin_MIN_A 108
+#define MotLin_MAX_A 1022
+#define MotLin_MIN_B 108
+#define MotLin_MAX_B 1022
+#define MotLin_MIN_C 108
+#define MotLin_MAX_C 1022
+#define MotLin_SlowRegion 90        // slow down motor to avoid crash
+#define MotLin_SlowFactor 2
 
 #define MotLin_PID_de 10            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
@@ -79,13 +85,12 @@ static volatile bool Flg_LiveAngle;
 #define ROT_DIR_B LATCbits.LATC7
 #define ROT_DIR_C LATAbits.LATA10
     
-#define MotRot_AngleRange 180       // 
+#define MotRot_AngleRange 180
 
-#define MotRot_PID_de 0.2           // acceptable error band ~ *0.01mm
-#define MotRot_PID_dt 0.1          // timer period
+#define MotRot_PID_dt 0.1           // timer period (currently not used)
 #define MotRot_PID_kP 150           // proportional component
-#define MotRot_PID_kI 10           // integral component
-#define MotRot_PID_kD 0           // derivative component
+#define MotRot_PID_kI 10            // integral component
+#define MotRot_PID_kD 0             // derivative component
 
 #define MotRot_PID_Imax 20
 #define MotRot_PID_Max 1000
@@ -101,8 +106,8 @@ static volatile bool Flg_LiveAngle;
 
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
-#define MMA8452Q_CTRL_REG1_ADDR 0x2A //Address of control register to be modified at Setup
-#define MMA8452Q_CTRL_REG1 0x01 //Value control register must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
+#define MMA8452Q_CTRL_REG1 0x01 //Value ctrl reg must be modified to at Setup
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
 
 /* ******************** LED DRIVER TLC59208 ****************************** */

@@ -31,8 +31,8 @@ void MotRot_OUT(uint8_t edge, int16_t duty){
 /* ******************** ROTARY MOTOR PID ************************************ */
 void MotRot_PID(uint8_t edge, float current, float desired){
     // avoid bad control inputs
-    if (desired < -0.5 * MotRot_AngleRange) desired = -0.5 * MotRot_AngleRange;
-    else if (desired > 0.5 * MotRot_AngleRange) desired = 0.5 * MotRot_AngleRange;
+    if (desired < -MotRot_AngleRange/2) desired = -MotRot_AngleRange/2;
+    else if (desired > MotRot_AngleRange/2) desired = MotRot_AngleRange/2;
     
     // calculate error
     static float error;

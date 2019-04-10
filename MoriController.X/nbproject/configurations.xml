@@ -23,6 +23,7 @@
         <itemPath>mcc_generated_files/clock.h</itemPath>
         <itemPath>mcc_generated_files/system.h</itemPath>
         <itemPath>mcc_generated_files/system_types.h</itemPath>
+        <itemPath>mcc_generated_files/tmr5.h</itemPath>
       </logicalFolder>
       <itemPath>TLC59208.h</itemPath>
       <itemPath>MMA8452Q.h</itemPath>
@@ -31,6 +32,7 @@
       <itemPath>MotRot.h</itemPath>
       <itemPath>define.h</itemPath>
       <itemPath>AS5048B.h</itemPath>
+      <itemPath>Coms.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -55,6 +57,7 @@
         <itemPath>mcc_generated_files/reset.c</itemPath>
         <itemPath>mcc_generated_files/clock.c</itemPath>
         <itemPath>mcc_generated_files/system.c</itemPath>
+        <itemPath>mcc_generated_files/tmr5.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>TLC59208.c</itemPath>
@@ -63,6 +66,7 @@
       <itemPath>MotRot.c</itemPath>
       <itemPath>MotLin.c</itemPath>
       <itemPath>AS5048B.c</itemPath>
+      <itemPath>Coms.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -287,6 +291,7 @@
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

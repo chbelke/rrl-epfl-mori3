@@ -65,7 +65,11 @@ int main() { //int argc, char** argv
 //    uint8_t led_on = 10;
 //    uint8_t led_off = 5;
     
-    MotRot_LIM(0,255);
+//    MotRot_LIM(0,255);
+    LED_R = 1;
+    
+    LED_Set(20,10,5);
+    TLC59208_Write();
     
     Flg_LiveAngle = false;      // rotary PID output off
 
