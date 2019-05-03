@@ -13,11 +13,11 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 
 /*
@@ -45,7 +45,9 @@
 #ifndef CLOCK_H
 #define	CLOCK_H
 
+#ifndef _XTAL_FREQ
 #define _XTAL_FREQ  7372800UL
+#endif
 /**
  * @Param
     none

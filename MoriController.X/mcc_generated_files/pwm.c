@@ -1,6 +1,5 @@
-
 /**
-  PWM Generated Driver API Source File 
+  PWM Generated Driver File
 
   @Company
     Microchip Technology Inc.
@@ -9,16 +8,16 @@
     pwm.c
 
   @Summary
-    This is the generated source file for the PWM driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated driver implementation file for the PWM driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This source file provides APIs for driver for PWM. 
-    Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
-        Device            :  dsPIC33EP512GM604
+    This source file provides APIs for PWM.
+    Generation Information :
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Device            :  dsPIC33EP512GM604      
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB 	          :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB 	          :  MPLAB X v5.10
 */
 
 /*
@@ -59,25 +58,25 @@
 void PWM_Initialize (void)
 {
     // PCLKDIV 1; 
-    PTCON2 = 0x0;
+    PTCON2 = 0x00;
     // SYNCOEN disabled; SEIEN disabled; SESTAT disabled; SEVTPS 1; SYNCSRC SYNCI1; SYNCEN disabled; EIPU disabled; SYNCPOL disabled; 
-    STCON = 0x0;
+    STCON = 0x00;
     // PCLKDIV 1; 
-    STCON2 = 0x0;
+    STCON2 = 0x00;
     // STPER 65528; 
     STPER = 0xFFF8;
     // SSEVTCMP 0; 
-    SSEVTCMP = 0x0;
+    SSEVTCMP = 0x00;
     // PTPER 0; 
-    PTPER = 0x0;
+    PTPER = 0x00;
     // SEVTCMP 0; 
-    SEVTCMP = 0x0;
+    SEVTCMP = 0x00;
     // MDC 15; 
-    MDC = 0xF;
+    MDC = 0x0F;
     // CHOPCLK 0; CHPCLKEN disabled; 
-    CHOP = 0x0;
+    CHOP = 0x00;
     // PWMKEY 0; 
-    PWMKEY = 0x0;
+    PWMKEY = 0x00;
     // MDCS Primary; FLTIEN disabled; CAM Edge Aligned; DTC Positive dead time for all Output modes; TRGIEN disabled; XPRES disabled; ITB Primary; IUE disabled; CLIEN disabled; MTBS disabled; DTCP disabled; 
     PWMCON1 = 0x200;
     // MDCS Primary; FLTIEN disabled; CAM Edge Aligned; DTC Positive dead time for all Output modes; TRGIEN disabled; XPRES disabled; ITB Primary; IUE disabled; CLIEN disabled; MTBS disabled; DTCP disabled; 
@@ -115,65 +114,65 @@ void PWM_Initialize (void)
     //FLTPOL disabled; CLPOL disabled; CLSRC FLT1; CLMOD disabled; FLTMOD Fault input is disabled; IFLTMOD disabled; FLTSRC FLT32; 
     __builtin_write_PWMSFR(&FCLCON6, 0xFB, &PWMKEY);
     // PDC1 0; 
-    PDC1 = 0x0;
+    PDC1 = 0x00;
     // PDC2 0; 
-    PDC2 = 0x0;
+    PDC2 = 0x00;
     // PDC3 0; 
-    PDC3 = 0x0;
+    PDC3 = 0x00;
     // PDC4 0; 
-    PDC4 = 0x0;
+    PDC4 = 0x00;
     // PDC5 0; 
-    PDC5 = 0x0;
+    PDC5 = 0x00;
     // PDC6 0; 
-    PDC6 = 0x0;
+    PDC6 = 0x00;
     // PHASE1 0; 
-    PHASE1 = 0x0;
+    PHASE1 = 0x00;
     // PHASE2 0; 
-    PHASE2 = 0x0;
+    PHASE2 = 0x00;
     // PHASE3 0; 
-    PHASE3 = 0x0;
+    PHASE3 = 0x00;
     // PHASE4 0; 
-    PHASE4 = 0x0;
+    PHASE4 = 0x00;
     // PHASE5 1000; 
     PHASE5 = 0x3E8;
     // PHASE6 0; 
-    PHASE6 = 0x0;
+    PHASE6 = 0x00;
     // DTR1 0; 
-    DTR1 = 0x0;
+    DTR1 = 0x00;
     // DTR2 0; 
-    DTR2 = 0x0;
+    DTR2 = 0x00;
     // DTR3 0; 
-    DTR3 = 0x0;
+    DTR3 = 0x00;
     // DTR4 0; 
-    DTR4 = 0x0;
+    DTR4 = 0x00;
     // DTR5 0; 
-    DTR5 = 0x0;
+    DTR5 = 0x00;
     // DTR6 0; 
-    DTR6 = 0x0;
+    DTR6 = 0x00;
     // ALTDTR1 0; 
-    ALTDTR1 = 0x0;
+    ALTDTR1 = 0x00;
     // ALTDTR2 0; 
-    ALTDTR2 = 0x0;
+    ALTDTR2 = 0x00;
     // ALTDTR3 0; 
-    ALTDTR3 = 0x0;
+    ALTDTR3 = 0x00;
     // ALTDTR4 0; 
-    ALTDTR4 = 0x0;
+    ALTDTR4 = 0x00;
     // ALTDTR5 0; 
-    ALTDTR5 = 0x0;
+    ALTDTR5 = 0x00;
     // ALTDTR6 0; 
-    ALTDTR6 = 0x0;
+    ALTDTR6 = 0x00;
     // SDC1 0; 
-    SDC1 = 0x0;
+    SDC1 = 0x00;
     // SDC2 0; 
-    SDC2 = 0x0;
+    SDC2 = 0x00;
     // SDC3 0; 
-    SDC3 = 0x0;
+    SDC3 = 0x00;
     // SDC4 0; 
-    SDC4 = 0x0;
+    SDC4 = 0x00;
     // SDC5 0; 
-    SDC5 = 0x0;
+    SDC5 = 0x00;
     // SDC6 0; 
-    SDC6 = 0x0;
+    SDC6 = 0x00;
     // SPHASE1 1000; 
     SPHASE1 = 0x3E8;
     // SPHASE2 1000; 
@@ -185,73 +184,186 @@ void PWM_Initialize (void)
     // SPHASE5 1000; 
     SPHASE5 = 0x3E8;
     // SPHASE6 0; 
-    SPHASE6 = 0x0;
+    SPHASE6 = 0x00;
     // TRGCMP 0; 
-    TRIG1 = 0x0;
+    TRIG1 = 0x00;
     // TRGCMP 0; 
-    TRIG2 = 0x0;
+    TRIG2 = 0x00;
     // TRGCMP 0; 
-    TRIG3 = 0x0;
+    TRIG3 = 0x00;
     // TRGCMP 0; 
-    TRIG4 = 0x0;
+    TRIG4 = 0x00;
     // TRGCMP 0; 
-    TRIG5 = 0x0;
+    TRIG5 = 0x00;
     // TRGCMP 0; 
-    TRIG6 = 0x0;
+    TRIG6 = 0x00;
     // TRGDIV 1; TRGSTRT 0; 
-    TRGCON1 = 0x0;
+    TRGCON1 = 0x00;
     // TRGDIV 1; TRGSTRT 0; 
-    TRGCON2 = 0x0;
+    TRGCON2 = 0x00;
     // TRGDIV 1; TRGSTRT 0; 
-    TRGCON3 = 0x0;
+    TRGCON3 = 0x00;
     // TRGDIV 1; TRGSTRT 0; 
-    TRGCON4 = 0x0;
+    TRGCON4 = 0x00;
     // TRGDIV 1; TRGSTRT 0; 
-    TRGCON5 = 0x0;
+    TRGCON5 = 0x00;
     // TRGDIV 1; TRGSTRT 0; 
-    TRGCON6 = 0x0;
+    TRGCON6 = 0x00;
     // BPLL disabled; BPHH disabled; BPLH disabled; BCH disabled; FLTLEBEN disabled; PLR disabled; CLLEBEN disabled; BCL disabled; PLF disabled; PHR disabled; BPHL disabled; PHF disabled; 
-    LEBCON1 = 0x0;
+    LEBCON1 = 0x00;
     // BPLL disabled; BPHH disabled; BPLH disabled; BCH disabled; FLTLEBEN disabled; PLR disabled; CLLEBEN disabled; BCL disabled; PLF disabled; PHR disabled; BPHL disabled; PHF disabled; 
-    LEBCON2 = 0x0;
+    LEBCON2 = 0x00;
     // BPLL disabled; BPHH disabled; BPLH disabled; BCH disabled; FLTLEBEN disabled; PLR disabled; CLLEBEN disabled; BCL disabled; PLF disabled; PHR disabled; BPHL disabled; PHF disabled; 
-    LEBCON3 = 0x0;
+    LEBCON3 = 0x00;
     // BPLL disabled; BPHH disabled; BPLH disabled; BCH disabled; FLTLEBEN disabled; PLR disabled; CLLEBEN disabled; BCL disabled; PLF disabled; PHR disabled; BPHL disabled; PHF disabled; 
-    LEBCON4 = 0x0;
+    LEBCON4 = 0x00;
     // BPLL disabled; BPHH disabled; BPLH disabled; BCH disabled; FLTLEBEN disabled; PLR disabled; CLLEBEN disabled; BCL disabled; PLF disabled; PHR disabled; BPHL disabled; PHF disabled; 
-    LEBCON5 = 0x0;
+    LEBCON5 = 0x00;
     // BPLL disabled; BPHH disabled; BPLH disabled; BCH disabled; FLTLEBEN disabled; PLR disabled; CLLEBEN disabled; BCL disabled; PLF disabled; PHR disabled; BPHL disabled; PHF disabled; 
-    LEBCON6 = 0x0;
+    LEBCON6 = 0x00;
     // LEB 0; 
-    LEBDLY1 = 0x0;
+    LEBDLY1 = 0x00;
     // LEB 0; 
-    LEBDLY2 = 0x0;
+    LEBDLY2 = 0x00;
     // LEB 0; 
-    LEBDLY3 = 0x0;
+    LEBDLY3 = 0x00;
     // LEB 0; 
-    LEBDLY4 = 0x0;
+    LEBDLY4 = 0x00;
     // LEB 0; 
-    LEBDLY5 = 0x0;
+    LEBDLY5 = 0x00;
     // LEB 0; 
-    LEBDLY6 = 0x0;
+    LEBDLY6 = 0x00;
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
-    AUXCON1 = 0x0;
+    AUXCON1 = 0x00;
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
-    AUXCON2 = 0x0;
+    AUXCON2 = 0x00;
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
-    AUXCON3 = 0x0;
+    AUXCON3 = 0x00;
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
-    AUXCON4 = 0x0;
+    AUXCON4 = 0x00;
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
-    AUXCON5 = 0x0;
+    AUXCON5 = 0x00;
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
-    AUXCON6 = 0x0;
+    AUXCON6 = 0x00;
     
 
     // SYNCOEN disabled; SEIEN disabled; SESTAT disabled; SEVTPS 1; SYNCSRC SYNCI1; SYNCEN disabled; PTSIDL disabled; PTEN enabled; EIPU disabled; SYNCPOL disabled; 
     PTCON = 0x8000;
 }
 
+void __attribute__ ((weak)) PWM_SpecialEvent_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_SpecialEvent_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM SpecialEvent callback function 
+		PWM_SpecialEvent_CallBack();
+		
+		// clear the PWM SpecialEvent interrupt flag
+		IFS3bits.PSEMIF = 0;
+	}
+}
+
+void __attribute__ ((weak)) PWM_Generator1_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_Generator1_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM Generator1 callback function 
+		PWM_Generator1_CallBack();
+		
+		// clear the PWM Generator1 interrupt flag
+		IFS5bits.PWM1IF = 0;
+	}
+}
+void __attribute__ ((weak)) PWM_Generator2_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_Generator2_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM Generator2 callback function 
+		PWM_Generator2_CallBack();
+		
+		// clear the PWM Generator2 interrupt flag
+		IFS5bits.PWM2IF = 0;
+	}
+}
+void __attribute__ ((weak)) PWM_Generator3_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_Generator3_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM Generator3 callback function 
+		PWM_Generator3_CallBack();
+		
+		// clear the PWM Generator3 interrupt flag
+		IFS6bits.PWM3IF = 0;
+	}
+}
+void __attribute__ ((weak)) PWM_Generator4_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_Generator4_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM Generator4 callback function 
+		PWM_Generator4_CallBack();
+		
+		// clear the PWM Generator4 interrupt flag
+		IFS6bits.PWM4IF = 0;
+	}
+}
+void __attribute__ ((weak)) PWM_Generator5_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_Generator5_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM Generator5 callback function 
+		PWM_Generator5_CallBack();
+		
+		// clear the PWM Generator5 interrupt flag
+		IFS6bits.PWM5IF = 0;
+	}
+}
+void __attribute__ ((weak)) PWM_Generator6_CallBack(void)
+{
+    // Add your custom callback code here
+}
+
+void PWM_Generator6_Tasks ( void )
+{
+	if(IFS3bits.PSEMIF)
+	{
+		// PWM Generator6 callback function 
+		PWM_Generator6_CallBack();
+		
+		// clear the PWM Generator6 interrupt flag
+		IFS6bits.PWM6IF = 0;
+	}
+}
 
 void PWM_Set(uint8_t PWM_Output, uint16_t PWM_Duty){
     switch(PWM_Output) {

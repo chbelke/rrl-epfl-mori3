@@ -13,11 +13,11 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 
 /*
@@ -52,19 +52,21 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "reset.h"
-#include "tmr5.h"
+#include "pwm.h"
 #include "tmr1.h"
 #include "tmr3.h"
-#include "pwm.h"
+#include "tmr5.h"
+#include "uart4.h"
+#include "adc1.h"
+#include "i2c1.h"
+#include "watchdog.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "adc1.h"
-#include "watchdog.h"
-#include "i2c1.h"
-#include "uart4.h"
+#include "reset.h"
 
+#ifndef _XTAL_FREQ
 #define _XTAL_FREQ  7372800UL
+#endif
 
 /**
  * @Param

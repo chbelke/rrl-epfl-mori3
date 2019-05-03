@@ -21,12 +21,12 @@
          <string>class com.microchip.mcc.mcu16.modules.uart.UART</string>
       </entry>
       <entry>
-         <string>RESET</string>
-         <string>class com.microchip.mcc.mcu16.systemManager.reset.RESET</string>
-      </entry>
-      <entry>
          <string>ICD</string>
          <string>class com.microchip.mcc.mcu16.systemManager.icd.Icd</string>
+      </entry>
+      <entry>
+         <string>RESET</string>
+         <string>class com.microchip.mcc.mcu16.systemManager.reset.RESET</string>
       </entry>
       <entry>
          <string>Interrupt Module</string>
@@ -61,14 +61,22 @@
          <string>class com.microchip.mcc.mcu16.modules.tmr.TMR</string>
       </entry>
       <entry>
+         <string>com.microchip.mcc.mcu16.Mcu16PeripheralLibraryLibraryModule</string>
+         <string>class com.microchip.mcc.protocolServices.base.modules.librarymodule.LibraryModule</string>
+      </entry>
+      <entry>
          <string>TMR1</string>
          <string>class com.microchip.mcc.mcu16.modules.tmr.TMR</string>
       </entry>
    </usedClasses>
    <usedLibraries class="java.util.ArrayList">
-      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu16.Mcu16PeripheralLibrary" version="1.75.1"/>
+      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu16.Mcu16PeripheralLibrary" version="1.95"/>
    </usedLibraries>
    <tokenMap class="java.util.HashMap">
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="U4MD"/>
+         <value>enabled</value>
+      </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNPDA" settingAlias="CNPDA7"/>
          <value>disabled</value>
@@ -76,6 +84,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="LEBCON5" settingAlias="PLR"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC2MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="FeaturePllGraphicsSelect"/>
@@ -136,6 +148,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNENC" settingAlias="CNIEC8" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T4MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="LATB" settingAlias="LATB15"/>
@@ -208,6 +224,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON5" settingAlias="CLIEN"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM6MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPDC" settingAlias="CNPDC7" alias="disabled"/>
@@ -358,6 +378,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="U2MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="CLKPinsOutput"/>
          <value>disabled</value>
       </entry>
@@ -462,6 +486,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="CMPMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON1" settingAlias="CLSRC" alias="CMP3"/>
          <value>10</value>
       </entry>
@@ -538,6 +566,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="CMPMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="RPOR10"/>
          <value>0</value>
       </entry>
@@ -570,6 +602,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC2MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="USTA" settingAlias="URXISEL"/>
          <value>RX_ONE_CHAR</value>
       </entry>
@@ -594,6 +630,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="DCIMD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="RPOR11"/>
          <value>0</value>
       </entry>
@@ -608,6 +648,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="SMPI" alias="Generates interrupt after completion of every 8th sample/conversion operation"/>
          <value>7</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC7MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON1" settingAlias="TRGSTRT" alias="7"/>
@@ -636,6 +680,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON3" settingAlias="CLSRC" alias="FLT32"/>
          <value>31</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC6MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON1" settingAlias="SSRCG" alias="disabled"/>
@@ -828,6 +876,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="DTR6" settingAlias="DTR"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM6MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON5" settingAlias="POLL" alias="enabled"/>
@@ -1054,6 +1106,10 @@
          <value>8</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="PMPMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="AUXCON4" settingAlias="BLANKSEL" alias="PWM6H"/>
          <value>6</value>
       </entry>
@@ -1144,6 +1200,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="OSCCON" settingAlias="LOCK" alias="out of lock"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC3MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON2" settingAlias="BPHL" alias="disabled"/>
@@ -1670,6 +1730,10 @@
          <value/>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="PMPMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RA4"/>
          <value>AI_C</value>
       </entry>
@@ -1784,6 +1848,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPDA" settingAlias="CNPDA0" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T5MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="LEBCON6" settingAlias="CLLEBEN"/>
@@ -1926,6 +1994,10 @@
          <value>25</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="C1MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON6" settingAlias="TRGSTRT" alias="24"/>
          <value>24</value>
       </entry>
@@ -2062,6 +2134,10 @@
          <value>3</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC8MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPDA" settingAlias="CNPDA1" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -2150,12 +2226,12 @@
          <value>7</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TON" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGDIV" alias="7"/>
          <value>6</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TON" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="REFOCON" settingAlias="RODIV" alias="Base clock value/16384"/>
@@ -2226,8 +2302,16 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6"/>
+         <value>0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON4" settingAlias="DMABL" alias="Allocates 64 words of buffer to each analog input"/>
          <value>6</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM1MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSH" settingAlias="CSS26" alias="disabled"/>
@@ -2350,6 +2434,14 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNENA" settingAlias="CNIEA1"/>
          <value>disabled</value>
       </entry>
@@ -2360,6 +2452,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="SYSUSBSPEED"/>
          <value>Invalid</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC5MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="STCON2" settingAlias="PCLKDIV" alias="16"/>
@@ -2404,6 +2500,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON2" settingAlias="TRGSTRT" alias="4"/>
          <value>4</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T1MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON2" settingAlias="TRGSTRT" alias="3"/>
@@ -2480,6 +2580,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="UART4" registerAlias="USTA" settingAlias="OERR" alias="ERROR"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="U2MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TCS" alias="T3CK"/>
@@ -2568,6 +2672,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PTCON" settingAlias="SYNCSRC" alias="SYNCI1"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM1MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="DTCP" alias="disabled"/>
@@ -2734,6 +2842,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM1MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON3" settingAlias="FLTSRC" alias="CMP1"/>
          <value>8</value>
       </entry>
@@ -2810,6 +2922,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="FCLCON4" settingAlias="FLTPOL"/>
          <value>disabled</value>
       </entry>
@@ -2832,6 +2948,14 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="LEBCON1" settingAlias="BPLH"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="System Module" registerAlias="FPOR" settingAlias="ALTI2C2" alias="ON"/>
@@ -2890,6 +3014,10 @@
          <value>7</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4"/>
+         <value>0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON5" settingAlias="BCL" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -2906,8 +3034,16 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC5MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON1" settingAlias="DONE" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T8MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ODCC" settingAlias="ODCC8" alias="enabled"/>
@@ -2962,11 +3098,19 @@
          <value>set</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3"/>
+         <value>0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PTPER" settingAlias="PTPER"/>
          <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSH" settingAlias="CSS25" alias="disabled"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2"/>
          <value>0</value>
       </entry>
       <entry>
@@ -3054,6 +3198,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T8MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNI" settingAlias="enable"/>
          <value>disabled</value>
       </entry>
@@ -3128,6 +3276,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON1" settingAlias="DONE" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="PWMMD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PTCON2" settingAlias="PCLKDIV" alias="2"/>
@@ -3238,6 +3390,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="PWMMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON1" settingAlias="CLSRC" alias="FLT4"/>
          <value>3</value>
       </entry>
@@ -3322,6 +3478,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="ADC2MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON4" settingAlias="FLTDAT" alias="PWM4L Low, PWM4H Low"/>
          <value>0</value>
       </entry>
@@ -3368,6 +3528,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ANSELA" settingAlias="ANSA2" alias="analog"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC6MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="LEBCON1" settingAlias="BPLL"/>
@@ -3692,6 +3856,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="RPINR8" settingAlias="IC4R"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="U1MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RA0"/>
@@ -4070,6 +4238,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="REFOMD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="ANSELA"/>
          <value>536</value>
       </entry>
@@ -4114,6 +4286,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="CTMUMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="DTR2" settingAlias="DTR"/>
          <value>0</value>
       </entry>
@@ -4148,6 +4324,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON5" settingAlias="TRGSTRT" alias="44"/>
          <value>44</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T3MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON5" settingAlias="TRGSTRT" alias="43"/>
@@ -4782,6 +4962,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="I2C1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CSTAT" settingAlias="R_nW" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -4812,6 +4996,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="IOCON4" settingAlias="SWAP"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="CTMUMD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="USTA" settingAlias="ADDEN"/>
@@ -5214,6 +5402,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC8MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="TRGSTAT" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -5232,6 +5424,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="timerExtPinSelection"/>
          <value>FALSE</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="SPI1MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PTCON2" settingAlias="PCLKDIV" alias="64"/>
@@ -5278,6 +5474,10 @@
          <value>3</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="I2C1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="localClockFreq"/>
          <value>3686400</value>
       </entry>
@@ -5316,6 +5516,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPUA" settingAlias="CNPUA7" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC4MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON5" settingAlias="FLTSRC" alias="FLT7"/>
@@ -5370,6 +5574,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="U3MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="OSCTUN" settingAlias="TUN" alias="Center Frequency-0.012%"/>
          <value>56</value>
       </entry>
@@ -5414,12 +5622,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TMR3_TIISRFunction"/>
-         <value>ISR_TMR3_TI</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON3" settingAlias="OVRENL" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TMR3_TIISRFunction"/>
+         <value>ISR_TMR3_TI</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPDB" settingAlias="CNPDB11" alias="enabled"/>
@@ -5602,6 +5810,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="SPI1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ODCC" settingAlias="ODCC7" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -5616,6 +5828,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="ODCB" settingAlias="ODCB2"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T2MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="timerExtPinSelection"/>
@@ -5742,6 +5958,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="SPI1MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON2" settingAlias="BCL" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -5844,6 +6064,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPUA" settingAlias="CNPUA3" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="U3MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="PHASE2"/>
@@ -6094,6 +6318,10 @@
          <value>54</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T3MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON6" settingAlias="CLMOD" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -6262,6 +6490,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7" settingAlias="DMA0MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="UART4" registerAlias="USTA" settingAlias="UTXEN" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -6276,6 +6508,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNPUB" settingAlias="CNPUB12"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC3MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON1" settingAlias="TRGSTAT" alias="enabled"/>
@@ -6350,6 +6586,10 @@
          <value>7</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="U1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON1" settingAlias="TRGDIV" alias="16"/>
          <value>15</value>
       </entry>
@@ -6368,6 +6608,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="ANSELC" settingAlias="ANSC2"/>
          <value>digital</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC7MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UERI" settingAlias="flag"/>
@@ -6494,8 +6738,16 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM3MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="STCON" settingAlias="EIPU" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="C2MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNPUC" settingAlias="CNPUC2"/>
@@ -6542,12 +6794,24 @@
          <value>FLT1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T3MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7" settingAlias="DMA0MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="AUXCON6" settingAlias="BLANKSEL" alias="PWM3H"/>
          <value>3</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="TRISB" settingAlias="TRISB8" alias="input"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="U1MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="PDSEL"/>
@@ -6590,12 +6854,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR5" name="maxPeriod"/>
-         <value>1.1377604167</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON3" settingAlias="PHF" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR5" name="maxPeriod"/>
+         <value>1.1377604167</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM" name="PWM_PSEMIISRFunction"/>
@@ -6742,6 +7006,10 @@
          <value>6</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC3MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR5" registerAlias="PR" settingAlias="PR"/>
          <value>57600</value>
       </entry>
@@ -6866,6 +7134,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="CMPMD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="WATCHDOG" name="customMasterSlaveViewerEnable"/>
          <value>enabled</value>
       </entry>
@@ -6928,6 +7200,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="FCLCON3" settingAlias="FLTMOD"/>
          <value>Fault input is disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC7MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="IOCON6" settingAlias="FLTDAT"/>
@@ -7110,6 +7386,10 @@
          <value>28</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7" settingAlias="PTGMD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="SATA"/>
          <value>disabled</value>
       </entry>
@@ -7130,6 +7410,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM3MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="iocUserSet RB14"/>
          <value>disabled</value>
       </entry>
@@ -7144,6 +7428,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="iocUserSet RB15"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T4MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="iocUserSet RB10"/>
@@ -7286,12 +7574,20 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="I2C1MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="OSCTUN" settingAlias="TUN" alias="Center Frequency+0.029%"/>
          <value>20</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="System Module" registerAlias="FWDT" settingAlias="WDTPS" alias="PS1"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC4MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="IOCON1" settingAlias="POLH"/>
@@ -7464,6 +7760,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="SMPI" alias="Generates interrupt after completion of every 31th sample/conversion operation"/>
          <value>30</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC8MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TON"/>
@@ -7890,6 +8190,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="QEI1MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON5" settingAlias="CLMOD" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -8126,6 +8430,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC8MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CSTAT" settingAlias="ADD10" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -8270,6 +8578,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM6MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="ITB" alias="Primary"/>
          <value>1</value>
       </entry>
@@ -8318,6 +8630,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="ADC1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="FWDT" settingAlias="WDTPS"/>
          <value>PS32768</value>
       </entry>
@@ -8340,6 +8656,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCHS123" settingAlias="CH123NA"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM2MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON6" settingAlias="DTCP" alias="enabled"/>
@@ -8430,12 +8750,12 @@
          <value>57600</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="actualPeriod"/>
-         <value>0.05</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON1" settingAlias="FLTSTAT"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="actualPeriod"/>
+         <value>0.05</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON6" settingAlias="PHR" alias="enabled"/>
@@ -8526,12 +8846,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="URXINV"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TSIDL" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="URXINV"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNPUA" settingAlias="CNPUA10"/>
@@ -8616,6 +8936,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="I2C1" name="I2C1_SICIISRFunction"/>
          <value>ISR_I2C1_SICI</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM2MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON3" settingAlias="PLR" alias="enabled"/>
@@ -9118,6 +9442,10 @@
          <value>255</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="ADC1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="RPINR12"/>
          <value>0</value>
       </entry>
@@ -9178,6 +9506,10 @@
          <value>46</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC6MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON3" settingAlias="TRGSTRT" alias="45"/>
          <value>45</value>
       </entry>
@@ -9188,6 +9520,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON4" settingAlias="FLTPOL" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC1MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON2" settingAlias="OSYNC" alias="enabled"/>
@@ -9246,6 +9582,10 @@
          <value>7</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC6MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="FCLCON4" settingAlias="FLTSRC"/>
          <value>FLT32</value>
       </entry>
@@ -9278,6 +9618,10 @@
          <value>37</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T7MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON3" settingAlias="TRGSTRT" alias="36"/>
          <value>36</value>
       </entry>
@@ -9286,12 +9630,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="tickerFactor"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON3" settingAlias="TRGSTRT" alias="35"/>
          <value>35</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="tickerFactor"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCSSL" settingAlias="CSS3"/>
@@ -9316,6 +9660,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="RPOR12" settingAlias="RP126R"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC2MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON6" settingAlias="PHR" alias="disabled"/>
@@ -9550,6 +9898,10 @@
          <value>8</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7" settingAlias="PTGMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON6" settingAlias="CLIEN"/>
          <value>disabled</value>
       </entry>
@@ -9584,6 +9936,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="OSCTUN" settingAlias="TUN" alias="Center Frequency-0.035%"/>
          <value>40</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="RTCCMD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="ODCC"/>
@@ -9654,6 +10010,10 @@
          <value>4</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="I2C2MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="IOCON6" settingAlias="POLH"/>
          <value>disabled</value>
       </entry>
@@ -9688,6 +10048,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCHS123" settingAlias="CH123NB" alias="CH1=OA3/AN6,CH2=AN7,CH3=AN8"/>
          <value>2</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="PWMMD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CSTAT" settingAlias="TRSTAT" alias="disabled"/>
@@ -9850,6 +10214,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T7MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCON1" settingAlias="ADSIDL"/>
          <value>disabled</value>
       </entry>
@@ -9864,6 +10232,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CCON" settingAlias="A10M" alias="7 Bit"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC7MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="STSEL"/>
@@ -9914,6 +10286,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC6MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="STCON" settingAlias="SYNCOEN"/>
          <value>disabled</value>
       </entry>
@@ -9938,16 +10314,16 @@
          <value>7</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="minPeriod"/>
-         <value>0.0000173611</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="LEBCON6" settingAlias="PHR"/>
          <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGSTRT" alias="6"/>
          <value>6</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="minPeriod"/>
+         <value>0.0000173611</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGSTRT" alias="5"/>
@@ -10070,6 +10446,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7" settingAlias="PTGMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="IOCON4"/>
          <value>19456</value>
       </entry>
@@ -10092,6 +10472,14 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="IOCON3"/>
          <value>19456</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="REFOMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="I2C2MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="FeatureAuxClockPostscaler2"/>
@@ -10154,12 +10542,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR5" name="minPeriod"/>
-         <value>0.0000173611</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON1" settingAlias="OVRDAT" alias="PWM1L Low, PWM1H Low"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR5" name="minPeriod"/>
+         <value>0.0000173611</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="RPINR16" settingAlias="QEA2R"/>
@@ -10168,6 +10556,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CLKDIV" settingAlias="DOZE" alias="1:8"/>
          <value>3</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM5MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSH" settingAlias="CSS30" alias="disabled"/>
@@ -10194,12 +10586,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TimerFrequency"/>
-         <value>3686400</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="IOCON5"/>
          <value>52224</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TimerFrequency"/>
+         <value>3686400</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON5" settingAlias="DTC" alias="Dead-Time Compensation mode"/>
@@ -10322,8 +10714,16 @@
          <value>13</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="REFOMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="FCLCON5" settingAlias="FLTPOL"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="C2MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="IUE" alias="enabled"/>
@@ -10364,6 +10764,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="I2C1" registerAlias="I2CTRN"/>
          <value>255</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T5MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="RPOR8" settingAlias="RP70R"/>
@@ -10422,6 +10826,10 @@
          <value>ISR_UART4_UERI</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T5MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON5" settingAlias="BPHL" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -10440,6 +10848,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON6" settingAlias="TRGDIV" alias="11"/>
          <value>10</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC2MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON2" settingAlias="BPLH" alias="enabled"/>
@@ -10468,6 +10880,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON4" settingAlias="PLR" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="SPI3MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RESET" registerAlias="RCON" settingAlias="WDTO" alias="disabled"/>
@@ -10560,6 +10976,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCHS123" settingAlias="CH123SA"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM5MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="System Module" registerAlias="FPOR" settingAlias="WDTWIN" alias="WIN75"/>
@@ -10954,6 +11374,10 @@
          <value>30</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGSTRT" alias="39"/>
          <value>39</value>
       </entry>
@@ -11126,12 +11550,20 @@
          <value>22</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC5MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATB" settingAlias="LATB11" alias="set"/>
          <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNPDB" settingAlias="CNPDB8"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T1MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON6" settingAlias="FLTIEN"/>
@@ -11146,12 +11578,12 @@
          <value>4</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR5" name="T5CK"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGSTRT" alias="10"/>
          <value>10</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR5" name="T5CK"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="PWMCON3"/>
@@ -11270,6 +11702,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON1" settingAlias="POLL" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -11330,6 +11766,10 @@
          <value>512</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="SPI2MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="SMPI" alias="Generates interrupt after completion of every 7th sample/conversion operation"/>
          <value>6</value>
       </entry>
@@ -11374,6 +11814,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="SPI2MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ODCB" settingAlias="ODCB12" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -11400,6 +11844,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="System Module" registerAlias="FPOR" settingAlias="WDTWIN" alias="WIN37"/>
          <value>128</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM5MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="STCON" settingAlias="SEIEN" alias="disabled"/>
@@ -11446,12 +11894,12 @@
          <value>2</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TCKPS" alias="1:64"/>
-         <value>2</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON5" settingAlias="CLSRC" alias="FLT2"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TCKPS" alias="1:64"/>
+         <value>2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNENB" settingAlias="CNIEB15"/>
@@ -11503,6 +11951,10 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="I2C1" registerAlias="MICI" settingAlias="enable"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC4MD"/>
          <value>enabled</value>
       </entry>
       <entry>
@@ -11568,6 +12020,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATC" settingAlias="LATC1" alias="clear"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="QEI1MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="UART4" registerAlias="USTA" settingAlias="UTXBF" alias="FULL"/>
@@ -11770,6 +12226,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC2MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="callBackRate"/>
          <value>0.01</value>
       </entry>
@@ -11804,6 +12264,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="RPINR15" settingAlias="HOME1R"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="SPI2MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSL" settingAlias="CSS1" alias="disabled"/>
@@ -12074,6 +12538,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="QEI1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="ODCC" settingAlias="ODCC6"/>
          <value>disabled</value>
       </entry>
@@ -12130,12 +12598,20 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC5MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="SOSCPinsInput"/>
          <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWM1I" settingAlias="flag"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC3MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CLKDIV" settingAlias="ROI" alias="disabled"/>
@@ -12206,6 +12682,14 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="CRCMD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="QEI2MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON5" settingAlias="BPHH" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -12228,6 +12712,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATA" settingAlias="LATA3" alias="set"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T2MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="ADC1" registerAlias="ADCSSH"/>
@@ -12316,6 +12804,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATC" settingAlias="LATC1" alias="set"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="I2C2MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSL" settingAlias="CSS4" alias="disabled"/>
@@ -12542,6 +13034,10 @@
          <value>3</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC4MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON3" settingAlias="CLMOD" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -12592,6 +13088,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PTCON" settingAlias="SYNCEN"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM3MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CLKDIV" settingAlias="PLLPRE" alias="8"/>
@@ -12682,6 +13182,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM4MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CCON" settingAlias="ACKDT" alias="Sends ACK"/>
          <value>0</value>
       </entry>
@@ -12712,6 +13216,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="FCLCON5" settingAlias="CLMOD"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="CTMUMD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="AUXCON5" settingAlias="CHOPSEL" alias="PWM6H"/>
@@ -12846,6 +13354,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T2MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="AUXCON4" settingAlias="CHOPSEL"/>
          <value>No state blanking</value>
       </entry>
@@ -12906,6 +13418,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC2MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="REFOCON" settingAlias="ROSSLP" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -12932,6 +13448,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="CNPDC" settingAlias="CNPDC5"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="DCIMD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPUB" settingAlias="CNPUB14" alias="enabled"/>
@@ -12964,6 +13484,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPUB" settingAlias="CNPUB7" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T7MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON3" settingAlias="FLTIEN" alias="disabled"/>
@@ -13028,6 +13552,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON3" settingAlias="CLSRC" alias="CMP2"/>
          <value>9</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="U4MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="RPOR12" settingAlias="RP127R"/>
@@ -13198,6 +13726,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC4MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISB" settingAlias="TRISB12"/>
          <value>output</value>
       </entry>
@@ -13254,6 +13786,14 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T9MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM4MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON6" settingAlias="BCH" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -13266,12 +13806,24 @@
          <value>12</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="SPI3MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON6" settingAlias="PMOD" alias="Complementary Output Mode"/>
          <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="FOSCSEL" settingAlias="PWMLOCK"/>
          <value>ON</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="DCIMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC4MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CSTAT" settingAlias="TBF" alias="disabled"/>
@@ -13286,6 +13838,10 @@
          <value>1:4</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC5MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ODCB" settingAlias="ODCB7" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -13296,6 +13852,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON4" settingAlias="POLH" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD4" settingAlias="U4MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON4" settingAlias="PHR" alias="enabled"/>
@@ -13316,6 +13876,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="BUFM"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T9MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TGATE" alias="disabled"/>
@@ -13398,6 +13962,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC3MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="RPINR9"/>
          <value>0</value>
       </entry>
@@ -13416,6 +13984,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="I2C1" registerAlias="I2CSTAT" settingAlias="IWCOL" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="ADC2MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON5" settingAlias="CLDAT" alias="PWM5L Low, PWM5H Low"/>
@@ -13550,8 +14122,16 @@
          <value>2</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="SPI3MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="XPRES" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="CRCMD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNPUB" settingAlias="CNPUB6" alias="disabled"/>
@@ -13670,6 +14250,10 @@
          <value>OFF</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM2MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="IOCON6" settingAlias="PENH"/>
          <value>disabled</value>
       </entry>
@@ -13762,12 +14346,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TCS" alias="T5CK"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON1" settingAlias="FLTSRC" alias="FLT6"/>
          <value>5</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TCS" alias="T5CK"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON5" settingAlias="CLLEBEN" alias="disabled"/>
@@ -13990,6 +14574,10 @@
          <value>20</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="RTCCMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="RPINR0"/>
          <value>0</value>
       </entry>
@@ -14154,6 +14742,10 @@
          <value>6</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="ADC2MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="STCON" settingAlias="SYNCPOL" alias="disabled"/>
          <value>0</value>
       </entry>
@@ -14196,6 +14788,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="ALTDTR4"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T6MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="DTR2"/>
@@ -14270,16 +14866,16 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="requestedPeriod"/>
-         <value>0.05</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="FCLCON3"/>
          <value>251</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="ALTDTR3"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="requestedPeriod"/>
+         <value>0.05</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RB15"/>
@@ -14326,12 +14922,12 @@
          <value>12352</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="prescaleDivisor"/>
-         <value>64</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="DTR4"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="prescaleDivisor"/>
+         <value>64</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="I2C1" registerAlias="I2CSTAT" settingAlias="R_nW"/>
@@ -14358,6 +14954,18 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="RTCCMD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="CRCMD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T9MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="SMPI" alias="Generates interrupt after completion of every 24th sample/conversion operation"/>
          <value>23</value>
       </entry>
@@ -14374,12 +14982,20 @@
          <value>31</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="PMPMD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="MTBS"/>
          <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PHASE5" settingAlias="PHASE"/>
          <value>1000</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="C2MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM" name="PWM_PWM3IISRFunction"/>
@@ -14426,12 +15042,12 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="timerMaxCount"/>
-         <value>65535</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON5" settingAlias="OVRDAT" alias="PWM5L High, PWM5H High"/>
          <value>3</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="timerMaxCount"/>
+         <value>65535</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON3" settingAlias="PLF" alias="enabled"/>
@@ -14448,6 +15064,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="TRISA" settingAlias="TRISA8" alias="input"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC5MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="FICD"/>
@@ -14590,6 +15210,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="QEI2MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM" name="PWMH4"/>
          <value>disabled</value>
       </entry>
@@ -14634,12 +15258,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR5" registerAlias="TMR" settingAlias="TMR"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON3" settingAlias="PENH" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR5" registerAlias="TMR" settingAlias="TMR"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON5" settingAlias="OVRENL" alias="enabled"/>
@@ -14850,6 +15474,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM4MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="I2C1" registerAlias="MICI" settingAlias="context"/>
          <value>OFF</value>
       </entry>
@@ -14916,6 +15544,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="RPOR8"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="U3MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="STCON" settingAlias="SESTAT" alias="disabled"/>
@@ -15022,6 +15654,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC1MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGDIV" alias="16"/>
          <value>15</value>
       </entry>
@@ -15062,6 +15698,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC7MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON2" settingAlias="PLR" alias="enabled"/>
          <value>1</value>
       </entry>
@@ -15076,6 +15716,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGDIV" alias="10"/>
          <value>9</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T6MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="LEBCON5"/>
@@ -15124,6 +15768,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PTCON" settingAlias="SEVTPS"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC7MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="LEBCON2" settingAlias="PLR" alias="disabled"/>
@@ -15210,8 +15858,16 @@
          <value>clear</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC3MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISB" settingAlias="TRISB4"/>
          <value>output</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD7" settingAlias="DMA0MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="LEBCON6"/>
@@ -15240,6 +15896,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON3" settingAlias="POLH" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="QEI2MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON3" settingAlias="CLIEN" alias="disabled"/>
@@ -15530,12 +16190,12 @@
          <value>32</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TSIDL" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON2" settingAlias="TRGSTRT" alias="31"/>
          <value>31</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TSIDL" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON2" settingAlias="TRGSTRT" alias="30"/>
@@ -15590,8 +16250,16 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T8MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TSIDL" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC8MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON2" settingAlias="TRGSTRT" alias="23"/>
@@ -15730,6 +16398,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC8MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON2" settingAlias="TRGSTRT" alias="17"/>
          <value>17</value>
       </entry>
@@ -15802,6 +16474,10 @@
          <value>3</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="IC6MD"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON1" settingAlias="SSRC" alias="PTGO13"/>
          <value>4</value>
       </entry>
@@ -15852,6 +16528,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="CLKPinsInput"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD3" settingAlias="T6MD" alias="disabled"/>
+         <value>0x1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNENB" settingAlias="CNIEB13" alias="enabled"/>
@@ -15924,6 +16604,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="I2C1" name="InternalClock"/>
          <value>3686400</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="ADC1MD"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="timerBitMode"/>
@@ -16018,6 +16702,10 @@
          <value>disabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="C1MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UTXREG" settingAlias="UTXREG"/>
          <value>0</value>
       </entry>
@@ -16110,6 +16798,10 @@
          <value>0</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="C1MD" alias="disabled"/>
+         <value>0x1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="iocUserSet RA9"/>
          <value>disabled</value>
       </entry>
@@ -16130,12 +16822,12 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TCKPS" alias="1:64"/>
-         <value>2</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PTCON" settingAlias="PTEN"/>
          <value>enabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TCKPS" alias="1:64"/>
+         <value>2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="PWMCON1" settingAlias="CAM" alias="Edge Aligned"/>
@@ -16222,6 +16914,10 @@
          <value>5</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="U2MD" alias="enabled"/>
+         <value>0x0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON2" settingAlias="FLTSRC" alias="FLT8"/>
          <value>7</value>
       </entry>
@@ -16296,6 +16992,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON4" settingAlias="CLIEN"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD1" settingAlias="T4MD" alias="enabled"/>
+         <value>0x0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON3" settingAlias="CLSTAT"/>
@@ -16385,131 +17085,131 @@
    <generatedFileHashHistoryMap class="java.util.HashMap">
       <entry>
          <file>mcc_generated_files\interrupt_manager.h</file>
-         <hash>d8a0662c6daa1e098d17062e06f7a98cf70f7eea5ae332d44f4f5b0ea17ebfc8</hash>
+         <hash>b572939d20e364d4be7377259bed52cdbab516fa0afebed9ef3454355dee39d7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\i2c1.c</file>
-         <hash>23bdab71c385692cdff1f058ae8aab73f4b64e310a2114922af187dcc166e288</hash>
+         <hash>50871f7f230bb2fb5a9ab9131f6c9de423b8b207925e445aa72511b3a2617c66</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\i2c1.h</file>
-         <hash>c7c9aec54ac779fb0137df10004134f7ad2d229426802385f07fbe52786f545a</hash>
+         <hash>b38603338140cd5656f5b1d76d1f16cf71ce0deb9cdf1c56eeb77d702e8623b1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\system_types.h</file>
-         <hash>aaa2307e72b61b591649184264b26492b46a14ab8e16fbfc467c4fe7e7b1bca5</hash>
+         <hash>92577cb01492552a4b93ff450d2d8be0a09623294aa2da1cd70de003428e928f</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\system.h</file>
-         <hash>6615b102fdb1ea714353a5ea0dff15e417c9006fbfee65bcd00bfd8ef41c9108</hash>
+         <hash>81ad666a3f08e75d611c2cae046a8e0bc8e4ca0e663ea38fefa64494eedd327a</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\system.c</file>
-         <hash>2dfc1b39a5376ed0a146241703ae8adfaf608e8a9cc08b35adb8d5cc1e84f310</hash>
+         <hash>ebf97afbf4d616e930c047664d98758388db196592a81b346b6d8e98fa7fe0a9</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\clock.h</file>
-         <hash>1a5e2606e380d5d76aef8391cabab0d454cdcd2f39599470e992355138d95861</hash>
+         <hash>a57d0deef30146c71cfef61009dcb45835a5a965d82271573a800e218e5d2ef4</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>
-         <hash>fd62b25e450624e4e3ecb7d7aeb83f2588545821726fa9b38f5c2e8cc0dabd36</hash>
+         <hash>c605439d4c19aa06acc836ad0b55d253b3f9dea1f178b6a2c1cb3d466b7cafa7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\reset.h</file>
-         <hash>b173c003b1736d5162dbe6f8caf2512c95e176f69557b49b323f5c2488593a1e</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr5.h</file>
-         <hash>7b20534a49f0d29e7c12d11eeb6737d3e27b35243948e63b1c545c2ff6f39f41</hash>
+         <hash>97b63e74a97fcca4edfebf51187c9a7143001b4780c9786c5f095b938f35eebd</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm.c</file>
-         <hash>1947cf91f0c24ac4174544996f85a9a8f03d00b7978b246dd91114e92ad4e5c9</hash>
+         <hash>b07bedf53329ef3055d51bb27d0c210232c95faaf874eff9e6fede5dab5de9c6</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.h</file>
-         <hash>3120450c57dc51ca4ce74e81947e440e7ee1daef696ea078384a7c766cb42196</hash>
+         <hash>d600ef374e30808ea50f4b6e977c69ba16eefa2ecd6d91e1d2459aa5735aafbc</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr5.h</file>
+         <hash>2bc6c269d05de042d9e1422f10be6c75408697411c3f697f90195ffa1aac8057</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\uart4.c</file>
-         <hash>f8e7eab053821d525fac4a14a00005a776924a0beb3cf108ea1295691a2f8b7e</hash>
+         <hash>79b14d5475df9568608f215e12a992fb54767b7f008291831a31b2ec08d3b155</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\reset.c</file>
-         <hash>19ee72f1a96be0cdd80dfe0d4c9fa46fe3dd012ebfd5b6fb4f2d994857ca6578</hash>
+         <hash>c1c698aaf06dd6d04033080a3ec1ae9a9636fbfa2877b086379a81c3af318b77</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.h</file>
-         <hash>cd571b6d2431de1a805a3bfefc79633b188b1f38e7f1a51998ecffda3c44c6a6</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr5.c</file>
-         <hash>300dd8762d3fe217387bcefa806e88326b4b256ace9444fc763d3ba128780fba</hash>
+         <hash>71aa5038e5f7cb34bdc2c4368b76bc9491864fb4de79ef59b0c78c0d3cfa1cb8</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\clock.c</file>
-         <hash>dd1f8e0e3e0e3de63ad9a0a8543b728729f3692ffd53a622b5efef0ba16e8e33</hash>
+         <hash>8f600d0e1b7655e4a1edd89e5dc4281509dcc95b1f06fe66c06d890971ce6424</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr5.c</file>
+         <hash>b26e46e09d93a53bae1dca322df1d8c5555cd5bbbe1abe58913b6bd73e8e4f9b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr3.h</file>
-         <hash>32bb45e2035a665a7995d6775f5ace6c54ffc55acb64db98708e8885eeaa99cb</hash>
+         <hash>77deb056f9a3da80bcfcd99457c0b8a4b9be286cf8f533dc3bac578c95b1bb9f</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.c</file>
-         <hash>6002f10640e4bf707c320e95a2fcbb46fedd34cd51be28ddfc3c6430208cf543</hash>
+         <hash>8cb7ff70a8995a25d6910826b3a1e24ae7a9267cd5470610281b08851ea169bd</hash>
       </entry>
       <entry>
          <file>main.c</file>
-         <hash>e6dabd86f1ad023baf031047ab5effa999f496d0df087da3f4067b9e4e3cb45b</hash>
+         <hash>2c73dd8aac971a9b2edc81ce7029527c895269806f49c22e282a148fa177de35</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
-         <hash>09bd754b4320e74c3891f4fe158087958dd356def0843a24dfe78451ca70f460</hash>
+         <hash>c9aea3f756307fdbbc44463482d272f53331003c75a13a3248b2a7df394d6f93</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.c</file>
-         <hash>5ca3e606dacf528ebb28c0819c6bab52b2f3872b2eddb20d825e7d535ea3379e</hash>
+         <hash>726c68db67b46ca689d0897ac2c3d14c72c374a54d02a261fd39e1e551160dec</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr3.c</file>
-         <hash>8dc0fc22dce70b4416907fabe35fc202d5bae3bf5ba6f0fb8d66e410c770d736</hash>
+         <hash>8a397b02f1a00a4c07ce70e6f6e885902b08bddbd0cb09f5ca375036f051b021</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\uart4.h</file>
-         <hash>51415e7c63bca86bfea19d0841f46f5e0d20b58c95cce5f54855949b7ffdd7c4</hash>
+         <hash>336d7136a7b96a144a71859f1b8b0e7786a4394898ec9e1c381b91fa185eddde</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm.h</file>
-         <hash>eff524b2f4881ae05c1e0427bc06583499ca87b43155eccce3d203e20e61f62a</hash>
+         <hash>241e565fbd1662beb2de1f4ae6050cf68b7cfe48b69abf70f03216e6bc56d5d7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.c</file>
-         <hash>1ecec38164b11b42a149bdae5eb30fc96656a382bb9580f92ab4db6dc38092e4</hash>
+         <hash>0dc039f3ea34de9d011e539b6291b89e5628e5216fba20fe8d86087422e60046</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\traps.c</file>
-         <hash>4421071dfbe1ba4389155189c9eda45aea788ee43cbf82800fe1e6553b366b69</hash>
+         <hash>f20932abf398c604a19b8645b5d47dfa12d471b5d89aa283f339f842e78a33bf</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\traps.h</file>
-         <hash>f5f5c97752269d23bb62d3d1edef30c651f67d86a95ac39ae0c1d0c72d93b1e8</hash>
+         <hash>e8de82757c28e5aac56c11947396b44dc5c11829280563977605e9f2c71bfcba</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.h</file>
-         <hash>5c513fb484432221c5c332a1d35d0992bc4746b53aefafa9fa2a60225198e5b2</hash>
+         <hash>12dbd34d05775978e50a047d983c021c869eab170f665e9814e069aaeaf71f66</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\interrupt_manager.c</file>
-         <hash>a5c5ed0818a250bcd92ec07822f260ce81e60a871ecf1e4c83a8580f4e916d8a</hash>
+         <hash>6171e095d4cb8e7988244828206891902b9ca08e2c5990623e4f2d41a907ab83</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\watchdog.h</file>
-         <hash>cd1c87ad637849c886c632377b47207bd952d3d73244b40587113d6a482a1790</hash>
+         <hash>382eb201c187338d7707cb2b37990ea5bfd271b134a112210231968f76f653ce</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\reset_types.h</file>
-         <hash>2ecf3049cd88124aa82a272d606df0c574cfd7f78433b93b5839783041a29542</hash>
+         <hash>53c674a9269c599f7491dc04514f40927822a0e76b34fd377ec916583a814635</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>

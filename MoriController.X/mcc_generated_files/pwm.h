@@ -13,11 +13,11 @@
   @Description
     This header file provides APIs for driver for PWM. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB 	          :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB 	          :  MPLAB X v5.10
 */
 
 /*
@@ -1619,9 +1619,290 @@ inline static void PWM_FaultInterruptDisable(PWM_GENERATOR genNum)
     }
 }
 
+/**
+  @Summary
+    Callback for PWM Special Event.
+
+  @Description
+    This routine is callback for PWM Special Event
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_SpecialEvent_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_SpecialEvent_Tasks(void);
+
+/**
+  @Summary
+    Callback for PWM Generator1.
+
+  @Description
+    This routine is callback for PWM Generator1
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator1_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator1_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator2.
+
+  @Description
+    This routine is callback for PWM Generator2
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator2_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator2_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator3.
+
+  @Description
+    This routine is callback for PWM Generator3
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator3_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator3_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator4.
+
+  @Description
+    This routine is callback for PWM Generator4
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator4_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator4_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator5.
+
+  @Description
+    This routine is callback for PWM Generator5
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator5_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator5_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator6.
+
+  @Description
+    This routine is callback for PWM Generator6
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator6_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator6_Tasks(void);
+
 //CHB
 void PWM_Set(uint8_t PWM_Output, uint16_t PWM_Duty);
-
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

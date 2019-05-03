@@ -17,11 +17,11 @@ void MotRot_OUT(uint8_t edge, int16_t duty){
             if (duty > 0) ROT_DIR_A = 1;        // direction output
             else ROT_DIR_A = 0;
             PWM_Set(ROT_PWM_A, abs(duty));      // pwm output
-        case 2:
+        case 1:
             if (duty > 0) ROT_DIR_B = 1;        // direction output
             else ROT_DIR_B = 0;
             PWM_Set(ROT_PWM_B, abs(duty));      // pwm output
-        case 3:
+        case 2:
             if (duty > 0) ROT_DIR_C = 1;        // direction output
             else ROT_DIR_C = 0;
             PWM_Set(ROT_PWM_C, abs(duty));      // pwm output

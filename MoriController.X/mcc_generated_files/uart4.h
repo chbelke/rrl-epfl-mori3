@@ -1,15 +1,11 @@
 /**
   UART4 Generated Driver API Header File 
-
   @Company
     Microchip Technology Inc.
-
   @File Name
     uart4.h
-
   @Summary
     This is the generated header file for the UART4 driver using PIC24 / dsPIC33 / PIC32MM MCUs
-
   @Description
     This header file provides APIs for driver for UART4. 
     Generation Information : 
@@ -23,13 +19,11 @@
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
-
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
     EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
     WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
     PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
     WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
-
     IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
     INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
     WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
@@ -37,7 +31,6 @@
     FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
     ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
     THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
  */
@@ -64,10 +57,8 @@ extern "C" {
      */
 
     /** UART4 Driver Hardware Flags
-
       @Summary
         Specifies the status of the hardware receive or transmit
-
       @Description
         This type specifies the status of the hardware receive or transmit.
         More than one of these values may be OR'd together to create a complete
@@ -107,10 +98,8 @@ extern "C" {
     } UART4_STATUS;
 
     /** UART4 Driver Transfer Flags
-
       @Summary
         Specifies the status of the receive or transmit
-
       @Description
         This type specifies the status of the receive or transmit operation.
         More than one of these values may be OR'd together to create a complete
@@ -148,7 +137,6 @@ extern "C" {
     /**
       @Summary
         Initializes the UART instance : 4
-
       @Description
         This routine initializes the UART driver instance for : 4
         index.
@@ -156,13 +144,10 @@ extern "C" {
     
       @Preconditions
         None.
-
       @Returns
         None.
-
       @Param
         None.
-
       @Comment
     
  
@@ -178,7 +163,6 @@ extern "C" {
                 numBytes += UART4_WriteBuffer ( writeBuffer+numBytes, bytesToWrite)  ;
             }
         </code>
-
      */
 
     void UART4_Initialize (void);
@@ -186,26 +170,20 @@ extern "C" {
     /**
       @Summary
         Read a byte of data from the UART4
-
       @Description
         This routine reads a byte of data from the UART4.
-
       @Preconditions
         UART4_Initializer function should have been called 
         before calling this function. The transfer status should be checked to see 
         if the receiver is not empty before calling this function.
-
       @Param
         None.
-
       @Returns
         A data byte received by the driver.
-
       @Example
         <code>
         char            myBuffer[MY_BUFFER_SIZE];
         unsigned int    numBytes;
-
         numBytes = 0;
         do
         {
@@ -213,9 +191,7 @@ extern "C" {
             {
                 myBuffer[numBytes++] = UART4_Read();
             }
-
             // Do something else...
-
         } while( numBytes < MY_BUFFER_SIZE);
         </code>
      */
@@ -225,34 +201,26 @@ extern "C" {
     /**
       @Summary
         Returns the number of bytes read by the UART4 peripheral
-
       @Description
         This routine returns the number of bytes read by the Peripheral and fills the
         application read buffer with the read data.
-
       @Preconditions
         UART4_Initializer function should have been called 
         before calling this function
-
       @Param
         buffer       - Buffer into which the data read from the UART4
-
       @Param
         numbytes     - Total number of bytes that need to be read from the UART4
                        (must be equal to or less than the size of the buffer)
-
       @Returns
         Number of bytes actually copied into the caller's buffer or -1 if there
         is an error.
-
       @Example
         <code>
         char                     myBuffer[MY_BUFFER_SIZE];
         unsigned int             numBytes;
         UART4_TRANSFER_STATUS status ;
-
         // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
-
         numBytes = 0;
         while( numBytes < MY_BUFFER_SIZE);
         {
@@ -273,7 +241,6 @@ extern "C" {
             {
                 continue;
             }
-
             // Do something else...
         }
         </code>
@@ -284,28 +251,21 @@ extern "C" {
     /**
       @Summary
         Writes a byte of data to the UART4
-
       @Description
         This routine writes a byte of data to the UART4.
-
       @Preconditions
         UART4_Initializer function should have been called 
         before calling this function. The transfer status should be checked to see if
         transmitter is not full before calling this function.
-
       @Param
         byte         - Data byte to write to the UART4
-
       @Returns
         None.
-
       @Example
         <code>
         char            myBuffer[MY_BUFFER_SIZE];
         unsigned int    numBytes;
-
         // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
-
         numBytes = 0;
         while( numBytes < MY_BUFFER_SIZE);
         {
@@ -313,7 +273,6 @@ extern "C" {
             {
                 UART4_Write(handle, myBuffer[numBytes++]);
             }
-
             // Do something else...
         }
         </code>
@@ -324,23 +283,18 @@ extern "C" {
     /**
       @Summary
         Returns the number of bytes written into the internal buffer
-
       @Description
         This API transfers the data from application buffer to internal buffer and 
         returns the number of bytes added in that queue
-
       @Preconditions
         UART4_Initializer function should have been called 
         before calling this function
-
       @Example
         <code>
         char                     myBuffer[MY_BUFFER_SIZE];
         unsigned int             numBytes;
         UART4_TRANSFER_STATUS status ;
-
         // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
-
         numBytes = 0;
         while( numBytes < MY_BUFFER_SIZE);
         {
@@ -361,7 +315,6 @@ extern "C" {
             {
                 continue;
             }
-
             // Do something else...
         }
         </code>
@@ -372,7 +325,6 @@ extern "C" {
     /**
       @Summary
         Returns the transmitter and receiver transfer status
-
       @Description
         This returns the transmitter and receiver transfer status.The returned status 
         may contain a value with more than one of the bits
@@ -380,21 +332,16 @@ extern "C" {
         The caller should perform an "AND" with the bit of interest and verify if the
         result is non-zero (as shown in the example) to verify the desired status
         bit.
-
       @Preconditions
         UART4_Initializer function should have been called 
         before calling this function
-
       @Param
         None.
-
       @Returns
         A UART4_TRANSFER_STATUS value describing the current status 
         of the transfer.
-
       @Example
         Refer to UART4_ReadBuffer and UART4_WriteBuffer for example
-
      */
 
     UART4_TRANSFER_STATUS UART4_TransferStatusGet (void );
@@ -403,7 +350,6 @@ extern "C" {
       @Summary
         Returns the character in the read sequence at the offset provided, without
         extracting it
-
       @Description
         This routine returns the character in the read sequence at the offset provided,
         without extracting it
@@ -444,7 +390,6 @@ extern "C" {
       @Summary
         Validates the offset input and get the character in the read sequence at the 
         offset provided, without extracting it
-
       @Description
         This routine validates the offset input and get the character in the read 
         sequence at the offset provided, without extracting it. 
@@ -453,7 +398,6 @@ extern "C" {
         dataByte     - Data byte to be read from UART4 RX buffer based on offset position.
         offset       - UART4 RX buffer peek position. Offset input range is should be
                        0 to (UART4_CONFIG_RX_BYTEQ_LENGTH - 1).
-
       @Return   
         false        - If the UART4 RX buffer is empty or dataByte is NULL or UART4 RX 
                        buffer is empty.
@@ -493,13 +437,10 @@ extern "C" {
     /**
       @Summary
         Returns the size of the receive buffer
-
       @Description
         This routine returns the size of the receive buffer.
-
       @Param
         None.
-
       @Returns
         Size of receive buffer.
     
@@ -525,16 +466,13 @@ extern "C" {
     /**
       @Summary
         Returns the size of the transmit buffer
-
       @Description
         This routine returns the size of the transmit buffer.
-
      @Param
         None.
  
      @Returns
         Size of transmit buffer.
-
      @Example
         Refer to UART4_Initializer(); for example.
      */
@@ -544,10 +482,8 @@ extern "C" {
     /**
       @Summary
         Returns the status of the receive buffer
-
       @Description
         This routine returns if the receive buffer is empty or not.
-
       @Param
         None.
  
@@ -560,9 +496,7 @@ extern "C" {
         char                     myBuffer[MY_BUFFER_SIZE];
         unsigned int             numBytes;
         UART4_TRANSFER_STATUS status ;
-
         // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
-
         numBytes = 0;
         while( numBytes < MY_BUFFER_SIZE);
         {
@@ -583,7 +517,6 @@ extern "C" {
             {
                 continue;
             }
-
             // Do something else...
         }
         </code>
@@ -595,17 +528,14 @@ extern "C" {
     /**
       @Summary
         Returns the status of the transmit buffer
-
       @Description
         This routine returns if the transmit buffer is full or not.
-
      @Param
         None.
  
      @Returns
         True if the transmit buffer is full
         False if the transmit buffer is not full
-
      @Example
         Refer to UART4_Initializer() for example.
  
@@ -616,24 +546,19 @@ extern "C" {
     /**
       @Summary
         Returns the transmitter and receiver status
-
       @Description
         This returns the transmitter and receiver status. The returned status 
         contains a 16 bit value.
         The caller should perform an "AND" with the bit of interest and verify if the
         result is non-zero (as shown in the example) to verify the desired status
         bit.
-
       @Preconditions
         UART4_Initializer function should have been called 
         before calling this function
-
       @Param
         None.
-
       @Returns
         16 bit value describing the current status of the transfer.
-
       @Example
         <code>
             while(!(UART4_StatusGet() & UART4_TX_COMPLETE ))

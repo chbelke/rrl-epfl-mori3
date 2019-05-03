@@ -18,6 +18,11 @@
 
 static volatile bool Flg_LiveAngle;
 
+/* ******************** NOTES *********************************************** */
+/* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
+ * is as follows: ((1/0.4 - 0.120)*3.6864)-2 = 6.77
+ * FRM: http://ww1.microchip.com/downloads/en/DeviceDoc/70000195g.pdf*/
+
 
 /* ******************** MODE SELECTION ************************************** */
 #define MODE_DEBUG 0
@@ -84,7 +89,7 @@ static volatile bool Flg_LiveAngle;
 #define ROT_DIR_A LATCbits.LATC6
 #define ROT_DIR_B LATCbits.LATC7
 #define ROT_DIR_C LATAbits.LATA10
-    
+
 #define MotRot_AngleRange 180       // overall range (in degrees)
 
 #define MotRot_PID_dt 0.1           // timer period (currently not used)

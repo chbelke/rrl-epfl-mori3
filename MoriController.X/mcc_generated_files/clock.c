@@ -13,11 +13,11 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 
 /*
@@ -42,26 +42,32 @@
     TERMS.
 */
 
-#include "clock.h"
-#include "stdint.h"
+#include <stdint.h>
 #include "xc.h"
+#include "clock.h"
 
 void CLOCK_Initialize(void)
 {
     // FRCDIV FRC/1; PLLPRE 2; DOZE 1:8; PLLPOST 1:4; DOZEN disabled; ROI disabled; 
     CLKDIV = 0x3040;
     // TUN Center frequency; 
-    OSCTUN = 0x0;
+    OSCTUN = 0x00;
     // ROON disabled; ROSEL disabled; RODIV Base clock value; ROSSLP disabled; 
-    REFOCON = 0x0;
+    REFOCON = 0x00;
     // PLLDIV 50; 
     PLLFBD = 0x32;
-    // RND disabled; SATB disabled; SATA disabled; ACCSAT disabled; 
-	CORCONbits.RND = 0;
-	CORCONbits.SATB = 0;
-	CORCONbits.SATA = 0;
-	CORCONbits.ACCSAT = 0;
+    // AD1MD enabled; PWMMD enabled; T3MD enabled; T4MD enabled; T1MD enabled; U2MD enabled; T2MD enabled; U1MD enabled; QEI1MD enabled; SPI2MD enabled; SPI1MD enabled; C2MD enabled; C1MD enabled; DCIMD enabled; T5MD enabled; I2C1MD enabled; 
+    PMD1 = 0x00;
+    // OC5MD enabled; OC6MD enabled; OC7MD enabled; OC8MD enabled; OC1MD enabled; IC2MD enabled; OC2MD enabled; IC1MD enabled; OC3MD enabled; OC4MD enabled; IC6MD enabled; IC7MD enabled; IC5MD enabled; IC8MD enabled; IC4MD enabled; IC3MD enabled; 
+    PMD2 = 0x00;
+    // ADC2MD enabled; PMPMD enabled; U3MD enabled; QEI2MD enabled; RTCCMD enabled; CMPMD enabled; T9MD enabled; T8MD enabled; CRCMD enabled; T7MD enabled; I2C2MD enabled; T6MD enabled; 
+    PMD3 = 0x00;
+    // U4MD enabled; CTMUMD enabled; REFOMD enabled; 
+    PMD4 = 0x00;
+    // PWM2MD enabled; PWM1MD enabled; PWM4MD enabled; SPI3MD enabled; PWM3MD enabled; PWM6MD enabled; PWM5MD enabled; 
+    PMD6 = 0x00;
+    // PTGMD enabled; DMA0MD enabled; 
+    PMD7 = 0x00;
     // CF no clock failure; NOSC FRCDIV; CLKLOCK unlocked; OSWEN Switch is Complete; IOLOCK not-active; 
-    __builtin_write_OSCCONH((uint8_t) ((0x700 >> _OSCCON_NOSC_POSITION) & 0x00FF));
     __builtin_write_OSCCONL((uint8_t) (0x700 & 0x00FF));
 }
