@@ -1,5 +1,5 @@
 /**
-  PIN MANAGER Generated Driver File
+  System Interrupts Generated Driver File 
 
   @Company:
     Microchip Technology Inc.
@@ -8,54 +8,53 @@
     pin_manager.c
 
   @Summary:
-    This is the generated manager file for the PIC24 / dsPIC33 / PIC32MM MCUs device.  This manager
+    This is the generated manager file for the MPLAB(c) Code Configurator device.  This manager
     configures the pins direction, initial state, analog setting.
     The peripheral pin select, PPS, configuration is also handled by this manager.
 
   @Description:
-    This source file provides implementations for PIN MANAGER.
-    Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+    This source file provides implementations for MPLAB(c) Code Configurator interrupts.
+    Generation Information : 
+        Product Revision  :  MPLAB(c) Code Configurator - pic24-dspic-pic32mm : 1.75.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB 	          :  MPLAB X v5.10
-*/
+        Compiler          :  XC16 v1.35
+        MPLAB             :  MPLAB X v5.05
 
-/*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
-    software and any derivatives exclusively with Microchip products.
+    Copyright (c) 2013 - 2015 released Microchip Technology Inc.  All rights reserved.
 
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-    WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-    PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
-    WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+    Microchip licenses to you the right to use, modify, copy and distribute
+    Software only when embedded on a Microchip microcontroller or digital signal
+    controller that is integrated into your product or third party product
+    (pursuant to the sublicense terms in the accompanying license agreement).
 
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-    BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-    FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-    ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-    THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+    You should refer to the license agreement accompanying this Software for
+    additional information regarding your rights and obligations.
 
-    MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
-    TERMS.
+    SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+    EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
+    MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
+    IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER
+    CONTRACT, NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR
+    OTHER LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
+    INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
+    CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
+    SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
+    (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+
 */
 
 
 /**
     Section: Includes
 */
-
 #include <xc.h>
 #include "pin_manager.h"
 
 /**
- Section: Driver Interface Function Definitions
+    void PIN_MANAGER_Initialize(void)
 */
-void PIN_MANAGER_Initialize (void)
+void PIN_MANAGER_Initialize(void)
 {
     /****************************************************************************
      * Setting the Output Latch SFR(s)
@@ -101,10 +100,10 @@ void PIN_MANAGER_Initialize (void)
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
-    RPINR28bits.U4RXR = 0x0026;    //RB6->UART4:U4RX
-    RPOR1bits.RP37R = 0x001D;    //RB5->UART4:U4TX
+    RPINR28bits.U4RXR = 0x0026;   //RB6->UART4:U4RX;
+    RPOR1bits.RP37R = 0x001D;   //RB5->UART4:U4TX;
 
-    __builtin_write_OSCCONL(OSCCON | 0x40); // lock PPS
+    __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
 
 }
 

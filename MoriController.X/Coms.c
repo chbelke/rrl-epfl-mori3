@@ -21,7 +21,7 @@ uint8_t MotLinDrivePWM[3] = {0, 0, 0}; // Manual drive mode PWM values by edge
  * - 0b010ooxxx manual indicator followed by 3 pwm values (1 signed byte each)
  * - 0b011xxooo automatic indicator followed by reference edge 0,1,2
  * - 0b011ooxoo direction (0 = inwards, 1 = outwards)
- * - 0b011oooxx
+ * - 0b011oooxx tbd
  */
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
@@ -198,7 +198,7 @@ void Coms_ESP_Eval() {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
                         if ((EspInAlloc >> (2-m)) & 0b00000001){
-                            MotRot_OUT(m,MotLinDrivePWM[m]);
+                            MotRot_OUT(m, MotLinDrivePWM[m]*256);
                         }
                     }
                 } else {

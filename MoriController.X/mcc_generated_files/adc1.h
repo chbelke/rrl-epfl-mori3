@@ -1,11 +1,15 @@
 /**
   ADC1 Generated Driver API Header File
+
   @Company
     Microchip Technology Inc.
+
   @File Name
     adc1.h
+
   @Summary
     This is the generated header file for the ADC1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+
   @Description
     This header file provides APIs for driver for ADC1.
     Generation Information :
@@ -19,11 +23,13 @@
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
+
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
     EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
     WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
     PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
     WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+
     IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
     INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
     WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
@@ -31,6 +37,7 @@
     FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
     ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
     THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
  */
@@ -215,17 +222,22 @@ typedef enum
     /**
       @Summary
         This function initializes ADC instance : 1
+
       @Description
         This routine initializes the ADC driver instance for : 1
         index, making it ready for clients to open and use it. It also initializes any
         internal data structures.
         This routine must be called before any other ADC routine is called. 
+
       @Preconditions
         None.
+
       @Param
         None.
+
       @Returns
         None.
+
       @Comment
     
  
@@ -246,6 +258,7 @@ typedef enum
             }
             conversion = ADC1_ConversionResultGet();
         </code>
+
      */
 
     void ADC1_Initialize (void);
@@ -253,17 +266,22 @@ typedef enum
     /**
       @Summary
         Clears interrupt flag
+
       @Description
         This routine is used to clear the interrupt flag manually.
  
       @Preconditions
         None.
+
       @Param
         None.
+
       @Returns
         None.
+
       @Example
         Refer to ADC1_Initialize() for an example
+
      */
 
 inline static void ADC1_InterruptFlagClear(void)
@@ -273,17 +291,22 @@ inline static void ADC1_InterruptFlagClear(void)
     /**
       @Summary
         Enables interrupts.
+
       @Description
         This routine is used to enable the ADC1 interrupt manually.
  
       @Preconditions
         None.
+
       @Param
         None.
+
       @Returns
         None.
+
       @Example
         Refer to ADC1_Initialize() for an example
+
      */
 inline static void ADC1_InterruptEnable(void)
 {  
@@ -292,17 +315,22 @@ inline static void ADC1_InterruptEnable(void)
     /**
       @Summary
         Disables interrupts
+
       @Description
         This routine is used to disable the ADC1 interrupt manually.
  
       @Preconditions
         None.
+
       @Param
         None.
+
       @Returns
         None.
+
       @Example
         Refer to ADC1_Initialize() for an example
+
      */
 
 inline static void ADC1_InterruptDisable(void)
@@ -312,16 +340,20 @@ inline static void ADC1_InterruptDisable(void)
     /**
       @Summary
         Starts sampling manually.
+
       @Description
         This routine is used to start the sampling manually.
  
       @Preconditions
         ADC1_Initialize() function should have been called 
         before calling this function.
+
       @Param
         None.
+
       @Returns
         None.
+
       @Example
     <code>
         int conversion;
@@ -339,6 +371,7 @@ inline static void ADC1_InterruptDisable(void)
         }
         conversion = ADC1_ConversionResultGet();
     </code>
+
      */
 
 inline static void ADC1_SamplingStart(void)
@@ -348,6 +381,7 @@ inline static void ADC1_SamplingStart(void)
     /**
       @Summary
         Stops sampling manually.
+
       @Description
         This routine is used to stop the sampling manually before conversion
         is triggered.
@@ -355,10 +389,13 @@ inline static void ADC1_SamplingStart(void)
       @Preconditions
         ADC1_Initialize() function should have been 
         called before calling this function.
+
       @Param
         None.
+
       @Returns
         None.
+
       @Example
     <code>
         int conversion;
@@ -385,6 +422,7 @@ inline static void ADC1_SamplingStop(void)
     /**
       @Summary
         Gets the buffer loaded with conversion results.
+
       @Description
         This routine is used to get the analog to digital converted values in a
         buffer. This routine gets converted values from multiple channels.
@@ -396,8 +434,10 @@ inline static void ADC1_SamplingStop(void)
  
       @Param
         None.
+
       @Returns
         Returns the count of the buffer containing the conversion values.
+
       @Example
         <code>
             int count;
@@ -421,6 +461,7 @@ uint16_t ADC1_ConversionResultBufferGet(uint16_t *buffer);
     /**
       @Summary
         Returns the ADC1 conversion value for Channel 0.
+
       @Description
         This routine is used to get the analog to digital converted value. This
         routine gets converted values from the channel specified.
@@ -434,6 +475,7 @@ uint16_t ADC1_ConversionResultBufferGet(uint16_t *buffer);
    
       @Returns
         Returns the buffer containing the conversion value.
+
       @Param
         Buffer address
   
@@ -448,6 +490,7 @@ inline static uint16_t ADC1_Channel0ConversionResultGet(void)
     /**
       @Summary
         Returns the ADC1 conversion value from Channel 1.
+
       @Description
         This routine is used to get the analog to digital converted value. This
         routine gets converted values from the channel specified.
@@ -461,6 +504,7 @@ inline static uint16_t ADC1_Channel0ConversionResultGet(void)
    
       @Returns
         Returns the buffer containing the conversion value.
+
       @Param
         Buffer address
   
@@ -475,6 +519,7 @@ inline static uint16_t ADC1_Channel1ConversionResultGet(void)
     /**
       @Summary
         Returns the ADC1 conversion value from Channel 2.
+
       @Description
         This routine is used to get the analog to digital converted value. This
         routine gets converted values from the channel specified.
@@ -488,6 +533,7 @@ inline static uint16_t ADC1_Channel1ConversionResultGet(void)
    
       @Returns
         Returns the buffer containing the conversion value.
+
       @Param
         Buffer address
   
@@ -503,6 +549,7 @@ inline static uint16_t ADC1_Channel2ConversionResultGet(void)
     /**
       @Summary
         Returns the ADC1 conversion value from Channel 3.
+
       @Description
         This routine is used to get the analog to digital converted value. This
         routine gets converted values from the channel specified.
@@ -516,6 +563,7 @@ inline static uint16_t ADC1_Channel2ConversionResultGet(void)
    
       @Returns
         Returns the buffer containing the conversion value.
+
       @Param
         Buffer address
   
@@ -530,6 +578,7 @@ inline static uint16_t ADC1_Channel3ConversionResultGet(void)
     /**
       @Summary
         Returns true when the conversion is completed
+
       @Description
         This routine is used to determine if conversion is completed. This routine
         returns the value of the DONE bit. When conversion is complete the routine
@@ -541,6 +590,7 @@ inline static uint16_t ADC1_Channel3ConversionResultGet(void)
  
       @Returns
         Returns true if conversion is completed
+
       @Param
         None
   
@@ -556,6 +606,7 @@ inline static bool ADC1_IsConversionComplete( void )
     /**
       @Summary
         Allows selection of a channel for conversion
+
       @Description
         This routine is used to select desired channel for conversion.
   
@@ -565,6 +616,7 @@ inline static bool ADC1_IsConversionComplete( void )
  
       @Returns
         None
+
       @Param
         Pass in required channel from the ADC1_CHANNEL list
   
@@ -580,6 +632,7 @@ inline static void ADC1_ChannelSelectSet( ADC1_CHANNEL channel )
     /**
       @Summary
         Returns the channel selected for conversion
+
       @Description
         This routine is used to return the channel selected for conversion.
   
@@ -589,6 +642,7 @@ inline static void ADC1_ChannelSelectSet( ADC1_CHANNEL channel )
  
       @Returns
         The value of the Channel Conversion register
+
       @Param
         None
   
@@ -604,6 +658,7 @@ inline static uint16_t ADC1_ChannelSelectGet( void )
     /**
       @Summary
         Allows selection of a data format type for conversion
+
       @Description
         This routine is used to select desired data format for conversion.
   
@@ -613,6 +668,7 @@ inline static uint16_t ADC1_ChannelSelectGet( void )
  
       @Returns
         None
+
       @Param
         Pass in required data format type from the ADC1_FORM_TYPE list
   
@@ -627,6 +683,7 @@ inline static void ADC1_FormatDataSet( ADC1_FORM_TYPE form )
     /**
       @Summary
         Allows selection of a resolution mode for conversion
+
       @Description
         This routine is used to select desired resolution mode for conversion.
   
@@ -636,6 +693,7 @@ inline static void ADC1_FormatDataSet( ADC1_FORM_TYPE form )
  
       @Returns
         None
+
       @Param
         Pass in required resolution mode from the ADC1_RESOLUTION_TYPE list
   
@@ -650,6 +708,7 @@ inline static void ADC1_ResolutionModeSet( ADC1_RESOLUTION_TYPE resolution )
     /**
       @Summary
         Allows simultaneous sampling to be enabled manually
+
       @Description
         This routine is used to enable simultaneous sampling of channels manually
   
@@ -659,11 +718,13 @@ inline static void ADC1_ResolutionModeSet( ADC1_RESOLUTION_TYPE resolution )
  
       @Returns
         None
+
       @Param
         None.
   
       @Example
         Refer to ADC1_Initialize(); for an example
+
      */
 
 inline static void ADC1_SimultaneousSamplingEnable(void)
@@ -673,6 +734,7 @@ inline static void ADC1_SimultaneousSamplingEnable(void)
     /**
       @Summary
         Allows simultaneous sampling to be disabled manually
+
       @Description
         This routine is used to disable simultaneous sampling of channels manually
   
@@ -682,6 +744,7 @@ inline static void ADC1_SimultaneousSamplingEnable(void)
  
       @Returns
         None
+
       @Param
         None.
   
@@ -696,6 +759,7 @@ inline static void ADC1_SimultaneousSamplingDisble(void)
     /**
     @Summary
         Allows sutomatic sampling to be enabled manually
+
       @Description
         This routine is used to enable automatic sampling of channels manually
   
@@ -705,6 +769,7 @@ inline static void ADC1_SimultaneousSamplingDisble(void)
  
       @Returns
         None
+
       @Param
         None.
   
@@ -719,6 +784,7 @@ inline static void ADC1_AutomaticSamplingEnable(void)
     /**
       @Summary
         Allows automatic sampling to be disabled manually
+
       @Description
         This routine is used to disable automatic sampling of channels manually
   
@@ -728,6 +794,7 @@ inline static void ADC1_AutomaticSamplingEnable(void)
  
       @Returns
         None
+
       @Param
         None.
   
@@ -742,6 +809,7 @@ inline static void ADC1_AutomaticSamplingDisable(void)
     /**
       @Summary
         Allows conversion clock prescaler value to be set
+
       @Description
         This routine is used to allow conversion clock prescaler value to be set manually
   
@@ -751,6 +819,7 @@ inline static void ADC1_AutomaticSamplingDisable(void)
  
       @Returns
         None
+
       @Param
         Pass in required prescaler integer value
   
@@ -766,6 +835,7 @@ inline static void ADC1_ConversionClockPrescalerSet(uint8_t prescaler)
     /**
       @Summary
         Allows module to be enabled manually
+
       @Description
         This routine is used to enable the ADC1 module manually
   
@@ -775,6 +845,7 @@ inline static void ADC1_ConversionClockPrescalerSet(uint8_t prescaler)
  
       @Returns
         None
+
       @Param
         None
   
@@ -788,6 +859,7 @@ inline static void ADC1_Enable(void)
     /**
       @Summary
         Allows module to be disabled manually
+
       @Description
         This routine is used to disable the ADC1 module manually
   
@@ -797,6 +869,7 @@ inline static void ADC1_Enable(void)
  
       @Returns
         None
+
       @Param
         None
   
@@ -811,6 +884,7 @@ inline static void ADC1_Disable(void)
     /**
       @Summary
         Allows selection of a positive 123 channel for conversion
+
       @Description
         This routine is used to select desired positive 123 channel for conversion.
   
@@ -820,6 +894,7 @@ inline static void ADC1_Disable(void)
  
       @Returns
         None
+
       @Param
         Pass in required channel from the ADC1_POS_123_CHANNEL list
   
@@ -835,6 +910,7 @@ inline static void ADC1_Positive123ChannelSelect( ADC1_POS_123_CHANNEL channel )
     /**
       @Summary
         Allows selection of a negative 123 channel for conversion
+
       @Description
         This routine is used to select desired negative 123 channel for conversion.
   
@@ -844,6 +920,7 @@ inline static void ADC1_Positive123ChannelSelect( ADC1_POS_123_CHANNEL channel )
  
       @Returns
         None
+
       @Param
         Pass in required channel from the ADC1_NEG_123_CHANNEL list
   
@@ -859,6 +936,7 @@ inline static void ADC1_Negative123ChannelSelect( ADC1_NEG_123_CHANNEL channel )
     /**
       @Summary
         Allows selection of conversion channels
+
       @Description
         This routine is used to select conversion channel for conversion.
   
@@ -868,6 +946,7 @@ inline static void ADC1_Negative123ChannelSelect( ADC1_NEG_123_CHANNEL channel )
  
       @Returns
         None
+
       @Param
         Pass in required channel from the ADC1_CONVERSION_CHANNELS_TYPE list
   
@@ -883,6 +962,7 @@ inline static void ADC1_ConversionChannelsSet( ADC1_CONVERSION_CHANNELS_TYPE cha
     /**
       @Summary
         Allows selection of a priority for interrupt
+
       @Description
         This routine is used to select desired priority for interrupt.
   
@@ -892,6 +972,7 @@ inline static void ADC1_ConversionChannelsSet( ADC1_CONVERSION_CHANNELS_TYPE cha
  
       @Returns
         None
+
       @Param
         Pass in required integer priority value
   
@@ -907,6 +988,7 @@ inline static void ADC1_InterruptPrioritySet( uint16_t priorityValue )
     /**
       @Summary
         Polled implementation
+
       @Description
         This routine is used to implement the tasks for polled implementations.
   
