@@ -201,11 +201,12 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 //    }
     
     // BLAST STATUS TO ESP
-    UART4_Write(ESP_Beg);
-    UART4_Write16(ADC1_Return(0));
-    UART4_Write16(ADC1_Return(1));
-    UART4_Write16(ADC1_Return(2));
-    UART4_Write(ESP_End);
+//    UART4_Write(ESP_Beg);
+//    UART4_Write16(ADC1_Return(0));
+//    UART4_Write16(ADC1_Return(1));
+//    UART4_Write16(ADC1_Return(2));
+//    UART4_Write(ESP_End);
+ 
 }
 
 void TMR5_Start( void )

@@ -3,6 +3,8 @@
 #include "mcc_generated_files/uart4.h"
 #include "MotLin.h"
 #include "MotRot.h"
+#include "math.h"
+#include "dsp.h"
 
 uint8_t EspInCase = 0; // Switch case variable
 uint8_t EspInAlloc = 0; // Incoming allocation byte
@@ -11,17 +13,22 @@ uint8_t EspInBytes = 0; // Incoming byte count
 uint16_t MotLinTemp[3] = {0, 0, 0}; // Linear motor set value (temporary)
 uint16_t MotRotTemp[3] = {0, 0, 0}; // Rotary motor set value (temporary)
 uint8_t MotLinDrivePWM[3] = {0, 0, 0}; // Manual drive mode PWM values by edge
+uint8_t MotLinDriveSpd = 0;
+int8_t MotLinDriveCrv = 0;
+#define length 68.15
 
 /* EspInAlloc: 
  * 0bxx000000, where xx = indicator
  * 00 = extension and angular values
  * - 0b00xxxxxx in order: linear indicators 1,2,3, rotary indicators 1,2,3
  * 01 = drive input
- * - 0b01xooooo 0 = automatic (modules evaluates), 1 = manual (direct to PWM)
+ * - 0b01xooooo 1 = automatic (modules evaluates), 0 = manual (direct to PWM)
  * - 0b010ooxxx manual indicator followed by 3 pwm values (1 signed byte each)
  * - 0b011xxooo automatic indicator followed by reference edge 0,1,2
  * - 0b011ooxoo direction (0 = inwards, 1 = outwards)
  * - 0b011oooxx tbd
+ * 10 = tbd
+ * - 0b10xxxxxx tbd
  */
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
@@ -39,6 +46,7 @@ uint8_t MotLinDrivePWM[3] = {0, 0, 0}; // Manual drive mode PWM values by edge
 /* ******************** ESP COMMAND EVALUATION ****************************** */
 void Coms_ESP_Eval() {
     uint8_t EspIn = UART4_Read(); // Incoming byte
+    UART4_Write(EspIn);
     switch (EspInCase) {
         case 0: // CHECK START BYTE
             if (EspIn == ESP_Beg) {
@@ -209,6 +217,26 @@ void Coms_ESP_Eval() {
             break;
             
         case 19: // AUTOMATIC DRIVE MODE **************************************
+            MotLinDriveSpd = EspIn;
+            EspInBytes = EspInBytes + 1;
+            EspInCase = 20;
+            break;
+        
+        case 20:
+            MotLinDriveCrv = EspIn;
+            EspInBytes = EspInBytes + 1;
+            EspInCase = 21;
+            break;
+            
+        case 21:
+            if (EspIn == ESP_End) {
+                if (EspInBytes == 4) {
+//                    Coms_ESP_Drive(MotLinDriveSpd, MotLinDriveCrv, (EspInAlloc & 0b00011000), (EspInAlloc & 0b00000100));
+                } else {
+                    // data lost
+                }
+            }
+            EspInCase = 0;
             break;
             
         default:
@@ -233,5 +261,78 @@ void Coms_ESP_SetMots() {
         if ((EspInAlloc >> (2 - (k - 1))) & 0x01) {
             //            MotLin_Set(k-1,MotLinTemp[k]);
         }
+    }
+}
+
+void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direction) {
+    int16_t Mo = curve*20; // from matlab moments up to +-2160 relative to 100% speed
+    int16_t Sa = speed; // from 255 to +-32767
+    if (!direction) { // inwards or outwards
+        Sa = -1*Sa;
+    }
+    
+    
+    
+    uint16_t a,b,c; // extension values from 180
+    switch (edge) {
+        case 0:
+            a = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
+            b = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
+            c = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
+        case 1:
+            a = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
+            b = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
+            c = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
+        case 2:
+            a = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
+            b = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
+            c = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
+        default:
+            a = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
+            b = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
+            c = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
+    }
+    
+    // vertex angles
+    // float alpha = acosf((b*b + c*c - a*a)/(2*b*c));
+    float beta = acosf((a*a + c*c - b*b)/(2*a*c));
+    float gamm = acosf((a*a + b*b - c*c)/(2*a*b));
+    
+    // wheel coordinates (for a: [length, 0])
+    float Wb[2] = {(b-length)*cosf(gamm), (b-length)*sinf(gamm)};
+    float Wc[2] = {a-length*cosf(beta), length*sinf(beta)};
+    
+    // second point in wheel direction
+    float Wb2[2] = {Wb[0]-cosf(PI/2-gamm), Wb[1]+sinf(PI/2-gamm)};
+    float Wc2[2] = {Wc[0]+cosf(PI/2-beta), Wc[1]+sinf(PI/2-beta)};
+    
+    // centroid coordinates
+    float D[2] = {(b*cosf(gamm)+a)/3, b*sinf(gamm)};
+    
+    // moment arm of wheel force to centroid
+    float Da = fabsf(D[0]-length);
+    float Db = fabsf((Wb2[1]-Wb[1])*D[0] - (Wb2[0]-Wb[0])*D[1] + Wb2[0]*Wb[1] - Wb2[1]*Wb[0]) / sqrtf(powf(Wb2[1]-Wb[1],2) + powf(Wb2[0]-Wb[0],2));
+    float Dc = fabsf((Wc2[1]-Wc[1])*D[0] - (Wc2[0]-Wc[0])*D[1] + Wc2[0]*Wc[1] - Wc2[1]*Wc[0]) / sqrtf(powf(Wc2[1]-Wc[1],2) + powf(Wc2[0]-Wc[0],2));
+    
+    float Sc = (Mo-Sa*Da)/(Db*cosf(PI/2-beta)/cosf(PI/2-gamm) + Dc);
+    float Sb = Sc*cosf(PI/2-beta)/cosf(PI/2-gamm);
+    
+    switch (edge) {
+        case 0:
+            MotRot_OUT(0,(int16_t)Sa*128);
+            MotRot_OUT(1,(int16_t)Sb*128);
+            MotRot_OUT(2,(int16_t)Sc*128);
+        case 1:
+            MotRot_OUT(0,Sb*128);
+            MotRot_OUT(1,Sc*128);
+            MotRot_OUT(2,Sa*128);
+        case 2:
+            MotRot_OUT(0,Sc*128);
+            MotRot_OUT(1,Sa*128);
+            MotRot_OUT(2,Sb*128);
+        default:
+            MotRot_OUT(0,Sa*128);
+            MotRot_OUT(1,Sb*128);
+            MotRot_OUT(2,Sc*128);
     }
 }

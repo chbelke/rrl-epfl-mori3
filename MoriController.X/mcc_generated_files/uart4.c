@@ -223,6 +223,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
     }
     
     IFS5bits.U4EIF = false;
+    LED_R = 0;
 }
 
 /**
