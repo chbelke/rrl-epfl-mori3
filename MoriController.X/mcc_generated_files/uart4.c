@@ -208,11 +208,11 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4RXInterrupt( void )
             uart4_obj.rxStatus.s.full = true;
             break;
         }
+        
+        Coms_ESP_Eval();
     }
 
     IFS5bits.U4RXIF = false;
-    
-    Coms_ESP_Eval();
 }
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
@@ -223,7 +223,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
     }
     
     IFS5bits.U4EIF = false;
-    LED_R = 0;
 }
 
 /**

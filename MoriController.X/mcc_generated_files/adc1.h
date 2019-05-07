@@ -13,11 +13,11 @@
   @Description
     This header file provides APIs for driver for ADC1.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB 	          :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB 	          :  MPLAB X v5.10
  */
 
 /*
@@ -83,7 +83,7 @@ typedef enum
     ADC1_AI_C =  0x18,
     ADC1_AI_B =  0x1C,
     ADC1_AI_A =  0x1D,
-        ADC1_CHANNEL_CTMU =  0x3E,
+        ADC1_CHANNEL_CTMU =  0x3e,
         ADC1_MAX_CHANNEL_COUNT = 4
     } ADC1_CHANNEL;
 
@@ -179,20 +179,20 @@ typedef enum
      */
 typedef enum 
 {
-    ADC1_SAMPLING_SOURCE_MANUAL  =  0x0,
-    ADC1_SAMPLING_SOURCE_PWM3  =  0x2,
-    ADC1_SAMPLING_SOURCE_PTGO13  =  0x4,
-    ADC1_SAMPLING_SOURCE_PTGO15  =  0x6,
-    ADC1_SAMPLING_SOURCE_PTGO12  =  0x3,
-    ADC1_SAMPLING_SOURCE_PTGO14  =  0x5,
-    ADC1_SAMPLING_SOURCE_AUTO  =  0x7,
-    ADC1_SAMPLING_SOURCE_PWM2  =  0x1,
     ADC1_SAMPLING_SOURCE_TMR3  =  0x2,
     ADC1_SAMPLING_SOURCE_PWM1  =  0x0,
-    ADC1_SAMPLING_SOURCE_TMR5  =  0x4,
-    ADC1_SAMPLING_SOURCE_PWM  =  0x3,
-    ADC1_SAMPLING_SOURCE_INT0  =  0x1,
+    ADC1_SAMPLING_SOURCE_MANUAL  =  0x0,
     ADC1_SAMPLING_SOURCE_CTMU  =  0x6,
+    ADC1_SAMPLING_SOURCE_TMR5  =  0x4,
+    ADC1_SAMPLING_SOURCE_PTGO15  =  0x6,
+    ADC1_SAMPLING_SOURCE_AUTO  =  0x7,
+    ADC1_SAMPLING_SOURCE_PTGO12  =  0x3,
+    ADC1_SAMPLING_SOURCE_PTGO13  =  0x4,
+    ADC1_SAMPLING_SOURCE_PWM2  =  0x1,
+    ADC1_SAMPLING_SOURCE_PWM  =  0x3,
+    ADC1_SAMPLING_SOURCE_PWM3  =  0x2,
+    ADC1_SAMPLING_SOURCE_INT0  =  0x1,
+    ADC1_SAMPLING_SOURCE_PTGO14  =  0x5,
 } ADC1_SAMPLING_SOURCE;
 
     /** ADC Conversion Channel Type Definition
@@ -288,6 +288,7 @@ inline static void ADC1_InterruptFlagClear(void)
 {
         IFS0bits.AD1IF = 0;
     }
+
     /**
       @Summary
         Enables interrupts.
@@ -308,10 +309,12 @@ inline static void ADC1_InterruptFlagClear(void)
         Refer to ADC1_Initialize() for an example
 
      */
+
 inline static void ADC1_InterruptEnable(void)
 {  
         IEC0bits.AD1IE = 1;
     }
+
     /**
       @Summary
         Disables interrupts
@@ -337,6 +340,7 @@ inline static void ADC1_InterruptDisable(void)
 {
         IEC0bits.AD1IE = 0;
     }
+
     /**
       @Summary
         Starts sampling manually.
@@ -378,6 +382,7 @@ inline static void ADC1_SamplingStart(void)
 {
         AD1CON1bits.SAMP = 1;
     }
+
     /**
       @Summary
         Stops sampling manually.
@@ -419,6 +424,7 @@ inline static void ADC1_SamplingStop(void)
 {
         AD1CON1bits.SAMP = 0;
     }
+
     /**
       @Summary
         Gets the buffer loaded with conversion results.
@@ -487,6 +493,7 @@ inline static uint16_t ADC1_Channel0ConversionResultGet(void)
 {
         return ADC1BUF0;
     }
+
     /**
       @Summary
         Returns the ADC1 conversion value from Channel 1.
@@ -516,6 +523,7 @@ inline static uint16_t ADC1_Channel1ConversionResultGet(void)
 {
         return ADC1BUF1;
     }
+
     /**
       @Summary
         Returns the ADC1 conversion value from Channel 2.
@@ -575,6 +583,7 @@ inline static uint16_t ADC1_Channel3ConversionResultGet(void)
 {
         return ADC1BUF3;
     }
+
     /**
       @Summary
         Returns true when the conversion is completed
@@ -629,6 +638,7 @@ inline static void ADC1_ChannelSelectSet( ADC1_CHANNEL channel )
 {
         AD1CHS0bits.CH0SA = channel;
     }
+
     /**
       @Summary
         Returns the channel selected for conversion
@@ -655,6 +665,7 @@ inline static uint16_t ADC1_ChannelSelectGet( void )
 {
         return AD1CHS0bits.CH0SA ;
     }
+
     /**
       @Summary
         Allows selection of a data format type for conversion
@@ -680,6 +691,7 @@ inline static void ADC1_FormatDataSet( ADC1_FORM_TYPE form )
 {
         AD1CON1bits.FORM = form;
     }
+
     /**
       @Summary
         Allows selection of a resolution mode for conversion
@@ -705,6 +717,7 @@ inline static void ADC1_ResolutionModeSet( ADC1_RESOLUTION_TYPE resolution )
 {
         AD1CON1bits.AD12B = resolution;
     }
+
     /**
       @Summary
         Allows simultaneous sampling to be enabled manually
@@ -731,6 +744,7 @@ inline static void ADC1_SimultaneousSamplingEnable(void)
 {
         AD1CON1bits.SIMSAM = 1;
     }
+
     /**
       @Summary
         Allows simultaneous sampling to be disabled manually
@@ -756,6 +770,7 @@ inline static void ADC1_SimultaneousSamplingDisble(void)
 {
         AD1CON1bits.SIMSAM = 0;
     }
+
     /**
     @Summary
         Allows sutomatic sampling to be enabled manually
@@ -781,6 +796,7 @@ inline static void ADC1_AutomaticSamplingEnable(void)
 {
         AD1CON1bits.ASAM = 1;
     }
+
     /**
       @Summary
         Allows automatic sampling to be disabled manually
@@ -806,6 +822,7 @@ inline static void ADC1_AutomaticSamplingDisable(void)
 {
         AD1CON1bits.ASAM = 0;
     }
+
     /**
       @Summary
         Allows conversion clock prescaler value to be set
@@ -832,6 +849,7 @@ inline static void ADC1_ConversionClockPrescalerSet(uint8_t prescaler)
 {
         AD1CON3bits.ADCS = prescaler - 1;
     }
+
     /**
       @Summary
         Allows module to be enabled manually
@@ -856,6 +874,7 @@ inline static void ADC1_Enable(void)
 {
         AD1CON1bits.ADON = 1;
     }
+
     /**
       @Summary
         Allows module to be disabled manually
@@ -907,6 +926,7 @@ inline static void ADC1_Positive123ChannelSelect( ADC1_POS_123_CHANNEL channel )
 {
         AD1CHS123 = (AD1CHS123 & 0xFF06) | channel;
     }
+
     /**
       @Summary
         Allows selection of a negative 123 channel for conversion
@@ -933,6 +953,7 @@ inline static void ADC1_Negative123ChannelSelect( ADC1_NEG_123_CHANNEL channel )
 {
         AD1CHS123bits.CH123NA = channel;
     }
+
     /**
       @Summary
         Allows selection of conversion channels
@@ -959,6 +980,7 @@ inline static void ADC1_ConversionChannelsSet( ADC1_CONVERSION_CHANNELS_TYPE cha
 {
         AD1CON2bits.CHPS = channel;
     }
+
     /**
       @Summary
         Allows selection of a priority for interrupt
@@ -985,8 +1007,27 @@ inline static void ADC1_InterruptPrioritySet( uint16_t priorityValue )
 {
         _AD1IP = 0x7 & priorityValue;
     }
+
     /**
       @Summary
+    Callback for ADC1.
+
+  @Description
+    This routine is callback for ADC1
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to ADC1_Initialize(); for an example
+*/
+void ADC1_CallBack(void);
+
+/**
+  @Summary
         Polled implementation
 
       @Description
@@ -1009,12 +1050,9 @@ inline static void ADC1_InterruptPrioritySet( uint16_t priorityValue )
 void ADC1_Tasks(void);
 
 
-
     // CHB
     void ADC1_Update (void);
     uint16_t ADC1_Return (uint8_t);
-
-
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

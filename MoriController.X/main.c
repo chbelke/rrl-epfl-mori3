@@ -71,9 +71,9 @@ int main() {
     TLC59208_Write();
 
     Flg_LiveAngle = false; // rotary PID output off
-    DAC5574_Write(0, 128);
-    DAC5574_Write(1, 128);
-    DAC5574_Write(2, 128);
+    DAC5574_Write(0, 255);
+    DAC5574_Write(1, 255);
+    DAC5574_Write(2, 255);
 
     //    Variables for example 1:
     /*//    uint8_t uart_read = 0;

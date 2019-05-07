@@ -59,8 +59,6 @@ void MotRot_PID(uint8_t edge, float current, float desired){
     
     // update motor control output
     MotRot_OUT(edge, (int16_t)outf);
-    
-    UART4_Write((int8_t)(outf));
 }
 
 /* ******************** ROTARY MOTOR CURRENT ******************************** */
