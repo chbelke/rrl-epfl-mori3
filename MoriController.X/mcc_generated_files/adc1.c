@@ -47,10 +47,10 @@
   Section: Included Files
 */
 
+#include <xc.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <xc.h>
 #include <libpic30.h>
 #include "adc1.h"
 

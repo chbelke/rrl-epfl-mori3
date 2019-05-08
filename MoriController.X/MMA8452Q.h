@@ -13,7 +13,6 @@
 
 void MMA8452Q_Setup(void);
 void MMA8452Q_Read(void);
-
 uint16_t ACC_Get(uint8_t);
 
 #endif	/* MMA8452Q_H */

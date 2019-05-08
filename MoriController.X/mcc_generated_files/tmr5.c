@@ -50,12 +50,9 @@
 #include <xc.h>
 #include "tmr5.h"
 #include "uart4.h"
-#include "../define.h"
 #include "adc1.h"
+#include "../define.h"
 #include "../MotLin.h"
-
-uint8_t stepcount = 0;
-uint8_t casecount = 0;
 
 /**
   Section: Data Type Definitions
@@ -157,55 +154,13 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
     
-    stepcount++;
-//    if (stepcount >= 16){
-//        stepcount = 0;
-//        switch (casecount){
-//            case 0:
-//                MotLin_Set(0,200);
-//                MotLin_Set(1,200);
-//                MotLin_Set(2,200);
-//                casecount++;
-//                break;
-//            case 1:
-//                MotLin_Set(0,900);
-//                MotLin_Set(1,200);
-//                MotLin_Set(2,200);
-//                casecount++;
-//                break;
-//            case 2:
-//                MotLin_Set(0,900);
-//                MotLin_Set(1,900);
-//                MotLin_Set(2,200);
-//                casecount++;
-//                break;
-//            case 3:
-//                MotLin_Set(0,900);
-//                MotLin_Set(1,900);
-//                MotLin_Set(2,900);
-//                casecount++;
-//                break;
-//            case 4:
-//                MotLin_Set(0,200);
-//                MotLin_Set(1,900);
-//                MotLin_Set(2,900);
-//                casecount++;
-//                break;
-//            case 5:
-//                MotLin_Set(0,200);
-//                MotLin_Set(1,200);
-//                MotLin_Set(2,900);
-//                casecount = 0;
-//                break;
-//        }
-//    }
-    
     // BLAST STATUS TO ESP
-    UART4_Write(ESP_Beg);
-    UART4_Write16(ADC1_Return(0));
-    UART4_Write16(ADC1_Return(1));
-    UART4_Write16(ADC1_Return(2));
-    UART4_Write(ESP_End);
+//    UART4_Write(ESP_Beg);
+//    UART4_Write16(ADC1_Return(0));
+//    UART4_Write16(ADC1_Return(1));
+//    UART4_Write16(ADC1_Return(2));
+//    UART4_Write(ESP_End);
+ 
 }
 
 void TMR5_Start( void )

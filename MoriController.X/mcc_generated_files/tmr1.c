@@ -48,13 +48,13 @@
 */
 
 #include <xc.h>
+#include "adc1.h"
 #include "tmr1.h"
 #include "../define.h"
 #include "../MotRot.h"
 #include "../AS5048B.h"
 #include "../TLC59208.h"
 #include "../MMA8452Q.h"
-#include "adc1.h"
 
 /**
   Section: Data Type Definitions
