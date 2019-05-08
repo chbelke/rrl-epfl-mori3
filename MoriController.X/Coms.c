@@ -1,23 +1,22 @@
 #include "Coms.h"
 #include "define.h"
-#include "mcc_generated_files/uart4.h"
 #include "MotLin.h"
 #include "MotRot.h"
 #include "math.h"
 #include "dsp.h"
+#include "mcc_generated_files/uart4.h"
 
-uint8_t EspInCase = 0; // Switch case variable
-uint8_t EspInAlloc = 0; // Incoming allocation byte
-uint8_t EspInBits = 0; // Bit count in allocation byte
-uint8_t EspInBytes = 0; // Incoming byte count
-uint16_t MotLinTemp[3] = {0, 0, 0}; // Linear motor set value (temporary)
-uint16_t MotRotTemp[3] = {0, 0, 0}; // Rotary motor set value (temporary)
-int8_t MotLinDrivePWM[3] = {0, 0, 0}; // Manual drive mode PWM values by edge
-uint8_t MotLinDriveSpd = 0;
-int8_t MotLinDriveCrv = 0;
-#define length 68.15
+uint8_t EspInCase = 0; // switch case variable
+uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
+uint8_t EspInBits = 0; // bit count in allocation byte
+uint8_t EspInByts = 0; // incoming byte count
+uint16_t MotLinTemp[3] = {0, 0, 0}; // linear motor extension value (temporary)
+uint16_t MotRotTemp[3] = {0, 0, 0}; // rotary motor angle value (temporary)
+int8_t DrivePWM[3] = {0, 0, 0}; // manual drive mode PWM values by edge
+uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
+#define WHEEL 68.15 // wheel distance from vertex
 
-/* EspInAlloc: 
+/* EspInAloc: 
  * 0bxx000000, where xx = indicator
  * 00 = extension and angular values
  * - 0b00xxxxxx in order: linear indicators 1,2,3, rotary indicators 1,2,3
@@ -40,7 +39,7 @@ int8_t MotLinDriveCrv = 0;
  * incoming data is valid, it triggers the appropriate function to implement
  * the commands received.
  * Fall-through is utilised to allocate the commands correctly according to
- * EspInAlloc.
+ * EspInAloc.
  */
 
 /* ******************** ESP COMMAND EVALUATION ****************************** */
@@ -50,126 +49,127 @@ void Coms_ESP_Eval() {
         case 0: // CHECK START BYTE
             if (EspIn == ESP_Beg) {
                 EspInCase = 1;
-                EspInBytes = 1;
+                EspInByts = 1;
             }
             break;
 
         case 1: // INPUT ALLOCATION *******************************************
-            EspInAlloc = EspIn;
+            EspInAloc = EspIn;
             // if xx == 00, count bits 
-            if (((EspInAlloc >> 6) & 0x03) == 0) { // ANGLE & EXTENSION INPUT
+            if (((EspInAloc >> 6) & 0x03) == 0) { // ANGLE & EXTENSION INPUT
                 EspInCase = 2;
-                // Brian Kernighan: http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetNaive
-                uint8_t EspInAllocTemp = EspInAlloc;
-                for (EspInBits = 0; EspInAllocTemp; EspInBits++) {
-                    EspInAllocTemp &= EspInAllocTemp - 1; // clear the LSB set
+                // Brian Kernighan: http://graphics.stanford.edu ...
+                //  ... /~seander/bithacks.html#CountBitsSetNaive
+                uint8_t EspInAlocTemp = EspInAloc;
+                for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
+                    EspInAlocTemp &= EspInAlocTemp - 1; // clear the LSB set
                 }
-            } else if (((EspInAlloc >> 6) & 0x03) == 1) { // DRIVE INPUT
-                if (EspInAlloc & 0b00100000) { // automatic drive mode
+            } else if (((EspInAloc >> 6) & 0x03) == 1) { // DRIVE INPUT
+                if (EspInAloc & 0b00100000) { // automatic drive mode
                     EspInCase = 19;
                 } else { // manual drive mode
                     EspInCase = 15;
                     // only last three bits relevant when counting rec. bytes
-                    uint8_t EspInAllocTemp = (EspInAlloc & 0b00000111);
-                    for (EspInBits = 0; EspInAllocTemp; EspInBits++) {
-                        EspInAllocTemp &= EspInAllocTemp - 1; // clear the LSB set
+                    uint8_t EspInAlocTemp = (EspInAloc & 0b00000111);
+                    for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
+                        EspInAlocTemp &= EspInAlocTemp - 1; // clear the LSB set
                     }
                 }
             }
-            EspInBytes = EspInBytes + 1;
+            EspInByts = EspInByts + 1;
             break;
 
         case 2: // LINEAR MOTOR INPUTS ****************************************
             /* cases 2 to 7, two bytes per motor input */
-            if (EspInAlloc & 0b00100000) {
+            if (EspInAloc & 0b00100000) {
                 MotLinTemp[0] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 3;
                 break;
             }
         case 3:
-            if (EspInAlloc & 0b00100000) {
+            if (EspInAloc & 0b00100000) {
                 MotLinTemp[0] = MotLinTemp[0] | (uint16_t) EspIn;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 4;
                 break;
             }
         case 4:
-            if (EspInAlloc & 0b00010000) {
+            if (EspInAloc & 0b00010000) {
                 MotLinTemp[1] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 5;
                 break;
             }
         case 5:
-            if (EspInAlloc & 0b00010000) {
+            if (EspInAloc & 0b00010000) {
                 MotLinTemp[1] = MotLinTemp[1] | (uint16_t) EspIn;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 6;
                 break;
             }
         case 6:
-            if (EspInAlloc & 0b00001000) {
+            if (EspInAloc & 0b00001000) {
                 MotLinTemp[2] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 7;
                 break;
             }
         case 7:
-            if (EspInAlloc & 0b00001000) {
+            if (EspInAloc & 0b00001000) {
                 MotLinTemp[2] = MotLinTemp[2] | (uint16_t) EspIn;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 8;
                 break;
             }
 
         case 8: // ROTARY MOTOR INPUTS ****************************************
             /* cases 8 to 13, two bytes per motor input */
-            if (EspInAlloc & 0b00000100) {
+            if (EspInAloc & 0b00000100) {
                 MotRotTemp[0] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 9;
                 break;
             }
         case 9:
-            if (EspInAlloc & 0b00000100) {
+            if (EspInAloc & 0b00000100) {
                 MotRotTemp[0] = MotRotTemp[0] | (uint16_t) EspIn;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 10;
                 break;
             }
         case 10:
-            if (EspInAlloc & 0b00000010) {
+            if (EspInAloc & 0b00000010) {
                 MotRotTemp[1] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 11;
                 break;
             }
         case 11:
-            if (EspInAlloc & 0b00000010) {
+            if (EspInAloc & 0b00000010) {
                 MotRotTemp[1] = MotRotTemp[1] | (uint16_t) EspIn;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 12;
                 break;
             }
         case 12:
-            if (EspInAlloc & 0b00000001) {
+            if (EspInAloc & 0b00000001) {
                 MotRotTemp[2] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 13;
                 break;
             }
         case 13:
-            if (EspInAlloc & 0b00000001) {
+            if (EspInAloc & 0b00000001) {
                 MotRotTemp[2] = MotRotTemp[2] | (uint16_t) EspIn;
-                EspInBytes = EspInBytes + 1;
+                EspInByts = EspInByts + 1;
                 EspInCase = 14;
                 break;
             }
 
-        case 14: // VERIFY MOTOR INPUTS ***************************************
+        case 14: // verify motor inputs
             if (EspIn == ESP_End) {
-                if (EspInBytes == (2 + EspInBits * 2)) {
+                if (EspInByts == (2 + EspInBits * 2)) {
                     Coms_ESP_SetMots();
                 } else {
                     // data lost
@@ -179,33 +179,33 @@ void Coms_ESP_Eval() {
             break;
 
         case 15: // MANUAL DRIVE MODE *****************************************
-            if (EspInAlloc & 0b00000100) {
-                MotLinDrivePWM[0] = EspIn;
-                EspInBytes = EspInBytes + 1;
+            if (EspInAloc & 0b00000100) {
+                DrivePWM[0] = EspIn;
+                EspInByts = EspInByts + 1;
                 EspInCase = 16;
                 break;
             }
         case 16:
-            if (EspInAlloc & 0b00000010) {
-                MotLinDrivePWM[1] = EspIn;
-                EspInBytes = EspInBytes + 1;
+            if (EspInAloc & 0b00000010) {
+                DrivePWM[1] = EspIn;
+                EspInByts = EspInByts + 1;
                 EspInCase = 17;
                 break;
             }
         case 17:
-            if (EspInAlloc & 0b00000001) {
-                MotLinDrivePWM[2] = EspIn;
-                EspInBytes = EspInBytes + 1;
+            if (EspInAloc & 0b00000001) {
+                DrivePWM[2] = EspIn;
+                EspInByts = EspInByts + 1;
                 EspInCase = 18;
                 break;
             }
-        case 18:
+        case 18: // verify drive inputs
             if (EspIn == ESP_End) {
-                if (EspInBytes == (2 + EspInBits)) {
+                if (EspInByts == (2 + EspInBits)) {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
-                        if ((EspInAlloc >> (2-m)) & 0b00000001){
-                            MotRot_OUT(m, MotLinDrivePWM[m]*8);
+                        if ((EspInAloc >> (2-m)) & 0b00000001){
+                            MotRot_OUT(m, DrivePWM[m]*8);
                         }
                     }
                 } else {
@@ -216,21 +216,22 @@ void Coms_ESP_Eval() {
             break;
             
         case 19: // AUTOMATIC DRIVE MODE **************************************
-            MotLinDriveSpd = EspIn;
-            EspInBytes = EspInBytes + 1;
+            DriveSpd = EspIn;
+            EspInByts = EspInByts + 1;
             EspInCase = 20;
             break;
         
         case 20:
-            MotLinDriveCrv = EspIn;
-            EspInBytes = EspInBytes + 1;
+            DriveCrv = EspIn;
+            EspInByts = EspInByts + 1;
             EspInCase = 21;
             break;
             
-        case 21:
+        case 21: // verify drive inputs
             if (EspIn == ESP_End) {
-                if (EspInBytes == 4) {
-                    Coms_ESP_Drive(MotLinDriveSpd, MotLinDriveCrv, ((EspInAlloc & 0b00011000)>>3), ((EspInAlloc & 0b00000100)>>2));
+                if (EspInByts == 4) {
+                    Coms_ESP_Drive(DriveSpd, DriveCrv, 
+                            ((EspInAloc & 0x18)>>3), ((EspInAloc & 0x04)>>2));
                 } else {
                     // data lost
                 }
@@ -250,23 +251,24 @@ void Coms_ESP_SetMots() {
 
     // Set linear motors
     for (j = 1; j <= 3; j++) {
-        if ((EspInAlloc >> (5 - (j - 1)))) {
+        if ((EspInAloc >> (5 - (j - 1)))) {
             MotLin_Set(j - 1, MotLinTemp[j - 1]);
         }
     }
 
     // Set rotary motors (not yet implemented)
     for (k = 1; k == 3; k++) {
-        if ((EspInAlloc >> (2 - (k - 1))) & 0x01) {
+        if ((EspInAloc >> (2 - (k - 1))) & 0x01) {
             //            MotLin_Set(k-1,MotLinTemp[k]);
         }
     }
 }
 
-void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direction) {
-    float Mo = curve*20; // from matlab moments up to +-2160 relative to 100% speed
-    float Sa = speed; 
-    if (!direction) { // inwards or outwards
+/* ******************** ESP COMMAND TO DRIVE ******************************** */
+void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
+    float Mo = curve*20;
+    float Sa = speed;
+    if (!direc) { // inwards or outwards
         Sa = -1*Sa;
     }
     
@@ -294,17 +296,13 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direction
             break;
     }
     
-    // vertex angles
-    // float alpha = acosf((b*b + c*c - a*a)/(2*b*c));
+    // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
     float beta = acosf((a*a + c*c - b*b)/(2*a*c));
     float gamm = acosf((a*a + b*b - c*c)/(2*a*b));
     
-    
-    // wheel coordinates (for a: [length, 0])
-    float Wb[2] = {(b-length)*cosf(gamm), (b-length)*sinf(gamm)};
-    float Wc[2] = {a-length*cosf(beta), length*sinf(beta)};
-    UART4_Write((int8_t)Wb[0]);
-    UART4_Write((int8_t)Wb[1]);
+    // wheel coordinates (for a: [WHEEL, 0])
+    float Wb[2] = {(b-WHEEL)*cosf(gamm), (b-WHEEL)*sinf(gamm)};
+    float Wc[2] = {a-WHEEL*cosf(beta), WHEEL*sinf(beta)};
     
     // second point in wheel direction
     float Wb2[2] = {Wb[0]-cosf(PI/2-gamm), Wb[1]+sinf(PI/2-gamm)};
@@ -314,18 +312,19 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direction
     float D[2] = {(b*cosf(gamm)+a)/3, b*sinf(gamm)};
     
     // moment arm of wheel force to centroid
-    float Da = fabsf(D[0]-length);
-    float Db = fabsf((Wb2[1]-Wb[1])*D[0] - (Wb2[0]-Wb[0])*D[1] + Wb2[0]*Wb[1] - Wb2[1]*Wb[0]) / sqrtf(powf(Wb2[1]-Wb[1],2) + powf(Wb2[0]-Wb[0],2));
-    float Dc = fabsf((Wc2[1]-Wc[1])*D[0] - (Wc2[0]-Wc[0])*D[1] + Wc2[0]*Wc[1] - Wc2[1]*Wc[0]) / sqrtf(powf(Wc2[1]-Wc[1],2) + powf(Wc2[0]-Wc[0],2));
+    float Da = fabsf(D[0]-WHEEL);
+    float Db = fabsf((Wb2[1]-Wb[1])*D[0]
+        - (Wb2[0]-Wb[0])*D[1] + Wb2[0]*Wb[1] - Wb2[1]*Wb[0]) 
+        / sqrtf(powf(Wb2[1]-Wb[1],2) + powf(Wb2[0]-Wb[0],2));
+    float Dc = fabsf((Wc2[1]-Wc[1])*D[0]
+        - (Wc2[0]-Wc[0])*D[1] + Wc2[0]*Wc[1] - Wc2[1]*Wc[0])
+        / sqrtf(powf(Wc2[1]-Wc[1],2) + powf(Wc2[0]-Wc[0],2));
     
+    // wheel speeds
     float Sc = (Mo-Sa*Da)/(Db*cosf(PI/2-beta)/cosf(PI/2-gamm) + Dc);
     float Sb = Sc*cosf(PI/2-beta)/cosf(PI/2-gamm);
     
-//    UART4_Write(edge);
-//    UART4_Write((int8_t)Sa);
-//    UART4_Write((int8_t)Sb);
-//    UART4_Write((int8_t)Sc);
-    
+    // output depending on driving edge
     switch (edge) {
         case 0:
             MotRot_OUT(0,Sa*10);
@@ -333,14 +332,14 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direction
             MotRot_OUT(2,Sc*10);
             break;
         case 1:
-            MotRot_OUT(0,Sb*10);
-            MotRot_OUT(1,Sc*10);
-            MotRot_OUT(2,Sa*10);
-            break;
-        case 2:
-            MotRot_OUT(0,Sc*10);
             MotRot_OUT(1,Sa*10);
             MotRot_OUT(2,Sb*10);
+            MotRot_OUT(0,Sc*10);
+            break;
+        case 2:
+            MotRot_OUT(2,Sa*10);
+            MotRot_OUT(0,Sb*10);
+            MotRot_OUT(1,Sc*10);
             break;
         default:
             MotRot_OUT(0,Sa*10);

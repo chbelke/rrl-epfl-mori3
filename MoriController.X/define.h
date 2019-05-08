@@ -16,7 +16,10 @@
 #include <stdbool.h>
 #include <libpic30.h>
 
-static volatile bool Flg_LiveAngle;
+static volatile bool Flg_LiveAngle = false;
+static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
+static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
+
 
 /* ******************** NOTES *********************************************** */
 /* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
@@ -33,7 +36,7 @@ static volatile bool Flg_LiveAngle;
 #define LED_Y LATBbits.LATB1        // orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
 
-/* ******************** EPS COMMUNICATION************************************ */
+/* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
 
@@ -125,18 +128,6 @@ static volatile bool Flg_LiveAngle;
 #define TLC59208_LEDOUT0 0xAA // LEDOUT0 all outputs PWM controlled
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
-
-
-
-
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* DEFINE_H */
 

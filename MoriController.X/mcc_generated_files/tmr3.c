@@ -50,8 +50,8 @@
 #include <xc.h>
 #include "tmr3.h"
 #include "adc1.h"
-#include "../MotLin.h"
 #include "uart4.h"
+#include "../MotLin.h"
 #include "../define.h"
 #include "../MotRot.h"
 #include "../AS5048B.h"
@@ -163,22 +163,6 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
     // Add your custom callback code here
     // read analog pot inputs
     ADC1_Update();
-    
-//    stepcount++;
-//    if (stepcount >= 200){
-//        if (flag == 0){
-//            desired = desired + 100;
-//            if (desired >= 800){
-//                flag = 1;
-//            }
-//        } else if (flag == 1){
-//            desired = desired - 100;
-//            if (desired <= 300){
-//                flag = 0;
-//            }
-//        }
-//        stepcount = 0;
-//    }
     
     MotLin_PID(0, ADC1_Return(0), MotLin_Get(0));
     MotLin_PID(1, ADC1_Return(1), MotLin_Get(1));

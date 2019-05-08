@@ -45,19 +45,19 @@
 /**
   Section: Included Files
 */
-#include "mcc_generated_files/system.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "define.h"
-#include "mcc_generated_files/mcc.h"
 #include "TLC59208.h"
 #include "MMA8452Q.h"
 #include "DAC5574.h"
 #include "MotRot.h"
 #include "MotLin.h"
 #include "AS5048B.h"
+#include "mcc_generated_files/system.h"
+#include "mcc_generated_files/mcc.h"
 
-int main() {
+int main (void) {
     SYSTEM_Initialize(); // MCC & User inits
 
     //    MotRot_LIM(0,255);          // set current limit of edge 0 to max
@@ -71,35 +71,13 @@ int main() {
     TLC59208_Write();
 
     Flg_LiveAngle = false; // rotary PID output off
-    DAC5574_Write(0, 255);
-    DAC5574_Write(1, 255);
-    DAC5574_Write(2, 255);
 
-    //    Variables for example 1:
-    /*//    uint8_t uart_read = 0;
-    //    uint8_t led_on = 10;
-    //    uint8_t led_off = 5;*/
     while (1) {
-
-        //      example 1: UART reading from WiFi (from Alex)
-        /*//        if (UART4_StatusGet() & UART4_RX_DATA_AVAILABLE) {
-        //            uart_read = UART4_Read();
-        //        } else {
-        //            uart_read = 0;
-        //        }
-        //        
-        //        if (uart_read == led_on) {
-        //            LED_B = 1;
-        //        } else if (uart_read == led_off) {
-        //            LED_B = 0;
-        //        }*/
-
-
         __delay_ms(100);
     }
-    return 1;
+    
+    return 0;
 }
 /**
  End of File
  */
-
