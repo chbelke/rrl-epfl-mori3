@@ -9,17 +9,9 @@
 #define	MOTLIN_H
 
 void MotLin_OUT(uint8_t, int16_t);
-    
 void MotLin_PID(uint8_t, int16_t, int16_t);
-
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
-#ifdef	__cplusplus
-}
-#endif
+uint16_t MotLin_Get(uint8_t);
+void MotLin_Set(uint8_t , uint16_t );
 
 #endif	/* MOTLIN_H */
 

@@ -1,7 +1,7 @@
 #include "TLC59208.h"
+#include <xc.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <xc.h>
 #include <libpic30.h>
 #include "define.h"
 

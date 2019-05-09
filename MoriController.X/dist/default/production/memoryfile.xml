@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/production/CHB_MoriV3_05.X.production.elf">
+  <executable name="dist/default/production/MoriController.X.production.elf">
     <memory name="data">
       <units>bytes</units>
       <length>49152</length>
-      <used>356</used>
-      <free>48796</free>
+      <used>512</used>
+      <free>48640</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>524514</length>
-      <used>10239</used>
-      <free>514275</free>
+      <used>17304</used>
+      <free>507210</free>
     </memory>
   </executable>
 </project>

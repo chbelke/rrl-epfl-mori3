@@ -9,14 +9,22 @@
 #ifndef DEFINE_H
 #define	DEFINE_H
 
-#define FCY 3686400UL
+#define FCY 3686400UL               // cycle frequency
 
 #include <xc.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <libpic30.h>
 
-static volatile bool Flg_LiveAngle;
+static volatile bool Flg_LiveAngle = false;
+static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
+static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
+
+
+/* ******************** NOTES *********************************************** */
+/* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
+ * is as follows: ((1/0.4 - 0.120)*3.6864)-2 = 6.77
+ * FRM: http://ww1.microchip.com/downloads/en/DeviceDoc/70000195g.pdf*/
 
 
 /* ******************** MODE SELECTION ************************************** */
@@ -24,18 +32,22 @@ static volatile bool Flg_LiveAngle;
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
-#define LED_B LATBbits.LATB0      // Blue LED
-#define LED_O LATBbits.LATB1      // Orange LED
+#define LED_R LATBbits.LATB0        // blue LED - 1 is off
+#define LED_Y LATBbits.LATB1        // orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
+
+/* ******************** ESP COMMUNICATION *********************************** */
+#define ESP_Beg 13                  // start byte
+#define ESP_End 14                  // end byte
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
-#define ROT_PWM_DutyReg_A SDC5      // Generator 5, Secondary
-#define ROT_PWM_DutyReg_B PDC5      // Generator 5, Primary
-#define ROT_PWM_DutyReg_C SDC4      // Generator 4, Secondary
-#define LIN_PWM_DutyReg_A SDC3      // Generator 3, Secondary
-#define LIN_PWM_DutyReg_B SDC2      // Generator 2, Secondary
-#define LIN_PWM_DutyReg_C SDC1      // Generator 1, Secondary
+#define ROT_PWM_DutyReg_A SDC5      // generator 5, secondary
+#define ROT_PWM_DutyReg_B PDC5      // generator 5, primary
+#define ROT_PWM_DutyReg_C SDC4      // generator 4, secondary
+#define LIN_PWM_DutyReg_A SDC3      // generator 3, secondary
+#define LIN_PWM_DutyReg_B SDC2      // generator 2, secondary
+#define LIN_PWM_DutyReg_C SDC1      // generator 1, secondary
 
 // Duty cycle selector
 #define ROT_PWM_A 1
@@ -58,12 +70,14 @@ static volatile bool Flg_LiveAngle;
 #define LIN_DIR_B LATBbits.LATB12
 #define LIN_DIR_C LATBbits.LATB14
 
-#define MotLin_MIN_A 72             // 62 + 10
-#define MotLin_MAX_A 970            // 980 -10
-#define MotLin_MIN_B 200
-#define MotLin_MAX_B 800
-#define MotLin_MIN_C 200
-#define MotLin_MAX_C 800
+#define MotLin_MIN_A 108            // min pot value A
+#define MotLin_MAX_A 1022           // max pot value A
+#define MotLin_MIN_B 108            // min pot value B
+#define MotLin_MAX_B 1022           // max pot value B
+#define MotLin_MIN_C 108            // min pot value C
+#define MotLin_MAX_C 1022           // max pot value C
+#define MotLin_SlowRegion 90        // slow region near min and max
+#define MotLin_SlowFactor 2         // linear slow down factor in slow region
 
 #define MotLin_PID_de 10            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
@@ -78,14 +92,13 @@ static volatile bool Flg_LiveAngle;
 #define ROT_DIR_A LATCbits.LATC6
 #define ROT_DIR_B LATCbits.LATC7
 #define ROT_DIR_C LATAbits.LATA10
-    
-#define MotRot_AngleRange 180       // 
 
-#define MotRot_PID_de 0.2           // acceptable error band ~ *0.01mm
-#define MotRot_PID_dt 0.1          // timer period
+#define MotRot_AngleRange 180       // overall range (in degrees)
+
+#define MotRot_PID_dt 0.1           // timer period (currently not used)
 #define MotRot_PID_kP 150           // proportional component
-#define MotRot_PID_kI 10           // integral component
-#define MotRot_PID_kD 0           // derivative component
+#define MotRot_PID_kI 10            // integral component
+#define MotRot_PID_kD 0             // derivative component
 
 #define MotRot_PID_Imax 20
 #define MotRot_PID_Max 1000
@@ -101,8 +114,8 @@ static volatile bool Flg_LiveAngle;
 
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
-#define MMA8452Q_CTRL_REG1_ADDR 0x2A //Address of control register to be modified at Setup
-#define MMA8452Q_CTRL_REG1 0x01 //Value control register must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
+#define MMA8452Q_CTRL_REG1 0x01 //Value ctrl reg must be modified to at Setup
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
 
 /* ******************** LED DRIVER TLC59208 ****************************** */
@@ -115,18 +128,6 @@ static volatile bool Flg_LiveAngle;
 #define TLC59208_LEDOUT0 0xAA // LEDOUT0 all outputs PWM controlled
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
-
-
-
-
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* DEFINE_H */
 

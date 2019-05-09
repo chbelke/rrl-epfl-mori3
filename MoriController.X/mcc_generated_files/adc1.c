@@ -47,10 +47,10 @@
   Section: Included Files
 */
 
+#include <xc.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <xc.h>
 #include <libpic30.h>
 #include "adc1.h"
 
@@ -176,9 +176,9 @@ void ADC1_Update(void) {
     ADC1_Values[0] = (ADC1_ValuesA[0] + ADC1_ValuesA[1] + ADC1_ValuesA[2]
             + ADC1_ValuesA[3]) / 4;
     ADC1_Values[1] = (ADC1_ValuesB[0] + ADC1_ValuesB[1] + ADC1_ValuesB[2]
-            + ADC1_ValuesA[3]) / 4;
+            + ADC1_ValuesB[3]) / 4;
     ADC1_Values[2] = (ADC1_ValuesC[0] + ADC1_ValuesC[1] + ADC1_ValuesC[2]
-            + ADC1_ValuesA[3]) / 4;
+            + ADC1_ValuesC[3]) / 4;
 
     
     // Alternatively:

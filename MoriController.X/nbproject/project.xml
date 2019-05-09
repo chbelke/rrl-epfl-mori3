@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>CHB_MoriV3_05</name>
+            <name>MoriController</name>
             <creation-uuid>83950bb0-4d39-4a21-aae2-d91868b3ae28</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
