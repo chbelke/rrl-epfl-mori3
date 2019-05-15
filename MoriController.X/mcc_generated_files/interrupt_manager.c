@@ -14,11 +14,11 @@
   @Description:
     This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 /*
     (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -53,14 +53,14 @@
 void INTERRUPT_Initialize (void)
 {
     //    UERI: UART4 Error
-    //    Priority: 2
-        IPC21bits.U4EIP = 2;
+    //    Priority: 1
+        IPC21bits.U4EIP = 1;
     //    UTXI: UART4 Transmitter
-    //    Priority: 2
-        IPC22bits.U4TXIP = 2;
+    //    Priority: 1
+        IPC22bits.U4TXIP = 1;
     //    URXI: UART4 Receiver
-    //    Priority: 2
-        IPC22bits.U4RXIP = 2;
+    //    Priority: 1
+        IPC22bits.U4RXIP = 1;
     //    MICI: I2C1 Master Events
     //    Priority: 3
         IPC4bits.MI2C1IP = 3;
@@ -77,4 +77,3 @@ void INTERRUPT_Initialize (void)
     //    Priority: 2
         IPC0bits.T1IP = 2;
 }
-

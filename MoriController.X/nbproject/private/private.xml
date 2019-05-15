@@ -3,20 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/tmr1.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/tmr3.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/tmr5.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/main.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/uart4.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/Coms.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/pwm.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/MotLin.c</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/MotRot.h</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/i2c1.h</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/define.h</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/mcc_generated_files/uart4.h</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/Coms.h</file>
-            <file>file:/C:/Users/belke.INTRANET/MPLABXProjects/CHB_MoriV3_06.X/MotRot.c</file>
+            <file>file:/C:/Users/belke.INTRANET/Documents/GitHub/Joint-Utility-Mori-Program/MoriController.X/MotRot.c</file>
+            <file>file:/C:/Users/belke.INTRANET/Documents/GitHub/Joint-Utility-Mori-Program/MoriController.X/MotLin.c</file>
+            <file>file:/C:/Users/belke.INTRANET/Documents/GitHub/Joint-Utility-Mori-Program/MoriController.X/mcc_generated_files/pwm.c</file>
+            <file>file:/C:/Users/belke.INTRANET/Documents/GitHub/Joint-Utility-Mori-Program/MoriController.X/main.c</file>
+            <file>file:/C:/Users/belke.INTRANET/Documents/GitHub/Joint-Utility-Mori-Program/MoriController.X/Coms.c</file>
+            <file>file:/C:/Users/belke.INTRANET/Documents/GitHub/Joint-Utility-Mori-Program/MoriController.X/mcc_generated_files/i2c1.c</file>
         </group>
     </open-files>
 </project-private>
