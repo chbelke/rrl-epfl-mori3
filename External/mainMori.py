@@ -20,7 +20,7 @@ to their appropriate values.
 import serial, time
 import datetime
 import sys, select, os
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from termcolor import colored
 import tkinter as tk
 from threading import Thread

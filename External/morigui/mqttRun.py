@@ -26,7 +26,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import copy
 # from scipy.optimize import minimize, least_squares
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from termcolor import colored
 import threading
 
@@ -38,12 +38,14 @@ class MqttHost(threading.Thread):
       threading.Thread.__init__(self)
       self.clientName = "boss"
       self.mqttServer = "192.168.0.50";
+      # self.mqttServer = "localhost"
       self.mqttPort = 1883;
       self.Connected = False
       self.numberModules = 0
       self.macDict = {}
       self.idDict = {}
       self.macOrder = []
+      self.coTimeDict = {}
       self.data = []
       self.macCallTime = time.time()
       self.verCallTime = time.time()
@@ -74,17 +76,23 @@ class MqttHost(threading.Thread):
 
    # The callback for when a PUBLISH message is received from the server.
    def on_message(self, client, userdata, msg):
-      topic = msg.topic.rsplit('/')
+      topic = msg.topic.rsplit('/') #example: split esp/00215A97/pub into [esp, 00215A97, pub]
       if(topic[0]=="esp"):
-         if(topic[-1] != "pub"):
+         if(topic[-1] != "pub"): #index -1 is last index of the list
             return
-         # print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+
+         #print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+
+
          espNum = topic[1]
          msgld = msg.payload.decode('UTF-8')
          pyld = msgld.rsplit(' ')
          cmd = pyld[0]
+         #print(colored("Payload = ","green") + pyld[0])
 
          if(pyld[0] == 'DST:'):
+            #print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+
             macaddr = pyld[1][:-1]
             rssi = int(pyld[2])
             if(macaddr in self.macDict):  #check if we know other mac
@@ -104,9 +112,10 @@ class MqttHost(threading.Thread):
             mac = pyld[1].replace(":", "")
             mac = mac.lower()
             mac = mac[:1] + 'e' + mac[2:] #Hack
+            #print("New MAC = " + mac)
             if self.macDict.get(mac) is None:
                self.macDict[mac] = espNum
-               self.macOrder.append(mac)
+               #self.macOrder.append(mac)
                self.numberModules += 1
                self.idDict[espNum] = mac
                self.data.append([])
@@ -116,6 +125,8 @@ class MqttHost(threading.Thread):
                   self.data[-1] = [[] for _ in range(len(data[0]))]
 
          elif(pyld[0] == 'VER:'):
+            print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+
             espVer = float(pyld[1])
             if(espVer == self.version):
                print("ESP/{} Software up to date".format(espNum))
@@ -137,23 +148,43 @@ class MqttHost(threading.Thread):
          elif(pyld[0] == 'ERR:'):
             print(colored(msgld, 'red'))
 
-         elif(pyld[0] == 'INFO:'):   
-            print(colored(msgld, 'yellow'))         
+         elif(pyld[0] == 'INFO:'): 
+            print(colored(msgld, 'yellow'))   
+
+         elif(pyld[0] == 'ON:'):
+            msgTime = time.time()
+            #print("ESP " + espNum + " is connected")
+            mac = pyld[1].replace(":", "")
+            mac = mac.lower()
+            mac = mac[:1] + 'e' + mac[2:] #Hack
+            self.coTimeDict[mac] = msgTime
+            if not (self.macDict.get(mac) is None) and not (mac in self.macOrder): #Check if the ESP has been referenced and offline
+               print(colored("New ESP connected", "green"))
+               self.macOrder.append(mac)
 
    def publishGlobal(self, message):
       self.client.publish("esp/rec",message)
 
    def publishLocal(self, addr, message):
+      #print(addr)
       self.client.publish("esp/{}/rec".format(addr),message)
 
    def getNumberConnected(self):
+      #print(self.macOrder)
+      for i in range(len(self.macOrder)-1, -1, -1): #Go through the array  from top to bottom to avoid out ouf range errors
+         #print(colored("ESP ", "blue") + self.macOrder[i] + "last connexion time = " + colored(time.time() - self.coTimeDict.get(self.macOrder[i]), "blue") + " ago")
+         if time.time() - self.coTimeDict.get(self.macOrder[i]) > 3:
+            print(colored("ESP " + self.macOrder[i] + " lost", "red"))
+            del self.macOrder[i]
+      self.numberModules = len(self.macOrder)
+      #print(self.macOrder)
       return self.numberModules
 
    def getMoriIds(self):
       return self.macDict
 
    def getMoriOrder(self):
-      return self.macOrder      
+      return self.macOrder
 
    def run(self):
       startTime = time.time()
@@ -164,13 +195,15 @@ class MqttHost(threading.Thread):
       self.client.loop_start()       
       while not self.event.is_set():
          if time.time() - loopTime > 10:
+            
             loopTime = time.time()
             print("Time Elapsed: {:.3f}".format(loopTime-startTime))
             # self.client.publish("esp/rec","mac")
             print("")
+            print(colored("Referenced ESPs : ","yellow"))
             print(self.macDict)
-            print(self.macOrder)
-             # calcResults(args.fileName)
+            #print(self.macOrder)
+            # calcResults(args.fileName)
             print("")
          self.event.wait(0.5)
  
