@@ -48,8 +48,8 @@ class MqttHost(threading.Thread):
       self.coTimeDict = {}
       self.data = []
       self.macCallTime = time.time()
-      self.verCallTime = time.time()
-      self.verCalled = False
+      self.verCallTimeDict = {}
+      self.verCalledDict = {}
       self.stayAlive = True
       self.version = 0.50
       self.event = threading.Event()
@@ -126,8 +126,16 @@ class MqttHost(threading.Thread):
                   self.data[-1] = [[] for _ in range(len(data[0]))]
 
          elif(pyld[0] == 'VER:'):
-            if self.verCalled == False: #Check if the version has already been asked a short while ago (if it has: wait a bit)
-               self.verCallTime = time.time()
+            mac = pyld[1].replace(":", "")
+            mac = mac.lower()
+            mac = mac[:1] + 'e' + mac[2:] #Hack
+            if self.verCallTimeDict.get(mac) is None:
+               self.verCallTimeDict[mac] = time.time()
+               self.verCalledDict[mac] = False
+
+
+            if self.verCalledDict.get(mac) == False: #Check if the version has already been asked a short while ago (if it has: wait a bit)
+               self.verCallTimeDict[mac] = time.time()
 
                print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
 
@@ -149,10 +157,10 @@ class MqttHost(threading.Thread):
                   self.client.loop_stop()
                   sys.exit()
 
-               self.verCalled = True
+               self.verCalledDict[mac] = True
 
-            elif time.time() - self.verMsgTime > 3:
-               self.verCalled = False
+            elif time.time() - self.verCallTimeDict.get(mac) > 3:
+               self.verCalledDict[mac] = False
 
 
          elif(pyld[0] == 'ERR:'):
