@@ -48,7 +48,7 @@ PubSubClient client(espClient);
 void setup()
 {
   Serial.begin(115200);
-  delay(500);
+  delay(1000);
   Serial.print("ChipID: ");
   Serial.println(ESP.getChipId());
   Serial.print("WifiID: ");
@@ -61,6 +61,9 @@ void setup()
   Serial.println(recieveName);
   
 
+  WiFi.mode(WIFI_STA);
+
+  delay(500);
   
 //  Serial.println(clientName);
   // WiFi.setOutputPower(5.0);
@@ -72,6 +75,8 @@ void setup()
     Serial.println("Connecting to WiFi..");
   }
   Serial.println("Connected to the WiFi network");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
@@ -85,7 +90,7 @@ void setup()
       Serial.print("failed with state ");
       Serial.print(client.state());
       delay(2000);
-    }
+    } 
   }
 
   //--------------------------- MQTT -----------------------------------------//
@@ -172,6 +177,7 @@ void loop()
     if (verGood == true)
     {
       scanWifis();
+      pubMac("ON: "); //Publish connexion message
       if (abs(lastMessage - millis()) > 10000)
       {
         client.publish(publishName, "ERR: SSID not found within 10s");
@@ -199,7 +205,7 @@ void loop()
   else
   {
     pubVersion();
-    delay(2000);
+    delay(500);
   }
   if (stopLoop == true)
     ArduinoOTA.handle();
@@ -212,8 +218,13 @@ void loop()
 //----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
+  //char* text = "0";
+  char text[6];
+  char* receiver = "esp/00000000/rec";
+  
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
+  Serial.println(len);
   Serial.print("Message:");
   for (int i = 0; i < len; i++) {
     Serial.print((char)payload[i]);
@@ -222,22 +233,45 @@ void callback(char* topic, byte* payload, unsigned int len)
 
   if ('m' == (char)payload[0])
   {
-    char buff[30];
-    String SSIDstring = String("MAC: ") + WiFi.macAddress();
-    SSIDstring.toCharArray(buff, 30);
-    client.publish(publishName, buff);
+    pubMac("MAC: ");
   }
   else if ('v' == char(payload[0]))
   {
     if ('g' == char(payload[1]))
-      verGood = true;
+      {
+        verGood = true;
+        pubMac("MAC: ");
+      }
     if ('b' == char(payload[1]))
       verGood = false;
     verCheck = true;
     Serial.println("version Checked");
   }
   else if ('h' == (char)payload[0])
+  {
     client.publish(publishName, "INFO: Hello!");
+  }
+  else if ('c' == (char)payload[0])
+  { 
+    if(len > 10){
+      for (int i = 0 ; i < 8 ; i++){
+        receiver[i + 4] = (char)payload[i + 1];  
+      }
+      for (int i = 10 ; i < len ; i++){
+        text[i - 10] = (char)payload[i];
+      }
+      
+      Serial.println(text);
+      Serial.println(receiver);
+      client.publish(receiver, text);
+    }
+    else{
+      for (int i = 0 ; i < len ; i++){
+        Serial.println((char)payload[i]);
+      }
+    }
+  }
+  
 
   Serial.println();
   Serial.println("-----------------------");
@@ -245,6 +279,13 @@ void callback(char* topic, byte* payload, unsigned int len)
 }
 
 
+void pubMac(String header)
+{
+    char buff[30];
+    String SSIDstring = String(header) + WiFi.macAddress();
+    SSIDstring.toCharArray(buff, 30);
+    client.publish(publishName, buff);
+}
 
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
@@ -272,7 +313,7 @@ void scanWifis()
     SSIDstring.toCharArray(buff, 100);
     if (strcmp(buff, "helloThere") == 0)
     {
-      Serial.println("GENERAL KENOBI");
+      //Serial.println("GENERAL KENOBI");
 
       uint8_t* bssid = WiFi.BSSID(i);
       char message[32];
@@ -292,14 +333,20 @@ void scanWifis()
 
       snprintf(msgPtr, 6, cstr);
 
-      Serial.print("Message: ");
-      Serial.println(message);
+      //Serial.print("Message: ");
+      //Serial.println(message);
 
       client.publish(publishName, message);
 
       lastMessage = millis();
     }
   }
+}
+
+
+void getIP()
+{
+  
 }
 
 

@@ -49,6 +49,7 @@ class MqttHost(threading.Thread):
       self.data = []
       self.macCallTime = time.time()
       self.verCallTime = time.time()
+      self.verCalled = False
       self.stayAlive = True
       self.version = 0.50
       self.event = threading.Event()
@@ -125,25 +126,34 @@ class MqttHost(threading.Thread):
                   self.data[-1] = [[] for _ in range(len(data[0]))]
 
          elif(pyld[0] == 'VER:'):
-            print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+            if self.verCalled == False: #Check if the version has already been asked a short while ago (if it has: wait a bit)
+               self.verCallTime = time.time()
 
-            espVer = float(pyld[1])
-            if(espVer == self.version):
-               print("ESP/{} Software up to date".format(espNum))
-               self.client.publish("esp/{}/rec".format(espNum),"vg")   #version good
-            elif(espVer < self.version):
-               print("ESP/{} Software out date".format(espNum))
-               print("ESP/{}: {}".format(espNum,espVer))
-               print("Curr: {}".format(self.version))
-               self.client.publish("esp/{}/rec".format(espNum),"vb")   #version bad
-               
-            elif(espVer > self.version):
-               print("Kevin is an idiot and forgot to update this to match newest version")
-               print("ESP/{}: {}".format(espNum,espVer))
-               print("Curr: {}".format(self.version))        
-               self.client.disconnect()
-               self.client.loop_stop()
-               sys.exit()
+               print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+
+               espVer = float(pyld[1])
+               if(espVer == self.version):
+                  print("ESP/{} Software up to date".format(espNum))
+                  self.client.publish("esp/{}/rec".format(espNum),"vg")   #version good
+               elif(espVer < self.version):
+                  print("ESP/{} Software out date".format(espNum))
+                  print("ESP/{}: {}".format(espNum,espVer))
+                  print("Curr: {}".format(self.version))
+                  self.client.publish("esp/{}/rec".format(espNum),"vb")   #version bad
+                  
+               elif(espVer > self.version):
+                  print("Kevin is an idiot and forgot to update this to match newest version")
+                  print("ESP/{}: {}".format(espNum,espVer))
+                  print("Curr: {}".format(self.version))        
+                  self.client.disconnect()
+                  self.client.loop_stop()
+                  sys.exit()
+
+               self.verCalled = True
+
+            elif time.time() - self.verMsgTime > 3:
+               self.verCalled = False
+
 
          elif(pyld[0] == 'ERR:'):
             print(colored(msgld, 'red'))
@@ -152,12 +162,11 @@ class MqttHost(threading.Thread):
             print(colored(msgld, 'yellow'))   
 
          elif(pyld[0] == 'ON:'):
-            msgTime = time.time()
             #print("ESP " + espNum + " is connected")
             mac = pyld[1].replace(":", "")
             mac = mac.lower()
             mac = mac[:1] + 'e' + mac[2:] #Hack
-            self.coTimeDict[mac] = msgTime
+            self.coTimeDict[mac] = time.time()
             if not (self.macDict.get(mac) is None) and not (mac in self.macOrder): #Check if the ESP has been referenced and offline
                print(colored("New ESP connected", "green"))
                self.macOrder.append(mac)
