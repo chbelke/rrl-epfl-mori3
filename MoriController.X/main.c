@@ -66,14 +66,19 @@ int main (void) {
     //    LED_R = 0;                  // switch red led on
     
     LED_R = 1;
-
-    LED_Set(20, 10, 5);
-    TLC59208_Write();
-
+    
+    // - Set rotary motor current limits -
+    // unexpected behaviour when limit not set (can set itself randomly 
+    // between startups), consider defining it in an initialisation 
+    // function, need to figure out what level to start with
+    MotRot_LIM(0,255);
+    MotRot_LIM(1,255);
+    MotRot_LIM(2,255);
+    
     Flg_LiveAngle = false; // rotary PID output off
 
     while (1) {
-        __delay_ms(100);
+        // __delay_ms(100);
     }
     
     return 0;

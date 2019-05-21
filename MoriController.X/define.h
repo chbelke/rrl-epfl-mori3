@@ -120,7 +120,7 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 
 /* ******************** LED DRIVER TLC59208 ****************************** */
 #define TLC59208_ADDRESS 0x20   //Addresss pins A0-A2 tied to GND (not in DS?)
-//#define TLC59208_ALL_ADDRESS 0x48
+//#define TLC59208_ALL_ADDRESS 0x48 // not needed for now
 #define TLC59208_CtrlReg 0xA2
 #define TLC59208_MODE1Add 0x80 // address MODE1, auto increment enabled
 #define TLC59208_MODE1 0x01 // respond to LED All Call, auto increment disabled
@@ -128,6 +128,9 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define TLC59208_LEDOUT0 0xAA // LEDOUT0 all outputs PWM controlled
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
+
+#define SMA_Period 100 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
+#define SMA_Duty 100 // 8-bit PWM value
 
 #endif	/* DEFINE_H */
 
