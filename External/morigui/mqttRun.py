@@ -53,6 +53,7 @@ class MqttHost(threading.Thread):
       self.stayAlive = True
       self.version = 0.50
       self.event = threading.Event()
+      self.moriShapeDict = {}
 
       print("Server IP: " + self.mqttServer)
       self.client = mqtt.Client(self.clientName)
@@ -93,7 +94,6 @@ class MqttHost(threading.Thread):
 
          if(pyld[0] == 'DST:'):
             #print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
-
             macaddr = pyld[1][:-1]
             rssi = int(pyld[2])
             if(macaddr in self.macDict):  #check if we know other mac
@@ -124,6 +124,8 @@ class MqttHost(threading.Thread):
                   self.data[i].append([])
                if(len(self.data)>1):
                   self.data[-1] = [[] for _ in range(len(data[0]))]
+            if self.moriShapeDict.get(espNum) is None: #Check if the ESP shape has already been asked once to initialize the shape array
+               self.moriShapeDict[espNum] = [200, 200, 200, 0, 0, 0]
 
          elif(pyld[0] == 'VER:'):
             mac = pyld[1].replace(":", "")
@@ -132,7 +134,6 @@ class MqttHost(threading.Thread):
             if self.verCallTimeDict.get(mac) is None:
                self.verCallTimeDict[mac] = time.time()
                self.verCalledDict[mac] = False
-
 
             if self.verCalledDict.get(mac) == False: #Check if the version has already been asked a short while ago (if it has: wait a bit)
                self.verCallTimeDict[mac] = time.time()
@@ -162,7 +163,6 @@ class MqttHost(threading.Thread):
             elif time.time() - self.verCallTimeDict.get(mac) > 3:
                self.verCalledDict[mac] = False
 
-
          elif(pyld[0] == 'ERR:'):
             print(colored(msgld, 'red'))
 
@@ -178,6 +178,25 @@ class MqttHost(threading.Thread):
             if not (self.macDict.get(mac) is None) and not (mac in self.macOrder): #Check if the ESP has been referenced and offline
                print(colored("New ESP connected", "green"))
                self.macOrder.append(mac)
+
+         elif(pyld[0] == 'SHAPE:'):
+            print(pyld)
+            mac = pyld[1].replace(":", "")
+            mac = mac.lower()
+            mac = mac[:1] + 'e' + mac[2:] #Hack
+            #print(espNum)
+            if not (self.macDict.get(mac) is None):  #Check if the ESP has been referenced
+               if self.moriShapeDict.get(espNum) is None: #Check if the ESP shape has already been asked once to initialize the shape array
+                  self.moriShapeDict[espNum] = [200, 200, 200, 0, 0, 0]
+               #print(pyld[2])
+               for i in range(2,len(pyld)):
+                  self.moriShapeDict.get(espNum)[i-2] = int(pyld[i])
+                  #print(pyld[2].find('1',i+2))
+                  #if pyld[2].find('1',i+2) == i+2: #Only change the shape values that have been sent by the ESP (the values that have changed)
+                  #   self.moriShapeDict.get(espNum)[i] = int(pyld[i+3])
+                  #   print(self.moriShapeDict.get(espNum))
+                  #print(self.moriShapeDict.get(espNum))
+
 
    def publishGlobal(self, message):
       self.client.publish("esp/rec",message)
@@ -196,6 +215,10 @@ class MqttHost(threading.Thread):
       self.numberModules = len(self.macOrder)
       #print(self.macOrder)
       return self.numberModules
+
+   def getMoriShape(self, espNum):
+      #print("Mori " + mac + " shape: " + moriShapeDict.get(mac))
+      return self.moriShapeDict.get(espNum)
 
    def getMoriIds(self):
       return self.macDict

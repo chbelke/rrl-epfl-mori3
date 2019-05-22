@@ -40,6 +40,7 @@ bool verGood = true;   //assumes we are up to date unless otherwise
 bool stopLoop = false;  //assumes we are running the proper code
 
 unsigned long lastMessage = millis();
+int moriShape[6] = {200, 200, 200, 0, 0, 0};
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -178,6 +179,7 @@ void loop()
     {
       scanWifis();
       pubMac("ON: "); //Publish connexion message
+      //pubShape();
       if (abs(lastMessage - millis()) > 10000)
       {
         client.publish(publishName, "ERR: SSID not found within 10s");
@@ -218,7 +220,7 @@ void loop()
 //----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
-  //char* text = "0";
+  int byteSize = 8;
   char text[6];
   char* receiver = "esp/00000000/rec";
   
@@ -234,6 +236,7 @@ void callback(char* topic, byte* payload, unsigned int len)
   if ('m' == (char)payload[0])
   {
     pubMac("MAC: ");
+    pubShape();
   }
   else if ('v' == char(payload[0]))
   {
@@ -257,8 +260,8 @@ void callback(char* topic, byte* payload, unsigned int len)
       for (int i = 0 ; i < 8 ; i++){
         receiver[i + 4] = (char)payload[i + 1];  
       }
-      for (int i = 10 ; i < len ; i++){
-        text[i - 10] = (char)payload[i];
+      for (int i = 9 ; i < len ; i++){
+        text[i - 9] = (char)payload[i];
       }
       
       Serial.println(text);
@@ -271,8 +274,55 @@ void callback(char* topic, byte* payload, unsigned int len)
       }
     }
   }
-  
+  else if ('0' == (char)payload[0] && '1' == (char)payload[1]) //Start byte for MORI command
+  {
+    int commandModeStart = 3;
+    int commandModeEnd = commandModeStart + 1;
+    int maxNbrCommands = 6;
+    int allocationStart = commandModeEnd + 1;
+    int allocationEnd = allocationStart + maxNbrCommands;
+    int commandsStart = allocationEnd + 1;
+    int commandSize = 3;
 
+    char newValue[3];
+    int nbrNewValues = 0;
+
+    if((char)payload[commandModeStart-1] != ' '){
+      Serial.print("Command start bit error!");
+    }
+    
+    if ((char)payload[commandModeStart] == '0' && (char)payload[commandModeEnd] == '0') //Shape command
+    {
+      Serial.println("NEW SHAPE");
+      for (int i = allocationStart ; i < allocationEnd ; i++){ //Go through the message to execute the command
+        //Serial.println((char)payload[i]);
+        if ((char)payload[i] == '1'){ //Extension or angle needs to be modified
+          Serial.print("Shape change");
+          for (int ii = 0 ; ii < commandSize ; ii++){
+            newValue[ii] = (char)payload[commandsStart + ii + (nbrNewValues * commandSize)];
+            Serial.println((char)payload[commandsStart + ii + (nbrNewValues * commandSize)]);
+          }
+          nbrNewValues += 1;
+          moriShape[i-allocationStart] = atoi(newValue);
+          Serial.print(atoi(newValue));
+        }
+      }
+      pubShape();
+    }
+    /*
+    if ((char)payload[i] == '1'){
+          newValue[0] = (char)payload[18+(valuesSeparation*nbrNewValues)];
+          newValue[1] = (char)payload[19+(valuesSeparation*nbrNewValues)];
+          nbrNewValues += 1;   
+          moriShape[i-11] = atoi(newValue);   
+          //Serial.println((char)payload[18+(valuesSeparation*nbrNewValues)]);
+          //Serial.println((char)payload[19+(valuesSeparation*nbrNewValues)]);
+          //Serial.println(newValue);
+          //Serial.println(atoi(newValue));
+
+    */
+  }
+  
   Serial.println();
   Serial.println("-----------------------");
 
@@ -285,6 +335,20 @@ void pubMac(String header)
     String SSIDstring = String(header) + WiFi.macAddress();
     SSIDstring.toCharArray(buff, 30);
     client.publish(publishName, buff);
+}
+
+void pubShape()
+{
+  char buff[130];
+  String shapeMsg = String("SHAPE: ") + WiFi.macAddress();
+  
+  for (int i = 0 ; i < 6 ; i++){
+    shapeMsg = String(shapeMsg) + String(" ") + String(moriShape[i]);
+  }
+  
+  shapeMsg.toCharArray(buff, 130);
+  Serial.println(buff);
+  client.publish(publishName, buff);
 }
 
 //----------------------- Recieved Message -----------------------------//
