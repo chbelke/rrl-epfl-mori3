@@ -10,6 +10,8 @@ uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
 uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
 uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};
 
+uint8_t SMA_Count[3] = {0,0,0};
+
 void TLC59208_Setup(void) {
     I2C1_MESSAGE_STATUS status;
     I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
@@ -136,9 +138,38 @@ void SMA_Set(uint8_t edge, uint8_t duty){
     TLC59208_Write();
 }
 
-void LED_Set(uint8_t R, uint8_t G, uint8_t B){
-    TLC_Values[0] = B;
-    TLC_Values[1] = G;
-    TLC_Values[2] = R;
+void SMA_On(uint8_t edge){
+    SMA_Count[edge] = SMA_Period;
+    SMA_Set(edge, SMA_Duty);
+}
+
+void SMA_Off(uint8_t edge){
+    SMA_Count[edge] = 0;
+    SMA_Set(edge, 0);
+}
+
+// coupling sma controller, called in TMR3_CallBack (20 Hz)
+// switches SMA off when counter run out
+void SMA_Ctrl(void){
+    uint8_t m;
+    for(m = 0; m <= 2; m++){
+        if (SMA_Count[m]){
+            SMA_Count[m] = SMA_Count[m] - 1;
+            if (SMA_Count[m] == 0){
+                SMA_Set(m, 0);
+            }
+        }
+    }
+}
+
+void LED_Set(uint8_t RGBcolor, uint8_t duty){
+    switch (RGBcolor) {
+        case 0:
+            TLC_Values[2] = duty; // red
+        case 1:
+            TLC_Values[1] = duty; // green
+        case 2:
+            TLC_Values[0] = duty; // blue
+    }
     TLC59208_Write();
 }
