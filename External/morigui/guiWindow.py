@@ -63,7 +63,6 @@ class MoriGui(Frame):
         allocationByte = mode
         dataBytes = ""
         endByte = "150"
-        allocation = 0;
 
         number = self.shapeCommandListMoriVar.get()
         if number == 'None':
@@ -71,24 +70,37 @@ class MoriGui(Frame):
             return
 
         for i in range(len(self.moriShapeSlider)):
-            print(self.moriShapeSlider[i].get())
+            #print(self.moriShapeSlider[i].get())
             if self.moriShapeSlider[i].get() != self.currentMoriShape.get(self.shapeCommandListMoriVar.get())[i]:
-                allocationByte = allocationByte + "1"
-                if(self.moriShapeSlider[i].get() > 9 and self.moriShapeSlider[i].get() < 100):
-                    dataBytes = dataBytes + "0" + str(self.moriShapeSlider[i].get()) #To keed the same dimensions for all commands
+                allocationByte = allocationByte + "1" #Shape change
+
+                #The following conditions are necessary to keep the same message size for all shape commands (size = 4)
+                if(self.moriShapeSlider[i].get() >= 100):
+                    dataBytes = dataBytes + "0" + str(self.moriShapeSlider[i].get())
+                elif(self.moriShapeSlider[i].get() > 9 and self.moriShapeSlider[i].get() < 100):
+                    dataBytes = dataBytes + "00" + str(self.moriShapeSlider[i].get())
                 elif(self.moriShapeSlider[i].get() >= 0 and self.moriShapeSlider[i].get() < 10):
-                    dataBytes = dataBytes + "00" + str(self.moriShapeSlider[i].get()) #To keed the same dimensions for all commands
+                    dataBytes = dataBytes + "000" + str(self.moriShapeSlider[i].get())
                 elif(self.moriShapeSlider[i].get() > -10 and self.moriShapeSlider[i].get() < 0):
-                    dataBytes = dataBytes + "-0" + str(abs(self.moriShapeSlider[i].get())) #To keed the same dimensions for all commands
+                    dataBytes = dataBytes + "-00" + str(abs(self.moriShapeSlider[i].get()))
+                elif(self.moriShapeSlider[i].get() > -100 and self.moriShapeSlider[i].get() < -10):
+                    dataBytes = dataBytes + "-0" + str(abs(self.moriShapeSlider[i].get()))
                 else:
-                    dataBytes = dataBytes + str(self.moriShapeSlider[i].get()) #What should be sent to the ESP??
+                    dataBytes = dataBytes + str(self.moriShapeSlider[i].get())
             else:
-                allocationByte = allocationByte + "0"
+                allocationByte = allocationByte + "0" #No shape change
 
         command = startByte + " " + allocationByte + " " + dataBytes + " " + endByte
         print(command)
         self.mqtthost.publishLocal(number,command)
-
+        
+        #IntVar arrays cannot be simply manipulated
+        self.shape0.set(self.moriShapeSlider[0].get())
+        self.shape1.set(self.moriShapeSlider[1].get())
+        self.shape2.set(self.moriShapeSlider[2].get())
+        self.shape3.set(self.moriShapeSlider[3].get())
+        self.shape4.set(self.moriShapeSlider[4].get())
+        self.shape5.set(self.moriShapeSlider[5].get())
         
             
     def quitButton(self):
@@ -151,6 +163,14 @@ class MoriGui(Frame):
         self.currentMoriShape[self.shapeCommandListMoriVar.get()] = self.mqtthost.getMoriShape(self.shapeCommandListMoriVar.get())
         for i in range(len(self.currentMoriShape.get(self.shapeCommandListMoriVar.get()))):
             self.moriShapeSlider[i].set(self.currentMoriShape.get(self.shapeCommandListMoriVar.get())[i])
+
+        #IntVar arrays cannot be simply manipulated
+        self.shape0.set(self.moriShapeSlider[0].get())
+        self.shape1.set(self.moriShapeSlider[1].get())
+        self.shape2.set(self.moriShapeSlider[2].get())
+        self.shape3.set(self.moriShapeSlider[3].get())
+        self.shape4.set(self.moriShapeSlider[4].get())
+        self.shape5.set(self.moriShapeSlider[5].get())
 
 
     def createWidgets(self):
@@ -227,9 +247,27 @@ class MoriGui(Frame):
         angleMax = 120
         self.moriShapeSlider = [None] * nbrShapeCommands
         self.currentMoriShape = {}
+        
+        #IntVar arrays cannot be simply manipulated
+        self.shape0 = IntVar()
+        self.shape0.set(200)
+        self.shape1 = IntVar()
+        self.shape1.set(200)
+        self.shape2 = IntVar()
+        self.shape2.set(200)
+        self.shape3 = IntVar()
+        self.shape3.set(0)
+        self.shape4 = IntVar()
+        self.shape4.set(0)
+        self.shape5 = IntVar()
+        self.shape5.set(0)
 
         self.moriShapeCmd0 = Label(frame_moriShapeCommand, text="SHAPE COMMANDS")
         self.moriShapeCmd0.grid(row=0, column = 1, sticky = S)
+        self.moriShapeCmd0 = Label(frame_moriShapeCommand, text="Current")
+        self.moriShapeCmd0.grid(row=1, column = 3, sticky = N, pady = 15)
+        self.moriShapeCmd0 = Label(frame_moriShapeCommand, text="Shape")
+        self.moriShapeCmd0.grid(row=1, column = 3, sticky = S)
 
         self.moriShapeCmd1 = Label(frame_moriShapeCommand, text="MORI:")
         self.moriShapeCmd1.grid(row=1, column = 0, sticky = S)
@@ -262,9 +300,22 @@ class MoriGui(Frame):
         self.moriShapeSlider[5] = Scale(frame_moriShapeCommand, from_= angleMin, orient = HORIZONTAL, length = 150, to = angleMax)
         self.moriShapeSlider[5].grid(row = 7, column = 1, sticky = S)
 
+        self.moriCurrentShape = Label(frame_moriShapeCommand, textvariable=str(self.shape0))
+        self.moriCurrentShape.grid(row = 2, column = 3, sticky = S)
+        self.moriCurrentShape = Label(frame_moriShapeCommand, textvariable=str(self.shape1))
+        self.moriCurrentShape.grid(row = 3, column = 3, sticky = S)
+        self.moriCurrentShape = Label(frame_moriShapeCommand, textvariable=str(self.shape2))
+        self.moriCurrentShape.grid(row = 4, column = 3, sticky = S)
+        self.moriCurrentShape = Label(frame_moriShapeCommand, textvariable=str(self.shape3))
+        self.moriCurrentShape.grid(row = 5, column = 3, sticky = S)
+        self.moriCurrentShape = Label(frame_moriShapeCommand, textvariable=str(self.shape4))
+        self.moriCurrentShape.grid(row = 6, column = 3, sticky = S)
+        self.moriCurrentShape = Label(frame_moriShapeCommand, textvariable=str(self.shape5))
+        self.moriCurrentShape.grid(row = 7, column = 3, sticky = S)
+
         self.moriShapeCommandButton = Button(frame_moriShapeCommand)
         self.moriShapeCommandButton["text"] = "Publish",
-        self.moriShapeCommandButton.grid(row=8, column = 1, sticky = S)
+        self.moriShapeCommandButton.grid(row=8, column = 1, sticky = N)
         self.moriShapeCommandButton["command"] = self.publishShapeCommand
     # ------------------------------Frame 6------------------------------------ # 
 

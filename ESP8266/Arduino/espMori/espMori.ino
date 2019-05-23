@@ -276,51 +276,49 @@ void callback(char* topic, byte* payload, unsigned int len)
   }
   else if ('0' == (char)payload[0] && '1' == (char)payload[1]) //Start byte for MORI command
   {
+    //Typical message: "01 00100100 650-30 150"
+    //01 = start byte
+    //00100100 = allocation byte (shape change for  extension A and angle alpha)
+    //650-30 = data bytes (axtension A = 650 and angle alpha = -30)
+    //150 = end byte
+    //Define the positions of the different sections of the message:
     int commandModeStart = 3;
     int commandModeEnd = commandModeStart + 1;
     int maxNbrCommands = 6;
     int allocationStart = commandModeEnd + 1;
     int allocationEnd = allocationStart + maxNbrCommands;
     int commandsStart = allocationEnd + 1;
-    int commandSize = 3;
-
-    char newValue[3];
+    int commandSize = 4; //The shape commands are always of size 4
+    char newValue[commandSize]; 
     int nbrNewValues = 0;
 
     if((char)payload[commandModeStart-1] != ' '){
       Serial.print("Command start bit error!");
     }
-    
     if ((char)payload[commandModeStart] == '0' && (char)payload[commandModeEnd] == '0') //Shape command
     {
-      Serial.println("NEW SHAPE");
       for (int i = allocationStart ; i < allocationEnd ; i++){ //Go through the message to execute the command
         //Serial.println((char)payload[i]);
         if ((char)payload[i] == '1'){ //Extension or angle needs to be modified
-          Serial.print("Shape change");
-          for (int ii = 0 ; ii < commandSize ; ii++){
+          //Serial.print("Shape change");
+          for (int ii = 0 ; ii < commandSize ; ii++){ //Save the desired shape
             newValue[ii] = (char)payload[commandsStart + ii + (nbrNewValues * commandSize)];
-            Serial.println((char)payload[commandsStart + ii + (nbrNewValues * commandSize)]);
+            //Serial.println((char)payload[commandsStart + ii + (nbrNewValues * commandSize)]);
           }
           nbrNewValues += 1;
-          moriShape[i-allocationStart] = atoi(newValue);
-          Serial.print(atoi(newValue));
+          moriShape[i-allocationStart] = atoi(newValue); //Convert char to int
+          //Serial.println(atoi(newValue));
         }
+      }
+      for (int ii = 0 ; ii < commandSize ; ii++){ //Save end byte
+        newValue[ii] = (char)payload[commandsStart + ii + (nbrNewValues * commandSize)];
+      }
+      //Serial.print(atoi(newValue));
+      if (atoi(newValue) != 150){ //Check end byte
+        Serial.print("Command end bit error!");
       }
       pubShape();
     }
-    /*
-    if ((char)payload[i] == '1'){
-          newValue[0] = (char)payload[18+(valuesSeparation*nbrNewValues)];
-          newValue[1] = (char)payload[19+(valuesSeparation*nbrNewValues)];
-          nbrNewValues += 1;   
-          moriShape[i-11] = atoi(newValue);   
-          //Serial.println((char)payload[18+(valuesSeparation*nbrNewValues)]);
-          //Serial.println((char)payload[19+(valuesSeparation*nbrNewValues)]);
-          //Serial.println(newValue);
-          //Serial.println(atoi(newValue));
-
-    */
   }
   
   Serial.println();

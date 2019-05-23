@@ -85,7 +85,6 @@ class MqttHost(threading.Thread):
 
          #print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
 
-
          espNum = topic[1]
          msgld = msg.payload.decode('UTF-8')
          pyld = msgld.rsplit(' ')
@@ -169,7 +168,7 @@ class MqttHost(threading.Thread):
          elif(pyld[0] == 'INFO:'): 
             print(colored(msgld, 'yellow'))   
 
-         elif(pyld[0] == 'ON:'):
+         elif(pyld[0] == 'ON:'): #Check online ESPs
             #print("ESP " + espNum + " is connected")
             mac = pyld[1].replace(":", "")
             mac = mac.lower()
@@ -179,8 +178,8 @@ class MqttHost(threading.Thread):
                print(colored("New ESP connected", "green"))
                self.macOrder.append(mac)
 
-         elif(pyld[0] == 'SHAPE:'):
-            print(pyld)
+         elif(pyld[0] == 'SHAPE:'): #ESP shape received
+            #print(pyld)
             mac = pyld[1].replace(":", "")
             mac = mac.lower()
             mac = mac[:1] + 'e' + mac[2:] #Hack
@@ -191,11 +190,6 @@ class MqttHost(threading.Thread):
                #print(pyld[2])
                for i in range(2,len(pyld)):
                   self.moriShapeDict.get(espNum)[i-2] = int(pyld[i])
-                  #print(pyld[2].find('1',i+2))
-                  #if pyld[2].find('1',i+2) == i+2: #Only change the shape values that have been sent by the ESP (the values that have changed)
-                  #   self.moriShapeDict.get(espNum)[i] = int(pyld[i+3])
-                  #   print(self.moriShapeDict.get(espNum))
-                  #print(self.moriShapeDict.get(espNum))
 
 
    def publishGlobal(self, message):
@@ -209,7 +203,7 @@ class MqttHost(threading.Thread):
       #print(self.macOrder)
       for i in range(len(self.macOrder)-1, -1, -1): #Go through the array  from top to bottom to avoid out ouf range errors
          #print(colored("ESP ", "blue") + self.macOrder[i] + "last connexion time = " + colored(time.time() - self.coTimeDict.get(self.macOrder[i]), "blue") + " ago")
-         if time.time() - self.coTimeDict.get(self.macOrder[i]) > 3:
+         if time.time() - self.coTimeDict.get(self.macOrder[i]) > 4: #Consider ESP disonnected if no message has been received in the last 4 seconds
             print(colored("ESP " + self.macOrder[i] + " lost", "red"))
             del self.macOrder[i]
       self.numberModules = len(self.macOrder)
@@ -235,7 +229,6 @@ class MqttHost(threading.Thread):
       self.client.loop_start()       
       while not self.event.is_set():
          if time.time() - loopTime > 10:
-            
             loopTime = time.time()
             print("Time Elapsed: {:.3f}".format(loopTime-startTime))
             # self.client.publish("esp/rec","mac")
