@@ -113,7 +113,7 @@ class MoriGui(Frame):
             return
         if leader == follower:
             print("Same Mori selected")
-            #return
+            return
 
         message = "ha" + "l" + follower # 'ha' is for handshake, 'l' is for leader
 
