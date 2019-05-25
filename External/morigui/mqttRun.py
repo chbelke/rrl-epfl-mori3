@@ -54,6 +54,7 @@ class MqttHost(threading.Thread):
       self.version = 0.50
       self.event = threading.Event()
       self.moriShapeDict = {}
+      self.leaderFollowerDict = {}
 
       print("Server IP: " + self.mqttServer)
       self.client = mqtt.Client(self.clientName)
@@ -190,6 +191,24 @@ class MqttHost(threading.Thread):
                #print(pyld[2])
                for i in range(2,len(pyld)):
                   self.moriShapeDict.get(espNum)[i-2] = int(pyld[i])
+
+         elif(pyld[0] == 'FOLLOWER:'):
+            #print(pyld)
+            if not (self.leaderFollowerDict.get(pyld[1]) is None): #Enter if the follower has followers
+               for i in range(len(self.leaderFollowerDict.get(pyld[1]))):
+                  if espNum == self.leaderFollowerDict.get(pyld[1])[i]: #Enter if the follower is leading the desired leader (error)
+                     print(colored("ERROR: ESP" + espNum + " is the follower of ESP" + pyld[1] + " so it cannot lead it!", "red"))
+                     return
+            if not (self.leaderFollowerDict.get(espNum) is None):#Enter if the leader has followers
+               for i in range(len(self.leaderFollowerDict.get(espNum))):
+                  if pyld[1] == self.leaderFollowerDict.get(espNum)[i]: #Enter if the leader is already leading the follower (error)
+                     print(colored("ERROR: ESP" + espNum + " is already the leader of ESP" + pyld[1], "red"))
+                     return
+            if self.leaderFollowerDict.get(espNum) is None: #First follower for the leader
+               self.leaderFollowerDict[espNum] = [pyld[1]]
+            else:
+               self.leaderFollowerDict[espNum].append(pyld[1])
+            print(self.leaderFollowerDict)
 
 
    def publishGlobal(self, message):

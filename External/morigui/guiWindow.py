@@ -51,10 +51,10 @@ class MoriGui(Frame):
             print("No Mori selected to receive")
             return
 
-        text = "c" + receiver + text
+        text = "com" + receiver + text # c is for communication
 
         self.mqtthost.publishLocal(sender,text)
-        print(colored("ESP " + sender + " will send ", "yellow") + text + colored(" to ESP " + receiver, "yellow"))
+        print(colored("ESP" + sender + " will send ", "yellow") + text + colored(" to ESP" + receiver, "yellow"))
         self.interMoriComEntry.delete(0, 'end')
 
     def publishShapeCommand(self):
@@ -77,7 +77,7 @@ class MoriGui(Frame):
                 #The following conditions are necessary to keep the same message size for all shape commands (size = 4)
                 if(self.moriShapeSlider[i].get() >= 100):
                     dataBytes = dataBytes + "0" + str(self.moriShapeSlider[i].get())
-                elif(self.moriShapeSlider[i].get() > 9 and self.moriShapeSlider[i].get() < 100):
+                elif(self.moriShapeSlider[i].get() >= 10 and self.moriShapeSlider[i].get() < 100):
                     dataBytes = dataBytes + "00" + str(self.moriShapeSlider[i].get())
                 elif(self.moriShapeSlider[i].get() >= 0 and self.moriShapeSlider[i].get() < 10):
                     dataBytes = dataBytes + "000" + str(self.moriShapeSlider[i].get())
@@ -91,7 +91,7 @@ class MoriGui(Frame):
                 allocationByte = allocationByte + "0" #No shape change
 
         command = startByte + " " + allocationByte + " " + dataBytes + " " + endByte
-        print(command)
+        print("Shape command: " + command)
         self.mqtthost.publishLocal(number,command)
         
         #IntVar arrays cannot be simply manipulated
@@ -102,6 +102,24 @@ class MoriGui(Frame):
         self.shape4.set(self.moriShapeSlider[4].get())
         self.shape5.set(self.moriShapeSlider[5].get())
         
+    def publishHandshake(self):
+        leader = self.handshakeLeaderListVar.get()
+        follower = self.handshakeFollowerListVar.get()
+        if leader == 'None':
+            print("No Mori selected to lead")
+            return
+        if follower == 'None':
+            print("No Mori selected to follow")
+            return
+        if leader == follower:
+            print("Same Mori selected")
+            #return
+
+        message = "ha" + "l" + follower # 'ha' is for handshake, 'l' is for leader
+
+        print(colored("ESP" + leader + " will lead", "yellow") + colored(" ESP" + follower, "yellow"))
+        self.mqtthost.publishLocal(leader,message)
+
             
     def quitButton(self):
         print("Stopping MQTT")
@@ -129,6 +147,10 @@ class MoriGui(Frame):
             receiverMenu.delete(0, "end")
             shapeCommandMenu = self.shapeCommandListMori["menu"]
             shapeCommandMenu.delete(0, "end")
+            handshakeLeaderMenu = self.handshakeLeaderList["menu"]
+            handshakeLeaderMenu.delete(0, "end")
+            handshakeFollowerMenu = self.handshakeFollowerList["menu"]
+            handshakeFollowerMenu.delete(0, "end")
 
             self.moriNumber = tmpList
             for mori_individ in self.moriNumber:
@@ -140,6 +162,10 @@ class MoriGui(Frame):
                              command=lambda value=mori_individ: self.receiverListMoriVar.set(value))
                 shapeCommandMenu.add_command(label=mori_individ, 
                              command=lambda value=mori_individ: self.shapeCommandListMoriVar.set(value))
+                handshakeLeaderMenu.add_command(label=mori_individ, 
+                             command=lambda value=mori_individ: self.handshakeLeaderListVar.set(value))
+                handshakeFollowerMenu.add_command(label=mori_individ, 
+                             command=lambda value=mori_individ: self.handshakeFollowerListVar.set(value))
 
     def update_option_menu(self):
         menu = self.moriNumber["menu"]
@@ -163,7 +189,6 @@ class MoriGui(Frame):
         self.currentMoriShape[self.shapeCommandListMoriVar.get()] = self.mqtthost.getMoriShape(self.shapeCommandListMoriVar.get())
         for i in range(len(self.currentMoriShape.get(self.shapeCommandListMoriVar.get()))):
             self.moriShapeSlider[i].set(self.currentMoriShape.get(self.shapeCommandListMoriVar.get())[i])
-
         #IntVar arrays cannot be simply manipulated
         self.shape0.set(self.moriShapeSlider[0].get())
         self.shape1.set(self.moriShapeSlider[1].get())
@@ -172,14 +197,19 @@ class MoriGui(Frame):
         self.shape4.set(self.moriShapeSlider[4].get())
         self.shape5.set(self.moriShapeSlider[5].get())
 
+    def handshake_leader_option_select(self, *args):
+        print("ESP " + self.handshakeLeaderListVar.get() + " selected.")
+
+    def handshake_follower_option_select(self, *args):
+        print("ESP " + self.handshakeFollowerListVar.get() + " selected.")
 
     def createWidgets(self):
-
         frame_party = Frame(self)
-        frame_pubg = Frame(self, relief=RAISED, borderwidth=1, pady=5)
-        frame_listMori = Frame(self, relief=RAISED, borderwidth=1, pady=5)
-        frame_interMoriCom = Frame(self, relief=RAISED, borderwidth=1, pady = 5)
-        frame_moriShapeCommand = Frame(self, relief=RAISED, borderwidth=1, pady = 5)
+        frame_pubg = Frame(self, relief=RAISED, borderwidth = 1, pady = 5)
+        frame_listMori = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
+        frame_interMoriCom = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
+        frame_moriShapeCommand = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
+        frame_moriHandshake = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
         bottomFrame = Frame(self)
     # ------------------------------Frame 1------------------------------------ #        
 
@@ -250,17 +280,17 @@ class MoriGui(Frame):
         
         #IntVar arrays cannot be simply manipulated
         self.shape0 = IntVar()
-        self.shape0.set(200)
+        self.shape0.set(extensionMin)
         self.shape1 = IntVar()
-        self.shape1.set(200)
+        self.shape1.set(extensionMin)
         self.shape2 = IntVar()
-        self.shape2.set(200)
+        self.shape2.set(extensionMin)
         self.shape3 = IntVar()
-        self.shape3.set(0)
+        self.shape3.set((angleMin+angleMax)/2)
         self.shape4 = IntVar()
-        self.shape4.set(0)
+        self.shape4.set((angleMin+angleMax)/2)
         self.shape5 = IntVar()
-        self.shape5.set(0)
+        self.shape5.set((angleMin+angleMax)/2)
 
         self.moriShapeCmd0 = Label(frame_moriShapeCommand, text="SHAPE COMMANDS")
         self.moriShapeCmd0.grid(row=0, column = 1, sticky = S)
@@ -330,14 +360,37 @@ class MoriGui(Frame):
         self.Mqtt["text"] = "Start",
         self.Mqtt["command"] = self.runMqtt
         self.Mqtt.pack({"side": "right"})
+    # ------------------------------Frame 7------------------------------------ #
+
+
+        self.moriHanshakeCmd0 = Label(frame_moriHandshake, text="HANDSHAKE")
+        self.moriHanshakeCmd0.grid(row=0, column = 0, sticky = E)
+
+        self.moriHandshakeCmd1 = Label(frame_moriHandshake, text="Leader: ")
+        self.moriHandshakeCmd1.grid(row=1, column = 0)
+        self.handshakeLeaderList = OptionMenu(frame_moriHandshake, self.handshakeLeaderListVar,*self.moriNumber)
+        self.handshakeLeaderList.grid(row=1, column = 1, ipadx = 50, sticky = SW)
+
+        self.moriHandshakeCmd2 = Label(frame_moriHandshake, text="Follower: ")
+        self.moriHandshakeCmd2.grid(row=3, column = 0)
+        self.handshakeFollowerList = OptionMenu(frame_moriHandshake, self.handshakeFollowerListVar,*self.moriNumber)
+        self.handshakeFollowerList.grid(row=3, column = 1, ipadx = 50, sticky = SW)
+
+        self.handshakeButton = Button(frame_moriHandshake)
+        self.handshakeButton["text"] = "Link",
+        self.handshakeButton.grid(row=0, column = 1, ipadx = 40, sticky = E)
+        self.handshakeButton["command"] = self.publishHandshake
+    # ------------------------------Frame 8------------------------------------ # 
+
 
         frame_party.pack(fill=X)
         frame_moriShapeCommand.pack({"side": "right"})
         frame_listMori.pack(ipadx = 10)
         frame_interMoriCom.pack()
+        frame_moriHandshake.pack()
         frame_pubg.pack()
         bottomFrame.pack(fill=BOTH, expand=True, pady=5)
-
+        
 
     def __init__(self, master=None):
         self.mqtthost = MqttHost()
@@ -362,6 +415,14 @@ class MoriGui(Frame):
         self.shapeCommandListMoriVar = StringVar()
         self.shapeCommandListMoriVar.set(self.moriNumber[0])
         self.shapeCommandListMoriVar.trace('w', self.shape_command_option_select)
+
+        self.handshakeLeaderListVar = StringVar()
+        self.handshakeLeaderListVar.set(self.moriNumber[0])
+        self.handshakeLeaderListVar.trace('w', self.handshake_leader_option_select)
+
+        self.handshakeFollowerListVar = StringVar()
+        self.handshakeFollowerListVar.set(self.moriNumber[0])
+        self.handshakeFollowerListVar.trace('w', self.handshake_follower_option_select)
 
         self.paaarty = self.partyOn()
 

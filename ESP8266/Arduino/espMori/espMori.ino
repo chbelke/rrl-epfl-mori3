@@ -220,14 +220,11 @@ void loop()
 //----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
-  int byteSize = 8;
-  char text[6];
-  char* receiver = "esp/00000000/rec";
-  
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
+  Serial.print("Message length: ");
   Serial.println(len);
-  Serial.print("Message:");
+  Serial.print("Message: ");
   for (int i = 0; i < len; i++) {
     Serial.print((char)payload[i]);
   }
@@ -238,6 +235,7 @@ void callback(char* topic, byte* payload, unsigned int len)
     pubMac("MAC: ");
     pubShape();
   }
+  
   else if ('v' == char(payload[0]))
   {
     if ('g' == char(payload[1]))
@@ -250,37 +248,116 @@ void callback(char* topic, byte* payload, unsigned int len)
     verCheck = true;
     Serial.println("version Checked");
   }
-  else if ('h' == (char)payload[0])
+  
+  else if ('h' == (char)payload[0] && 'e' == (char)payload[1]) //'he' is for hello
   {
     client.publish(publishName, "INFO: Hello!");
   }
-  else if ('c' == (char)payload[0])
-  { 
-    if(len > 10){
-      for (int i = 0 ; i < 8 ; i++){
-        receiver[i + 4] = (char)payload[i + 1];  
+  
+  else if ('c' == (char)payload[0] && 'o' == (char)payload[1] && 'm' == (char)payload[2]) //'com' is for communication
+  {  
+    char text[32];
+    char* receiver = "esp/00000000/rec"; 
+    
+    //Define the positions and lengths of the different sections of the received message
+    int receiverIDLength = 8;
+    int receiverPublishIDStart = 4;
+    int receiverMessageIDStart = 3;
+    int textStart = 11;
+
+    for (int i = 0 ; i < receiverIDLength ; i++){
+      receiver[i + receiverPublishIDStart] = (char)payload[i + receiverMessageIDStart];  
+    }
+    for (int i = textStart ; i < len ; i++){
+      text[i - textStart] = (char)payload[i];
+    }
+    
+    Serial.println(text);
+    Serial.println(receiver);
+    client.publish(receiver, text);
+  }
+
+  else if ('h' == (char)payload[0] && 'a' == (char)payload[1]){ //'ha' is for handshake
+    bool continueHandshake = false;
+    bool handshakeCorrect = false;
+
+    //Define the positions and lengths of the different sections of the received message
+    int role = 2;
+    int espIDStart = 3;
+    int espIDLength = 8;
+    int receiverPublishIDStart = 4; 
+    
+    char* followerID = "00000000";
+    char* receiver = "esp/00000000/rec";
+    char* message = "ha_00000000/00000000"; 
+    //"_" will be the role of the receiver
+    //==> The leader receives from the boss (computer): hal'otherID'
+    //==> It then sends sends to follower: hal'otherID'/'selfID'
+    //==> The follower receives the message, checks it's ID and sends (if ID correct): haf'selfID'/'otherID'
+    //==> The leader receives the message, check its ID and the handshake is established (if ID correct)
+    
+    if ((char)payload[role] == 'l'){ // 'l' is for leader (l is a letter)
+      message[role] = 'f';
+      if (len == espIDStart + espIDLength){ //Message received from boss (computer)
+         continueHandshake = true;
+         for (int i = 0 ; i < espIDLength ; i++){
+            //Create the message to be sent to follower
+            receiver[i + receiverPublishIDStart] = (char)payload[i + espIDStart];
+            message[i + espIDStart] = (char)payload[i + espIDStart];
+            message[i + espIDStart + espIDLength + 1] = recieveName[i + receiverPublishIDStart];
+         }
       }
-      for (int i = 9 ; i < len ; i++){
-        text[i - 9] = (char)payload[i];
+      else if (len == espIDStart + 2*espIDLength + 1){ //Message received frome follower
+        handshakeCorrect = true;
+        for (int i = 0 ; i < espIDLength ; i++){
+          //Check if own and received IDs are the same
+          followerID[i] = (char)payload[i + espIDStart];
+          if (payload[i + espIDStart + espIDLength + 1] != recieveName[i + receiverPublishIDStart]){
+            Serial.println("Leader ID error!");
+            handshakeCorrect = false;
+          }
+        }
       }
-      
-      Serial.println(text);
-      Serial.println(receiver);
-      client.publish(receiver, text);
+    }
+    else if ((char)payload[role] == 'f'){ // 'f' is for follower
+       message[role] = 'l';
+       continueHandshake = true;
+       for (int i = 0 ; i < espIDLength ; i++){
+          //Create the message to be sent to leader
+          receiver[i + receiverPublishIDStart] = (char)payload[i + espIDStart + espIDLength + 1];
+          message[i + espIDStart] = (char)payload[i + espIDStart];
+          message[i + espIDStart + espIDLength + 1] = (char)payload[i + espIDStart + espIDLength + 1];
+
+          //Check if own and received IDs are the same
+          if (message[i + espIDStart] != recieveName[i + receiverPublishIDStart]){
+            Serial.println("Follower ID error!");
+            continueHandshake = false;
+          }
+       }
     }
     else{
-      for (int i = 0 ; i < len ; i++){
-        Serial.println((char)payload[i]);
-      }
+      Serial.println("Role definition error!");
+    }
+    if (continueHandshake){
+      client.publish(receiver, message);
+    }
+    if (handshakeCorrect){
+      Serial.println("HANDSHAKE ESTABLISHED!");
+      char buff[20];
+      String handshakeString = String("FOLLOWER: ") + followerID;
+      handshakeString.toCharArray(buff, 20);
+      //Serial.println(buff);
+      client.publish(publishName, buff);
     }
   }
+  
   else if ('0' == (char)payload[0] && '1' == (char)payload[1]) //Start byte for MORI command
   {
     //Typical message: "01 00100100 650-30 150"
     //01 = start byte
     //00100100 = allocation byte (shape change for  extension A and angle alpha)
     //650-30 = data bytes (axtension A = 650 and angle alpha = -30)
-    //150 = end byte
+    //150 = end byte (it is a number that is out of range for extension and angle)
     //Define the positions of the different sections of the message:
     int commandModeStart = 3;
     int commandModeEnd = commandModeStart + 1;
@@ -319,13 +396,21 @@ void callback(char* topic, byte* payload, unsigned int len)
       }
       pubShape();
     }
+    else if ((char)payload[commandModeStart] == '0' && (char)payload[commandModeEnd] == '1') //Drive command
+    {
+      
+    }
+    else if ((char)payload[commandModeStart] == '1' && (char)payload[commandModeEnd] == '0') //Coupling/LED command
+    {
+      
+    }
   }
+
   
   Serial.println();
   Serial.println("-----------------------");
 
 }
-
 
 void pubMac(String header)
 {
