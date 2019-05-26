@@ -13,11 +13,11 @@
   @Description
     This source file provides APIs for driver for UART4. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 
 /*
@@ -97,7 +97,7 @@ typedef struct
 
 } UART_OBJECT ;
 
-static UART_OBJECT uart4_obj ;
+static volatile UART_OBJECT uart4_obj ;
 
 /** UART Driver Queue Length
 
@@ -132,15 +132,15 @@ void UART4_Initialize(void)
     U4MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U4STA = 0x00;
-    // BaudRate = 19200; Frequency = 3686400 Hz; BRG 47; 
-    U4BRG = 0x2F;
+    // BaudRate = 115200; Frequency = 3686400 Hz; BRG 7; 
+    U4BRG = 0x07;
     
     IEC5bits.U4RXIE = 1;
     
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
     
     U4MODEbits.UARTEN = 1;  // enabling UARTEN bit
-    U4STAbits.UTXEN = 1; 
+    U4STAbits.UTXEN = 1;
 
     uart4_obj.txHead = uart4_txByteQ;
     uart4_obj.txTail = uart4_txByteQ;
@@ -158,13 +158,16 @@ void UART4_Initialize(void)
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4TXInterrupt ( void )
 { 
-    if(uart4_obj.txStatus.s.empty)
+    if((uart4_obj.txHead == uart4_obj.txTail) && (uart4_obj.txStatus.s.full == false))
     {
-        IEC5bits.U4TXIE = false;
+        while(U4STAbits.TRMT == 0){}
+        
+        uart4_obj.txStatus.s.empty = true;
+        IEC5bits.U4TXIE = 0;
         return;
     }
 
-    IFS5bits.U4TXIF = false;
+    IFS5bits.U4TXIF = 0;
 
     while(!(U4STAbits.UTXBF == 1))
     {
@@ -181,7 +184,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4TXInterrupt ( void )
 
         if(uart4_obj.txHead == uart4_obj.txTail)
         {
-            uart4_obj.txStatus.s.empty = true;
             break;
         }
     }
@@ -213,6 +215,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4RXInterrupt( void )
     }
 
     IFS5bits.U4RXIF = false;
+   
 }
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
@@ -272,7 +275,7 @@ unsigned int UART4_ReadBuffer( uint8_t *buffer, const unsigned int bufLen)
 
 void UART4_Write( const uint8_t byte)
 {
-    IEC5bits.U4TXIE = false;
+    IEC5bits.U4TXIE = 0;
     
     *uart4_obj.txTail = byte;
 
@@ -290,7 +293,7 @@ void UART4_Write( const uint8_t byte)
         uart4_obj.txStatus.s.full = true;
     }
 
-    IEC5bits.U4TXIE = true ;
+    IEC5bits.U4TXIE = 1 ;
 }
 
 unsigned int UART4_WriteBuffer( const uint8_t *buffer , const unsigned int bufLen )
@@ -316,16 +319,24 @@ UART4_TRANSFER_STATUS UART4_TransferStatusGet (void )
 {
     UART4_TRANSFER_STATUS status = 0;
 
-    if(uart4_obj.txStatus.s.full)
-    {
-        status |= UART4_TRANSFER_STATUS_TX_FULL;
-    }
-
+    /* The TX empty must be checked before the full in order to prevent a race
+     * condition where a TX transmission could start between these two checks
+     * resulting in both full and empty set at the same time.
+     */
     if(uart4_obj.txStatus.s.empty)
     {
         status |= UART4_TRANSFER_STATUS_TX_EMPTY;
     }
 
+    if(uart4_obj.txStatus.s.full)
+    {
+        status |= UART4_TRANSFER_STATUS_TX_FULL;
+    }
+
+    /* The RX full must be checked before the empty in order to prevent a race
+     * condition where a RX reception could start between these two checks
+     * resulting in both empty and full set at the same time.
+     */
     if(uart4_obj.rxStatus.s.full)
     {
         status |= UART4_TRANSFER_STATUS_RX_FULL;
@@ -367,16 +378,14 @@ bool UART4_PeekSafe(uint8_t *dataByte, uint16_t offset)
     uint16_t index = 0;
     bool status = true;
     
-    if((offset >= UART4_CONFIG_RX_BYTEQ_LENGTH) || (uart4_obj.rxStatus.s.empty)\
-            || (!dataByte))
+    if((offset >= UART4_CONFIG_RX_BYTEQ_LENGTH) || (uart4_obj.rxStatus.s.empty) || (!dataByte))
     {
         status = false;
     }
     else
     {
         //Compute the offset buffer overflow range
-        index = ((uart4_obj.rxHead - uart4_rxByteQ) + offset)\
-                % UART4_CONFIG_RX_BYTEQ_LENGTH;
+        index = ((uart4_obj.rxHead - uart4_rxByteQ) + offset) % UART4_CONFIG_RX_BYTEQ_LENGTH;
         
         /**
          * Check for offset input value range is valid or invalid. If the range 
@@ -385,17 +394,24 @@ bool UART4_PeekSafe(uint8_t *dataByte, uint16_t offset)
         if(uart4_obj.rxHead < uart4_obj.rxTail) 
         {
             if((uart4_obj.rxHead + offset) > (uart4_obj.rxTail - 1))
+            {
                 status = false;
+        }
         }
         else if(uart4_obj.rxHead > uart4_obj.rxTail)
         {
-            if((uart4_rxByteQ + index) > (uart4_obj.rxTail - 1))
+            if((uart4_rxByteQ + index) < uart4_obj.rxHead)
+            {
+                if( (uart4_rxByteQ + index) >= uart4_obj.rxTail )
+                {
                 status = false;
+        }
+            } 
         }
 
         if(status == true)
         {
-            *dataByte = UART4_Peek(index);
+            *dataByte = UART4_Peek(offset);
         }
     }
     return status;
@@ -441,6 +457,18 @@ bool UART4_ReceiveBufferIsEmpty (void)
 bool UART4_TransmitBufferIsFull(void)
 {
     return(uart4_obj.txStatus.s.full);
+}
+
+void UART4_Enable(void)
+{
+    U4MODEbits.UARTEN = 1;
+    U4STAbits.UTXEN = 1;
+}
+
+void UART4_Disable(void)
+{
+    U4MODEbits.UARTEN = 0;
+    U4STAbits.UTXEN = 0;
 }
 
 uint16_t UART4_StatusGet (void)

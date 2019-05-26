@@ -56,11 +56,11 @@ void INTERRUPT_Initialize (void)
     //    Priority: 1
         IPC21bits.U4EIP = 1;
     //    UTXI: UART4 Transmitter
-    //    Priority: 1
-        IPC22bits.U4TXIP = 1;
+    //    Priority: 3
+        IPC22bits.U4TXIP = 3;
     //    URXI: UART4 Receiver
-    //    Priority: 1
-        IPC22bits.U4RXIP = 1;
+    //    Priority: 3
+        IPC22bits.U4RXIP = 3;
     //    MICI: I2C1 Master Events
     //    Priority: 3
         IPC4bits.MI2C1IP = 3;

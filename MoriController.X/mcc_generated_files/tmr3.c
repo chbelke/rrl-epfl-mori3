@@ -48,6 +48,7 @@
  */
 
 #include <xc.h>
+#include "math.h"
 #include "tmr3.h"
 #include "adc1.h"
 #include "uart4.h"
@@ -79,12 +80,11 @@
     None.
  */
 
-typedef struct _TMR_OBJ_STRUCT
-{
+typedef struct _TMR_OBJ_STRUCT {
     /* Timer Elapsed */
-    bool                                                    timerElapsed;
+    bool timerElapsed;
     /*Software Counter value*/
-    uint8_t                                                 count;
+    uint8_t count;
 
 } TMR_OBJ;
 
@@ -94,8 +94,7 @@ static TMR_OBJ tmr3_obj;
   Section: Driver Interface
  */
 
-void TMR3_Initialize (void)
-{
+void TMR3_Initialize(void) {
     //TMR3 0; 
     TMR3 = 0x00;
     //Period = 0.05 s; Frequency = 3686400 Hz; PR3 2880; 
@@ -111,10 +110,7 @@ void TMR3_Initialize (void)
 
 }
 
-
-
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
-{
+void __attribute__((interrupt, no_auto_psv)) _T3Interrupt() {
     /* Check if the Timer Interrupt/Status is set */
 
     //***User Area Begin
@@ -130,51 +126,43 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
     IFS0bits.T3IF = false;
 }
 
-
-void TMR3_Period16BitSet( uint16_t value )
-{
+void TMR3_Period16BitSet(uint16_t value) {
     /* Update the counter values */
     PR3 = value;
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Period16BitGet( void )
-{
-    return( PR3 );
+uint16_t TMR3_Period16BitGet(void) {
+    return ( PR3);
 }
 
-void TMR3_Counter16BitSet ( uint16_t value )
-{
+void TMR3_Counter16BitSet(uint16_t value) {
     /* Update the counter values */
     TMR3 = value;
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Counter16BitGet( void )
-{
-    return( TMR3 );
+uint16_t TMR3_Counter16BitGet(void) {
+    return ( TMR3);
 }
 
-
-void __attribute__ ((weak)) TMR3_CallBack(void)
-{
+void __attribute__((weak)) TMR3_CallBack(void) {
     // Add your custom callback code here
-    
+
     // read analog pot inputs
     ADC1_Update();
     // edge extension control loops
     MotLin_PID(0, ADC1_Return(0), MotLin_Get(0));
     MotLin_PID(1, ADC1_Return(1), MotLin_Get(1));
     MotLin_PID(2, ADC1_Return(2), MotLin_Get(2));
-    
+
     // coupling sma controller
     SMA_Ctrl();
 }
 
-void TMR3_Start( void )
-{
+void TMR3_Start(void) {
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 
@@ -185,8 +173,7 @@ void TMR3_Start( void )
     T3CONbits.TON = 1;
 }
 
-void TMR3_Stop( void )
-{
+void TMR3_Stop(void) {
     /* Stop the Timer */
     T3CONbits.TON = false;
 
@@ -194,26 +181,22 @@ void TMR3_Stop( void )
     IEC0bits.T3IE = false;
 }
 
-bool TMR3_GetElapsedThenClear(void)
-{
+bool TMR3_GetElapsedThenClear(void) {
     bool status;
 
     status = tmr3_obj.timerElapsed;
 
-    if(status == true)
-    {
+    if (status == true) {
         tmr3_obj.timerElapsed = false;
     }
     return status;
 }
 
-int TMR3_SoftwareCounterGet(void)
-{
+int TMR3_SoftwareCounterGet(void) {
     return tmr3_obj.count;
 }
 
-void TMR3_SoftwareCounterClear(void)
-{
+void TMR3_SoftwareCounterClear(void) {
     tmr3_obj.count = 0;
 }
 
