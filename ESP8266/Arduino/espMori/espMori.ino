@@ -60,7 +60,6 @@ void setup()
   Serial.println(clientName);
   Serial.println(publishName);
   Serial.println(recieveName);
-  
 
   WiFi.mode(WIFI_STA);
 
@@ -319,7 +318,7 @@ void callback(char* topic, byte* payload, unsigned int len)
         }
       }
     }
-    else if ((char)payload[role] == 'f'){ // 'f' is for follower
+    else if ((char)payload[role] == 'f'){ //'f' is for follower
        message[role] = 'l';
        continueHandshake = true;
        for (int i = 0 ; i < espIDLength ; i++){
@@ -380,11 +379,11 @@ void callback(char* topic, byte* payload, unsigned int len)
           //Serial.print("Shape change");
           for (int ii = 0 ; ii < commandSize ; ii++){ //Save the desired shape
             newValue[ii] = (char)payload[commandsStart + ii + (nbrNewValues * commandSize)];
-            //Serial.println((char)payload[commandsStart + ii + (nbrNewValues * commandSize)]);
+            Serial.println((char)payload[commandsStart + ii + (nbrNewValues * commandSize)]);
           }
           nbrNewValues += 1;
           moriShape[i-allocationStart] = atoi(newValue); //Convert char to int
-          //Serial.println(atoi(newValue));
+          Serial.println(atoi(newValue));
         }
       }
       for (int ii = 0 ; ii < commandSize ; ii++){ //Save end byte
@@ -392,7 +391,7 @@ void callback(char* topic, byte* payload, unsigned int len)
       }
       //Serial.print(atoi(newValue));
       if (atoi(newValue) != 150){ //Check end byte
-        Serial.print("Command end bit error!");
+        Serial.println("Command end bit error!");
       }
       pubShape();
     }

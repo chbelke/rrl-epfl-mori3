@@ -50,11 +50,11 @@ class MqttHost(threading.Thread):
       self.macCallTime = time.time()
       self.verCallTimeDict = {}
       self.verCalledDict = {}
-      self.stayAlive = True
       self.version = 0.50
       self.event = threading.Event()
       self.moriShapeDict = {}
       self.leaderFollowerDict = {}
+      self.leaderFollowerOrder = []
 
       print("Server IP: " + self.mqttServer)
       self.client = mqtt.Client(self.clientName)
@@ -189,7 +189,7 @@ class MqttHost(threading.Thread):
                if self.moriShapeDict.get(espNum) is None: #Check if the ESP shape has already been asked once to initialize the shape array
                   self.moriShapeDict[espNum] = [200, 200, 200, 0, 0, 0]
                #print(pyld[2])
-               for i in range(2,len(pyld)):
+               for i in range(2,len(pyld)): #Store the desired shape values
                   self.moriShapeDict.get(espNum)[i-2] = int(pyld[i])
 
          elif(pyld[0] == 'FOLLOWER:'):
@@ -204,11 +204,15 @@ class MqttHost(threading.Thread):
                   if pyld[1] == self.leaderFollowerDict.get(espNum)[i]: #Enter if the leader is already leading the follower (error)
                      print(colored("ERROR: ESP" + espNum + " is already the leader of ESP" + pyld[1], "red"))
                      return
+
+            #Conditions verified => add the follower to the leader's list
             if self.leaderFollowerDict.get(espNum) is None: #First follower for the leader
                self.leaderFollowerDict[espNum] = [pyld[1]]
+               self.leaderFollowerOrder.append(espNum)
             else:
                self.leaderFollowerDict[espNum].append(pyld[1])
-            print(self.leaderFollowerDict)
+               self.leaderFollowerOrder.append(espNum)
+            print(colored("Leader - Follower : " + self.leaderFollowerDict,"yellow"))
 
 
    def publishGlobal(self, message):
@@ -229,15 +233,26 @@ class MqttHost(threading.Thread):
       #print(self.macOrder)
       return self.numberModules
 
-   def getMoriShape(self, espNum):
+   def resetHandshakes(self):
+      #Empty the leader - follower arrays 
+      self.leaderFollowerDict = {}
+      self.leaderFollowerOrder = []
+
+   def getMoriShape(self):
       #print("Mori " + mac + " shape: " + moriShapeDict.get(mac))
-      return self.moriShapeDict.get(espNum)
+      return self.moriShapeDict
 
    def getMoriIds(self):
       return self.macDict
 
    def getMoriOrder(self):
       return self.macOrder
+
+   def getLeaderIds(self):
+      return self.leaderFollowerDict
+
+   def getLeaderOrder(self):
+      return self.leaderFollowerOrder
 
    def run(self):
       startTime = time.time()
@@ -249,14 +264,14 @@ class MqttHost(threading.Thread):
       while not self.event.is_set():
          if time.time() - loopTime > 10:
             loopTime = time.time()
-            print("Time Elapsed: {:.3f}".format(loopTime-startTime))
+            #print("Time Elapsed: {:.3f}".format(loopTime-startTime))
             # self.client.publish("esp/rec","mac")
-            print("")
-            print(colored("Referenced ESPs : ","yellow"))
-            print(self.macDict)
+            #print("")
+            #print(colored("Referenced ESPs : ","yellow"))
+            #print(self.macDict)
             #print(self.macOrder)
             # calcResults(args.fileName)
-            print("")
+            #print("")
          self.event.wait(0.5)
  
    def exit(self):
