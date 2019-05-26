@@ -61,8 +61,6 @@ int main (void) {
     SYSTEM_Initialize(); // MCC & User inits
 
     //    MotRot_LIM(0,255);          // set current limit of edge 0 to max
-    //    LED_Set(20,10,5);           // set color of rgb leds
-    //    TLC59208_Write();           // update led driver
     //    LED_R = 0;                  // switch red led on
     
     LED_R = 1;

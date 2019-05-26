@@ -37,7 +37,7 @@ uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
  * 10 = coupling & led input
  * - 0b10xxxooo retract couplings 0,1,2 (if already open, interval prolonged)
  * - 0b10oooxxx rgb led values follow in order
- * 11 = tbd
+ * 11 = tbd - mode selection?
  * - 0b11xxxxxx tbd
  */
 
@@ -267,7 +267,7 @@ void Coms_ESP_Eval() {
             EspInCase = 0;
             break;
             
-        case 22: // LED INPUT **************************************************
+        case 22: // COUPLING & LED INPUT ***************************************
             if (EspInAloc & 0b00000100) {
                 RgbPWM[0] = EspIn;
                 EspInByts = EspInByts + 1;
@@ -291,7 +291,7 @@ void Coms_ESP_Eval() {
                 break;
             }
             
-        case 25: // verify drive inputs
+        case 25: // verify coupling inputs
             if (EspIn == ESP_End) {
                 if (EspInByts == (2 + EspInBits)) {
                     // set smas
@@ -318,8 +318,8 @@ void Coms_ESP_Eval() {
             
         default:
             EspInCase = 0;
+            break;
     }
-
 }
 
 /* ******************** ESP COMMAND TO MOTORS ******************************* */

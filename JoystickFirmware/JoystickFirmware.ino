@@ -30,7 +30,7 @@ uint8_t CouplDelayCount[3] = {0, 0, 0};     // count from coupling trigger
 #define CouplDelay 150                      // coupling display after trigger
 uint8_t CouplCount = 0;                     // open coupling count
 char CouplInd[3] = "ABC";                   // string array displayed when coupling
-uint8_t CouplOut = 0b10000000;              // coupling CMD byte
+uint8_t CouplOut = B10000000;              // coupling CMD byte
 
 // driving edge button eval
 uint8_t DriveEdge = 0;                      // driving edge selection
@@ -59,7 +59,7 @@ void setup() {
   pinMode(10, INPUT);
   pinMode(13, INPUT);
 
-  Serial.begin(19200);
+  Serial.begin(115200);
   lcd.begin(16, 2);
   lcd.createChar(0, upArrow);
   lcd.createChar(1, downArrow);
@@ -97,17 +97,17 @@ void loop() {
     if (digitalRead(10)) {                  // coupling A button
       CouplDelayCount[0] = 0;
       CouplFlag[0] = true;
-      CouplOut = CouplOut | 0b00100000;
+      CouplOut = CouplOut | B00100000;
     }
     if (digitalRead(9)) {                   // coupling B button
       CouplDelayCount[1] = 0;
       CouplFlag[1] = true;
-      CouplOut = CouplOut | 0b00010000;
+      CouplOut = CouplOut | B00010000;
     }
     if (digitalRead(8)) {                   // coupling C button
       CouplDelayCount[2] = 0;
       CouplFlag[2] = true;
-      CouplOut = CouplOut | 0b00001000;
+      CouplOut = CouplOut | B00001000;
     }
   }
 
@@ -124,8 +124,71 @@ void loop() {
   // CMD send interval
   if (CMD_UpdateFlag) {
 
+    /* *** EXTENSION INPUT ********************************************************************** */
+    if (digitalRead(6) == true) {
+      MotLin[0] = map(analogRead(A3), 0, 1023, 200, 900);
+      MotLin[1] = map(analogRead(A4), 0, 1023, 200, 900);
+      MotLin[2] = map(analogRead(A5), 0, 1023, 200, 900);
+
+      Serial.write(CMD_Beg);
+      Serial.write(B00111000);
+      Serial.write((uint8_t)(MotLin[0] >> 8));
+      Serial.write((uint8_t)(MotLin[0] & 0x00FF));
+      Serial.write((uint8_t)(MotLin[1] >> 8));
+      Serial.write((uint8_t)(MotLin[1] & 0x00FF));
+      Serial.write((uint8_t)(MotLin[2] >> 8));
+      Serial.write((uint8_t)(MotLin[2] & 0x00FF));
+      Serial.write(CMD_End);
+
+      MotLin[0] = map(MotLin[0], 200, 900, 900, 200);
+      MotLin[1] = map(MotLin[1], 200, 900, 900, 200);
+      MotLin[2] = map(MotLin[2], 200, 900, 900, 200);
+
+      // LCD
+      lcd.setCursor(0, 1);
+      lcd.print("Ext: ");
+      lcd.print(MotLin[0]);
+      lcd.print(" ");
+      lcd.print(MotLin[1]);
+      lcd.print(" ");
+      lcd.print(MotLin[2]);
+      // LCD
+
+
+      /* *** COUPLING INPUT ********************************************************************* */
+    } else if (CouplFlag[0] || CouplFlag[1] || CouplFlag[2]) {
+      Serial.write(CMD_Beg);
+      Serial.write(CouplOut);
+      Serial.write(CMD_End);
+
+      // LCD
+      lcd.setCursor(0, 1);
+      lcd.print("Coupl. ");
+      CouplCount = 0;
+      for (int j = 0; j <= 2; j++) {
+        if (CouplFlag[j]) {
+          lcd.print(CouplInd[j]);
+          CouplCount++;
+        }
+      }
+      lcd.print(" open");
+      if (CouplCount == 1) {
+        lcd.print("  ");
+      } else if (CouplCount == 2) {
+        lcd.print(" ");
+      }
+      lcd.print(" ");
+      // LCD
+
+    } else {
+      // LCD
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+      // LCD
+    }
+
     /* *** DRIVE INPUT ************************************************************************** */
-    if (digitalRead(7)) {
+    if (digitalRead(7) == true) {
       // read joystick values
       Joystick[0] = analogRead(A2);
       Joystick[1] = analogRead(A1);
@@ -151,7 +214,7 @@ void loop() {
       Serial.write(CMD_Beg);
       if (Joystick[0] != 512) {
         if (Joystick[0] < 512) {            // --- REVERSE DRIVE -----------------------------------
-          Serial.write(0b01100000 | ((DriveEdge & 0b00000011) << 3));
+          Serial.write(B01100000 | ((DriveEdge & B00000011) << 3));
 
           JoystickMapped0 = (uint8_t)map(Joystick[0], 0, 512, 255, 0);
           Serial.write(JoystickMapped0);
@@ -168,7 +231,7 @@ void loop() {
           // LCD
 
         } else {                            // --- FORWARD DRIVE -----------------------------------
-          Serial.write(0b01100100 | ((DriveEdge & 0b00000011) << 3));
+          Serial.write(B01100100 | ((DriveEdge & B00000011) << 3));
           JoystickMapped0 = (uint8_t)map(Joystick[0], 512, 1024, 0, 255);
           Serial.write(JoystickMapped0);
 
@@ -223,17 +286,17 @@ void loop() {
         }
 
       } else if (Joystick[2] != 512) {      // --- TWIST -------------------------------------------
-        Serial.write(0b01000111);
+        Serial.write(B01000111);
         JoystickMapped2 = (int8_t)map(Joystick[2], 0, 1024, 127, -127);
         Serial.write(JoystickMapped2);
         Serial.write(JoystickMapped2);
         Serial.write(JoystickMapped2);
 
         // LCD
-        if (JoystickMapped2 > 0) {
-          lcd.write((byte)3); // twist right
-        } else {
+        if (JoystickMapped2 >= 0) {
           lcd.write((byte)2); // twist left
+        } else {
+          lcd.write((byte)3); // twist right
         }
         if (abs(JoystickMapped2) < 10) {
           lcd.print("  ");
@@ -246,10 +309,10 @@ void loop() {
         // LCD
 
       } else {                              // --- NO DRIVE ----------------------------------------
-        Serial.write(0b01000111);
-        Serial.write((uint8_t)0);
-        Serial.write((uint8_t)0);
-        Serial.write((uint8_t)0);
+        Serial.write(B01000111);
+        Serial.write(B00000000);
+        Serial.write(B00000000);
+        Serial.write(B00000000);
 
         // LCD
         lcd.print("              ");
@@ -258,71 +321,23 @@ void loop() {
       }
       Serial.write(CMD_End);
 
+    } else if (Serial.available()) {        // --- for debugging -----------------------------------
+      uint8_t conRead = Serial.read();
+      if (conRead == 0x0F) {
+        while (!Serial.available());
+        uint8_t bytRead1 = Serial.read();
+        //          while (!Serial.available());
+        //          uint8_t bytRead2 = Serial.read();
+        lcd.setCursor(0, 0);
+        lcd.print(((int16_t)(bytRead1)));
+        lcd.print("                ");
+      }
     } else {
       // LCD
       lcd.setCursor(0, 0);
       lcd.print("                ");
       // LCD
-    }
 
-
-    /* *** EXTENSION INPUT ********************************************************************** */
-    if (digitalRead(6)) {
-      MotLin[0] = map(analogRead(A3), 0, 1023, 900, 200);
-      MotLin[1] = map(analogRead(A4), 0, 1023, 900, 200);
-      MotLin[2] = map(analogRead(A5), 0, 1023, 900, 200);
-
-      Serial.write(CMD_Beg);
-      Serial.write(0b00111000);
-      Serial.write((uint8_t)(MotLin[0] >> 8));
-      Serial.write((uint8_t)(MotLin[0] & 0x00FF));
-      Serial.write((uint8_t)(MotLin[1] >> 8));
-      Serial.write((uint8_t)(MotLin[1] & 0x00FF));
-      Serial.write((uint8_t)(MotLin[2] >> 8));
-      Serial.write((uint8_t)(MotLin[2] & 0x00FF));
-      Serial.write(CMD_End);
-
-      // LCD
-      lcd.setCursor(0, 1);
-      lcd.print("Ext: ");
-      lcd.print(MotLin[0]);
-      lcd.print(" ");
-      lcd.print(MotLin[1]);
-      lcd.print(" ");
-      lcd.print(MotLin[2]);
-      // LCD
-
-
-      /* *** COUPLING INPUT ********************************************************************* */
-    } else if (CouplFlag[0] || CouplFlag[1] || CouplFlag[2]) {
-      Serial.write(CMD_Beg);
-      Serial.write(CouplOut);
-      Serial.write(CMD_End);
-
-      // LCD
-      lcd.setCursor(0, 1);
-      lcd.print("Coupl. ");
-      CouplCount = 0;
-      for (int j = 0; j <= 2; j++) {
-        if (CouplFlag[j]) {
-          lcd.print(CouplInd[j]);
-          CouplCount++;
-        }
-      }
-      lcd.print(" open");
-      if (CouplCount == 1) {
-        lcd.print("  ");
-      } else if (CouplCount == 2) {
-        lcd.print(" ");
-      }
-      lcd.print(" ");
-      // LCD
-
-    } else {
-      // LCD
-      lcd.setCursor(0, 1);
-      lcd.print("                ");
-      // LCD
     }
 
     CMD_UpdateFlag = false;

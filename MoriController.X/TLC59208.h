@@ -18,5 +18,6 @@ void SMA_On(uint8_t);
 void SMA_Off(uint8_t);
 void SMA_Ctrl(void);
 void LED_Set(uint8_t, uint8_t);
+void LED_SetAll(uint8_t, uint8_t, uint8_t);
 
 #endif	/* TLC59208_H */
