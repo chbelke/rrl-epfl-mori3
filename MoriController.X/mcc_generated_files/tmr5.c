@@ -14,11 +14,11 @@
   @Description
     This source file provides APIs for driver for TMR5. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36
+        MPLAB             :  MPLAB X v5.10
 */
 
 /*
@@ -53,6 +53,8 @@
 #include "adc1.h"
 #include "../define.h"
 #include "../MotLin.h"
+#include "../TLC59208.h"
+#include "../MMA8452Q.h"
 
 /**
   Section: Data Type Definitions
@@ -90,8 +92,8 @@ void TMR5_Initialize (void)
 {
     //TMR5 0; 
     TMR5 = 0x00;
-    //Period = 1 s; Frequency = 3686400 Hz; PR5 57600; 
-    PR5 = 0xE100;
+    //Period = 0.2 s; Frequency = 3686400 Hz; PR5 11520; 
+    PR5 = 0x2D00;
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
     T5CON = 0x8020;
 
@@ -153,15 +155,38 @@ uint16_t TMR5_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
-    
-    // BLAST STATUS TO ESP
-//    UART4_Write(ESP_Beg);
-//    UART4_Write16(ADC1_Return(0));
-//    UART4_Write16(ADC1_Return(1));
-//    UART4_Write16(ADC1_Return(2));
-//    UART4_Write(ESP_End);
- 
-}
+
+    if (MODE_LED_ANGLE) {
+        MMA8452Q_Read();
+        int16_t RGB[3] = {0, 0, 0};
+        RGB[0] = ACC_Get(0) / 16 + 64;
+        RGB[1] = ACC_Get(1) / 16 + 64;
+        RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
+        uint8_t m;
+        for (m = 0; m <= 2; m++) {
+            if (RGB[m] < 0) {
+                RGB[m] = 0;
+            } else if (RGB[m] > 255) {
+                RGB[m] = 255;
+            }
+        }
+        LED_SetAll(RGB[0] / 2, RGB[1] / 2, RGB[2]);
+    } else if (MODE_LED_EDGES) {
+        uint16_t RGB[3];
+        RGB[0] = (902 - (ADC1_Return(0))) / 30;
+        RGB[1] = (902 - (ADC1_Return(1))) / 30;
+        RGB[2] = (902 - (ADC1_Return(2))) / 30;
+        uint8_t m;
+        for (m = 0; m <= 2; m++) {
+            if (RGB[m] < 0) {
+                RGB[m] = 0;
+            } else if (RGB[m] > 255) {
+                RGB[m] = 255;
+            }
+        }
+        LED_SetAll(RGB[0], RGB[1], RGB[2]);
+    }
+ }
 
 void TMR5_Start( void )
 {

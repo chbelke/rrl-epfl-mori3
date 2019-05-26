@@ -20,15 +20,24 @@ static volatile bool Flg_LiveAngle = false;
 static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
 static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 
-
 /* ******************** NOTES *********************************************** */
+// Timer info
+/* Timer 1: 100 Hz - angle feedback
+ * Timer 3: 20 Hz - extension feedback, coupling controller
+ * Timer 5: 5 Hz - updating LEDs */
+
+// I2C MCC modification
 /* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
  * is as follows: ((1/0.4 - 0.120)*3.6864)-2 = 6.77
  * FRM: http://ww1.microchip.com/downloads/en/DeviceDoc/70000195g.pdf*/
 
-
 /* ******************** MODE SELECTION ************************************** */
-#define MODE_DEBUG 0
+#define MODE_DEBUG false
+
+/* ******************** LIVE MODE VARS ************************************** */
+static volatile bool MODE_LED_ANGLE = true;
+static volatile bool MODE_LED_EDGES = false;
+
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
@@ -133,4 +142,3 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define SMA_Duty 100 // 8-bit PWM value
 
 #endif	/* DEFINE_H */
-
