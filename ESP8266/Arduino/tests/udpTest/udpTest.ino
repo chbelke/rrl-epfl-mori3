@@ -14,6 +14,9 @@
 
 **********************************************************************************/
 
+// Sample UDP command:
+// udp/rw/p100/i192.168.0.51/mhello
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoOTA.h>
@@ -47,6 +50,12 @@ int moriShape[6] = {200, 200, 200, 0, 0, 0};
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+WiFiUDP UDP;
+
+const int PACKET_SIZE = 48;
+byte udpInBuff[PACKET_SIZE];
+byte udpOutBuff[PACKET_SIZE];
 
 //--------------------------- Start ----------------------------------------//
 void setup()
@@ -187,14 +196,10 @@ void loop()
       ArduinoOTA.handle();
       break;
     case 3:   //everything is good
-      scanWifis();
-      pubMac("ON: "); //Publish connexion message
-      //pubShape();
-      if (abs(lastMessage - millis()) > 10000)
-      {
-        client.publish(publishName, "ERR: SSID not found within 10s");
-        lastMessage = millis();
-      }
+      normalOp();
+    case 4:
+      normalOp();
+      readUDP();
   }
   client.loop();
 }
@@ -406,15 +411,7 @@ void callback(char* topic, byte* payload, unsigned int len)
   }
   else if (!memcmp(payload2,"udp",sizeof("udp")-1))
   {
-    Serial.println("Recieved UDP");
-    Serial.println(sizeof("udp"));
-    for (int i = 0; i < len; i++) 
-    {
-      Serial.print(payload2[i]);
-    }
-    Serial.println();
-    Serial.println("HERP");
-    Serial.println(payload2);
+    establishUDP(payload2, len);
   }
 
   
@@ -445,6 +442,90 @@ void pubShape()
   client.publish(publishName, buff);
 }
 
+void establishUDP(char* payld, unsigned int len)
+{
+  bool readFlag = false;
+  bool writeFlag = false;
+  int port=0;
+  char ip[15];
+  char msg[40];
+  Serial.println("Recieved UDP Command");
+  for (int i = 3; i < len; i++)   //start after udp
+  {
+    if(payld[i] == 'r')
+      readFlag = true;
+    if(payld[i] == 'w')
+      writeFlag = true;
+    if(payld[i] == 'p')
+    {
+      for(int l=1; isDigit(payld[i+l]); l++)
+      {
+        port = port *10 + (payld[i+l]-'0');
+        if(i+l+1 > len)
+          break;
+      }
+    }
+    if(payld[i] == 'i')
+    {
+      int l;
+      for(l=1; isDigit(payld[i+l])|| payld[i+l] == '.'; l++)
+      {
+        ip[l-1] = payld[i+l];
+        if(i+l+1 > len)
+          break;
+      }
+      for(l; l <= 16; l++)
+      {
+        ip[l-1] = '\0';
+      }
+    }
+    if(payld[i] == 'm')
+    {
+      int m=1;
+      for(m; i+m<=len; m++)
+      {
+        msg[m-1] = payld[i+m];
+        Serial.println(msg[m-1]);
+        if(i+m+1 > len)
+          break;
+      }
+      msg[m-1] = '\0';
+    }
+  }
+  if(readFlag)
+  {
+    if(port!=0)
+    {
+      UDP.begin(port);
+      Serial.print("Listening to UDP on Port: ");
+      Serial.println(UDP.localPort());
+      runState = 4;
+    }
+  }
+  if(writeFlag)
+  {
+    if(!memcmp(ip,"192",sizeof("192")-1))
+    {
+//      for(int i=0; i< strlen(msg);i++)
+//      {
+        memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
+        // Initialize values needed to form NTP request
+        udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
+        // send a packet requesting a timestamp:
+        UDP.beginPacket(ip, port); // NTP requests are to port 123
+        UDP.write(udpOutBuff, PACKET_SIZE);
+        UDP.endPacket();
+//      }
+      Serial.print("Sent: ");
+      Serial.print(msg);
+      Serial.print("\t to: ");
+      Serial.print(ip);
+      Serial.print(":");
+      Serial.print(port);
+    }
+  }
+}
+
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
 {
@@ -455,6 +536,30 @@ void pubVersion()
   client.publish(publishName, buff);
 }
 
+
+void readUDP()
+{
+  if (UDP.parsePacket() == 0) { // If there's no response (yet)
+    return;
+  }
+  UDP.read(udpInBuff, PACKET_SIZE);
+  for(int i=0; i< sizeof(udpInBuff);i++)
+    {
+      Serial.print(udpInBuff[i]);
+    }
+}
+
+void normalOp()
+{
+  scanWifis();
+  pubMac("ON: "); //Publish connexion message
+  //pubShape();
+  if (abs(lastMessage - millis()) > 10000)
+  {
+    client.publish(publishName, "ERR: SSID not found within 10s");
+    lastMessage = millis();
+  }
+}
 
 //--------------------------- Scans Network -----------------------------//
 void scanWifis()
@@ -500,13 +605,6 @@ void scanWifis()
     }
   }
 }
-
-
-void getIP()
-{
-  
-}
-
 
 char* concatID(char* header, char* footer) {
 //  char* header = String(ESP.getChipId()).c_str();
