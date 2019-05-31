@@ -22,16 +22,10 @@
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 
-const char* esp_ssid = "helloThere";
-const char* esp_password =  "generalKenobi1";
 const char* brn_ssid = "rrl_wifi";
 const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
-
-//char* clientName = (char*)malloc(8*sizeof(char));
-//char* publishName = (char*)malloc(16*sizeof(char));
-//char* recieveName = (char*)malloc(16*sizeof(char));
 
 char clientName[16];
 char publishName[36];
@@ -41,11 +35,11 @@ const float softwareVersion = 0.5;
 
 bool verCheck = false;  //assumes we don't know the version
 bool verGood = true;   //assumes we are up to date unless otherwise
-bool stopLoop = false;  //assumes we are running the proper code
 
 char runState = 0;
 
 unsigned long lastMessage = millis();
+unsigned long lastMacPub = millis();
 int moriShape[6] = {200, 200, 200, 0, 0, 0};
 
 WiFiClient espClient;
@@ -53,9 +47,14 @@ PubSubClient client(espClient);
 
 WiFiUDP UDP;
 
-const int PACKET_SIZE = 48;
+const int PACKET_SIZE = 16; //how many bytes the buffers hold
 byte udpInBuff[PACKET_SIZE];
 byte udpOutBuff[PACKET_SIZE];
+const int IPLEN = 5;
+char ipList[IPLEN][15]; //holds 5 ips of a length of 15udp/w/p100/i192.168.0.65/
+int portList[IPLEN];
+
+unsigned long lastOutUDP = millis();
 
 //--------------------------- Start ----------------------------------------//
 void setup()
@@ -112,7 +111,7 @@ void setup()
   client.subscribe(recieveName);
   client.subscribe("esp/rec");
 
-  WiFi.softAP(esp_ssid, esp_password);
+//  WiFi.softAP(esp_ssid, esp_password);
 
   //----------------------- OAT Handling--------------------------------------//
   ArduinoOTA.setPort(8266);
@@ -177,6 +176,13 @@ void setup()
     client.loop();
   });
   // ArduinoOTA.begin();
+
+  //----------------------- UDP Handling--------------------------------------//
+  for(int i=0; i <= IPLEN; i++)
+  {
+    ipList[i][0] = '\0';
+  }
+  
 }
 
 
@@ -197,9 +203,15 @@ void loop()
       break;
     case 3:   //everything is good
       normalOp();
+      break;
     case 4:
       normalOp();
       readUDP();
+      break;
+    case 5:
+      normalOp(); 
+      writeUDP();
+      break;
   }
   client.loop();
 }
@@ -210,13 +222,11 @@ void enableOTA()
   Serial.println("StoppingLoop");
   client.publish(publishName, "ERR: Pausing functionality until updated");
   client.loop();
-  WiFi.mode(WIFI_STA);
   ArduinoOTA.begin();
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
   delay(1000);
-  stopLoop = true;
 }
 
 
@@ -446,6 +456,8 @@ void establishUDP(char* payld, unsigned int len)
 {
   bool readFlag = false;
   bool writeFlag = false;
+  bool msgFlag = false;
+  bool portFlag = false;
   int port=0;
   char ip[15];
   char msg[40];
@@ -464,6 +476,7 @@ void establishUDP(char* payld, unsigned int len)
         if(i+l+1 > len)
           break;
       }
+      portFlag = true;
     }
     if(payld[i] == 'i')
     {
@@ -490,6 +503,8 @@ void establishUDP(char* payld, unsigned int len)
           break;
       }
       msg[m-1] = '\0';
+      msgFlag = true;
+      break;
     }
   }
   if(readFlag)
@@ -504,10 +519,25 @@ void establishUDP(char* payld, unsigned int len)
   }
   if(writeFlag)
   {
-    if(!memcmp(ip,"192",sizeof("192")-1))
+    if(!memcmp(ip,"192",sizeof("192")-1) && portFlag)
     {
-//      for(int i=0; i< strlen(msg);i++)
-//      {
+      if(!msgFlag)
+      {
+        Serial.print("NO MSG!");
+        for(int i=0; i <= IPLEN; i++)
+          {
+            if(ipList[i][0] == '\0')
+            {
+              //ipList[i] = strcpy(ip);
+              strcpy(ipList[i], ip);
+              break;
+            }
+          }
+        Serial.print("CHANGE STATE!");
+        runState = 5;
+      }
+      else
+      {
         memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
         // Initialize values needed to form NTP request
         udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
@@ -515,13 +545,13 @@ void establishUDP(char* payld, unsigned int len)
         UDP.beginPacket(ip, port); // NTP requests are to port 123
         UDP.write(udpOutBuff, PACKET_SIZE);
         UDP.endPacket();
-//      }
-      Serial.print("Sent: ");
-      Serial.print(msg);
-      Serial.print("\t to: ");
-      Serial.print(ip);
-      Serial.print(":");
-      Serial.print(port);
+        Serial.print("Sent: ");
+        Serial.print(msg);
+        Serial.print("\t to: ");
+        Serial.print(ip);
+        Serial.print(":");
+        Serial.print(port);
+      }       
     }
   }
 }
@@ -549,11 +579,52 @@ void readUDP()
     }
 }
 
+void writeUDP()
+{
+  long unsigned currentTime = millis();
+  if(currentTime - lastOutUDP < 100)
+    return;
+  Serial.println("WRITE MOFO");
+  lastOutUDP = currentTime;
+  for(int i=0; i <= IPLEN; i++)
+  {
+    Serial.println(ipList[i]);
+    Serial.print("For LOOOOps:" );
+    if(ipList[i][0] == '\0')
+    {
+      Serial.print(i);
+      Serial.print(" ");
+      Serial.println(ipList[i][0]);
+      break;
+    }
+    Serial.println("Break IT");
+    memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
+    // Initialize values needed to form NTP request
+    udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
+    // send a packet requesting a timestamp:
+    UDP.beginPacket(ipList[i], portList[i]); // NTP requests are to port 123
+    UDP.write(udpOutBuff, PACKET_SIZE);
+    UDP.endPacket();
+    Serial.print("Sent: ");
+    Serial.print(udpOutBuff[0]);
+    Serial.print("\t to: ");
+    Serial.print(ipList[i]);
+    Serial.print(":");
+    Serial.print(portList[i]);
+  }
+}
+
+
 void normalOp()
 {
-  scanWifis();
-  pubMac("ON: "); //Publish connexion message
-  //pubShape();
+//  scanWifis();
+  long unsigned currentTime = millis();
+  if(currentTime - lastMacPub > 2000)
+  {
+    pubMac("ON: "); //Publish connexion message
+    lastMacPub = millis();
+  }
+  
   if (abs(lastMessage - millis()) > 10000)
   {
     client.publish(publishName, "ERR: SSID not found within 10s");
