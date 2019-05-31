@@ -27,6 +27,8 @@ const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
 
+const char* esp_role = "mori";
+
 char clientName[16];
 char publishName[36];
 char recieveName[36];
@@ -210,7 +212,11 @@ void loop()
       break;
     case 5:
       normalOp(); 
-      writeUDP();
+      writeUDPShape();
+      break;
+    case 6:
+      normalOp();
+      writeUDPSerial();
       break;
   }
   client.loop();
@@ -248,6 +254,7 @@ void callback(char* topic, byte* payload, unsigned int len)
   if (!memcmp(payload2,"mac",sizeof("mac")-1))
   {
     pubMac("MAC: ");
+    pubRole();
     pubShape();
   }
   
@@ -255,6 +262,7 @@ void callback(char* topic, byte* payload, unsigned int len)
   {
     runState = 3;
     pubMac("MAC: ");
+    pubRole();
     Serial.println("version Excellent");
   }
   else if (!memcmp(payload2,"vb",sizeof("vb")-1))
@@ -398,6 +406,7 @@ void callback(char* topic, byte* payload, unsigned int len)
           }
           nbrNewValues += 1;
           moriShape[i-allocationStart] = atoi(newValue); //Convert char to int
+//          moriShape[i-allocationStart] = newValue;
           Serial.println(atoi(newValue));
         }
       }
@@ -438,6 +447,15 @@ void pubMac(String header)
     client.publish(publishName, buff);
 }
 
+void pubRole()
+{
+  char buff[40];
+  String roleString = String("ROLE: ") + WiFi.macAddress() + String(" ") + String(esp_role);
+  roleString.toCharArray(buff, 30);
+  client.publish(publishName, buff);
+}
+
+
 void pubShape()
 {
   char buff[130];
@@ -458,6 +476,7 @@ void establishUDP(char* payld, unsigned int len)
   bool writeFlag = false;
   bool msgFlag = false;
   bool portFlag = false;
+  bool serialFlag = false;
   int port=0;
   char ip[15];
   char msg[40];
@@ -468,6 +487,8 @@ void establishUDP(char* payld, unsigned int len)
       readFlag = true;
     if(payld[i] == 'w')
       writeFlag = true;
+    if(payld[i] == 's')
+      serialFlag = true;
     if(payld[i] == 'p')
     {
       for(int l=1; isDigit(payld[i+l]); l++)
@@ -525,16 +546,27 @@ void establishUDP(char* payld, unsigned int len)
       {
         Serial.print("NO MSG!");
         for(int i=0; i <= IPLEN; i++)
+        {
+          if(ipList[i][0] == '\0')
           {
-            if(ipList[i][0] == '\0')
-            {
-              //ipList[i] = strcpy(ip);
-              strcpy(ipList[i], ip);
-              break;
-            }
+            //ipList[i] = strcpy(ip);
+            strcpy(ipList[i], ip);
+            portList[i] = port;
+            break;
           }
-        Serial.print("CHANGE STATE!");
-        runState = 5;
+        }
+        if(serialFlag)
+        {
+          Serial.print("Entering Serial");
+          client.publish(publishName, "Entering Serial");
+          runState = 6;
+        }
+        else
+        {
+          client.publish(publishName, "Publishing Data");
+          Serial.print("CHANGE STATE!");
+          runState = 5;
+        }
       }
       else
       {
@@ -551,9 +583,9 @@ void establishUDP(char* payld, unsigned int len)
         Serial.print(ip);
         Serial.print(":");
         Serial.print(port);
-      }       
-    }
-  }
+      } //else (!msg)       
+    } //IP
+  } //writeFlag
 }
 
 //----------------------- Recieved Message -----------------------------//
@@ -569,48 +601,71 @@ void pubVersion()
 
 void readUDP()
 {
-  if (UDP.parsePacket() == 0) { // If there's no response (yet)
+  if (UDP.parsePacket() == 0) // If there's no response (yet)
+  { 
     return;
   }
   UDP.read(udpInBuff, PACKET_SIZE);
   for(int i=0; i< sizeof(udpInBuff);i++)
-    {
-      Serial.print(udpInBuff[i]);
-    }
+  {
+    Serial.print(udpInBuff[i]);
+  }
+  Serial.println();
 }
 
-void writeUDP()
+void writeUDPShape()
 {
   long unsigned currentTime = millis();
   if(currentTime - lastOutUDP < 100)
     return;
-  Serial.println("WRITE MOFO");
   lastOutUDP = currentTime;
   for(int i=0; i <= IPLEN; i++)
   {
-    Serial.println(ipList[i]);
-    Serial.print("For LOOOOps:" );
     if(ipList[i][0] == '\0')
     {
-      Serial.print(i);
-      Serial.print(" ");
-      Serial.println(ipList[i][0]);
       break;
     }
-    Serial.println("Break IT");
     memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
-    // Initialize values needed to form NTP request
-    udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
-    // send a packet requesting a timestamp:
+    for(int j=0; j<=6; j++)
+    {
+      udpOutBuff[1+j*2] = highByte(moriShape[j]);
+      udpOutBuff[0+j*2] = lowByte(moriShape[j]);
+    }
     UDP.beginPacket(ipList[i], portList[i]); // NTP requests are to port 123
     UDP.write(udpOutBuff, PACKET_SIZE);
     UDP.endPacket();
+    
     Serial.print("Sent: ");
-    Serial.print(udpOutBuff[0]);
+    for(int j=0; j<PACKET_SIZE; j++)
+    {
+      Serial.print(udpOutBuff[j]);
+    }
     Serial.print("\t to: ");
     Serial.print(ipList[i]);
     Serial.print(":");
-    Serial.print(portList[i]);
+    Serial.println(portList[i]);
+  }
+}
+
+void writeUDPSerial()
+{
+  if (Serial.available() > 0) 
+  {
+    uint8_t bytRead1 = Serial.read();
+    udpOutBuff[0] = bytRead1;
+    for(int i=0; i <= IPLEN; i++)
+    {
+      if(ipList[i][0] == '\0')
+      {
+        break;
+      }
+      UDP.beginPacket(ipList[i], portList[i]);
+      UDP.write(udpOutBuff, 1);
+      UDP.endPacket();
+    }
+    Serial.print("Sent: ");
+    Serial.print(udpOutBuff[0]);
+    client.publish(publishName, "Sent Serial!");
   }
 }
 
