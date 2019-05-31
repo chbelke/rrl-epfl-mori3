@@ -25,7 +25,7 @@ const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
 
-const char* esp_role = "mori";
+const char* esp_role = "contr";
 
 //char* clientName = (char*)malloc(8*sizeof(char));
 //char* publishName = (char*)malloc(16*sizeof(char));
@@ -56,7 +56,7 @@ void setup()
   Serial.println(ESP.getChipId());
   Serial.print("WifiID: ");
   Serial.println(WiFi.macAddress());
-  sprintf(clientName, "%08X", ESP.getChipId());
+  sprintf(clientName,"%08X",ESP.getChipId());
   sprintf(publishName, "esp/%s/pub", clientName);
   sprintf(recieveName, "esp/%s/rec", clientName);
   Serial.println(clientName);
@@ -66,8 +66,8 @@ void setup()
   WiFi.mode(WIFI_STA);
 
   delay(500);
-
-  //  Serial.println(clientName);
+  
+//  Serial.println(clientName);
   // WiFi.setOutputPower(5.0);
   WiFi.begin(brn_ssid, brn_password);
 
@@ -92,7 +92,7 @@ void setup()
       Serial.print("failed with state ");
       Serial.print(client.state());
       delay(2000);
-    }
+    } 
   }
 
   //--------------------------- MQTT -----------------------------------------//
@@ -117,7 +117,7 @@ void setup()
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS
     // using SPIFFS.end()
     char message[30];
-    sprintf(message, "Start updating: %s", type);
+    sprintf(message,"Start updating: %s",type);
     client.publish(publishName, message);
     Serial.println(message);
     client.loop();
@@ -135,14 +135,14 @@ void setup()
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
   {
     Serial.printf("Progress: %i/100", (progress / (total / 100)));
-    if (progress % 10 < 1)
+    if(progress % 10 < 1)
     {
       char message[30];
-      sprintf(message, "Progress: %i/100", (progress / (total / 100)));
+      sprintf(message, "Progress: %i/100", (progress / (total / 100))); 
       client.publish(publishName, message);
       client.loop();
     }
-
+      
   });
 
   ArduinoOTA.onError([](ota_error_t error)
@@ -235,43 +235,35 @@ void callback(char* topic, byte* payload, unsigned int len)
   {
     pubMac("MAC: ");
     pubRole();
-    pubShape();
   }
-
+  
   else if ('v' == char(payload[0]))
   {
     if ('g' == char(payload[1]))
-    {
-      verGood = true;
-      pubMac("MAC: ");
-      pubRole();
-    }
+      {
+        verGood = true;
+        pubMac("MAC: ");
+        pubRole();
+      }
     if ('b' == char(payload[1]))
       verGood = false;
     verCheck = true;
     Serial.println("version Checked");
   }
-
+  
   else if ('h' == (char)payload[0] && 'e' == (char)payload[1]) //'he' is for hello
   {
     client.publish(publishName, "INFO: Hello!");
   }
-
+  
   else if ('c' == (char)payload[0] && 'o' == (char)payload[1] && 'm' == (char)payload[2]) //'com' is for communication
-  {
+  {  
     communication(payload, len);
   }
 
-  else if ('h' == (char)payload[0] && 'a' == (char)payload[1]) { //'ha' is for handshake
+  else if ('h' == (char)payload[0] && 'a' == (char)payload[1]){ //'ha' is for handshake
     handshake(payload, len);
   }
-
-  else if ('0' == (char)payload[0] && '1' == (char)payload[1]) //Start byte for MORI command
-  {
-    command(payload);
-  }
-
-
   Serial.println();
   Serial.println("-----------------------");
 
@@ -279,53 +271,38 @@ void callback(char* topic, byte* payload, unsigned int len)
 
 void pubMac(String header)
 {
-  char buff[30];
-  String SSIDstring = String(header) + WiFi.macAddress();
-  SSIDstring.toCharArray(buff, 30);
-  client.publish(publishName, buff);
+    char buff[30];
+    String SSIDstring = String(header) + WiFi.macAddress();
+    SSIDstring.toCharArray(buff, 30);
+    client.publish(publishName, buff);
 }
 
 void pubRole()
 {
-  char buff[40];
+  char buff[30];
   String roleString = String("ROLE: ") + WiFi.macAddress() + String(" ") + String(esp_role);
   roleString.toCharArray(buff, 30);
   client.publish(publishName, buff);
 }
 
-void pubShape()
-{
-  char buff[130];
-  String shapeMsg = String("SHAPE: ") + WiFi.macAddress();
-
-  for (int i = 0 ; i < 6 ; i++) {
-    shapeMsg = String(shapeMsg) + String(" ") + String(moriShape[i]);
-  }
-
-  shapeMsg.toCharArray(buff, 130);
-  Serial.println(buff);
-  client.publish(publishName, buff);
-}
-
 void communication(byte* payload, int len){
   char text[32];
-  char* receiver = "esp/00000000/rec";
-
+  char* receiver = "esp/00000000/rec"; 
+  
   //Define the positions and lengths of the different sections of the received message
   int receiverIDLength = 8;
   int receiverPublishIDStart = 4;
   int receiverMessageIDStart = 3;
   int textStart = 11;
 
-  for (int i = 0 ; i < receiverIDLength ; i++) {
-    receiver[i + receiverPublishIDStart] = (char)payload[i + receiverMessageIDStart];
+  for (int i = 0 ; i < receiverIDLength ; i++){
+    receiver[i + receiverPublishIDStart] = (char)payload[i + receiverMessageIDStart];  
   }
-  for (int i = textStart ; i < len ; i++) {
+  for (int i = textStart ; i < len ; i++){
     text[i - textStart] = (char)payload[i];
   }
-
   text[len-textStart] = '\0';
-
+  
   Serial.println(text);
   Serial.println(receiver);
   client.publish(receiver, text);
@@ -343,7 +320,7 @@ void handshake(byte* payload, int len){
   
   char* followerID = "00000000";
   char* receiver = "esp/00000000/rec";
-  char* message = "ha_00000000/00000000"; 
+  char* message = "ha_00000000/00000000\0"; 
   //"_" will be the role of the receiver
   //==> The leader receives from the boss (computer): hal'otherID'
   //==> It then sends sends to follower: hal'otherID'/'selfID'
@@ -405,60 +382,6 @@ void handshake(byte* payload, int len){
   }
 }
 
-void command(byte* payload){
-  //Typical message: "01 00100100 650-30 150"
-  //01 = start byte
-  //00100100 = allocation byte (shape change for  extension A and angle alpha)
-  //650-30 = data bytes (axtension A = 650 and angle alpha = -30)
-  //150 = end byte (it is a number that is out of range for extension and angle)
-  //Define the positions of the different sections of the message:
-  int commandModeStart = 3;
-  int commandModeEnd = commandModeStart + 1;
-  int maxNbrCommands = 6;
-  int allocationStart = commandModeEnd + 1;
-  int allocationEnd = allocationStart + maxNbrCommands;
-  int commandsStart = allocationEnd + 1;
-  int commandSize = 4; //The shape commands are always of size 4
-  char newValue[commandSize];
-  int nbrNewValues = 0;
-
-  if ((char)payload[commandModeStart - 1] != ' ') {
-    Serial.print("Command start bit error!");
-  }
-  if ((char)payload[commandModeStart] == '0' && (char)payload[commandModeEnd] == '0') //Shape command
-  {
-    for (int i = allocationStart ; i < allocationEnd ; i++) { //Go through the message to execute the command
-      //Serial.println((char)payload[i]);
-      if ((char)payload[i] == '1') { //Extension or angle needs to be modified
-        //Serial.print("Shape change");
-        for (int ii = 0 ; ii < commandSize ; ii++) { //Save the desired shape
-          newValue[ii] = (char)payload[commandsStart + ii + (nbrNewValues * commandSize)];
-          Serial.println((char)payload[commandsStart + ii + (nbrNewValues * commandSize)]);
-        }
-        nbrNewValues += 1;
-        moriShape[i - allocationStart] = atoi(newValue); //Convert char to int
-        Serial.println(atoi(newValue));
-      }
-    }
-    for (int ii = 0 ; ii < commandSize ; ii++) { //Save end byte
-      newValue[ii] = (char)payload[commandsStart + ii + (nbrNewValues * commandSize)];
-    }
-    //Serial.print(atoi(newValue));
-    if (atoi(newValue) != 150) { //Check end byte
-      Serial.println("Command end bit error!");
-    }
-    pubShape();
-  }
-  else if ((char)payload[commandModeStart] == '0' && (char)payload[commandModeEnd] == '1') //Drive command
-  {
-
-  }
-  else if ((char)payload[commandModeStart] == '1' && (char)payload[commandModeEnd] == '0') //Coupling/LED command
-  {
-
-  }
-}
-
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
 {
@@ -516,7 +439,7 @@ void scanWifis()
 }
 
 char* concatID(char* header, char* footer) {
-  //  char* header = String(ESP.getChipId()).c_str();
+//  char* header = String(ESP.getChipId()).c_str();
   char buf[30];
   strcpy(buf, "esp/");
   strcpy(buf, header);
