@@ -55,6 +55,8 @@ class MqttHost(threading.Thread):
       self.moriShapeDict = {}
       self.leaderFollowerDict = {}
       self.leaderFollowerOrder = []
+      self.controllerDict = {}
+      self.controllerOrder = []
 
       print("Server IP: " + self.mqttServer)
       self.client = mqtt.Client(self.clientName)
@@ -115,10 +117,11 @@ class MqttHost(threading.Thread):
             mac = mac[:1] + 'e' + mac[2:] #Hack
             #print("New MAC = " + mac)
             if self.macDict.get(mac) is None:
-               self.macDict[mac] = espNum
+               self.macDict[mac] = [None] * 2 #First index is for the role of the ESP and the second is for its ID
+               self.macDict.get(mac)[1] = espNum
                #self.macOrder.append(mac)
                self.numberModules += 1
-               self.idDict[espNum] = mac
+               self.idDict[espNum] = mac #Useful to find the right indexes for GUI widgets
                self.data.append([])
                for i in range(len(data)):
                   self.data[i].append([])
@@ -162,6 +165,18 @@ class MqttHost(threading.Thread):
 
             elif time.time() - self.verCallTimeDict.get(mac) > 3:
                self.verCalledDict[mac] = False
+
+         elif(pyld[0] == 'ROLE:'): #Define the role of the ESP ('mori' or 'contr')
+            #print(colored("ESP : " + pyld[1] + " role recieved: " + pyld[2], 'green'))
+            mac = pyld[1].replace(":", "")
+            mac = mac.lower()
+            mac = mac[:1] + 'e' + mac[2:] #Hack
+            #print("New MAC = " + mac)
+            if self.macDict.get(mac) is None:
+               print(colored("ESP: " + pyld[1] + " not yet initialized!", "red"))
+            else:
+               self.macDict.get(mac)[0] = pyld[2]
+               print(self.macDict)
 
          elif(pyld[0] == 'ERR:'):
             print(colored(msgld, 'red'))
@@ -212,15 +227,40 @@ class MqttHost(threading.Thread):
             else:
                self.leaderFollowerDict[espNum].append(pyld[1])
                self.leaderFollowerOrder.append(espNum)
-            print(colored("Leader - Follower : " + self.leaderFollowerDict,"yellow"))
+
+         elif(pyld[0] == 'CONTROL:'):
+            #print(pyld)
+            if not(self.controllerDict.get(espNum) is None):#Enter if the leader has followers
+               for i in range(len(self.controllerDict.get(espNum))):
+                  if pyld[1] == self.controllerDict.get(espNum)[i]: #Enter if the leader is already leading the follower (error)
+                     print(colored("ERROR: ESP" + espNum + " is already the leader of ESP" + pyld[1], "red"))
+                     return
+
+            #Conditions verified => add the follower to the leader's list
+            if self.controllerDict.get(espNum) is None: #First follower for the leader
+               self.controllerDict[espNum] = [pyld[1]]
+               self.controllerOrder.append(espNum)
+            else:
+               self.controllerDict[espNum].append(pyld[1])
+               self.controllerOrder.append(espNum)
 
 
    def publishGlobal(self, message):
       self.client.publish("esp/rec",message)
 
    def publishLocal(self, addr, message):
+      published = False
       #print(addr)
-      self.client.publish("esp/{}/rec".format(addr),message)
+      #Enter if the Mori has a controller, so the command will be sent through that controller
+      for controller in self.controllerOrder:
+         if (not(self.controllerDict.get(controller) is None) and (addr in self.controllerDict.get(controller))):
+            published = True
+            message = "com" + addr + message 
+            print("Published \"" + message + "\" to ESP" + controller + " for ESP" + addr)
+            self.client.publish("esp/{}/rec".format(controller), message)
+      if not published: #Enter if the Mori has no controller
+         print("Published \"" + message + "\" to ESP" + addr)
+         self.client.publish("esp/{}/rec".format(addr), message)
 
    def getNumberConnected(self):
       #print(self.macOrder)
@@ -238,14 +278,19 @@ class MqttHost(threading.Thread):
       self.leaderFollowerDict = {}
       self.leaderFollowerOrder = []
 
+   def resetControllers(self):
+      #Empty the controller - mori arrays 
+      self.controllerDict = {}
+      self.controllerOrder = []
+
    def getMoriShape(self):
       #print("Mori " + mac + " shape: " + moriShapeDict.get(mac))
       return self.moriShapeDict
 
-   def getMoriIds(self):
+   def getEspIds(self):
       return self.macDict
 
-   def getMoriOrder(self):
+   def getEspOrder(self):
       return self.macOrder
 
    def getLeaderIds(self):
@@ -253,6 +298,12 @@ class MqttHost(threading.Thread):
 
    def getLeaderOrder(self):
       return self.leaderFollowerOrder
+
+   def getControllerIds(self):
+      return self.controllerDict
+
+   def getControllerOrder(self):
+      return self.controllerOrder
 
    def run(self):
       startTime = time.time()
@@ -266,12 +317,12 @@ class MqttHost(threading.Thread):
             loopTime = time.time()
             #print("Time Elapsed: {:.3f}".format(loopTime-startTime))
             # self.client.publish("esp/rec","mac")
-            #print("")
-            #print(colored("Referenced ESPs : ","yellow"))
-            #print(self.macDict)
+            print("")
+            print(colored("Referenced ESPs : ","yellow"))
+            print(self.macDict)
             #print(self.macOrder)
             # calcResults(args.fileName)
-            #print("")
+            print("")
          self.event.wait(0.5)
  
    def exit(self):
