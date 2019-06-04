@@ -17,19 +17,14 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoOTA.h>
+#include <WiFiUdp.h>
 
-const char* esp_ssid = "helloThere";
-const char* esp_password =  "generalKenobi1";
 const char* brn_ssid = "rrl_wifi";
 const char* brn_password =  "Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
 
 const char* esp_role = "contr";
-
-//char* clientName = (char*)malloc(8*sizeof(char));
-//char* publishName = (char*)malloc(16*sizeof(char));
-//char* recieveName = (char*)malloc(16*sizeof(char));
 
 char clientName[16];
 char publishName[36];
@@ -39,13 +34,25 @@ const float softwareVersion = 0.5;
 
 bool verCheck = false;  //assumes we don't know the version
 bool verGood = true;   //assumes we are up to date unless otherwise
-bool stopLoop = false;  //assumes we are running the proper code
+
+char runState = 0;
 
 unsigned long lastMessage = millis();
-int moriShape[6] = {200, 200, 200, 0, 0, 0};
+unsigned long lastMacPub = millis();
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+WiFiUDP UDP;
+
+const int PACKET_SIZE = 16; //how many bytes the buffers hold
+byte udpInBuff[PACKET_SIZE];
+byte udpOutBuff[PACKET_SIZE];
+const int IPLEN = 5;
+char ipList[IPLEN][15]; //holds 5 ips of a length of 15udp/w/p100/i192.168.0.65/
+int portList[IPLEN];
+
+unsigned long lastOutUDP = millis();
 
 //--------------------------- Start ----------------------------------------//
 void setup()
@@ -102,7 +109,7 @@ void setup()
   client.subscribe(recieveName);
   client.subscribe("esp/rec");
 
-  WiFi.softAP(esp_ssid, esp_password);
+  //WiFi.softAP(esp_ssid, esp_password);
 
   //----------------------- OAT Handling--------------------------------------//
   ArduinoOTA.setPort(8266);
@@ -167,55 +174,56 @@ void setup()
     client.loop();
   });
   // ArduinoOTA.begin();
+
+  //----------------------- UDP Handling--------------------------------------//
+  for(int i=0; i <= IPLEN; i++)
+  {
+    ipList[i][0] = '\0';
+  }
+  
 }
-
-
 
 //----------------------- Loooooooop--------------------------------------//
 void loop()
 {
-  if (verCheck == true) //have checked version
-  {
-    if (verGood == true)
-    {
-      scanWifis();
-      pubMac("ON: "); //Publish connexion message
-      //pubShape();
-      if (abs(lastMessage - millis()) > 10000)
-      {
-        client.publish(publishName, "ERR: SSID not found within 10s");
-        lastMessage = millis();
-      }
-    }
-    else //Version is old
-    {
-      if (stopLoop == false)
-      {
-        Serial.println("StoppingLoop");
-        client.publish(publishName, "ERR: Pausing functionality until updated");
-        client.loop();
-        WiFi.mode(WIFI_STA);
-        ArduinoOTA.begin();
-        Serial.println("Ready");
-        Serial.print("IP address: ");
-        Serial.println(WiFi.localIP());
-        delay(1000);
-        stopLoop = true;
-      }
-      //      Serial.println("GODDAMN SNAKES ON THIS GODDAMN PLANE");
-    }
+  switch(runState){
+    case 0:   //booting up
+      pubVersion();
+      delay(500);
+      break;
+    case 1:   //version bad - enable auto updates
+      enableOTA();
+      runState = 2;
+    case 2:   //handle OTA
+      ArduinoOTA.handle();
+      break;
+    case 3:   //everything is good
+      normalOp();
+      break;
+    case 4:
+      normalOp();
+      readUDP();
+      break;
+    case 6:
+      normalOp();
+      writeUDPSerial();
+      break;
   }
-  else
-  {
-    pubVersion();
-    delay(500);
-  }
-  if (stopLoop == true)
-    ArduinoOTA.handle();
   client.loop();
 }
 
 
+void enableOTA()
+{
+  Serial.println("StoppingLoop");
+  client.publish(publishName, "ERR: Pausing functionality until updated");
+  client.loop();
+  ArduinoOTA.begin();
+  Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  delay(1000);
+}
 
 
 //----------------------- Recieved Message --------------------------//
@@ -226,44 +234,50 @@ void callback(char* topic, byte* payload, unsigned int len)
   Serial.print("Message length: ");
   Serial.println(len);
   Serial.print("Message: ");
+  char payload2[len]; //Convert the received message to char
   for (int i = 0; i < len; i++) {
-    Serial.print((char)payload[i]);
+    payload2[i] = (char)payload[i];
+    Serial.print(payload2[i]);
   }
   Serial.println();
 
-  if ('m' == (char)payload[0])
+  if (!memcmp(payload2,"mac",sizeof("mac")-1))
   {
     pubMac("MAC: ");
     pubRole();
   }
-  
-  else if ('v' == char(payload[0]))
+  else if (!memcmp(payload2,"vg",sizeof("vg")-1))
   {
-    if ('g' == char(payload[1]))
-      {
-        verGood = true;
-        pubMac("MAC: ");
-        pubRole();
-      }
-    if ('b' == char(payload[1]))
-      verGood = false;
-    verCheck = true;
-    Serial.println("version Checked");
+    runState = 3;
+    pubMac("MAC: ");
+    pubRole();
+    Serial.println("version Excellent");
   }
-  
-  else if ('h' == (char)payload[0] && 'e' == (char)payload[1]) //'he' is for hello
+  else if (!memcmp(payload2,"vb",sizeof("vb")-1))
+  {
+    runState = 1;
+    Serial.println("version bad");
+  }
+
+  else if (!memcmp(payload2,"hello",sizeof("hello")-1)) //respond hello
   {
     client.publish(publishName, "INFO: Hello!");
   }
-  
-  else if ('c' == (char)payload[0] && 'o' == (char)payload[1] && 'm' == (char)payload[2]) //'com' is for communication
-  {  
-    communication(payload, len);
+
+    else if (!memcmp(payload2,"com",sizeof("com")-1)) //'com' is for communication
+  {
+    communication(payload2, len);
   }
 
-  else if ('h' == (char)payload[0] && 'a' == (char)payload[1]){ //'ha' is for handshake
-    handshake(payload, len);
+  else if (!memcmp(payload2,"hand",sizeof("hand")-1)){ //'hand' is for handshake
+    handshake(payload2, len);
   }
+
+  else if (!memcmp(payload2,"udp",sizeof("udp")-1))
+  {
+    establishUDP(payload2, len);
+  }
+  
   Serial.println();
   Serial.println("-----------------------");
 
@@ -285,56 +299,57 @@ void pubRole()
   client.publish(publishName, buff);
 }
 
-void communication(byte* payload, int len){
+void communication(char* payload, int len){
   char text[32];
-  char* receiver = "esp/00000000/rec"; 
-  
+  char* receiver = "esp/00000000/rec";
+
   //Define the positions and lengths of the different sections of the received message
   int receiverIDLength = 8;
   int receiverPublishIDStart = 4;
   int receiverMessageIDStart = 3;
   int textStart = 11;
 
-  for (int i = 0 ; i < receiverIDLength ; i++){
-    receiver[i + receiverPublishIDStart] = (char)payload[i + receiverMessageIDStart];  
+  for (int i = 0 ; i < receiverIDLength ; i++) {
+    receiver[i + receiverPublishIDStart] = payload[i + receiverMessageIDStart];
   }
-  for (int i = textStart ; i < len ; i++){
-    text[i - textStart] = (char)payload[i];
+  for (int i = textStart ; i < len ; i++) {
+    text[i - textStart] = payload[i];
   }
+
   text[len-textStart] = '\0';
-  
+
   Serial.println(text);
   Serial.println(receiver);
   client.publish(receiver, text);
 }
 
-void handshake(byte* payload, int len){
+void handshake(char* payload, int len){
   bool continueHandshake = false;
   bool handshakeCorrect = false;
 
   //Define the positions and lengths of the different sections of the received message
-  int role = 2;
-  int espIDStart = 3;
+  int role = 4;
+  int espIDStart = 5;
   int espIDLength = 8;
   int receiverPublishIDStart = 4; 
   
   char* followerID = "00000000";
   char* receiver = "esp/00000000/rec";
-  char* message = "ha_00000000/00000000\0"; 
+  char* message = "hand_00000000/00000000\0"; 
   //"_" will be the role of the receiver
   //==> The leader receives from the boss (computer): hal'otherID'
   //==> It then sends sends to follower: hal'otherID'/'selfID'
   //==> The follower receives the message, checks it's ID and sends (if ID correct): haf'selfID'/'otherID'
   //==> The leader receives the message, check its ID and the handshake is established (if ID correct)
   
-  if ((char)payload[role] == 'l'){ // 'l' is for leader (l is a letter)
+  if (payload[role] == 'l'){ // 'l' is for leader (l is a letter)
     message[role] = 'f';
     if (len == espIDStart + espIDLength){ //Message received from boss (computer)
        continueHandshake = true;
        for (int i = 0 ; i < espIDLength ; i++){
           //Create the message to be sent to follower
-          receiver[i + receiverPublishIDStart] = (char)payload[i + espIDStart];
-          message[i + espIDStart] = (char)payload[i + espIDStart];
+          receiver[i + receiverPublishIDStart] = payload[i + espIDStart];
+          message[i + espIDStart] = payload[i + espIDStart];
           message[i + espIDStart + espIDLength + 1] = recieveName[i + receiverPublishIDStart];
        }
     }
@@ -342,7 +357,7 @@ void handshake(byte* payload, int len){
       handshakeCorrect = true;
       for (int i = 0 ; i < espIDLength ; i++){
         //Check if own and received IDs are the same
-        followerID[i] = (char)payload[i + espIDStart];
+        followerID[i] = payload[i + espIDStart];
         if (payload[i + espIDStart + espIDLength + 1] != recieveName[i + receiverPublishIDStart]){
           Serial.println("Leader ID error!");
           handshakeCorrect = false;
@@ -350,14 +365,14 @@ void handshake(byte* payload, int len){
       }
     }
   }
-  else if ((char)payload[role] == 'f'){ //'f' is for follower
+  else if (payload[role] == 'f'){ //'f' is for follower
      message[role] = 'l';
      continueHandshake = true;
      for (int i = 0 ; i < espIDLength ; i++){
         //Create the message to be sent to leader
-        receiver[i + receiverPublishIDStart] = (char)payload[i + espIDStart + espIDLength + 1];
-        message[i + espIDStart] = (char)payload[i + espIDStart];
-        message[i + espIDStart + espIDLength + 1] = (char)payload[i + espIDStart + espIDLength + 1];
+        receiver[i + receiverPublishIDStart] = payload[i + espIDStart + espIDLength + 1];
+        message[i + espIDStart] = payload[i + espIDStart];
+        message[i + espIDStart + espIDLength + 1] = payload[i + espIDStart + espIDLength + 1];
 
         //Check if own and received IDs are the same
         if (message[i + espIDStart] != recieveName[i + receiverPublishIDStart]){
@@ -365,6 +380,7 @@ void handshake(byte* payload, int len){
           continueHandshake = false;
         }
      }
+     Serial.println(message);
   }
   else{
     Serial.println("Role definition error!");
@@ -382,6 +398,120 @@ void handshake(byte* payload, int len){
   }
 }
 
+void establishUDP(char* payld, unsigned int len)
+{
+  bool readFlag = false;
+  bool writeFlag = false;
+  bool msgFlag = false;
+  bool portFlag = false;
+  bool serialFlag = false;
+  int port=0;
+  char ip[15];
+  char msg[40];
+  Serial.println("Recieved UDP Command");
+  for (int i = 3; i < len; i++)   //start after udp
+  {
+    if(payld[i] == 'r')
+      readFlag = true;
+    if(payld[i] == 'w')
+      writeFlag = true;
+    if(payld[i] == 's')
+      serialFlag = true;
+    if(payld[i] == 'p')
+    {
+      for(int l=1; isDigit(payld[i+l]); l++)
+      {
+        port = port *10 + (payld[i+l]-'0');
+        if(i+l+1 > len)
+          break;
+      }
+      portFlag = true;
+    }
+    if(payld[i] == 'i')
+    {
+      int l;
+      for(l=1; isDigit(payld[i+l])|| payld[i+l] == '.'; l++)
+      {
+        ip[l-1] = payld[i+l];
+        if(i+l+1 > len)
+          break;
+      }
+      for(l; l <= 16; l++)
+      {
+        ip[l-1] = '\0';
+      }
+    }
+    if(payld[i] == 'm')
+    {
+      int m;
+      for(m = 0 ; i+m+1 < len ; m++)
+      {
+        msg[m] = payld[i+m+1];
+        Serial.println(msg[m]);
+      }
+      msg[m] = '\0';
+      msgFlag = true;
+      break;
+    }
+  }
+  if(readFlag)
+  {
+    if(port!=0)
+    {
+      UDP.begin(port);
+      Serial.print("Listening to UDP on Port: ");
+      Serial.println(UDP.localPort());
+      runState = 4;
+    }
+  }
+  if(writeFlag)
+  {
+    if(!memcmp(ip,"192",sizeof("192")-1) && portFlag)
+    {
+      if(!msgFlag)
+      {
+        Serial.print("NO MSG!");
+        for(int i=0; i <= IPLEN; i++)
+        {
+          if(ipList[i][0] == '\0')
+          {
+            //ipList[i] = strcpy(ip);
+            strcpy(ipList[i], ip);
+            portList[i] = port;
+            break;
+          }
+        }
+      runState = 3;
+      }
+      else
+      {
+        memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
+        // Initialize values needed to form NTP request
+         for(int i = 0; msg[i] != '\0' ; i++)
+        {
+          udpOutBuff[0+i*2] = highByte(msg[i]);
+          udpOutBuff[1+i*2] = lowByte(msg[i]);
+        }
+        Serial.println("Output buffer = ");
+        for(int i = 0 ; i < 16 ; i++){
+           Serial.println(udpOutBuff[i]);
+        }
+        // udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
+        // send a packet requesting a timestamp:
+        UDP.beginPacket(ip, port); // NTP requests are to port 123
+        UDP.write(udpOutBuff, PACKET_SIZE);
+        UDP.endPacket();
+        Serial.print("Sent: ");
+        Serial.print(msg);
+        Serial.print("\t to: ");
+        Serial.print(ip);
+        Serial.print(":");
+        Serial.print(port);
+      } //else (!msg)       
+    } //IP
+  } //writeFlag
+}
+
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
 {
@@ -390,6 +520,75 @@ void pubVersion()
                     + String(" ") + WiFi.localIP();
   IPstring.toCharArray(buff, 100);
   client.publish(publishName, buff);
+}
+
+void readUDP()
+{
+  if (UDP.parsePacket() == 0) // If there's no response (yet)
+  { 
+    return;
+  }
+  UDP.read(udpInBuff, PACKET_SIZE);
+  char msg[40];
+  int lastChar = 0;
+  for(int i=0; i< sizeof(udpInBuff);i++)
+  {
+    Serial.print(udpInBuff[i]);
+    Serial.println((char)udpInBuff[i]);
+    msg[i] = (char)udpInBuff[i];
+    if (udpInBuff[i] != 0){
+      lastChar = i;
+    }
+  }
+  Serial.println(lastChar);
+  msg[lastChar+1] = '\0';
+  Serial.print("MSG: ");
+  for(int i=0 ; i < sizeof(msg) ; i++){
+    Serial.print(msg[i]);
+  }
+  
+  Serial.println();
+}
+
+
+
+void writeUDPSerial()
+{
+  if (Serial.available() > 0) 
+  {
+    uint8_t bytRead1 = Serial.read();
+    udpOutBuff[0] = bytRead1;
+    for(int i=0; i <= IPLEN; i++)
+    {
+      if(ipList[i][0] == '\0')
+      {
+        break;
+      }
+      UDP.beginPacket(ipList[i], portList[i]);
+      UDP.write(udpOutBuff, 1);
+      UDP.endPacket();
+    }
+    Serial.print("Sent: ");
+    Serial.print(udpOutBuff[0]);
+    client.publish(publishName, "Sent Serial!");
+  }
+}
+
+void normalOp()
+{
+//  scanWifis();
+  long unsigned currentTime = millis();
+  if(currentTime - lastMacPub > 2000)
+  {
+    pubMac("ON: "); //Publish connexion message
+    lastMacPub = millis();
+  }
+  
+  if (abs(lastMessage - millis()) > 10000)
+  {
+    client.publish(publishName, "ERR: SSID not found within 10s");
+    lastMessage = millis();
+  }
 }
 
 

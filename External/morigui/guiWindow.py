@@ -175,7 +175,7 @@ class MoriGui(Frame):
                     print("Leader Mori is following the follower Mori!")
                     return
 
-        message = "ha" + "l" + follower # 'ha' is for handshake, 'l' is for leader
+        message = "hand" + "l" + follower # 'hand' is for handshake, 'l' is for leader
 
         print(colored("ESP" + leader + " will lead", "yellow") + colored(" ESP" + follower, "yellow"))
         self.mqtthost.publishLocal(leader,message)
@@ -197,7 +197,7 @@ class MoriGui(Frame):
         self.mqtthost.exit()
 
     def updateConnected(self): #Updates the number of connected ESPs and the lists
-        self.after(2000, self.updateConnected)
+        self.after(1500, self.updateConnected)
         tmp = self.numberConnected.get()
         if tmp != self.mqtthost.getNumberConnected():
             self.numberConnected.set(self.mqtthost.getNumberConnected())
@@ -538,21 +538,21 @@ class MoriGui(Frame):
         self.controllerMoriCmd1.grid(row=2, column = 0, ipadx = 20)
 
         self.controllerLink = Button(frame_controllerMori)
-        self.controllerLink["text"] = "Link"
+        self.controllerLink["text"] = "Connect"
         self.controllerLink.grid(row=4, column = 1, ipadx = 35, sticky = E)
         self.controllerLink["command"] =  lambda: self.publishHandshake(self.controllerListVar.get(), self.moriListVar.get(), self.mqtthost.getControllerIds())
 
-        self.controlReset = Button(frame_controllerMori, text = "Reset", command = self.resetControl)
+        self.controlReset = Button(frame_controllerMori, text = "Disconnect", command = self.resetControl)
         self.controlReset.grid(row=0, column = 1, ipadx = 35, sticky = E)
  
 
-        frame_party.pack(fill=X)
+        #frame_party.pack(fill=X)
         frame_moriShapeCommand.pack({"side": "right"})
-        frame_controllerMori.pack({"side": "left"})
+        #frame_controllerMori.pack({"side": "left"})
         frame_listMori.pack(ipadx = 10)
         frame_interMoriCom.pack()
-        frame_moriHandshake.pack()
-        frame_moriLead.pack()
+        #frame_moriHandshake.pack()
+        #frame_moriLead.pack()
         frame_pubg.pack()
         bottomFrame.pack(fill=BOTH, expand=True, pady=5)
         

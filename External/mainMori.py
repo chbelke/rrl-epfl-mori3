@@ -55,6 +55,7 @@ class mainGui(Thread):
     def run(self):
         self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
+        self.root.title("ESP Communication")
         self.gui = MoriGui(master=self.root)
 
         # label = tk.Label(self.root, text="Hello World")
