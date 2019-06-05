@@ -73,6 +73,7 @@ class MoriGui(Frame):
         dataBytes = ""
         endByte = "150"
 
+        self.currentMoriShape = self.mqtthost.getMoriShape()
         number = self.shapeCommandListMoriVar.get()
         if number == 'None':
             print("No Mori selected")
@@ -320,6 +321,9 @@ class MoriGui(Frame):
         else:
             self.leadDict[self.leaderListVar.get()] = True
 
+    def toggleUDP(self):
+        self.mqtthost.toggleUDP()
+
     def controller_option_select(self, *args):
         print("ESP " + self.controllerListVar.get() + " selected.")
 
@@ -544,17 +548,22 @@ class MoriGui(Frame):
 
         self.controlReset = Button(frame_controllerMori, text = "Disconnect", command = self.resetControl)
         self.controlReset.grid(row=0, column = 1, ipadx = 35, sticky = E)
+
+        self.controlUDPCmd0 = Label(frame_controllerMori, text="UDP Communication?")
+        self.controlUDPCmd0.grid(row=5, column = 0, ipadx = 20)
+        self.controlUDPCheckbox = Checkbutton(frame_controllerMori, command = self.toggleUDP)
+        self.controlUDPCheckbox.grid(row=5, column = 1,  sticky = W)
  
 
         #frame_party.pack(fill=X)
         frame_moriShapeCommand.pack({"side": "right"})
-        #frame_controllerMori.pack({"side": "left"})
+        frame_controllerMori.pack({"side": "left"})
         frame_listMori.pack(ipadx = 10)
         frame_interMoriCom.pack()
-        #frame_moriHandshake.pack()
-        #frame_moriLead.pack()
-        frame_pubg.pack()
-        bottomFrame.pack(fill=BOTH, expand=True, pady=5)
+        frame_moriHandshake.pack()
+        frame_moriLead.pack()
+        #frame_pubg.pack()
+        #bottomFrame.pack(fill=BOTH, expand=True, pady=5)
         
 
     def __init__(self, master=None):

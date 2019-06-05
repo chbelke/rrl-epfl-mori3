@@ -31,6 +31,8 @@ from termcolor import colored
 import threading
 
 
+#udp/w/p100/i192.168.0.53/m01 00111111 0900090009000000-1200120 150
+
 
 class MqttHost(threading.Thread):
 
@@ -57,6 +59,9 @@ class MqttHost(threading.Thread):
       self.leaderFollowerOrder = []
       self.controllerDict = {}
       self.controllerOrder = []
+      self.IPDict = {}
+      self.udpPort = 100
+      self.UDPCom = False
 
       print("Server IP: " + self.mqttServer)
       self.client = mqtt.Client(self.clientName)
@@ -92,6 +97,7 @@ class MqttHost(threading.Thread):
          msgld = msg.payload.decode('UTF-8')
          pyld = msgld.rsplit(' ')
          cmd = pyld[0]
+
          #print(colored("Payload = ","green") + pyld[0])
 
          if(pyld[0] == 'DST:'):
@@ -130,6 +136,12 @@ class MqttHost(threading.Thread):
             if self.moriShapeDict.get(espNum) is None: #Check if the ESP shape has already been asked once to initialize the shape array
                self.moriShapeDict[espNum] = [200, 200, 200, 0, 0, 0]
 
+         elif(pyld[0] == 'IP:'):
+            #print(colored(pyld[1],"red"))
+            if self.IPDict.get(espNum) is None:
+               self.IPDict[espNum] = pyld[1]
+               #print(self.IPDict)
+
          elif(pyld[0] == 'VER:'):
             mac = pyld[1].replace(":", "")
             mac = mac.lower()
@@ -141,7 +153,7 @@ class MqttHost(threading.Thread):
             if self.verCalledDict.get(mac) == False: #Check if the version has already been asked a short while ago (if it has: wait a bit)
                self.verCallTimeDict[mac] = time.time()
 
-               print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
+               #print(colored(msg.topic, 'yellow') + ", " + colored(msg.payload.decode('UTF-8')))
 
                espVer = float(pyld[1])
                if(espVer == self.version):
@@ -243,24 +255,32 @@ class MqttHost(threading.Thread):
             else:
                self.controllerDict[espNum].append(pyld[1])
                self.controllerOrder.append(espNum)
+            #Establish a UDP communication between the controller and the MORI
+            message = "udp/r/p" + str(self.udpPort)
+            self.publishLocal(pyld[1], message) #The MORI will read the messages
 
 
    def publishGlobal(self, message):
       self.client.publish("esp/rec",message)
 
-   def publishLocal(self, addr, message):
+   def publishLocal(self, addr, msg):
       published = False
       #print(addr)
       #Enter if the Mori has a controller, so the command will be sent through that controller
       for controller in self.controllerOrder:
          if (not(self.controllerDict.get(controller) is None) and (addr in self.controllerDict.get(controller))):
             published = True
-            message = "com" + addr + message 
-            print("Published \"" + message + "\" to ESP" + controller + " for ESP" + addr)
-            self.client.publish("esp/{}/rec".format(controller), message)
+            #UDP condition
+            if self.UDPCom:
+               message = "udp/w/p" + str(self.udpPort) + "/i" + self.IPDict.get(addr) +"/m" + msg
+               self.client.publish("esp/{}/rec".format(controller), message)
+            else:
+               message = "com" + addr + msg 
+               print("Published \"" + message + "\" to ESP" + controller + " for ESP" + addr)
+               self.client.publish("esp/{}/rec".format(controller), message)
       if not published: #Enter if the Mori has no controller
-         print("Published \"" + message + "\" to ESP" + addr)
-         self.client.publish("esp/{}/rec".format(addr), message)
+         print("Published \"" + msg + "\" to ESP" + addr)
+         self.client.publish("esp/{}/rec".format(addr), msg)
 
    def getNumberConnected(self):
       #print(self.macOrder)
@@ -273,12 +293,28 @@ class MqttHost(threading.Thread):
       #print(self.macOrder)
       return self.numberModules
 
+   def toggleUDP(self):
+      if self.UDPCom:
+         self.UDPCom = False
+         #Stop the UDP connections
+         for i in range(len(self.controllerDict)):
+            #for j in range(len(self.controllerDict.get(list(self.controllerDict)[i]))):
+               #self.publishLocal(self.controllerDict.get(list(self.controllerDict)[i])[j],"vg")
+            self.publishLocal(list(self.controllerDict)[i],"vg")
+      else:
+         self.UDPCom = True
+
    def resetHandshakes(self):
       #Empty the leader - follower arrays 
       self.leaderFollowerDict = {}
       self.leaderFollowerOrder = []
 
    def resetControllers(self):
+      #Reset the UDP connexions
+      for i in range(len(self.controllerDict)):#Stop
+         for j in range(len(self.controllerDict.get(list(self.controllerDict)[i]))):
+            self.publishLocal(self.controllerDict.get(list(self.controllerDict)[i])[j],"vg")
+         self.publishLocal(list(self.controllerDict)[i],"vg")
       #Empty the controller - mori arrays 
       self.controllerDict = {}
       self.controllerOrder = []
