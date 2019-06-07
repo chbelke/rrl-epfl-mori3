@@ -321,17 +321,17 @@ void loop() {
       }
       Serial.write(CMD_End);
 
-    } else if (Serial.available()) {        // --- for debugging -----------------------------------
-      uint8_t conRead = Serial.read();
-      if (conRead == 0x0F) {
-        while (!Serial.available());
-        uint8_t bytRead1 = Serial.read();
-        //          while (!Serial.available());
-        //          uint8_t bytRead2 = Serial.read();
-        lcd.setCursor(0, 0);
-        lcd.print(((int16_t)(bytRead1)));
-        lcd.print("                ");
-      }
+      //    } else if (Serial.available()) {        // --- for debugging -----------------------------------
+      //      uint8_t conRead = Serial.read();
+      //      if (conRead == 0x0F) {
+      //        while (!Serial.available());
+      //        uint8_t bytRead1 = Serial.read();
+      //        while (!Serial.available());
+      //        uint8_t bytRead2 = Serial.read();
+      //        lcd.setCursor(0, 0);
+      //        lcd.print((int16_t)((bytRead1 << 8) | bytRead2));
+      //        lcd.print("                ");
+      //      }
     } else {
       // LCD
       lcd.setCursor(0, 0);
@@ -341,6 +341,19 @@ void loop() {
     }
 
     CMD_UpdateFlag = false;
+  }
+
+  if ((digitalRead(7) == false) && (Serial.available())) {        // --- for debugging -----------------------------------
+    uint8_t conRead = Serial.read();
+    if (conRead == 0x0F) {
+      while (!Serial.available());
+      uint8_t bytRead1 = Serial.read();
+      while (!Serial.available());
+      uint8_t bytRead2 = Serial.read();
+      lcd.setCursor(0, 0);
+      lcd.print((int16_t)((bytRead1 << 8) | bytRead2));
+      lcd.print("                ");
+    }
   }
 }
 

@@ -16,9 +16,6 @@
 #include <stdbool.h>
 #include <libpic30.h>
 
-static volatile bool Flg_LiveAngle = false;
-static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
-static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 
 /* ******************** NOTES *********************************************** */
 // Timer info
@@ -31,12 +28,23 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
  * is as follows: ((1/0.4 - 0.120)*3.6864)-2 = 6.77
  * FRM: http://ww1.microchip.com/downloads/en/DeviceDoc/70000195g.pdf*/
 
+
 /* ******************** MODE SELECTION ************************************** */
-#define MODE_DEBUG false
+//#define MODE_DEBUG false
+
+#define MODE_ENC_CON false
+#define MODE_ACC_CON true
+
 
 /* ******************** LIVE MODE VARS ************************************** */
 static volatile bool MODE_LED_ANGLE = true;
 static volatile bool MODE_LED_EDGES = false;
+
+
+/* ********************  FLAGS ********************************************** */
+static volatile bool Flg_LiveAngle = false;
+static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
+static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 
 
 /* ******************** PERIPHERALS ***************************************** */
@@ -45,9 +53,11 @@ static volatile bool MODE_LED_EDGES = false;
 #define LED_Y LATBbits.LATB1        // orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
 
+
 /* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
+
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
@@ -74,6 +84,7 @@ static volatile bool MODE_LED_EDGES = false;
 //#define PWM_Perd_LinB SPHASE2    
 //#define PWM_Perd_LinC SPHASE1    
 
+
 /* ******************** LINEAR MOTORS *************************************** */
 #define LIN_DIR_A LATBbits.LATB10
 #define LIN_DIR_B LATBbits.LATB12
@@ -97,6 +108,7 @@ static volatile bool MODE_LED_EDGES = false;
 #define MotLin_PID_Imax 15
 #define MotLin_PID_Max 1000
 
+
 /* ******************** ROTARY MOTORS *************************************** */
 #define ROT_DIR_A LATCbits.LATC6
 #define ROT_DIR_B LATCbits.LATC7
@@ -112,20 +124,24 @@ static volatile bool MODE_LED_EDGES = false;
 #define MotRot_PID_Imax 20
 #define MotRot_PID_Max 1000
 
+
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           20
 #define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      50
+
 
 /* ******************** ENCODERS AS5048B ************************************ */
 #define AS5048B_Address 0x40
 #define AS5048B_Reg_AngleMSB 0xFE
 #define AS5048B_Res 16384.0
 
+
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
 #define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
 #define MMA8452Q_CTRL_REG1 0x01 //Value ctrl reg must be modified to at Setup
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
+
 
 /* ******************** LED DRIVER TLC59208 ****************************** */
 #define TLC59208_ADDRESS 0x20   //Addresss pins A0-A2 tied to GND (not in DS?)
@@ -138,7 +154,7 @@ static volatile bool MODE_LED_EDGES = false;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period 100 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
-#define SMA_Duty 100 // 8-bit PWM value
+#define SMA_Period 60 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
+#define SMA_Duty 50 // 8-bit PWM value
 
 #endif	/* DEFINE_H */

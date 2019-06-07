@@ -61,13 +61,13 @@
 void SYSTEM_Initialize(void)
 {
     PIN_MANAGER_Initialize();
-    INTERRUPT_Initialize();
     CLOCK_Initialize();
+    INTERRUPT_Initialize();
+    PWM_Initialize();
     I2C1_Initialize();
     UART4_Initialize();
     ADC1_Initialize();
     TMR3_Initialize();
-    PWM_Initialize();
     
     TLC59208_Setup();           // TLC59208 Init
     MMA8452Q_Setup();           // MMA8452Q Init

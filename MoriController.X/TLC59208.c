@@ -129,11 +129,16 @@ void TLC59208_Write(void) {
 void SMA_Set(uint8_t edge, uint8_t duty) {
     switch (edge) {
         case 0:
-            TLC_Values[5] = duty;
+            TLC_Values[3] = duty;
+            break;
         case 1:
-            TLC_Values[6] = duty;
+            TLC_Values[4] = duty;
+            break;
         case 2:
-            TLC_Values[7] = duty;
+            TLC_Values[5] = duty;
+            break;
+        default:
+            break;
     }
     TLC59208_Write();
 }
@@ -157,8 +162,10 @@ void SMA_Ctrl(void) {
         if (SMA_Count[m]) {
             SMA_Count[m] = SMA_Count[m] - 1;
             if (SMA_Count[m] == 0) {
-                SMA_Set(m, 0);
+                SMA_Off(m);
             }
+        } else {
+            SMA_Off(m);
         }
     }
 }
@@ -167,10 +174,15 @@ void LED_Set(uint8_t RGBcolor, uint8_t duty) {
     switch (RGBcolor) {
         case 0:
             TLC_Values[2] = duty; // red
+            break;
         case 1:
             TLC_Values[1] = duty; // green
+            break;
         case 2:
             TLC_Values[0] = duty; // blue
+            break;
+        default:
+            break;
     }
     TLC59208_Write();
 }

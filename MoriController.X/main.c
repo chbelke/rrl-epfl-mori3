@@ -62,13 +62,16 @@ int main (void) {
 
     //    MotRot_LIM(0,255);          // set current limit of edge 0 to max
     //    LED_R = 0;                  // switch red led on
-    
     LED_R = 1;
     
+    SMA_Off(0);
+    SMA_Off(1);
+    SMA_Off(2);
+    
     // - Set rotary motor current limits -
-    // unexpected behaviour when limit not set (can set itself randomly 
-    // between startups), consider defining it in an initialisation 
-    // function, need to figure out what level to start with
+    /* unexpected behaviour when limit not set (can set itself randomly 
+     * between startups), consider defining it in an initialisation 
+     * function, need to figure out what level to start with */
     MotRot_LIM(0,255);
     MotRot_LIM(1,255);
     MotRot_LIM(2,255);

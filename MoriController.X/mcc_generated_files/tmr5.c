@@ -156,7 +156,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
 
-    if (MODE_LED_ANGLE) {
+    if (MODE_LED_ANGLE && MODE_ACC_CON) {
         MMA8452Q_Read();
         int16_t RGB[3] = {0, 0, 0};
         RGB[0] = ACC_Get(0) / 16 + 64;
@@ -171,7 +171,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
             }
         }
         LED_SetAll(RGB[0] / 2, RGB[1] / 2, RGB[2]);
-    } else if (MODE_LED_EDGES) {
+    } else if (MODE_LED_EDGES && MODE_ACC_CON) {
         uint16_t RGB[3];
         RGB[0] = (902 - (ADC1_Return(0))) / 30;
         RGB[1] = (902 - (ADC1_Return(1))) / 30;

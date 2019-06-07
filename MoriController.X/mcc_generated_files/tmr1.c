@@ -162,8 +162,14 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         LED_Y ^= 1; //toggle yellow LED
     }
     
-//    static float angle;
-//    angle = ENC_Read(0);
+    if (MODE_ENC_CON){
+        static uint16_t angle[3];
+        angle[0] = ENC_Read(0);
+        angle[1] = ENC_Read(1);
+        angle[2] = ENC_Read(2);
+    }
+//    UART4_Write(0x0F);
+//    UART4_Write16(angle[2]);
     
     // Rotary Motor PID here
 //    MotRot_PID(0, angle, ((float)ADC1_Return(1))*360/1024-180);
