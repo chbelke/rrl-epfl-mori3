@@ -49,7 +49,7 @@ PubSubClient client(espClient);
 
 WiFiUDP UDP;
 
-const int PACKET_SIZE = 30; //how many bytes the buffers hold
+const int PACKET_SIZE = 42; //how many bytes the buffers hold
 byte udpInBuff[PACKET_SIZE];
 byte udpOutBuff[PACKET_SIZE];
 const int IPLEN = 5;
@@ -214,14 +214,6 @@ void loop()
       normalOp();
       readUDP();
       break;
-    case 5:
-      normalOp(); 
-      writeUDPShape();
-      break;
-    case 6:
-      normalOp();
-      writeUDPSerial();
-      break;
   }
   client.loop();
 }
@@ -281,9 +273,13 @@ void callback(char* topic, byte* payload, unsigned int len)
     client.publish(publishName, "INFO: Hello!");
   }
 
-    else if (!memcmp(payload2,"com",sizeof("com")-1)) //'com' is for communication
+  else if (!memcmp(payload2,"hand",sizeof("hand")-1)){ //'hand' is for handshake
+    handshake(payload2, len);
+  }
+
+  else if (!memcmp(payload2,"shape",sizeof("shape")-1)) //Send shape
   {
-    communication(payload2, len);
+    pubShape();
   }
 
   else if (!memcmp(payload2,"hand",sizeof("hand")-1)){ //'hand' is for handshake
@@ -564,6 +560,7 @@ void establishUDP(char* payld, unsigned int len)
   }
   if(writeFlag)
   {
+    Serial.println("MORI ASKED TO SEND UDP MSG????");
     if(!memcmp(ip,"192",sizeof("192")-1) && portFlag)
     {
       if(!msgFlag)
@@ -579,18 +576,6 @@ void establishUDP(char* payld, unsigned int len)
             break;
           }
         }
-        if(serialFlag)
-        {
-          Serial.print("Entering Serial");
-          client.publish(publishName, "Entering Serial");
-          runState = 6;
-        }
-        else
-        {
-          client.publish(publishName, "Publishing Data");
-          Serial.print("CHANGE STATE!");
-          runState = 5;
-        }
       }
       else
       {
@@ -598,8 +583,6 @@ void establishUDP(char* payld, unsigned int len)
         // Initialize values needed to form NTP request
         for(int i = 0; msg[i] != '\0' ; i++)
         {
-          //udpOutBuff[0+i*2] = highByte(msg[i]);
-          //udpOutBuff[1+i*2] = lowByte(msg[i]);
           udpOutBuff[i] = (byte)msg[i];
         }
         Serial.println("Output buffer = ");
@@ -652,44 +635,10 @@ void readUDP()
 
   callback("UDP", udpInBuff, sizeof(udpInBuff));
 
-  /*
-  if(udpInBuff[0] == 1){ //Shape message
-    int shapeIndex = 0;
-    char* tmp = "0000";
-    int lastChar = 0;
-    for(int i = 1 ; udpInBuff[i] != 0 ;i++){
-      while((char)udpInBuff[i+lastChar] != ' '){
-        lastChar++; //T keep track of the length of the shape values
-      }
-      if((char)udpInBuff[i] != ' '){
-        tmp[4-lastChar] = (char)udpInBuff[i]; //Store the shape values
-      }
-      else{
-        moriShape[shapeIndex] = atoi(tmp);
-        Serial.print("Shape: ");
-        Serial.print(moriShape[shapeIndex]);
-        Serial.print("\t");
-        Serial.print("tmp = ");
-        shapeIndex++;
-        for(int j = 0 ; j < 4 ; j++){
-          Serial.print(tmp[j]);
-          tmp[j] = '0';
-        }
-        Serial.println();
-      }
-      lastChar = 0;
-    }
-    pubShape();
-    Serial.println();
-  }
-  */
   char msg[40];
   int i;
   for(i=0; udpInBuff[i] != 0 ;i++)
   {
-    //Serial.print(udpInBuff[i]);
-    //Serial.print("\t");
-    //Serial.println((char)udpInBuff[i]);
     msg[i] = (char)udpInBuff[i];
   }
   msg[i] = '\0';
@@ -698,70 +647,6 @@ void readUDP()
     Serial.print(msg[i]);
   }
   Serial.println();
-}
-
-void writeUDPShape()
-{
-  long unsigned currentTime = millis();
-  if(currentTime - lastOutUDP < 500)
-    return;
-  lastOutUDP = currentTime;
-  for(int i=0; i <= IPLEN; i++)
-  {
-    if(ipList[i][0] == '\0')
-    {
-      break;
-    }
-    memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
-    int lastChar;
-    int buffPos = 0;
-    char* tmp;
-    tmp = "0000";
-    udpOutBuff[buffPos] = 0b00000001; // Start byte for shape message
-    buffPos++;
-    
-    for(int j=0; j < 6; j++)
-    {
-      Serial.println();
-      sprintf(tmp,"%d",moriShape[j]);
-      Serial.print("Int shape: ");
-      Serial.print(moriShape[j]);
-
-      lastChar = 4;
-      if((moriShape[j] > -100 && moriShape[j] <= -10) || moriShape[j] >= 100){
-        lastChar = 3;
-      }
-      else if((moriShape[j] > -10 && moriShape[j] < 0) || moriShape[j] >= 10){
-        lastChar = 2;
-      }
-      else if(moriShape[j] >= 0){
-        lastChar = 1;
-      }
-      Serial.print("\t char shape: ");  
-      for (int k = 0 ; k < lastChar ; k++){
-        Serial.print(tmp[k]);
-        udpOutBuff[buffPos] = (byte)tmp[k];
-        buffPos++;
-        tmp[k] = '0';
-      }
-      udpOutBuff[buffPos] = (byte)' ';
-      buffPos++;
-      Serial.println();
-    }
-    UDP.beginPacket(ipList[i], portList[i]); // NTP requests are to port 123
-    UDP.write(udpOutBuff, PACKET_SIZE);
-    UDP.endPacket();
-    
-    Serial.print("Sent: ");
-    for(int j=0; j<PACKET_SIZE; j++)
-    {
-      Serial.print(udpOutBuff[j]);
-    }
-    Serial.print("\t to: ");
-    Serial.print(ipList[i]);
-    Serial.print(":");
-    Serial.println(portList[i]);
-  }
 }
 
 void writeUDPSerial()

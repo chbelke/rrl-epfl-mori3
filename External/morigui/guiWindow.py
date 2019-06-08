@@ -523,11 +523,16 @@ class MoriGui(Frame):
         self.leaderList = OptionMenu(frame_moriLead, self.leaderListVar,*self.moriNumber)
         self.leaderList.grid(row=0, column = 0, ipadx = 50)
 
-        self.moriLeadCmd0 = Label(frame_moriLead, text="LEAD?")
-        self.moriLeadCmd0.grid(row=0, column = 1, ipadx = 20)
+        self.moriLeadCmd0 = Label(frame_moriLead, text="LEAD")
+        self.moriLeadCmd0.grid(row=0, column = 2, ipadx = 20, sticky = W)
 
         self.moriLeadCheckbox = Checkbutton(frame_moriLead, command = self.toggleLead)
-        self.moriLeadCheckbox.grid(row=0, column = 2,  sticky = W)
+        self.moriLeadCheckbox.grid(row=0, column = 1)
+
+        self.controlUDPCmd0 = Label(frame_moriLead, text="UDP Communication")
+        self.controlUDPCmd0.grid(row=1, column = 0, ipadx = 20)
+        self.controlUDPCheckbox = Checkbutton(frame_moriLead, command = self.toggleUDP)
+        self.controlUDPCheckbox.grid(row=1, column = 1)
 
 
     # ------------------------------Frame 9------------------------------------ # 
@@ -549,10 +554,6 @@ class MoriGui(Frame):
         self.controlReset = Button(frame_controllerMori, text = "Disconnect", command = self.resetControl)
         self.controlReset.grid(row=0, column = 1, ipadx = 35, sticky = E)
 
-        self.controlUDPCmd0 = Label(frame_controllerMori, text="UDP Communication?")
-        self.controlUDPCmd0.grid(row=5, column = 0, ipadx = 20)
-        self.controlUDPCheckbox = Checkbutton(frame_controllerMori, command = self.toggleUDP)
-        self.controlUDPCheckbox.grid(row=5, column = 1,  sticky = W)
  
 
         #frame_party.pack(fill=X)
