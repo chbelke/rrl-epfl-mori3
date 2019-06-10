@@ -268,6 +268,12 @@ void callback(char* topic, byte* payload, unsigned int len)
     Serial.println("version bad");
   }
 
+  else if (!memcmp(payload2,"stopudp",sizeof("stopudp")-1))
+  {
+    runState = 3;
+    Serial.println("UDP communication stopped");
+  }
+
   else if (!memcmp(payload2,"hello",sizeof("hello")-1)) //respond hello
   {
     client.publish(publishName, "INFO: Hello!");
@@ -430,10 +436,11 @@ void establishUDP(char* payld, unsigned int len)
   {
     if(payld[i] == 'r')
       readFlag = true;
-    if(payld[i] == 'w')
+    if(payld[i] == 'w'){
       writeFlag = true;
-    if(payld[i] == 's')
-      serialFlag = true;
+      if(payld[i+1] == 's')
+        serialFlag = true;
+    }
     if(payld[i] == 'p')
     {
       for(int l=1; isDigit(payld[i+l]); l++)
@@ -487,54 +494,50 @@ void establishUDP(char* payld, unsigned int len)
   {
     if(!memcmp(ip,"192",sizeof("192")-1) && portFlag)
     {
+      for(int i=0; i <= IPLEN; i++)
+      {
+        if(ipList[i][0] == '\0')
+        {
+          //ipList[i] = strcpy(ip);
+          strcpy(ipList[i], ip);
+          portList[i] = port;
+          break;
+        }
+      }
       if(!msgFlag)
       {
+        runState = 3;
+        if (serialFlag){
+          runState = 5;
+          Serial.println("Serial communication");
+        }
         Serial.print("NO MSG!");
-        for(int i=0; i <= IPLEN; i++)
+      }
+      else{
+        //Message to be transmitted to the MORIs
+        memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
+        //Initialize values needed to form NTP request
+         for(int i = 0; msg[i] != '\0' ; i++)
         {
-          if(ipList[i][0] == '\0')
-          {
-            //ipList[i] = strcpy(ip);
-            strcpy(ipList[i], ip);
-            portList[i] = port;
-            break;
-          }
+          udpOutBuff[i] = (byte)msg[i];
         }
-      runState = 3;
-      }
-      for(int i=0; i <= IPLEN; i++)
-        {
-          if(ipList[i][0] == '\0')
-          {
-            //ipList[i] = strcpy(ip);
-            strcpy(ipList[i], ip);
-            portList[i] = port;
-            break;
-          }
+        Serial.println("Output buffer = ");
+        for(int i = 0 ; i < 16 ; i++){
+           Serial.println(udpOutBuff[i]);
         }
-      //Message to be transmitted to the MORIs
-      memset(udpOutBuff, 0, PACKET_SIZE);  // set all bytes in the buffer to 0
-      // Initialize values needed to form NTP request
-       for(int i = 0; msg[i] != '\0' ; i++)
-      {
-        udpOutBuff[i] = (byte)msg[i];
+        // udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
+        // send a packet requesting a timestamp:
+        UDP.beginPacket(ip, port); // NTP requests are to port 123
+        UDP.write(udpOutBuff, PACKET_SIZE);
+        UDP.endPacket();
+        Serial.print("Sent: ");
+        Serial.print(msg);
+        Serial.print("\t to: ");
+        Serial.print(ip);
+        Serial.print(":");
+        Serial.print(port);   
+        //runState = 3;
       }
-      Serial.println("Output buffer = ");
-      for(int i = 0 ; i < 16 ; i++){
-         Serial.println(udpOutBuff[i]);
-      }
-      // udpOutBuff[0] = 0b11100011;   // LI, Version, Mode
-      // send a packet requesting a timestamp:
-      UDP.beginPacket(ip, port); // NTP requests are to port 123
-      UDP.write(udpOutBuff, PACKET_SIZE);
-      UDP.endPacket();
-      Serial.print("Sent: ");
-      Serial.print(msg);
-      Serial.print("\t to: ");
-      Serial.print(ip);
-      Serial.print(":");
-      Serial.print(port);   
-      runState = 3;
     } //IP
   } //writeFlag
 }
@@ -578,23 +581,89 @@ void writeUDPSerial()
 {
   if (Serial.available() > 0) 
   {
-    uint8_t bytRead1 = Serial.read();
-    udpOutBuff[0] = bytRead1;
-    for(int i=0; i <= IPLEN; i++)
-    {
-      if(ipList[i][0] == '\0')
+    if (convertSerialCommand()){ //Enter only if the message was correctly received
+      for(int i=0; i <= IPLEN; i++)
       {
-        break;
+        if(ipList[i][0] == '\0'){
+          break;
+        }
+        UDP.beginPacket(ipList[i], portList[i]);
+        UDP.write(udpOutBuff, PACKET_SIZE);
+        UDP.endPacket();
       }
-      UDP.beginPacket(ipList[i], portList[i]);
-      UDP.write(udpOutBuff, 1);
-      UDP.endPacket();
+      client.publish(publishName, "Sent Serial!");
     }
-    Serial.print("Sent: ");
-    Serial.print(udpOutBuff[0]);
-    client.publish(publishName, "Sent Serial!");
+    //Reset the buffer
+    memset(udpOutBuff, 0, PACKET_SIZE);
   }
 }
+
+bool convertSerialCommand(){
+  int allocationStart = 2;
+  int allocationEnd = 10;
+  int commandSize = 4;
+  int minValue = 200;
+  int maxValue = 900;
+  char* shapeStartByte = "13";
+  char* endByte = "150";
+  int alloc;
+  int shapeValue;
+  char charValue[4];
+
+  if (atoi(shapeStartByte) == Serial.read()){
+    //Define the start byte
+    for(int i = 0 ; i < sizeof(shapeStartByte) ; i++){
+      udpOutBuff[i] = (byte)shapeStartByte[i];
+    }
+    //Space between start and allocation bytes
+    udpOutBuff[allocationStart] = (byte)' ';
+    alloc = Serial.read(); //Allocation byte
+    for (int i = allocationEnd ; i > allocationStart ; i--){
+      //Separate each bit in the allocation byte to obtain a correct format
+      if (alloc % 2 == 0){
+        udpOutBuff[i] = (char)'0';
+      }
+      else{
+        udpOutBuff[i] = (char)'1';
+      }
+      alloc = alloc >> 1;
+    }
+    //Space between sllocation and command bytes
+    udpOutBuff[allocationEnd+1] = (char)' ';
+    for (int i = allocationEnd+2 ; i < PACKET_SIZE-commandSize ; i += commandSize){
+      //udpOutBuff[i] = Serial.read();
+      shapeValue = Serial.read();
+      
+      if (shapeValue == 14){//End byte --> stop the encoding of the message
+        //Space between command and end bytes
+        udpOutBuff[i] = (byte)' ';
+        i++;
+        for (int j = 0 ; j < 3 ; j++){
+          udpOutBuff[i+j] = (byte)endByte[j];
+        }
+        return true;
+      }
+      //Shape values are encoded on 2 bytes so these operations are necessary to convert the values to char format
+      shapeValue = shapeValue << 8;
+      shapeValue = shapeValue + Serial.read();
+
+      //Redefine the range (the received message has an inverted range)
+      shapeValue = minValue + maxValue - shapeValue;
+      sprintf(charValue, "%04d", shapeValue);
+      
+      //Store the shape values
+      for (int j = 0 ; j < commandSize ; j++){
+        udpOutBuff[i+j] = (byte)charValue[j];
+        charValue[j] = '0';
+      }
+      //Reset the shape variable
+      shapeValue = 0;
+    }
+  }
+  //Start or end byte error
+  return false;
+}
+
 
 void normalOp()
 {

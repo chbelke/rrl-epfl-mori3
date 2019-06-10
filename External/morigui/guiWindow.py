@@ -67,7 +67,7 @@ class MoriGui(Frame):
         self.interMoriComEntry.delete(0, 'end')
 
     def publishShapeCommand(self):
-        startByte = "01"
+        startByte = "13"
         mode = "00"
         allocationByte = mode
         dataBytes = ""
@@ -190,6 +190,9 @@ class MoriGui(Frame):
 
     def resetControl(self):
         print("No more controlers!")
+        if self.UDPcommunication: #Reset the UDP and joystick control to "off"
+            self.toggleUDP()
+            self.controlUDPCheckbox.deselect()
         self.mqtthost.resetControllers()
         self.updateConnected #Important to reset the list
 
@@ -198,7 +201,9 @@ class MoriGui(Frame):
         self.mqtthost.exit()
 
     def updateConnected(self): #Updates the number of connected ESPs and the lists
+        self.update_shape_sliders(False)
         self.after(1500, self.updateConnected)
+        
         tmp = self.numberConnected.get()
         if tmp != self.mqtthost.getNumberConnected():
             self.numberConnected.set(self.mqtthost.getNumberConnected())
@@ -277,6 +282,19 @@ class MoriGui(Frame):
             menu.add_command(label=string, 
                              command=lambda value=string: self.listMoriVar.set(value))
 
+    def update_shape_sliders(self, compel):
+        if self.joystickCommand or compel:
+            self.currentMoriShape = self.mqtthost.getMoriShape()
+            for i in range(len(self.currentMoriShape.get(self.shapeCommandListMoriVar.get()))):
+                self.moriShapeSlider[i].set(self.currentMoriShape.get(self.shapeCommandListMoriVar.get())[i])
+            #IntVar arrays cannot be simply manipulated
+            self.shape0.set(self.moriShapeSlider[0].get())
+            self.shape1.set(self.moriShapeSlider[1].get())
+            self.shape2.set(self.moriShapeSlider[2].get())
+            self.shape3.set(self.moriShapeSlider[3].get())
+            self.shape4.set(self.moriShapeSlider[4].get())
+            self.shape5.set(self.moriShapeSlider[5].get())
+
     def option_select(self, *args):
         print("ESP " + self.listMoriVar.get() + " selected.")
 
@@ -289,16 +307,7 @@ class MoriGui(Frame):
     def shape_command_option_select(self, *args):
         print("ESP " + self.shapeCommandListMoriVar.get() + " selected.")
         self.mqtthost.publishLocal(self.shapeCommandListMoriVar.get(), "shape")
-        self.currentMoriShape = self.mqtthost.getMoriShape()
-        for i in range(len(self.currentMoriShape.get(self.shapeCommandListMoriVar.get()))):
-            self.moriShapeSlider[i].set(self.currentMoriShape.get(self.shapeCommandListMoriVar.get())[i])
-        #IntVar arrays cannot be simply manipulated
-        self.shape0.set(self.moriShapeSlider[0].get())
-        self.shape1.set(self.moriShapeSlider[1].get())
-        self.shape2.set(self.moriShapeSlider[2].get())
-        self.shape3.set(self.moriShapeSlider[3].get())
-        self.shape4.set(self.moriShapeSlider[4].get())
-        self.shape5.set(self.moriShapeSlider[5].get())
+        self.update_shape_sliders(True)
 
     def handshake_leader_option_select(self, *args):
         print("ESP " + self.handshakeLeaderListVar.get() + " selected.")
@@ -314,6 +323,12 @@ class MoriGui(Frame):
         else:
             self.moriLeadCheckbox.deselect()
 
+    def controller_option_select(self, *args):
+        print("ESP " + self.controllerListVar.get() + " selected.")
+
+    def mori_option_select(self, *args):
+        print("ESP " + self.moriListVar.get() + " selected.")
+
     def toggleLead(self):
         #Change the leader status (to lead or not to lead :P) when the checkbox is toggled
         if self.leadDict.get(self.leaderListVar.get()) == True:
@@ -322,16 +337,41 @@ class MoriGui(Frame):
             self.leadDict[self.leaderListVar.get()] = True
 
     def toggleUDP(self):
-        self.mqtthost.toggleUDP()
+        #Enter if there is a mori-controler pair
+        if len(self.mqtthost.getControllerOrder()) > 0: 
+            #Activate UDP communication
+            if not self.UDPcommunication:
+                self.UDPcommunication = True
+                self.mqtthost.toggleUDP()
+            else:
+                self.UDPcommunication = False
+                self.mqtthost.toggleUDP()
+                #Deactivate joystick control when UDP communication is disabled
+                if self.joystickCommand: 
+                    self.toggleJoystick()
+                    self.joystickControlCheckbox.deselect()
+        else:
+            print("No controller-Mori pair defined")
+            self.controlUDPCheckbox.deselect()
 
-    def controller_option_select(self, *args):
-        print("ESP " + self.controllerListVar.get() + " selected.")
-
-    def mori_option_select(self, *args):
-        print("ESP " + self.moriListVar.get() + " selected.")
-
-
-
+    def toggleJoystick(self):
+        if not self.joystickCommand:
+            if self.mqtthost.toggleJoystick(self.moriListVar.get(), True):
+                self.joystickCommand = True
+                #Activate UDP communication when joystick control is enabled
+                if not self.UDPcommunication: 
+                    self.toggleUDP()
+                    self.controlUDPCheckbox.select()
+            else:
+                print("No controller-Mori pair defined")
+                self.joystickControlCheckbox.deselect()
+        else: 
+            #Deactivate joystick control
+            if self.mqtthost.toggleJoystick(self.moriListVar.get(), False):
+                self.joystickCommand = False
+            else:
+                print("No controller-Mori pair defined")
+                
     def createWidgets(self):
         frame_party = Frame(self)
         frame_pubg = Frame(self, relief=RAISED, borderwidth = 1, pady = 5)
@@ -534,6 +574,11 @@ class MoriGui(Frame):
         self.controlUDPCheckbox = Checkbutton(frame_moriLead, command = self.toggleUDP)
         self.controlUDPCheckbox.grid(row=1, column = 1)
 
+        self.joystickControlCmd0 = Label(frame_moriLead, text="Joystick commands")
+        self.joystickControlCmd0.grid(row=2, column = 0, ipadx = 20)
+        self.joystickControlCheckbox = Checkbutton(frame_moriLead, command = self.toggleJoystick)
+        self.joystickControlCheckbox.grid(row=2, column = 1)
+
 
     # ------------------------------Frame 9------------------------------------ # 
         self.controllerList = OptionMenu(frame_controllerMori, self.controllerListVar,*self.moriNumber)
@@ -563,7 +608,7 @@ class MoriGui(Frame):
         frame_interMoriCom.pack()
         frame_moriHandshake.pack()
         frame_moriLead.pack()
-        #frame_pubg.pack()
+        frame_pubg.pack()
         #bottomFrame.pack(fill=BOTH, expand=True, pady=5)
         
 
@@ -615,6 +660,8 @@ class MoriGui(Frame):
         self.moriListVar.trace('w', self.mori_option_select)
 
         self.leadDict = {}
+        self.UDPcommunication = False
+        self.joystickCommand = False
 
         self.paaarty = self.partyOn()
 

@@ -298,11 +298,25 @@ class MqttHost(threading.Thread):
          self.UDPCom = False
          #Stop the UDP connections
          for i in range(len(self.controllerDict)):
-            #for j in range(len(self.controllerDict.get(list(self.controllerDict)[i]))):
-               #self.publishLocal(self.controllerDict.get(list(self.controllerDict)[i])[j],"vg")
-            self.publishLocal(list(self.controllerDict)[i],"vg")
+            self.publishLocal(list(self.controllerDict)[i],"stopudp")
       else:
          self.UDPCom = True
+      return self.UDPCom
+
+   def toggleJoystick(self, mori, activate):
+      published = False
+      #Activate or deactivate the joystick control
+      for controller in self.controllerOrder: #Enter if the MORI has a controller
+         if (not(self.controllerDict.get(controller) is None) and (mori in self.controllerDict.get(controller))):
+            published = True
+            if activate:
+               #"ws" is for write serial
+               message = "udp/ws/p" + str(self.udpPort) + "/i" + self.IPDict.get(mori)
+               self.client.publish("esp/{}/rec".format(controller), message)
+            else:
+               self.client.publish("esp/{}/rec".format(controller), "stopudp")
+      return published
+
 
    def resetHandshakes(self):
       #Empty the leader - follower arrays 
@@ -313,8 +327,8 @@ class MqttHost(threading.Thread):
       #Reset the UDP connexions
       for i in range(len(self.controllerDict)):#Stop
          for j in range(len(self.controllerDict.get(list(self.controllerDict)[i]))):
-            self.publishLocal(self.controllerDict.get(list(self.controllerDict)[i])[j],"vg")
-         self.publishLocal(list(self.controllerDict)[i],"vg")
+            self.publishLocal(self.controllerDict.get(list(self.controllerDict)[i])[j],"stopudp")
+         self.publishLocal(list(self.controllerDict)[i],"stopudp")
       #Empty the controller - mori arrays 
       self.controllerDict = {}
       self.controllerOrder = []

@@ -268,6 +268,12 @@ void callback(char* topic, byte* payload, unsigned int len)
     Serial.println("version bad");
   }
 
+  else if (!memcmp(payload2,"stopudp",sizeof("stopudp")-1))
+  {
+    runState = 3;
+    Serial.println("UDP communication stopped");
+  }
+
   else if (!memcmp(payload2,"hello",sizeof("hello")-1)) //respond hello
   {
     client.publish(publishName, "INFO: Hello!");
@@ -286,7 +292,7 @@ void callback(char* topic, byte* payload, unsigned int len)
     handshake(payload2, len);
   }
 
-  else if ('0' == payload2[0] && '1' == payload2[1]) //Start byte for MORI command
+  else if ('1' == payload2[0] && '3' == payload2[1]) //Start byte for MORI command
   {
     command(payload2);
   }
