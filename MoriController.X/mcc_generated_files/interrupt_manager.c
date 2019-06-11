@@ -56,17 +56,17 @@ void INTERRUPT_Initialize (void)
     //    Priority: 1
         IPC21bits.U4EIP = 1;
     //    UTXI: UART4 Transmitter
-    //    Priority: 3
-        IPC22bits.U4TXIP = 3;
+    //    Priority: 4
+        IPC22bits.U4TXIP = 4;
     //    URXI: UART4 Receiver
-    //    Priority: 3
-        IPC22bits.U4RXIP = 3;
+    //    Priority: 4
+        IPC22bits.U4RXIP = 4;
     //    MICI: I2C1 Master Events
-    //    Priority: 3
-        IPC4bits.MI2C1IP = 3;
+    //    Priority: 4
+        IPC4bits.MI2C1IP = 4;
     //    SICI: I2C1 Slave Events
-    //    Priority: 3
-        IPC4bits.SI2C1IP = 3;
+    //    Priority: 4
+        IPC4bits.SI2C1IP = 4;
     //    TI: Timer 5
     //    Priority: 1
         IPC7bits.T5IP = 1;
@@ -74,6 +74,6 @@ void INTERRUPT_Initialize (void)
     //    Priority: 2
         IPC2bits.T3IP = 2;
     //    TI: Timer 1
-    //    Priority: 2
-        IPC0bits.T1IP = 2;
+    //    Priority: 3
+        IPC0bits.T1IP = 3;
 }

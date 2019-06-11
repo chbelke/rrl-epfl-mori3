@@ -46,8 +46,11 @@
 /**
   Section: Included Files
 */
-
 #include <xc.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <libpic30.h>
 #include "adc1.h"
 #include "tmr1.h"
 #include "../define.h"

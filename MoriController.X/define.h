@@ -12,6 +12,7 @@
 #define FCY 3686400UL               // cycle frequency
 
 #include <xc.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <libpic30.h>
@@ -52,6 +53,7 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define LED_R LATBbits.LATB0        // blue LED - 1 is off
 #define LED_Y LATBbits.LATB1        // orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
+#define WIFI_EN LATBbits.LATB4      // wifi enable
 
 
 /* ******************** ESP COMMUNICATION *********************************** */
@@ -154,7 +156,7 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period 60 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
+#define SMA_Period 60 // SMA on-time (updated in 20 Hz loop) - 100 = 3 sec.
 #define SMA_Duty 50 // 8-bit PWM value
 
 #endif	/* DEFINE_H */

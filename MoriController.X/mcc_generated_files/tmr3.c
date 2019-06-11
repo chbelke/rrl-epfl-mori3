@@ -48,6 +48,10 @@
  */
 
 #include <xc.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <libpic30.h>
 #include "math.h"
 #include "tmr3.h"
 #include "adc1.h"
@@ -151,15 +155,15 @@ uint16_t TMR3_Counter16BitGet(void) {
 void __attribute__((weak)) TMR3_CallBack(void) {
     // Add your custom callback code here
 
+    // coupling sma controller
+    SMA_Ctrl();
+    
     // read analog pot inputs
     ADC1_Update();
     // edge extension control loops
     MotLin_PID(0, ADC1_Return(0), MotLin_Get(0));
     MotLin_PID(1, ADC1_Return(1), MotLin_Get(1));
     MotLin_PID(2, ADC1_Return(2), MotLin_Get(2));
-
-    // coupling sma controller
-    SMA_Ctrl();
 }
 
 void TMR3_Start(void) {

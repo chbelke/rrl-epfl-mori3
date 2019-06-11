@@ -64,6 +64,8 @@ int main (void) {
     //    LED_R = 0;                  // switch red led on
     LED_R = 1;
     
+    WIFI_EN = 1;
+    
     SMA_Off(0);
     SMA_Off(1);
     SMA_Off(2);

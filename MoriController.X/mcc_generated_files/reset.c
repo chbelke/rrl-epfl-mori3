@@ -42,9 +42,11 @@
     TERMS.
 */
 
-#include <stdbool.h>
+#include <xc.h>
+#include <stdio.h>
 #include <stdint.h>
-#include "xc.h"
+#include <stdbool.h>
+#include <libpic30.h>
 #include "reset.h"
 
 /**

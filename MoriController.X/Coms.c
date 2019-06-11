@@ -96,6 +96,7 @@ void Coms_ESP_Eval() {
                     }
                 } else {
                     EspInCase = 25;
+                    EspInBits = 0;
                 }
             }
             EspInByts = EspInByts + 1;
@@ -297,14 +298,14 @@ void Coms_ESP_Eval() {
                     // set smas
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
-                        if ((EspInAloc >> (5-m)) & 0b00000001){
+                        if (EspInAloc & (0b00100000 >> m)){
                             SMA_On(m);
                         }
                     }
                     // update leds
                     for (m = 0; m <= 2; m++) {
                         if ((EspInAloc >> (2-m)) & 0b00000001){
-                            LED_Set(m, RgbPWM[m]);
+//                            LED_Set(m, RgbPWM[m]);
                         }
                     }
                 } else {
@@ -314,6 +315,9 @@ void Coms_ESP_Eval() {
                 EspIn0End = EspIn0End + 1; // no end byte
             }
             EspInCase = 0;
+            break;
+            
+        case 26:
             break;
             
         default:

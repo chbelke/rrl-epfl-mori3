@@ -5,12 +5,11 @@
 #include <libpic30.h>
 #include "define.h"
 
-uint8_t TLC_Values[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+volatile uint8_t TLC_Values[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
 uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
 uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};
-
-uint8_t SMA_Count[3] = {0, 0, 0};
+volatile int8_t SMA_Count[3] = {0, 0, 0};
 
 void TLC59208_Setup(void) {
     I2C1_MESSAGE_STATUS status;
@@ -107,10 +106,11 @@ void TLC59208_Write(void) {
             // add some delay here
             __delay_us(1);
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT)
+            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
                 break; //return (0);
-            else
+            } else {
                 slaveTimeOut++;
+            }
         }
 
         if (status == I2C1_MESSAGE_COMPLETE)
@@ -145,7 +145,7 @@ void SMA_Set(uint8_t edge, uint8_t duty) {
 
 void SMA_On(uint8_t edge) {
     SMA_Count[edge] = SMA_Period;
-    SMA_Set(edge, SMA_Duty);
+//    SMA_Set(edge, SMA_Duty);
 }
 
 void SMA_Off(uint8_t edge) {
@@ -161,7 +161,7 @@ void SMA_Ctrl(void) {
     for (m = 0; m <= 2; m++) {
         if (SMA_Count[m]) {
             SMA_Count[m] = SMA_Count[m] - 1;
-            if (SMA_Count[m] == 0) {
+            if (SMA_Count[m] <= 0) {
                 SMA_Off(m);
             }
         } else {

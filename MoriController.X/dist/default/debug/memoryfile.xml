@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/production/MoriController.X.production.elf">
+  <executable name="dist/default/debug/MoriController.X.debug.elf">
     <memory name="data">
       <units>bytes</units>
       <length>49152</length>
-      <used>554</used>
-      <free>48598</free>
+      <used>634</used>
+      <free>48518</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>524514</length>
-      <used>18828</used>
-      <free>505686</free>
+      <used>18819</used>
+      <free>505695</free>
     </memory>
   </executable>
 </project>

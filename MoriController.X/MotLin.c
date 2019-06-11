@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpic30.h>
+#include <stdbool.h>
 #include "define.h"
 #include "mcc_generated_files/pwm.h"
 

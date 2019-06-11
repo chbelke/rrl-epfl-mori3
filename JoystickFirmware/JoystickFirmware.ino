@@ -26,11 +26,15 @@ int8_t JoystickMapped2 = 0;
 
 // coupling button eval
 bool CouplFlag[3] = {false, false, false};  // coupling button flag
+bool CouplNew = false;
 uint8_t CouplDelayCount[3] = {0, 0, 0};     // count from coupling trigger
 #define CouplDelay 150                      // coupling display after trigger
 uint8_t CouplCount = 0;                     // open coupling count
 char CouplInd[3] = "ABC";                   // string array displayed when coupling
-uint8_t CouplOut = B10000000;              // coupling CMD byte
+uint8_t CouplOut = B10000000;               // coupling CMD byte
+unsigned long CouplDebounce = 500;
+unsigned long CouplDebounceLast[3] = {0, 0, 0};
+
 
 // driving edge button eval
 uint8_t DriveEdge = 0;                      // driving edge selection
@@ -93,21 +97,28 @@ void setup() {
 void loop() {
 
   // coupling buttons only when extension input off
+
   if (digitalRead(6) == false) {
-    if (digitalRead(10)) {                  // coupling A button
+    if (digitalRead(10) && ((millis() - CouplDebounceLast[0]) > CouplDebounce)) {                  // coupling A button
       CouplDelayCount[0] = 0;
       CouplFlag[0] = true;
       CouplOut = CouplOut | B00100000;
+      CouplNew = true;
+      CouplDebounceLast[0] = millis();
     }
-    if (digitalRead(9)) {                   // coupling B button
+    if (digitalRead(9) && ((millis() - CouplDebounceLast[1]) > CouplDebounce)) {                   // coupling B button
       CouplDelayCount[1] = 0;
       CouplFlag[1] = true;
       CouplOut = CouplOut | B00010000;
+      CouplNew = true;
+      CouplDebounceLast[1] = millis();
     }
-    if (digitalRead(8)) {                   // coupling C button
+    if (digitalRead(8) && ((millis() - CouplDebounceLast[2]) > CouplDebounce)) {                   // coupling C button
       CouplDelayCount[2] = 0;
       CouplFlag[2] = true;
       CouplOut = CouplOut | B00001000;
+      CouplNew = true;
+      CouplDebounceLast[2] = millis();
     }
   }
 
@@ -157,9 +168,13 @@ void loop() {
 
       /* *** COUPLING INPUT ********************************************************************* */
     } else if (CouplFlag[0] || CouplFlag[1] || CouplFlag[2]) {
-      Serial.write(CMD_Beg);
-      Serial.write(CouplOut);
-      Serial.write(CMD_End);
+      if (CouplNew) {
+        Serial.write(CMD_Beg);
+        Serial.write(CouplOut);
+        Serial.write(CMD_End);
+        CouplOut = B10000000;
+        CouplNew = false;
+      }
 
       // LCD
       lcd.setCursor(0, 1);
@@ -212,7 +227,9 @@ void loop() {
       // LCD
 
       Serial.write(CMD_Beg);
-      if (Joystick[0] != 512) {
+
+      if ((Joystick[0] != 512) && ((Joystick[2] < 800) & (Joystick[2] > 200))) {
+        // Joystick[2] checking whether too much twist input. if so, do not drive
         if (Joystick[0] < 512) {            // --- REVERSE DRIVE -----------------------------------
           Serial.write(B01100000 | ((DriveEdge & B00000011) << 3));
 
