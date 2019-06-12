@@ -31,9 +31,6 @@ from termcolor import colored
 import threading
 
 
-#udp/w/p100/i192.168.0.53/m01 00111111 0900090009000000-1200120 150
-
-
 class MqttHost(threading.Thread):
 
    def __init__(self):
@@ -231,7 +228,7 @@ class MqttHost(threading.Thread):
                   if pyld[1] == self.leaderFollowerDict.get(espNum)[i]: #Enter if the leader is already leading the follower (error)
                      print(colored("ERROR: ESP" + espNum + " is already the leader of ESP" + pyld[1], "red"))
                      return
-
+            print("FOLLOWER!!")
             #Conditions verified => add the follower to the leader's list
             if self.leaderFollowerDict.get(espNum) is None: #First follower for the leader
                self.leaderFollowerDict[espNum] = [pyld[1]]
@@ -319,7 +316,8 @@ class MqttHost(threading.Thread):
 
 
    def resetHandshakes(self):
-      #Empty the leader - follower arrays 
+      #Empty the leader - follower arrays
+      print("no more") 
       self.leaderFollowerDict = {}
       self.leaderFollowerOrder = []
 

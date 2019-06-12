@@ -42,7 +42,7 @@ char runState = 0;
 
 unsigned long lastMessage = millis();
 unsigned long lastMacPub = millis();
-int moriShape[6] = {200, 200, 200, 0, 0, 0};
+int moriShape[6] = {900, 900, 900, 0, 0, 0};
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -279,10 +279,11 @@ void callback(char* topic, byte* payload, unsigned int len)
     client.publish(publishName, "INFO: Hello!");
   }
 
-  else if (!memcmp(payload2,"hand",sizeof("hand")-1)){ //'hand' is for handshake
-    handshake(payload2, len);
+  else if (!memcmp(payload2,"com",sizeof("com")-1)) //'com' is for communication
+  {
+    communication(payload2, len);
   }
-
+  
   else if (!memcmp(payload2,"shape",sizeof("shape")-1)) //Send shape
   {
     pubShape();
@@ -335,9 +336,16 @@ void pubShape()
 {
   char buff[130];
   String shapeMsg = String("SHAPE: ") + WiFi.macAddress();
-
+  int shape;
+  
   for (int i = 0 ; i < 6 ; i++) {
-    shapeMsg = String(shapeMsg) + String(" ") + String(moriShape[i]);
+    if (i < 3){ //Extentions values
+      shape = 1100 - moriShape[i]; //Redefine the range for the GUI
+    }
+    else{ //Angle values
+      shape = moriShape[i];
+    }
+    shapeMsg = String(shapeMsg) + String(" ") + String(shape);
   }
 
   shapeMsg.toCharArray(buff, 130);
@@ -375,7 +383,8 @@ void handshake(char* payload, int len){
 
   //Define the positions and lengths of the different sections of the received message
   int role = 4;
-  int espIDStart = 5;
+  int type = 5;
+  int espIDStart = 6;
   int espIDLength = 8;
   int receiverPublishIDStart = 4; 
   
@@ -387,6 +396,8 @@ void handshake(char* payload, int len){
   //==> It then sends sends to follower: hal'otherID'/'selfID'
   //==> The follower receives the message, checks it's ID and sends (if ID correct): haf'selfID'/'otherID'
   //==> The leader receives the message, check its ID and the handshake is established (if ID correct)
+
+  message[type] = payload[type];
   
   if (payload[role] == 'l'){ // 'l' is for leader (l is a letter)
     message[role] = 'f';
@@ -437,7 +448,17 @@ void handshake(char* payload, int len){
   if (handshakeCorrect){
     Serial.println("HANDSHAKE ESTABLISHED!");
     char buff[20];
-    String handshakeString = String("CONTROL: ") + followerID;
+    String handshakeString;
+    //"type" defines if this was a leader-follower or a controller-Mori handshake
+    if (payload[type] == 'l'){
+      handshakeString = String("FOLLOWER: ") + followerID;
+    }
+    else if (payload[type] == 'c'){
+      handshakeString = String("CONTROL: ") + followerID;
+    }
+    else{
+      Serial.println("Handshake type error!");
+    }
     handshakeString.toCharArray(buff, 20);
     //Serial.println(buff);
     client.publish(publishName, buff);

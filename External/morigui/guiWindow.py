@@ -85,19 +85,24 @@ class MoriGui(Frame):
                 shapeChange = True
                 allocationByte = allocationByte + "1" #Shape change
 
+                if i < 3: #Extention value
+                    newShape = 1100 - self.moriShapeSlider[i].get() #Redefine the range for the Mori
+                else: #Angle value
+                    newShape = self.moriShapeSlider[i].get()
+                
                 #The following conditions are necessary to keep the same message size for all shape commands (size = 4)
-                if(self.moriShapeSlider[i].get() >= 100):
-                    dataBytes = dataBytes + "0" + str(self.moriShapeSlider[i].get())
-                elif(self.moriShapeSlider[i].get() >= 10 and self.moriShapeSlider[i].get() < 100):
-                    dataBytes = dataBytes + "00" + str(self.moriShapeSlider[i].get())
-                elif(self.moriShapeSlider[i].get() >= 0 and self.moriShapeSlider[i].get() < 10):
-                    dataBytes = dataBytes + "000" + str(self.moriShapeSlider[i].get())
-                elif(self.moriShapeSlider[i].get() > -10 and self.moriShapeSlider[i].get() < 0):
-                    dataBytes = dataBytes + "-00" + str(abs(self.moriShapeSlider[i].get()))
-                elif(self.moriShapeSlider[i].get() > -100 and self.moriShapeSlider[i].get() < -10):
-                    dataBytes = dataBytes + "-0" + str(abs(self.moriShapeSlider[i].get()))
+                if(newShape >= 100):
+                    dataBytes = dataBytes + "0" + str(newShape)
+                elif(newShape >= 10 and self.moriShapeSlider[i].get() < 100):
+                    dataBytes = dataBytes + "00" + str(newShape)
+                elif(newShape >= 0 and self.moriShapeSlider[i].get() < 10):
+                    dataBytes = dataBytes + "000" + str(newShape)
+                elif(newShape > -10 and self.moriShapeSlider[i].get() < 0):
+                    dataBytes = dataBytes + "-00" + str(abs(newShape))
+                elif(newShape > -100 and self.moriShapeSlider[i].get() < -10):
+                    dataBytes = dataBytes + "-0" + str(abs(newShape))
                 else:
-                    dataBytes = dataBytes + str(self.moriShapeSlider[i].get())
+                    dataBytes = dataBytes + str(newShape)
             else:
                 allocationByte = allocationByte + "0" #No shape change
 
@@ -121,19 +126,24 @@ class MoriGui(Frame):
                         shapeChange = True
                         allocationByte = allocationByte + "1" #Shape change
 
+                        if i < 3: #Extention value
+                            newShape = 1100 - self.moriShapeSlider[ii].get() #Redefine the range for the Mori
+                        else: #Angle value
+                            newShape = self.moriShapeSlider[ii].get()
+
                         #The following conditions are necessary to keep the same message size for all shape commands (size = 4)
-                        if(self.moriShapeSlider[ii].get() >= 100):
-                            dataBytes = dataBytes + "0" + str(self.moriShapeSlider[ii].get())
-                        elif(self.moriShapeSlider[ii].get() >= 10 and self.moriShapeSlider[ii].get() < 100):
-                            dataBytes = dataBytes + "00" + str(self.moriShapeSlider[ii].get())
-                        elif(self.moriShapeSlider[ii].get() >= 0 and self.moriShapeSlider[ii].get() < 10):
-                            dataBytes = dataBytes + "000" + str(self.moriShapeSlider[ii].get())
-                        elif(self.moriShapeSlider[ii].get() > -10 and self.moriShapeSlider[ii].get() < 0):
-                            dataBytes = dataBytes + "-00" + str(abs(self.moriShapeSlider[ii].get()))
-                        elif(self.moriShapeSlider[ii].get() > -100 and self.moriShapeSlider[ii].get() < -10):
-                            dataBytes = dataBytes + "-0" + str(abs(self.moriShapeSlider[ii].get()))
+                        if(newShape >= 100):
+                            dataBytes = dataBytes + "0" + str(newShape)
+                        elif(newShape >= 10 and self.moriShapeSlider[i].get() < 100):
+                            dataBytes = dataBytes + "00" + str(newShape)
+                        elif(newShape >= 0 and self.moriShapeSlider[i].get() < 10):
+                            dataBytes = dataBytes + "000" + str(newShape)
+                        elif(newShape > -10 and self.moriShapeSlider[i].get() < 0):
+                            dataBytes = dataBytes + "-00" + str(abs(newShape))
+                        elif(newShape > -100 and self.moriShapeSlider[i].get() < -10):
+                            dataBytes = dataBytes + "-0" + str(abs(newShape))
                         else:
-                            dataBytes = dataBytes + str(self.moriShapeSlider[ii].get())
+                            dataBytes = dataBytes + str(newShape)
                     else:
                         allocationByte = allocationByte + "0" #No shape change
                 if shapeChange:
@@ -141,7 +151,7 @@ class MoriGui(Frame):
                 else: #To avoid having two spaces
                     command = startByte + " " + allocationByte + " " + endByte
                 message = "com" + leaderDict.get(number)[i] + command 
-                print("Published \"" + message + "\" to esp/" + leaderDict.get(number)[i] + "/rec")
+                #print("Published \"" + message + "\" to esp/" + leaderDict.get(number)[i] + "/rec")
                 self.mqtthost.publishLocal(number,message)    
         
         #IntVar arrays cannot be simply manipulated
@@ -152,7 +162,7 @@ class MoriGui(Frame):
         self.shape4.set(self.moriShapeSlider[4].get())
         self.shape5.set(self.moriShapeSlider[5].get())
         
-    def publishHandshake(self, leader, follower, leaderDict):
+    def publishHandshake(self, leader, follower, leaderDict, type):
         if leader == 'None':
             print("No ESP selected to lead")
             return
@@ -176,7 +186,8 @@ class MoriGui(Frame):
                     print("Leader Mori is following the follower Mori!")
                     return
 
-        message = "hand" + "l" + follower # 'hand' is for handshake, 'l' is for leader
+        #"type" defines if this is a leader-follower or a controller-Mori handshake
+        message = "hand" + "l" + type + follower # 'hand' is for handshake, 'l' is for leader
 
         print(colored("ESP" + leader + " will lead", "yellow") + colored(" ESP" + follower, "yellow"))
         self.mqtthost.publishLocal(leader,message)
@@ -201,9 +212,9 @@ class MoriGui(Frame):
         self.mqtthost.exit()
 
     def updateConnected(self): #Updates the number of connected ESPs and the lists
-        self.update_shape_sliders(False)
+        #self.update_shape_sliders(False)
         self.after(1500, self.updateConnected)
-        
+
         tmp = self.numberConnected.get()
         if tmp != self.mqtthost.getNumberConnected():
             self.numberConnected.set(self.mqtthost.getNumberConnected())
@@ -551,7 +562,7 @@ class MoriGui(Frame):
         self.handshakeButton = Button(frame_moriHandshake)
         self.handshakeButton["text"] = "Link",
         self.handshakeButton.grid(row=3, column = 1, ipadx = 40, sticky = E)
-        self.handshakeButton["command"] = lambda: self.publishHandshake(self.handshakeLeaderListVar.get(), self.handshakeFollowerListVar.get(), self.mqtthost.getLeaderIds())
+        self.handshakeButton["command"] = lambda: self.publishHandshake(self.handshakeLeaderListVar.get(), self.handshakeFollowerListVar.get(), self.mqtthost.getLeaderIds(),'l')
 
         self.moriHanshakeReset = Button(frame_moriHandshake)
         self.moriHanshakeReset["text"] = "Reset"
@@ -594,7 +605,7 @@ class MoriGui(Frame):
         self.controllerLink = Button(frame_controllerMori)
         self.controllerLink["text"] = "Connect"
         self.controllerLink.grid(row=4, column = 1, ipadx = 35, sticky = E)
-        self.controllerLink["command"] =  lambda: self.publishHandshake(self.controllerListVar.get(), self.moriListVar.get(), self.mqtthost.getControllerIds())
+        self.controllerLink["command"] =  lambda: self.publishHandshake(self.controllerListVar.get(), self.moriListVar.get(), self.mqtthost.getControllerIds(),'c')
 
         self.controlReset = Button(frame_controllerMori, text = "Disconnect", command = self.resetControl)
         self.controlReset.grid(row=0, column = 1, ipadx = 35, sticky = E)

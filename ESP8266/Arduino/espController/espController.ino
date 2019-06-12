@@ -42,7 +42,7 @@ char runState = 0;
 unsigned long lastMessage = millis();
 unsigned long lastMacPub = millis();
 
-int desiredMoriShape[6] = {200, 200, 200, 0, 0, 0};
+int desiredMoriShape[6] = {900, 900, 900, 0, 0, 0};
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -279,7 +279,7 @@ void callback(char* topic, byte* payload, unsigned int len)
     client.publish(publishName, "INFO: Hello!");
   }
 
-    else if (!memcmp(payload2,"com",sizeof("com")-1)) //'com' is for communication
+  else if (!memcmp(payload2,"com",sizeof("com")-1)) //'com' is for communication
   {
     communication(payload2, len);
   }
@@ -648,7 +648,7 @@ bool convertSerialCommand(){
       shapeValue = shapeValue + Serial.read();
 
       //Redefine the range (the received message has an inverted range)
-      shapeValue = minValue + maxValue - shapeValue;
+      //shapeValue = minValue + maxValue - shapeValue;
       sprintf(charValue, "%04d", shapeValue);
       
       //Store the shape values
