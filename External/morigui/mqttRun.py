@@ -374,6 +374,10 @@ class MqttHost(threading.Thread):
          self.event.wait(0.5)
  
    def exit(self):
+      for i in range(len(self.controllerDict)):#Stop
+         for j in range(len(self.controllerDict.get(list(self.controllerDict)[i]))):
+            self.publishLocal(self.controllerDict.get(list(self.controllerDict)[i])[j],"stopudp")
+         self.publishLocal(list(self.controllerDict)[i],"stopudp")
       self.client.disconnect()
       self.client.loop_stop()
       self.event.set()

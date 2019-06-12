@@ -352,7 +352,8 @@ void handshake(char* payload, int len){
 
   //Define the positions and lengths of the different sections of the received message
   int role = 4;
-  int espIDStart = 5;
+  int type = 5;
+  int espIDStart = 6;
   int espIDLength = 8;
   int receiverPublishIDStart = 4; 
   
@@ -364,6 +365,8 @@ void handshake(char* payload, int len){
   //==> It then sends sends to follower: hal'otherID'/'selfID'
   //==> The follower receives the message, checks it's ID and sends (if ID correct): haf'selfID'/'otherID'
   //==> The leader receives the message, check its ID and the handshake is established (if ID correct)
+
+  message[type] = payload[type];
   
   if (payload[role] == 'l'){ // 'l' is for leader (l is a letter)
     message[role] = 'f';
@@ -414,7 +417,17 @@ void handshake(char* payload, int len){
   if (handshakeCorrect){
     Serial.println("HANDSHAKE ESTABLISHED!");
     char buff[20];
-    String handshakeString = String("CONTROL: ") + followerID;
+    String handshakeString;
+    //"type" defines if this was a leader-follower or a controller-Mori handshake
+    if (payload[type] == 'l'){
+      handshakeString = String("FOLLOWER: ") + followerID;
+    }
+    else if (payload[type] == 'c'){
+      handshakeString = String("CONTROL: ") + followerID;
+    }
+    else{
+      Serial.println("Handshake type error!");
+    }
     handshakeString.toCharArray(buff, 20);
     //Serial.println(buff);
     client.publish(publishName, buff);
