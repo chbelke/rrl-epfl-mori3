@@ -1,18 +1,20 @@
-/**
-  WATCHDOG Generated Driver File
 
-  @Company
+/**
+  EXT_INT Generated Driver File 
+
+  @Company:
     Microchip Technology Inc.
 
-  @File Name
-    watchdog.h
+  @File Name:
+    ext_int.c
 
   @Summary
-    This is the generated driver implementation file for the WATCHDOG driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated driver implementation file for the EXT_INT 
+    driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
-  @Description
-    This header file provides implementations for driver APIs for WATCHDOG.
-    Generation Information :
+  @Description:
+    This source file provides implementations for driver APIs for EXT_INT. 
+    Generation Information : 
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
@@ -42,50 +44,62 @@
     TERMS.
 */
 
-#ifndef WATCHDOG_H
-#define	WATCHDOG_H
-
 /**
-  Section: Type defines
- */ 
-
-/**
- * Enables Watch Dog Timer (WDT) using the software bit.
- * @example
- * <code>
- * WATCHDOG_TimerSoftwareEnable();
- * </code>
+   Section: Includes
  */
-inline static void WATCHDOG_TimerSoftwareEnable(void)
-{
-    RCONbits.SWDTEN = 1;
-}
+
+#include "ext_int.h"
+#include "../define.h"
+
+//***User Area Begin->code: Add External Interrupt handler specific headers 
+
+//***User Area End->code: Add External Interrupt handler specific headers
 
 /**
- * Disables Watch Dog Timer (WDT) using the software bit.
- * @example
- * <code>
- * WATCHDOG_TimerSoftwareDisable();
- * </code>
- */
-inline static void WATCHDOG_TimerSoftwareDisable(void)
-{
-    RCONbits.SWDTEN = 0;
-}
-
-/**
- * Clears the Watch Dog Timer (WDT).
- * @example
- * <code>
- * WATCHDOG_TimerClear();
- * </code>
- */
-inline static void WATCHDOG_TimerClear(void)
-{
-    ClrWdt();
-}
-
-#endif	/* WATCHDOG_H */
-/**
- End of File
+   Section: External Interrupt Handlers
 */
+ 
+ void __attribute__ ((weak)) EX_INT1_CallBack(void)
+{
+    // Add your custom callback code here
+//    LED_R ^=1; 
+    Flg_Button = true;
+}
+
+/**
+  Interrupt Handler for EX_INT1 - INT1
+*/
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
+{
+    //***User Area Begin->code: External Interrupt 1***
+	
+	EX_INT1_CallBack();
+    
+	//***User Area End->code: External Interrupt 1***
+    EX_INT1_InterruptFlagClear();
+}
+
+/**
+    Section: External Interrupt Initializers
+ */
+/**
+    void EXT_INT_Initialize(void)
+
+    Initializer for the following external interrupts
+    INT1
+    INT3
+    INT4
+*/
+void EXT_INT_Initialize(void)
+{
+    /*******
+     * INT1
+     * Clear the interrupt flag
+     * Set the external interrupt edge detect
+     * Enable the interrupt, if enabled in the UI. 
+     ********/
+    EX_INT1_InterruptFlagClear();   
+    EX_INT1_NegativeEdgeSet();
+    EX_INT1_InterruptEnable();
+
+}

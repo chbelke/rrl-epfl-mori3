@@ -140,12 +140,11 @@ void SMA_Set(uint8_t edge, uint8_t duty) {
         default:
             break;
     }
-    TLC59208_Write();
 }
 
 void SMA_On(uint8_t edge) {
     SMA_Count[edge] = SMA_Period;
-//    SMA_Set(edge, SMA_Duty);
+    SMA_Set(edge, SMA_Duty);
 }
 
 void SMA_Off(uint8_t edge) {
@@ -168,6 +167,7 @@ void SMA_Ctrl(void) {
             SMA_Off(m);
         }
     }
+    TLC59208_Write();
 }
 
 void LED_Set(uint8_t RGBcolor, uint8_t duty) {

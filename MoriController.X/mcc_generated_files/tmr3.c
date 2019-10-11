@@ -14,15 +14,15 @@
   @Description
     This source file provides APIs for driver for TMR3. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36b
+        MPLAB             :  MPLAB X v5.25
  */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -63,9 +63,11 @@
 #include "../TLC59208.h"
 #include "../MMA8452Q.h"
 
-//uint16_t desired = 500;
-//uint8_t stepcount = 0;
-//uint8_t flag = 0;
+/**
+ Section: File specific functions
+*/
+void (*TMR3_InterruptHandler)(void) = NULL;
+void TMR3_CallBack(void);
 
 /**
   Section: Data Type Definitions
@@ -74,21 +76,22 @@
 /** TMR Driver Hardware Instance Object
 
   @Summary
-    Defines the object required for the maintainence of the hardware instance.
+    Defines the object required for the maintenance of the hardware instance.
 
   @Description
-    This defines the object required for the maintainence of the hardware
+    This defines the object required for the maintenance of the hardware
     instance. This object exists once per hardware instance of the peripheral.
 
   Remarks:
     None.
  */
 
-typedef struct _TMR_OBJ_STRUCT {
+typedef struct _TMR_OBJ_STRUCT
+{
     /* Timer Elapsed */
-    bool timerElapsed;
+    volatile bool           timerElapsed;
     /*Software Counter value*/
-    uint8_t count;
+    volatile uint8_t        count;
 
 } TMR_OBJ;
 
@@ -98,7 +101,8 @@ static TMR_OBJ tmr3_obj;
   Section: Driver Interface
  */
 
-void TMR3_Initialize(void) {
+void TMR3_Initialize (void)
+{
     //TMR3 0; 
     TMR3 = 0x00;
     //Period = 0.05 s; Frequency = 3686400 Hz; PR3 2880; 
@@ -106,6 +110,10 @@ void TMR3_Initialize(void) {
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
     T3CON = 0x8020;
 
+    if(TMR3_InterruptHandler == NULL)
+    {
+        TMR3_SetInterruptHandler(&TMR3_CallBack);
+    }
 
     IFS0bits.T3IF = false;
     IEC0bits.T3IE = true;
@@ -114,14 +122,19 @@ void TMR3_Initialize(void) {
 
 }
 
-void __attribute__((interrupt, no_auto_psv)) _T3Interrupt() {
+
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
+{
     /* Check if the Timer Interrupt/Status is set */
 
     //***User Area Begin
 
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes
-    TMR3_CallBack();
+    if(TMR3_InterruptHandler) 
+    { 
+           TMR3_InterruptHandler(); 
+    }
 
     //***User Area End
 
@@ -130,29 +143,35 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt() {
     IFS0bits.T3IF = false;
 }
 
-void TMR3_Period16BitSet(uint16_t value) {
+void TMR3_Period16BitSet( uint16_t value )
+{
     /* Update the counter values */
     PR3 = value;
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Period16BitGet(void) {
-    return ( PR3);
+uint16_t TMR3_Period16BitGet( void )
+{
+    return( PR3 );
 }
 
-void TMR3_Counter16BitSet(uint16_t value) {
+void TMR3_Counter16BitSet ( uint16_t value )
+{
     /* Update the counter values */
     TMR3 = value;
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Counter16BitGet(void) {
-    return ( TMR3);
+uint16_t TMR3_Counter16BitGet( void )
+{
+    return( TMR3 );
 }
 
-void __attribute__((weak)) TMR3_CallBack(void) {
+
+void __attribute__ ((weak)) TMR3_CallBack(void)
+{
     // Add your custom callback code here
 
     // coupling sma controller
@@ -166,7 +185,16 @@ void __attribute__((weak)) TMR3_CallBack(void) {
     MotLin_PID(2, ADC1_Return(2), MotLin_Get(2));
 }
 
-void TMR3_Start(void) {
+
+void  TMR3_SetInterruptHandler(void (* InterruptHandler)(void))
+{ 
+    IEC0bits.T3IE = false;
+    TMR3_InterruptHandler = InterruptHandler; 
+    IEC0bits.T3IE = true;
+}
+
+void TMR3_Start( void )
+{
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 
@@ -177,7 +205,8 @@ void TMR3_Start(void) {
     T3CONbits.TON = 1;
 }
 
-void TMR3_Stop(void) {
+void TMR3_Stop( void )
+{
     /* Stop the Timer */
     T3CONbits.TON = false;
 
@@ -185,22 +214,26 @@ void TMR3_Stop(void) {
     IEC0bits.T3IE = false;
 }
 
-bool TMR3_GetElapsedThenClear(void) {
+bool TMR3_GetElapsedThenClear(void)
+{
     bool status;
 
     status = tmr3_obj.timerElapsed;
 
-    if (status == true) {
+    if(status == true)
+    {
         tmr3_obj.timerElapsed = false;
     }
     return status;
 }
 
-int TMR3_SoftwareCounterGet(void) {
+int TMR3_SoftwareCounterGet(void)
+{
     return tmr3_obj.count;
 }
 
-void TMR3_SoftwareCounterClear(void) {
+void TMR3_SoftwareCounterClear(void)
+{
     tmr3_obj.count = 0;
 }
 

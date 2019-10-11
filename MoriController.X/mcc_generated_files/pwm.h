@@ -13,15 +13,15 @@
   @Description
     This header file provides APIs for driver for PWM. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB 	          :  MPLAB X v5.05
+        Compiler          :  XC16 v1.36b
+        MPLAB 	          :  MPLAB X v5.25
 */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -84,6 +84,23 @@ typedef enum
     PWM_GENERATOR_5 =  5,       
     PWM_GENERATOR_6 =  6,       
 } PWM_GENERATOR;
+
+/** PWM Primary Synchronization Polarity Definition
+ 
+ @Summary 
+   Defines the PWM Primary Synchronization Input/Output Polarity.
+ 
+ @Description
+   This routine defines the PWM Primary Synchronization Input/Output Polarity.
+ 
+ Remarks:
+   None
+ */
+typedef enum 
+{
+    PWM_PRIMARY_SYNC_INOUT_POLARITY_HIGH,
+    PWM_PRIMARY_SYNC_INOUT_POLARITY_LOW
+} PWM_PRIMARY_SYNC_INOUT_POLARITY;
 
 /**
   Section: Interface Routines
@@ -247,7 +264,7 @@ inline static void PWM_PrimarySyncOutputEnable(void)
     Disables synchronization output from the Primary PWM timebase generator.
 
   @Description
-    This routine is used to disbale synchronization output from the Primary PWM timebase generator.
+    This routine is used to disable synchronization output from the Primary PWM timebase generator.
 
   @Param
     None.
@@ -261,6 +278,30 @@ inline static void PWM_PrimarySyncOutputEnable(void)
 inline static void PWM_PrimarySyncOutputDisable(void)
 {
 	PTCONbits.SYNCOEN = false; 
+}
+
+/**
+  @Summary
+    Assigns the primary synchronization input/output polarity.
+
+  @Description
+    This routine is used to assign the primary synchronization input/output polarity.
+
+  @Param
+    polarity    -   Polarity to be set.
+
+  @Returns
+    None
+ 
+  @Example 
+    <code>    
+        PWM_PRIMARY_SYNC_INOUT_POLARITY polarity = PWM_PRIMARY_SYNC_INOUT_POLARITY_LOW;
+        PWM_PrimarySyncInputOutputPolaritySet(polarity);
+    </code>
+*/
+inline static void PWM_PrimarySyncInputOutputPolaritySet(PWM_PRIMARY_SYNC_INOUT_POLARITY polarity)
+{
+    PTCONbits.SYNCPOL = polarity;
 }
 
 /**
@@ -582,27 +623,29 @@ inline static void PWM_FaultInterruptStatusClear(PWM_GENERATOR genNum)
 */ 
 inline static bool PWM_FaultInterruptStatusGet(PWM_GENERATOR genNum)
 {		
+    bool status = false;
     switch(genNum) { 
         case PWM_GENERATOR_1:
-                return PWMCON1bits.FLTSTAT;                
+                status = PWMCON1bits.FLTSTAT;                
                 break;       
         case PWM_GENERATOR_2:
-                return PWMCON2bits.FLTSTAT;                
+                status = PWMCON2bits.FLTSTAT;                
                 break;       
         case PWM_GENERATOR_3:
-                return PWMCON3bits.FLTSTAT;                
+                status = PWMCON3bits.FLTSTAT;                
                 break;       
         case PWM_GENERATOR_4:
-                return PWMCON4bits.FLTSTAT;                
+                status = PWMCON4bits.FLTSTAT;                
                 break;       
         case PWM_GENERATOR_5:
-                return PWMCON5bits.FLTSTAT;                
+                status = PWMCON5bits.FLTSTAT;                
                 break;       
         case PWM_GENERATOR_6:
-                return PWMCON6bits.FLTSTAT;                
+                status = PWMCON6bits.FLTSTAT;                
                 break;       
         default:break;    
     }
+    return status;
 }
 
 /**
@@ -681,27 +724,29 @@ inline static void PWM_CurrentLimitInterruptStatusClear(PWM_GENERATOR genNum)
 */  
 inline static bool PWM_CurrentLimitInterruptStatusGet(PWM_GENERATOR genNum)
 {	
+    bool status = false;
     switch(genNum) { 
         case PWM_GENERATOR_1:
-                return PWMCON1bits.CLSTAT;                
+                status = PWMCON1bits.CLSTAT;                
                 break;       
         case PWM_GENERATOR_2:
-                return PWMCON2bits.CLSTAT;                
+                status = PWMCON2bits.CLSTAT;                
                 break;       
         case PWM_GENERATOR_3:
-                return PWMCON3bits.CLSTAT;                
+                status = PWMCON3bits.CLSTAT;                
                 break;       
         case PWM_GENERATOR_4:
-                return PWMCON4bits.CLSTAT;                
+                status = PWMCON4bits.CLSTAT;                
                 break;       
         case PWM_GENERATOR_5:
-                return PWMCON5bits.CLSTAT;                
+                status = PWMCON5bits.CLSTAT;                
                 break;       
         case PWM_GENERATOR_6:
-                return PWMCON6bits.CLSTAT;                
+                status = PWMCON6bits.CLSTAT;                
                 break;       
         default:break;    
     }
+    return status;
 }
 
 /**
@@ -780,27 +825,29 @@ inline static void PWM_TriggerInterruptStatusClear(PWM_GENERATOR genNum)
 */  
 inline static bool PWM_TriggerInterruptStatusGet(PWM_GENERATOR genNum)
 {
+    bool status = false;
     switch(genNum) { 
         case PWM_GENERATOR_1:
-                return PWMCON1bits.TRGSTAT;                
+                status = PWMCON1bits.TRGSTAT;                
                 break;       
         case PWM_GENERATOR_2:
-                return PWMCON2bits.TRGSTAT;                
+                status = PWMCON2bits.TRGSTAT;                
                 break;       
         case PWM_GENERATOR_3:
-                return PWMCON3bits.TRGSTAT;                
+                status = PWMCON3bits.TRGSTAT;                
                 break;       
         case PWM_GENERATOR_4:
-                return PWMCON4bits.TRGSTAT;                
+                status = PWMCON4bits.TRGSTAT;                
                 break;       
         case PWM_GENERATOR_5:
-                return PWMCON5bits.TRGSTAT;                
+                status = PWMCON5bits.TRGSTAT;                
                 break;       
         case PWM_GENERATOR_6:
-                return PWMCON6bits.TRGSTAT;                
+                status = PWMCON6bits.TRGSTAT;                
                 break;       
         default:break;  
     }
+    return status;
 }
 
 /**
@@ -1016,27 +1063,27 @@ inline static void PWM_OverrideDataSet(PWM_GENERATOR genNum,uint16_t overrideDat
 {
     switch(genNum) { 
         case PWM_GENERATOR_1:
-                overrideData = ((overrideData & 0xFFFC)<<6);
+                overrideData = ((overrideData & 0x0003)<<6);
                 __builtin_write_PWMSFR(&IOCON1, (IOCON1 | overrideData), &PWMKEY);                
                 break;       
         case PWM_GENERATOR_2:
-                overrideData = ((overrideData & 0xFFFC)<<6);
+                overrideData = ((overrideData & 0x0003)<<6);
                 __builtin_write_PWMSFR(&IOCON2, (IOCON2 | overrideData), &PWMKEY);                
                 break;       
         case PWM_GENERATOR_3:
-                overrideData = ((overrideData & 0xFFFC)<<6);
+                overrideData = ((overrideData & 0x0003)<<6);
                 __builtin_write_PWMSFR(&IOCON3, (IOCON3 | overrideData), &PWMKEY);                
                 break;       
         case PWM_GENERATOR_4:
-                overrideData = ((overrideData & 0xFFFC)<<6);
+                overrideData = ((overrideData & 0x0003)<<6);
                 __builtin_write_PWMSFR(&IOCON4, (IOCON4 | overrideData), &PWMKEY);                
                 break;       
         case PWM_GENERATOR_5:
-                overrideData = ((overrideData & 0xFFFC)<<6);
+                overrideData = ((overrideData & 0x0003)<<6);
                 __builtin_write_PWMSFR(&IOCON5, (IOCON5 | overrideData), &PWMKEY);                
                 break;       
         case PWM_GENERATOR_6:
-                overrideData = ((overrideData & 0xFFFC)<<6);
+                overrideData = ((overrideData & 0x0003)<<6);
                 __builtin_write_PWMSFR(&IOCON6, (IOCON6 | overrideData), &PWMKEY);                
                 break;       
         default:break;  
@@ -1622,6 +1669,287 @@ inline static void PWM_FaultInterruptDisable(PWM_GENERATOR genNum)
 //CHB
 void PWM_Set(uint8_t PWM_Output, uint16_t PWM_Duty);
 
+/**
+  @Summary
+    Callback for PWM Special Event.
+
+  @Description
+    This routine is callback for PWM Special Event
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_SpecialEvent_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_SpecialEvent_Tasks(void);
+
+/**
+  @Summary
+    Callback for PWM Generator1.
+
+  @Description
+    This routine is callback for PWM Generator1
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator1_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator1_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator2.
+
+  @Description
+    This routine is callback for PWM Generator2
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator2_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator2_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator3.
+
+  @Description
+    This routine is callback for PWM Generator3
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator3_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator3_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator4.
+
+  @Description
+    This routine is callback for PWM Generator4
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator4_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator4_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator5.
+
+  @Description
+    This routine is callback for PWM Generator5
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator5_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator5_Tasks(void);
+/**
+  @Summary
+    Callback for PWM Generator6.
+
+  @Description
+    This routine is callback for PWM Generator6
+
+  @Param
+    None.
+
+  @Returns
+    None
+ 
+  @Example 
+	Refer to PWM_Initialize(); for an example
+*/
+void PWM_Generator6_CallBack(void);
+
+/**
+  @Summary
+    Polled implementation
+
+  @Description
+    This routine is used to implement the tasks for polled implementations.
+  
+  @Preconditions
+    PWM_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns 
+    None
+ 
+  @Param
+    None
+ 
+  @Example
+    Refer to PWM_Initialize(); for an example
+    
+*/
+void PWM_Generator6_Tasks(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

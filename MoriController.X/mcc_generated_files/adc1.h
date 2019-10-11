@@ -13,15 +13,15 @@
   @Description
     This header file provides APIs for driver for ADC1.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB 	          :  MPLAB X v5.10
+        Compiler          :  XC16 v1.36b
+        MPLAB 	          :  MPLAB X v5.25
  */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -49,6 +49,7 @@
   Section: Included Files
  */
 
+#include <xc.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -83,9 +84,9 @@ typedef enum
     ADC1_AI_C =  0x18,
     ADC1_AI_B =  0x1C,
     ADC1_AI_A =  0x1D,
-        ADC1_CHANNEL_CTMU =  0x3e,
-        ADC1_MAX_CHANNEL_COUNT = 4
-    } ADC1_CHANNEL;
+    ADC1_CHANNEL_CTMU =  0x3E,
+    ADC1_MAX_CHANNEL_COUNT = 4
+} ADC1_CHANNEL;
 
     /** ADC Positive 123 Channels Definition
  
@@ -101,12 +102,12 @@ typedef enum
      */
 typedef enum 
 {
-        ADC1_POS_123_CHANNEL_0 = 0x0,
-        ADC1_POS_123_CHANNEL_1 = 0x1,
-        ADC1_POS_123_CHANNEL_2 = 0x8,
-        ADC1_POS_123_CHANNEL_3 = 0x9,
-        ADC1_POS_123_CHANNEL_4 = 0x10
-    } ADC1_POS_123_CHANNEL;
+    ADC1_POS_123_CHANNEL_0 = 0x0,
+    ADC1_POS_123_CHANNEL_1 = 0x1,
+    ADC1_POS_123_CHANNEL_2 = 0x8,
+    ADC1_POS_123_CHANNEL_3 = 0x9,
+    ADC1_POS_123_CHANNEL_4 = 0x10
+} ADC1_POS_123_CHANNEL;
 
     /** ADC Negative 123 Channels Definition
  
@@ -122,10 +123,10 @@ typedef enum
      */
 typedef enum 
 {
-        ADC1_NEG_123_CHANNEL_0 = 0x0,
-        ADC1_NEG_123_CHANNEL_1 = 0x2,
-        ADC1_NEG_123_CHANNEL_2 = 0x3
-    } ADC1_NEG_123_CHANNEL;
+    ADC1_NEG_123_CHANNEL_0 = 0x0,
+    ADC1_NEG_123_CHANNEL_1 = 0x2,
+    ADC1_NEG_123_CHANNEL_2 = 0x3
+} ADC1_NEG_123_CHANNEL;
 
     /** ADC Data Format Type Definition
  
@@ -141,11 +142,11 @@ typedef enum
      */
 typedef enum 
 {
-        ADC1_FORM_UNSIGNED_INT   = 0, /* Unsigned Integer */
-        ADC1_FORM_SIGNED_INT     = 1, /* Signed Integer */
-        ADC1_FORM_UNSIGNED_FRACT = 2, /* Unsigned Fraction */
-        ADC1_FORM_SIGNED_FRACT   = 3  /* Signed Integer */
-    } ADC1_FORM_TYPE;
+    ADC1_FORM_UNSIGNED_INT   = 0, /* Unsigned Integer */
+    ADC1_FORM_SIGNED_INT     = 1, /* Signed Integer */
+    ADC1_FORM_UNSIGNED_FRACT = 2, /* Unsigned Fraction */
+    ADC1_FORM_SIGNED_FRACT   = 3  /* Signed Integer */
+} ADC1_FORM_TYPE;
 
     /** ADC Resolution Type Definition
  
@@ -161,9 +162,9 @@ typedef enum
      */
 typedef enum 
 {
-        ADC1_RESOLUTION_10_BIT   = 0, /* 10-bit, 4-channel ADC operation */
-        ADC1_RESOLUTION_12_BIT   = 1  /* 12-bit, 1-channel ADC operation */
-    } ADC1_RESOLUTION_TYPE;
+    ADC1_RESOLUTION_10_BIT   = 0, /* 10-bit, 4-channel ADC operation */
+    ADC1_RESOLUTION_12_BIT   = 1  /* 12-bit, 1-channel ADC operation */
+} ADC1_RESOLUTION_TYPE;
 
     /** ADC Sampling Source Definition
  
@@ -179,20 +180,20 @@ typedef enum
      */
 typedef enum 
 {
-    ADC1_SAMPLING_SOURCE_PTGO13  =  0x4,
-    ADC1_SAMPLING_SOURCE_PTGO12  =  0x3,
-    ADC1_SAMPLING_SOURCE_CTMU  =  0x6,
-    ADC1_SAMPLING_SOURCE_AUTO  =  0x7,
-    ADC1_SAMPLING_SOURCE_PTGO14  =  0x5,
-    ADC1_SAMPLING_SOURCE_PWM1  =  0x0,
-    ADC1_SAMPLING_SOURCE_TMR5  =  0x4,
     ADC1_SAMPLING_SOURCE_PWM2  =  0x1,
-    ADC1_SAMPLING_SOURCE_MANUAL  =  0x0,
-    ADC1_SAMPLING_SOURCE_INT0  =  0x1,
-    ADC1_SAMPLING_SOURCE_PWM  =  0x3,
-    ADC1_SAMPLING_SOURCE_PWM3  =  0x2,
+    ADC1_SAMPLING_SOURCE_PTGO12  =  0x3,
     ADC1_SAMPLING_SOURCE_TMR3  =  0x2,
     ADC1_SAMPLING_SOURCE_PTGO15  =  0x6,
+    ADC1_SAMPLING_SOURCE_AUTO  =  0x7,
+    ADC1_SAMPLING_SOURCE_CTMU  =  0x6,
+    ADC1_SAMPLING_SOURCE_PWM1  =  0x0,
+    ADC1_SAMPLING_SOURCE_MANUAL  =  0x0,
+    ADC1_SAMPLING_SOURCE_TMR5  =  0x4,
+    ADC1_SAMPLING_SOURCE_INT0  =  0x1,
+    ADC1_SAMPLING_SOURCE_PWM3  =  0x2,
+    ADC1_SAMPLING_SOURCE_PTGO13  =  0x4,
+    ADC1_SAMPLING_SOURCE_PWM  =  0x3,
+    ADC1_SAMPLING_SOURCE_PTGO14  =  0x5,
 } ADC1_SAMPLING_SOURCE;
 
     /** ADC Conversion Channel Type Definition
@@ -1050,9 +1051,9 @@ void ADC1_CallBack(void);
 void ADC1_Tasks(void);
 
 
-    // CHB
-    void ADC1_Update (void);
-    uint16_t ADC1_Return (uint8_t);
+// CHB
+void ADC1_Update (void);
+uint16_t ADC1_Return (uint8_t);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

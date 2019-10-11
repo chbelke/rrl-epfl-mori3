@@ -151,9 +151,9 @@ void loop() {
       Serial.write((uint8_t)(MotLin[2] & 0x00FF));
       Serial.write(CMD_End);
 
-      MotLin[0] = map(MotLin[0], 200, 900, 900, 200);
-      MotLin[1] = map(MotLin[1], 200, 900, 900, 200);
-      MotLin[2] = map(MotLin[2], 200, 900, 900, 200);
+      MotLin[0] = map(MotLin[0], 150, 950, 950, 150);
+      MotLin[1] = map(MotLin[1], 150, 950, 950, 150);
+      MotLin[2] = map(MotLin[2], 150, 950, 950, 150);
 
       // LCD
       lcd.setCursor(0, 1);

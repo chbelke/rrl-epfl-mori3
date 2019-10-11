@@ -13,15 +13,15 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB             :  MPLAB X v5.10
+        Compiler          :  XC16 v1.36b
+        MPLAB             :  MPLAB X v5.25
 */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -46,17 +46,17 @@
 #include "clock.h"
 #include "system.h"
 #include "system_types.h"
-#include "interrupt_manager.h"
-#include "traps.h"
-#include "adc1.h"
-#include "i2c1.h"
-#include "tmr1.h"
-#include "tmr3.h"
-#include "pwm.h"
 #include "tmr5.h"
 #include "uart4.h"
+#include "ext_int.h"
+#include "i2c1.h"
+#include "interrupt_manager.h"
+#include "traps.h"
+#include "pwm.h"
+#include "tmr1.h"
+#include "tmr3.h"
+#include "adc1.h"
 #include "../TLC59208.h"
-#include "../MMA8452Q.h"
 
 void SYSTEM_Initialize(void)
 {
@@ -64,6 +64,7 @@ void SYSTEM_Initialize(void)
     CLOCK_Initialize();
     INTERRUPT_Initialize();
     PWM_Initialize();
+    EXT_INT_Initialize();
     I2C1_Initialize();
     UART4_Initialize();
     ADC1_Initialize();

@@ -14,15 +14,15 @@
   @Description
     This source file provides APIs for driver for TMR5. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB             :  MPLAB X v5.10
-*/
+        Compiler          :  XC16 v1.36b
+        MPLAB             :  MPLAB X v5.25
+ */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -41,11 +41,11 @@
 
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
-*/
+ */
 
 /**
   Section: Included Files
-*/
+ */
 
 #include <xc.h>
 #include <stdio.h>
@@ -59,30 +59,38 @@
 #include "../MotLin.h"
 #include "../TLC59208.h"
 #include "../MMA8452Q.h"
+#include "../Battery.h"
+#include "../Button.h"
+
+/**
+ Section: File specific functions
+*/
+void (*TMR5_InterruptHandler)(void) = NULL;
+void TMR5_CallBack(void);
 
 /**
   Section: Data Type Definitions
-*/
+ */
 
 /** TMR Driver Hardware Instance Object
 
   @Summary
-    Defines the object required for the maintainence of the hardware instance.
+    Defines the object required for the maintenance of the hardware instance.
 
   @Description
-    This defines the object required for the maintainence of the hardware
+    This defines the object required for the maintenance of the hardware
     instance. This object exists once per hardware instance of the peripheral.
 
   Remarks:
     None.
-*/
+ */
 
 typedef struct _TMR_OBJ_STRUCT
 {
     /* Timer Elapsed */
-    bool                                                    timerElapsed;
+    volatile bool           timerElapsed;
     /*Software Counter value*/
-    uint8_t                                                 count;
+    volatile uint8_t        count;
 
 } TMR_OBJ;
 
@@ -90,7 +98,7 @@ static TMR_OBJ tmr5_obj;
 
 /**
   Section: Driver Interface
-*/
+ */
 
 void TMR5_Initialize (void)
 {
@@ -101,14 +109,17 @@ void TMR5_Initialize (void)
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
     T5CON = 0x8020;
 
-    
+    if(TMR5_InterruptHandler == NULL)
+    {
+        TMR5_SetInterruptHandler(&TMR5_CallBack);
+    }
+
     IFS1bits.T5IF = false;
     IEC1bits.T5IE = true;
-	
+
     tmr5_obj.timerElapsed = false;
 
 }
-
 
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _T5Interrupt (  )
@@ -119,7 +130,10 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T5Interrupt (  )
 
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes
-    TMR5_CallBack();
+    if(TMR5_InterruptHandler) 
+    { 
+           TMR5_InterruptHandler(); 
+    }
 
     //***User Area End
 
@@ -127,7 +141,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T5Interrupt (  )
     tmr5_obj.timerElapsed = true;
     IFS1bits.T5IF = false;
 }
-
 
 void TMR5_Period16BitSet( uint16_t value )
 {
@@ -159,6 +172,12 @@ uint16_t TMR5_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
+    if (Flg_Button){
+        Button_Eval();
+        Flg_Button = false;
+    }
+    
+    Battery_Check(); 
 
     if (MODE_LED_ANGLE && MODE_ACC_CON) {
         MMA8452Q_Read();
@@ -177,9 +196,9 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         LED_SetAll(RGB[0] / 2, RGB[1] / 2, RGB[2]);
     } else if (MODE_LED_EDGES) {
         uint16_t RGB[3];
-        RGB[0] = (902 - (ADC1_Return(0))) / 30;
-        RGB[1] = (902 - (ADC1_Return(1))) / 30;
-        RGB[2] = (902 - (ADC1_Return(2))) / 30;
+        RGB[0] = (1024 - (ADC1_Return(0))) / 60;
+        RGB[1] = (1024 - (ADC1_Return(1))) / 60;
+        RGB[2] = (1024 - (ADC1_Return(2))) / 60;
         uint8_t m;
         for (m = 0; m <= 2; m++) {
             if (RGB[m] < 0) {
@@ -190,7 +209,75 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         }
         LED_SetAll(RGB[0], RGB[1], RGB[2]);
     }
- }
+
+    static int j = 0;
+    static int m = 0;
+    j++;
+    if (j >= 150) {
+        m++;
+        j = 0;
+    }
+//    switch (m) {
+//        case 0:
+//            MotLin_Set(0, 565);
+//            MotLin_Set(1, 565);
+//            MotLin_Set(2, 565);
+//            break;
+//        case 1:
+//            MotLin_Set(0, 208);
+//            MotLin_Set(1, 208);
+//            MotLin_Set(2, 208);
+//            break;
+//        case 2:
+//            MotLin_Set(0, 922);
+//            MotLin_Set(1, 922);
+//            MotLin_Set(2, 922);
+//            break;
+//        case 3:
+//            MotLin_Set(0, 1022);
+//            MotLin_Set(1, 1022);
+//            MotLin_Set(2, 1022);
+//            break;
+//        case 4:
+//            MotLin_Set(0, 1022);
+//            MotLin_Set(1, 1022);
+//            MotLin_Set(2, 108);
+//            break;
+//        case 5:
+//            MotLin_Set(0, 1022);
+//            MotLin_Set(1, 108);
+//            MotLin_Set(2, 108);
+//            break;
+//        case 6:
+//            MotLin_Set(0, 108);
+//            MotLin_Set(1, 108);
+//            MotLin_Set(2, 108);
+//            break;
+//        case 7:
+//            MotLin_Set(0, 108);
+//            MotLin_Set(1, 108);
+//            MotLin_Set(2, 1022);
+//            break;
+//        case 8:
+//            MotLin_Set(0, 108);
+//            MotLin_Set(1, 1022);
+//            MotLin_Set(2, 1022);
+//            break;
+//        case 9:
+//            m = 3;
+//            break;
+//        default:
+//            m = 0;
+//            break;
+//    }
+}
+
+void  TMR5_SetInterruptHandler(void (* InterruptHandler)(void))
+{ 
+    IEC1bits.T5IE = false;
+    TMR5_InterruptHandler = InterruptHandler; 
+    IEC1bits.T5IE = true;
+}
 
 void TMR5_Start( void )
 {
@@ -216,7 +303,7 @@ void TMR5_Stop( void )
 bool TMR5_GetElapsedThenClear(void)
 {
     bool status;
-    
+
     status = tmr5_obj.timerElapsed;
 
     if(status == true)
@@ -233,9 +320,9 @@ int TMR5_SoftwareCounterGet(void)
 
 void TMR5_SoftwareCounterClear(void)
 {
-    tmr5_obj.count = 0; 
+    tmr5_obj.count = 0;
 }
 
 /**
  End of File
-*/
+ */

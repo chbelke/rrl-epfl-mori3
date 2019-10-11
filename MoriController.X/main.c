@@ -11,17 +11,17 @@
     This is the generated main.c using PIC24 / dsPIC33 / PIC32MM MCUs.
 
   @Description
-    This source file provides main entry point for system intialization and application code development.
+    This source file provides main entry point for system initialization and application code development.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB 	          :  MPLAB X v5.10
+        Compiler          :  XC16 v1.36b
+        MPLAB 	          :  MPLAB X v5.25
  */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -57,13 +57,26 @@
 #include "mcc_generated_files/system.h"
 #include "mcc_generated_files/mcc.h"
 
-int main (void) {
-    SYSTEM_Initialize(); // MCC & User inits
+/* GLOBAL MODES */
+volatile bool MODE_LED_ANGLE = false;
+volatile bool MODE_LED_EDGES = true;
+/* GLOBAL FLAGS */
+volatile bool Flg_LiveAngle = false;
+volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
+volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
+volatile bool Flg_BatLow = false;
+volatile bool Flg_Button = false;
+/* declaration for other source files is contained in define.h */
 
-    //    MotRot_LIM(0,255);          // set current limit of edge 0 to max
-    //    LED_R = 0;                  // switch red led on
+
+/*
+                         Main application
+ */
+int main(void)
+{
+    SYSTEM_Initialize(); // initialize the device
+
     LED_R = 1;
-    
     WIFI_EN = 1;
     
     SMA_Off(0);
@@ -78,14 +91,17 @@ int main (void) {
     MotRot_LIM(1,255);
     MotRot_LIM(2,255);
     
-    Flg_LiveAngle = false; // rotary PID output off
-
-    while (1) {
-        // __delay_ms(100);
-    }
+    MotLin_Set(0,900);
+    MotLin_Set(1,900);
+    MotLin_Set(2,900);
     
-    return 0;
+    while (1)
+    {
+        // Add your application code
+    }
+    return 1; 
 }
 /**
  End of File
  */
+

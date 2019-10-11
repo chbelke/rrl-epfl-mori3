@@ -22,7 +22,11 @@
 // Timer info
 /* Timer 1: 100 Hz - angle feedback
  * Timer 3: 20 Hz - extension feedback, coupling controller
- * Timer 5: 5 Hz - updating LEDs */
+ * Timer 5: 5 Hz - updating LEDs 
+ * TMRx_f NOT used to define frequency */
+#define TMR1_f 100
+#define TMR3_f 20
+#define TMR5_f 5
 
 // I2C MCC modification
 /* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
@@ -32,20 +36,23 @@
 
 /* ******************** MODE SELECTION ************************************** */
 //#define MODE_DEBUG false
-
 #define MODE_ENC_CON false
-#define MODE_ACC_CON true
+#define MODE_ACC_CON false
+
+#define STAT_MotLin_Active false
+#define STAT_MotRot_Active true
 
 
 /* ******************** LIVE MODE VARS ************************************** */
-static volatile bool MODE_LED_ANGLE = true;
-static volatile bool MODE_LED_EDGES = false;
-
+extern volatile bool MODE_LED_ANGLE;
+extern volatile bool MODE_LED_EDGES;
 
 /* ********************  FLAGS ********************************************** */
-static volatile bool Flg_LiveAngle = false;
-static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
-static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
+extern volatile bool Flg_LiveAngle;
+extern volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C;
+extern volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C;
+extern volatile bool Flg_BatLow;
+extern volatile bool Flg_Button;
 
 
 /* ******************** PERIPHERALS ***************************************** */
@@ -54,6 +61,7 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define LED_Y LATBbits.LATB1        // orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
 #define WIFI_EN LATBbits.LATB4      // wifi enable
+#define BAT_LBO PORTBbits.RB7       // low battery indicator
 
 
 /* ******************** ESP COMMUNICATION *********************************** */
@@ -69,6 +77,8 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define LIN_PWM_DutyReg_A SDC3      // generator 3, secondary
 #define LIN_PWM_DutyReg_B SDC2      // generator 2, secondary
 #define LIN_PWM_DutyReg_C SDC1      // generator 1, secondary
+// ROT PWM full range 1024 (SPHASEx, PHASEx)
+// LIN PWM limited to 1024 (SPHASEx)
 
 // Duty cycle selector
 #define ROT_PWM_A 1
@@ -98,10 +108,10 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define MotLin_MAX_B 1022           // max pot value B
 #define MotLin_MIN_C 108            // min pot value C
 #define MotLin_MAX_C 1022           // max pot value C
-#define MotLin_SlowRegion 90        // slow region near min and max
-#define MotLin_SlowFactor 2         // linear slow down factor in slow region
+#define MotLin_SlowRegion 50        // slow region near min and max
+#define MotLin_SlowFactor 1.5         // linear slow down factor in slow region
 
-#define MotLin_PID_de 10            // acceptable error band ~ *0.01mm
+#define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
 #define MotLin_PID_kP 25            // proportional component
 #define MotLin_PID_kI 12            // integral component
@@ -157,6 +167,6 @@ static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
 #define SMA_Period 60 // SMA on-time (updated in 20 Hz loop) - 100 = 3 sec.
-#define SMA_Duty 50 // 8-bit PWM value
+#define SMA_Duty 20 // 8-bit PWM value
 
 #endif	/* DEFINE_H */

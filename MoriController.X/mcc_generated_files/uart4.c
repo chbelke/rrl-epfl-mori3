@@ -13,15 +13,15 @@
   @Description
     This source file provides APIs for driver for UART4. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB             :  MPLAB X v5.10
+        Compiler          :  XC16 v1.36b
+        MPLAB             :  MPLAB X v5.25
 */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -45,7 +45,9 @@
 /**
   Section: Included Files
 */
-
+#include <stdbool.h>
+#include <stdint.h>
+#include "xc.h"
 #include "uart4.h"
 #include "../Coms.h"
 
@@ -59,45 +61,11 @@
     Defines the object required for the status of the queue.
 */
 
-typedef union
-{
-    struct
-    {
-            uint8_t full:1;
-            uint8_t empty:1;
-            uint8_t reserved:6;
-    }s;
-    uint8_t status;
-}
-
-UART_BYTEQ_STATUS;
-
-/** UART Driver Hardware Instance Object
-
-  @Summary
-    Defines the object required for the maintenance of the hardware instance.
-
-*/
-
-typedef struct
-{
-    /* RX Byte Q */
-    uint8_t                                      *rxTail ;
-
-    uint8_t                                      *rxHead ;
-
-    /* TX Byte Q */
-    uint8_t                                      *txTail ;
-
-    uint8_t                                      *txHead ;
-
-    UART_BYTEQ_STATUS                        rxStatus ;
-
-    UART_BYTEQ_STATUS                        txStatus ;
-
-} UART_OBJECT ;
-
-static volatile UART_OBJECT uart4_obj ;
+static uint8_t * volatile rxTail;
+static uint8_t *rxHead;
+static uint8_t *txTail;
+static uint8_t * volatile txHead;
+static bool volatile rxOverflowed;
 
 /** UART Driver Queue Length
 
@@ -106,8 +74,8 @@ static volatile UART_OBJECT uart4_obj ;
 
 */
 
-#define UART4_CONFIG_TX_BYTEQ_LENGTH 8
-#define UART4_CONFIG_RX_BYTEQ_LENGTH 8
+#define UART4_CONFIG_TX_BYTEQ_LENGTH (8+1)
+#define UART4_CONFIG_RX_BYTEQ_LENGTH (8+1)
 
 /** UART Driver Queue
 
@@ -116,8 +84,11 @@ static volatile UART_OBJECT uart4_obj ;
 
 */
 
-static uint8_t uart4_txByteQ[UART4_CONFIG_TX_BYTEQ_LENGTH] ;
-static uint8_t uart4_rxByteQ[UART4_CONFIG_RX_BYTEQ_LENGTH] ;
+static uint8_t txQueue[UART4_CONFIG_TX_BYTEQ_LENGTH];
+static uint8_t rxQueue[UART4_CONFIG_RX_BYTEQ_LENGTH];
+
+void (*UART4_TxDefaultInterruptHandler)(void);
+void (*UART4_RxDefaultInterruptHandler)(void);
 
 /**
   Section: Driver Interface
@@ -125,44 +96,53 @@ static uint8_t uart4_rxByteQ[UART4_CONFIG_RX_BYTEQ_LENGTH] ;
 
 void UART4_Initialize(void)
 {
-    // Set the UART4 module to the options selected in the user interface.
+    IEC5bits.U4TXIE = 0;
+    IEC5bits.U4RXIE = 0;
 
     // STSEL 1; IREN disabled; PDSEL 8N; UARTEN enabled; RTSMD disabled; USIDL disabled; WAKE disabled; ABAUD disabled; LPBACK disabled; BRGH enabled; URXINV disabled; UEN TX_RX; 
     // Data Bits = 8; Parity = None; Stop Bits = 1;
-    U4MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit
+    U4MODE = (0x8008 & ~(1<<15));  // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U4STA = 0x00;
     // BaudRate = 115200; Frequency = 3686400 Hz; BRG 7; 
     U4BRG = 0x07;
     
+    txHead = txQueue;
+    txTail = txQueue;
+    rxHead = rxQueue;
+    rxTail = rxQueue;
+   
+    rxOverflowed = 0;
+
+    UART4_SetTxInterruptHandler(UART4_Transmit_ISR);
+
+    UART4_SetRxInterruptHandler(UART4_Receive_ISR);
+
     IEC5bits.U4RXIE = 1;
     
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
-    
-    U4MODEbits.UARTEN = 1;  // enabling UARTEN bit
+    U4MODEbits.UARTEN = 1;   // enabling UART ON bit
     U4STAbits.UTXEN = 1;
-
-    uart4_obj.txHead = uart4_txByteQ;
-    uart4_obj.txTail = uart4_txByteQ;
-    uart4_obj.rxHead = uart4_rxByteQ;
-    uart4_obj.rxTail = uart4_rxByteQ;
-    uart4_obj.rxStatus.s.empty = true;
-    uart4_obj.txStatus.s.empty = true;
-    uart4_obj.txStatus.s.full = false;
-    uart4_obj.rxStatus.s.full = false;
 }
 
 /**
     Maintains the driver's transmitter state machine and implements its ISR
 */
 
+void UART4_SetTxInterruptHandler(void* handler)
+{
+    UART4_TxDefaultInterruptHandler = handler;
+}
+
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4TXInterrupt ( void )
 { 
-    if((uart4_obj.txHead == uart4_obj.txTail) && (uart4_obj.txStatus.s.full == false))
+    (*UART4_TxDefaultInterruptHandler)();
+}
+
+void UART4_Transmit_ISR ( void )
     {
-        while(U4STAbits.TRMT == 0){}
-        
-        uart4_obj.txStatus.s.empty = true;
+    if(txHead == txTail)
+    {
         IEC5bits.U4TXIE = 0;
         return;
     }
@@ -171,51 +151,60 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4TXInterrupt ( void )
 
     while(!(U4STAbits.UTXBF == 1))
     {
-        U4TXREG = *uart4_obj.txHead;
+        U4TXREG = *txHead++;
 
-        uart4_obj.txHead++;
-
-        if(uart4_obj.txHead == (uart4_txByteQ + UART4_CONFIG_TX_BYTEQ_LENGTH))
+        if(txHead == (txQueue + UART4_CONFIG_TX_BYTEQ_LENGTH))
         {
-            uart4_obj.txHead = uart4_txByteQ;
+            txHead = txQueue;
         }
 
-        uart4_obj.txStatus.s.full = false;
-
-        if(uart4_obj.txHead == uart4_obj.txTail)
+        // Are we empty?
+        if(txHead == txTail)
         {
             break;
         }
     }
 }
 
+void UART4_SetRxInterruptHandler(void* handler)
+{
+    UART4_RxDefaultInterruptHandler = handler;
+}
+
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4RXInterrupt( void )
 {
+    (*UART4_RxDefaultInterruptHandler)();
+}
+
+void UART4_Receive_ISR(void)
+{
+
     while((U4STAbits.URXDA == 1))
     {
-        *uart4_obj.rxTail = U4RXREG;
+        *rxTail = U4RXREG;
 
-        uart4_obj.rxTail++;
-
-        if(uart4_obj.rxTail == (uart4_rxByteQ + UART4_CONFIG_RX_BYTEQ_LENGTH))
+        // Will the increment not result in a wrap and not result in a pure collision?
+        // This is most often condition so check first
+        if ( ( rxTail    != (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH-1)) &&
+             ((rxTail+1) != rxHead) )
         {
-            uart4_obj.rxTail = uart4_rxByteQ;
+            rxTail++;
         }
-
-        uart4_obj.rxStatus.s.empty = false;
-        
-        if(uart4_obj.rxTail == uart4_obj.rxHead)
+        else if ( (rxTail == (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH-1)) &&
+                  (rxHead !=  rxQueue) )
         {
-            //Sets the flag RX full
-            uart4_obj.rxStatus.s.full = true;
-            break;
+            // Pure wrap no collision
+            rxTail = rxQueue;
+        }
+        else // must be collision
+        {
+            rxOverflowed = true;
         }
         
         Coms_ESP_Eval();
     }
 
     IFS5bits.U4RXIF = false;
-   
 }
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
@@ -225,7 +214,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
         U4STAbits.OERR = 0;
     }
     
-    IFS5bits.U4EIF = false;
+    IFS5bits.U4EIF = 0;
 }
 
 /**
@@ -236,245 +225,264 @@ uint8_t UART4_Read( void)
 {
     uint8_t data = 0;
 
-    data = *uart4_obj.rxHead;
-
-    uart4_obj.rxHead++;
-
-    if (uart4_obj.rxHead == (uart4_rxByteQ + UART4_CONFIG_RX_BYTEQ_LENGTH))
+    while (rxHead == rxTail )
     {
-        uart4_obj.rxHead = uart4_rxByteQ;
     }
 
-    if (uart4_obj.rxHead == uart4_obj.rxTail)
+    data = *rxHead;
+
+    rxHead++;
+
+    if (rxHead == (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH))
     {
-        uart4_obj.rxStatus.s.empty = true;
+        rxHead = rxQueue;
     }
-
-    uart4_obj.rxStatus.s.full = false;
-
     return data;
 }
 
-unsigned int UART4_ReadBuffer( uint8_t *buffer, const unsigned int bufLen)
-{
-    unsigned int numBytesRead = 0 ;
-    while ( numBytesRead < ( bufLen ))
+void UART4_Write( uint8_t byte)
     {
-        if( uart4_obj.rxStatus.s.empty)
+    while(UART4_IsTxReady() == 0)
+    {
+    }
+
+    *txTail = byte;
+
+    txTail++;
+    
+    if (txTail == (txQueue + UART4_CONFIG_TX_BYTEQ_LENGTH))
+    {
+        txTail = txQueue;
+}
+
+    IEC5bits.U4TXIE = 1;
+}
+
+bool UART4_IsRxReady(void)
+{
+    return !(rxHead == rxTail);
+}
+
+bool UART4_IsTxReady(void)
+    {
+    uint16_t size;
+    uint8_t *snapshot_txHead = (uint8_t*)txHead;
+    
+    if (txTail < snapshot_txHead)
         {
-            break;
+        size = (snapshot_txHead - txTail - 1);
         }
         else
         {
-            buffer[numBytesRead++] = UART4_Read () ;
+        size = ( UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1 );
         }
-    }
 
-    return numBytesRead ;
+    return (size != 0);
 }
 
-void UART4_Write( const uint8_t byte)
+bool UART4_IsTxDone(void)
 {
-    IEC5bits.U4TXIE = 0;
-    
-    *uart4_obj.txTail = byte;
-
-    uart4_obj.txTail++;
-    
-    if (uart4_obj.txTail == (uart4_txByteQ + UART4_CONFIG_TX_BYTEQ_LENGTH))
+    if(txTail == txHead)
     {
-        uart4_obj.txTail = uart4_txByteQ;
+        return (bool)U4STAbits.TRMT;
     }
-
-    uart4_obj.txStatus.s.empty = false;
-
-    if (uart4_obj.txHead == uart4_obj.txTail)
-    {
-        uart4_obj.txStatus.s.full = true;
-    }
-
-    IEC5bits.U4TXIE = 1 ;
+    
+    return false;
 }
 
-unsigned int UART4_WriteBuffer( const uint8_t *buffer , const unsigned int bufLen )
-{
-    unsigned int numBytesWritten = 0 ;
+    
+/*******************************************************************************
 
-    while ( numBytesWritten < ( bufLen ))
+  !!! Deprecated API !!!
+  !!! These functions will not be supported in future releases !!!
+
+*******************************************************************************/
+
+static uint8_t UART4_RxDataAvailable(void)
     {
-        if((uart4_obj.txStatus.s.full))
-        {
-            break;
+    uint16_t size;
+    uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
+    
+    if (snapshot_rxTail < rxHead) 
+    {
+        size = ( UART4_CONFIG_RX_BYTEQ_LENGTH - (rxHead-snapshot_rxTail));
+    }
+    else
+    {
+        size = ( (snapshot_rxTail - rxHead));
+    }
+
+    if(size > 0xFF)
+    {
+        return 0xFF;
+    }
+
+    return size;
+}
+
+static uint8_t UART4_TxDataAvailable(void)
+{
+    uint16_t size;
+    uint8_t *snapshot_txHead = (uint8_t*)txHead;
+
+    if (txTail < snapshot_txHead)
+    {
+        size = (snapshot_txHead - txTail - 1);
         }
         else
         {
-            UART4_Write (buffer[numBytesWritten++] ) ;
+        size = ( UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1 );
         }
+    
+    if(size > 0xFF)
+    {
+        return 0xFF;
     }
 
-    return numBytesWritten ;
+    return size;
 }
 
-UART4_TRANSFER_STATUS UART4_TransferStatusGet (void )
+unsigned int __attribute__((deprecated)) UART4_ReadBuffer( uint8_t *buffer ,  unsigned int numbytes)
+{
+    unsigned int rx_count = UART4_RxDataAvailable();
+    unsigned int i;
+
+    if(numbytes < rx_count)
+    {
+        rx_count = numbytes;
+    }
+
+    for(i=0; i<rx_count; i++)
+    {
+        *buffer++ = UART4_Read();
+    }
+
+    return rx_count;    
+    }
+
+unsigned int __attribute__((deprecated)) UART4_WriteBuffer( uint8_t *buffer , unsigned int numbytes )
+    {
+    unsigned int tx_count = UART4_TxDataAvailable();
+    unsigned int i;
+    
+    if(numbytes < tx_count)
+    {
+        tx_count = numbytes;
+    }
+    
+    for(i=0; i<tx_count; i++)
+    {
+        UART4_Write(*buffer++);
+    }
+    
+    return tx_count;  
+}
+
+UART4_TRANSFER_STATUS __attribute__((deprecated)) UART4_TransferStatusGet (void )
 {
     UART4_TRANSFER_STATUS status = 0;
-
-    /* The TX empty must be checked before the full in order to prevent a race
-     * condition where a TX transmission could start between these two checks
-     * resulting in both full and empty set at the same time.
-     */
-    if(uart4_obj.txStatus.s.empty)
-    {
-        status |= UART4_TRANSFER_STATUS_TX_EMPTY;
-    }
-
-    if(uart4_obj.txStatus.s.full)
-    {
-        status |= UART4_TRANSFER_STATUS_TX_FULL;
-    }
-
-    /* The RX full must be checked before the empty in order to prevent a race
-     * condition where a RX reception could start between these two checks
-     * resulting in both empty and full set at the same time.
-     */
-    if(uart4_obj.rxStatus.s.full)
-    {
-        status |= UART4_TRANSFER_STATUS_RX_FULL;
-    }
-
-    if(uart4_obj.rxStatus.s.empty)
-    {
-        status |= UART4_TRANSFER_STATUS_RX_EMPTY;
-    }
-    else
-    {
-        status |= UART4_TRANSFER_STATUS_RX_DATA_PRESENT;
-    }
-    return status;
-}
-
-/*
-    Uart Peek function returns the character in the read sequence with
-    the provided offset, without extracting it.
-*/
-uint8_t UART4_Peek(uint16_t offset)
-{
-    if( (uart4_obj.rxHead + offset) >= (uart4_rxByteQ + UART4_CONFIG_RX_BYTEQ_LENGTH))
-    {
-      return uart4_rxByteQ[offset - (uart4_rxByteQ + UART4_CONFIG_RX_BYTEQ_LENGTH - uart4_obj.rxHead)];
-    }
-    else
-    {
-      return *(uart4_obj.rxHead + offset);
-    }
-}
-
-/*
-    Uart PeekSafe function validates all the possible conditions and get the character  
-    in the read sequence with the provided offset, without extracting it.
-*/
-bool UART4_PeekSafe(uint8_t *dataByte, uint16_t offset)
-{
-    uint16_t index = 0;
-    bool status = true;
+    uint8_t rx_count = UART4_RxDataAvailable();
+    uint8_t tx_count = UART4_TxDataAvailable();
     
-    if((offset >= UART4_CONFIG_RX_BYTEQ_LENGTH) || (uart4_obj.rxStatus.s.empty) || (!dataByte))
+    switch(rx_count)
     {
-        status = false;
+        case 0:
+            status |= UART4_TRANSFER_STATUS_RX_EMPTY;
+            break;
+        case UART4_CONFIG_RX_BYTEQ_LENGTH:
+            status |= UART4_TRANSFER_STATUS_RX_FULL;
+            break;
+        default:
+            status |= UART4_TRANSFER_STATUS_RX_DATA_PRESENT;
+            break;
     }
-    else
+    
+    switch(tx_count)
     {
-        //Compute the offset buffer overflow range
-        index = ((uart4_obj.rxHead - uart4_rxByteQ) + offset) % UART4_CONFIG_RX_BYTEQ_LENGTH;
-        
-        /**
-         * Check for offset input value range is valid or invalid. If the range 
-         * is invalid, then status set to false else true.
-         */
-        if(uart4_obj.rxHead < uart4_obj.rxTail) 
-        {
-            if((uart4_obj.rxHead + offset) > (uart4_obj.rxTail - 1))
-            {
-                status = false;
-        }
-        }
-        else if(uart4_obj.rxHead > uart4_obj.rxTail)
-        {
-            if((uart4_rxByteQ + index) < uart4_obj.rxHead)
-            {
-                if( (uart4_rxByteQ + index) >= uart4_obj.rxTail )
-                {
-                status = false;
-        }
-            } 
-        }
+        case 0:
+            status |= UART4_TRANSFER_STATUS_TX_FULL;
+            break;
+        case UART4_CONFIG_RX_BYTEQ_LENGTH:
+            status |= UART4_TRANSFER_STATUS_TX_EMPTY;
+            break;
+        default:
+            break;
+    }
 
-        if(status == true)
-        {
-            *dataByte = UART4_Peek(offset);
-        }
-    }
-    return status;
+    return status;    
 }
 
-unsigned int UART4_ReceiveBufferSizeGet(void)
+uint8_t __attribute__((deprecated)) UART4_Peek(uint16_t offset)
 {
-    if(!uart4_obj.rxStatus.s.full)
+    uint8_t *peek = rxHead + offset;
+    
+    while(peek > (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH))
     {
-        if(uart4_obj.rxHead > uart4_obj.rxTail)
+        peek -= UART4_CONFIG_RX_BYTEQ_LENGTH;
+    }
+        
+    return *peek;
+}
+
+bool __attribute__((deprecated)) UART4_ReceiveBufferIsEmpty (void)
         {
-            return(uart4_obj.rxHead - uart4_obj.rxTail);
+    return (UART4_RxDataAvailable() == 0);
+        }
+
+bool __attribute__((deprecated)) UART4_TransmitBufferIsFull(void)
+        {
+    return (UART4_TxDataAvailable() == 0);
+        }
+
+uint16_t __attribute__((deprecated)) UART4_StatusGet (void)
+        {
+    return U4STA;
+        }
+
+unsigned int __attribute__((deprecated)) UART4_TransmitBufferSizeGet(void)
+{
+    if(UART4_TxDataAvailable() != 0)
+    {
+        if(txHead > txTail)
+        {
+            return(txHead - txTail);
         }
         else
         {
-            return(UART4_CONFIG_RX_BYTEQ_LENGTH - (uart4_obj.rxTail - uart4_obj.rxHead));
+            return(UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead));
         } 
     }
     return 0;
 }
 
-unsigned int UART4_TransmitBufferSizeGet(void)
+unsigned int __attribute__((deprecated)) UART4_ReceiveBufferSizeGet(void)
 {
-    if(!uart4_obj.txStatus.s.full)
+    if(UART4_RxDataAvailable() != 0)
     { 
-        if(uart4_obj.txHead > uart4_obj.txTail)
+        if(rxHead > rxTail)
         {
-            return(uart4_obj.txHead - uart4_obj.txTail);
+            return(rxHead - rxTail);
         }
         else
         {
-            return(UART4_CONFIG_TX_BYTEQ_LENGTH - (uart4_obj.txTail - uart4_obj.txHead));
+            return(UART4_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead));
         }
     }
     return 0;
 }
 
-bool UART4_ReceiveBufferIsEmpty (void)
-{
-    return(uart4_obj.rxStatus.s.empty);
-}
-
-bool UART4_TransmitBufferIsFull(void)
-{
-    return(uart4_obj.txStatus.s.full);
-}
-
-void UART4_Enable(void)
+void __attribute__((deprecated)) UART4_Enable(void)
 {
     U4MODEbits.UARTEN = 1;
     U4STAbits.UTXEN = 1;
 }
 
-void UART4_Disable(void)
+void __attribute__((deprecated)) UART4_Disable(void)
 {
     U4MODEbits.UARTEN = 0;
     U4STAbits.UTXEN = 0;
 }
 
-uint16_t UART4_StatusGet (void)
-{
-    return U4STA;
-}
 
 ///// ADDED FUNCTION /////
 void UART4_Write16(uint16_t txData)
