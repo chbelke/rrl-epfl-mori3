@@ -21,7 +21,7 @@
 #include <WiFiUdp.h>
 
 const char* brn_ssid = "rrl_wifi";
-const char* brn_password =  "Bm41254126";
+const char* brn_password =  "Bm41254126";//"Bm41254126";
 const char* mqttServer = "192.168.0.50";
 const int mqttPort = 1883;
 
@@ -43,6 +43,13 @@ char runState = 0;
 unsigned long lastMessage = millis();
 unsigned long lastMacPub = millis();
 int moriShape[6] = {900, 900, 900, 0, 0, 0};
+
+const int nbrSerialPorts = 3; //Each Mori har 3 serial ports (3 sides)
+const int maxNbrMoris = 6;
+const int espIdLen = 8;
+int nbrRegisteredMoris = 0;
+int registeredMoris[maxNbrMoris];
+int moriMap[maxNbrMoris][nbrSerialPorts];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -209,6 +216,7 @@ void loop()
       break;
     case 3:   //everything is good
       normalOp();
+      recvSerial();
       break;
     case 4:
       normalOp();
@@ -235,10 +243,10 @@ void enableOTA()
 //----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
-  Serial.print("Message arrived in topic: ");
-  Serial.println(topic);
-  Serial.print("Message length: ");
-  Serial.println(len);
+  //Serial.print("Message arrived in topic: ");
+  //Serial.println(topic);
+  //Serial.print("Message length: ");
+  //Serial.println(len);
   Serial.print("Message: ");
   char payload2[len]; //Convert the received message to char
   for (int i = 0; i < len; i++) {
@@ -303,8 +311,20 @@ void callback(char* topic, byte* payload, unsigned int len)
     establishUDP(payload2, len);
   }
 
+  else if (!memcmp(payload2,"map",sizeof("map")-1))
+  {
+    client.publish(publishName, "INFO: Map msg received");
+    //reset the mori map
+    for(int i = 0 ; i < maxNbrMoris ; i++){
+      for(int j = 0 ; j < nbrSerialPorts ; j++){
+        moriMap[i][j] = 0;
+      }
+    }
+    nbrRegisteredMoris = 0;
+    sendPing();
+  }
   Serial.println();
-  Serial.println("-----------------------");
+  //Serial.println("-----------------------");
 
 }
 
@@ -633,7 +653,137 @@ void establishUDP(char* payld, unsigned int len)
   } //writeFlag
 }
 
+void sendPing(){
+  //Add the leader's Id number to the list of registered moris
+  //This step is needed in order to know which Moris have been mapped
+  char buff[16];
+  
+  registeredMoris[nbrRegisteredMoris] = atoi(clientName);
+  nbrRegisteredMoris++;
+  
+  sprintf(buff,"ping1%s",clientName); //"1" is for port number 1 (ESPs have only one port)
+  Serial.println(buff);
+  client.publish(publishName, "INFO: Ping sent");
+}
 
+void respondPing(char* payload){
+  int portIndex = 13;
+  int espMsgStartIndex = 4;
+  int espMsgLen = 9;
+
+  //MSG: resp-espSendPort-espId-selfReceivePort-selfId
+  char* buff = "respYXXXXXXXXP00000000";
+
+  for (int i = espMsgStartIndex ; i < portIndex ; i++){
+        buff[i] = payload[i];
+  }
+  buff[portIndex] = '1'; //Esp port
+
+  for (int i = portIndex+1 ; i < portIndex+espMsgLen ; i++){
+        buff[i] = clientName[i-portIndex-1];
+  }
+  buff[portIndex+espMsgLen] = '\0'; //Set end of array
+  
+  Serial.println(buff);
+}
+
+void mapMoris(char* payload, int len){
+  int serialPort = 4; //position of the serialPort nbr in the payload
+  char moriIdOne[espIdLen];
+  char moriIdTwo[espIdLen];
+  int moriOne;
+  int moriTwo;
+  
+  client.publish(publishName, "INFO: Mapping");
+
+  if(len < 16){
+    client.publish(publishName, "INFO: Error in received message!");
+  }
+  else{
+    for(int i = serialPort+1 ; i < serialPort+1+espIdLen ; i++){
+      moriIdOne[i-serialPort-1] = payload[i];
+    }
+    moriIdOne[espIdLen] = '\0';
+    moriOne = atoi(moriIdOne);
+
+    for(int i = serialPort+2+espIdLen ; i < serialPort+2+(2*espIdLen) ; i++){
+      moriIdTwo[i-serialPort-2-espIdLen] = payload[i];
+    }
+    moriIdTwo[espIdLen] = '\0';
+    moriTwo = atoi(moriIdTwo);
+    
+    ///*
+    char buff6[32];
+    sprintf(buff6,"INFO: Mori1: %d , Mori2: %d",moriOne,moriTwo);
+    client.publish(publishName, buff6);
+    //*/
+
+    int counter = 0;
+    for(int i = 0 ; i < nbrRegisteredMoris ; i++){
+      if(moriOne == registeredMoris[i]){
+        moriMap[i][payload[serialPort]-'1'] = moriTwo;;
+        moriMap[nbrRegisteredMoris][payload[serialPort+1+espIdLen]-'1'] = moriOne;
+      }
+      else{
+        counter++;
+      }
+    }
+    if(counter == nbrRegisteredMoris-1){
+      client.publish(publishName, "INFO: Mori successfully added!");
+      registeredMoris[nbrRegisteredMoris] = moriTwo;
+      nbrRegisteredMoris++;
+    }
+    else{
+      client.publish(publishName, "INFO: Error in adding Mori!");
+    }
+  }
+  
+  int test;
+  for(int i = 0 ; i < nbrRegisteredMoris ; i++){
+    test = registeredMoris[i];
+    char buff3[32];
+    sprintf(buff3,"INFO: mori%d: %d",i+1,test);
+    client.publish(publishName, buff3);
+  }
+  
+  char buff2[32];
+  for (int j = 0 ; j < nbrRegisteredMoris ; j++){
+    sprintf(buff2,"INFO: Map line %d = %d , %d , %d",j+1, moriMap[j][0],moriMap[j][1],moriMap[j][2]);
+    client.publish(publishName, buff2);
+  }
+}
+
+bool recvSerial(){
+    char payload[32];
+    int i = 0;
+    byte receivedByte;
+    
+    payload[0] = '\0'; //Reset the payload array
+    while (Serial.available() > 0) {
+        //Set the first element of the payload to the number of the port on which the message is received
+        receivedByte = Serial.read();
+
+        payload[i] = receivedByte;
+        //Serial.println(payload[i]);
+        i++;
+    }
+    payload[i] = '\0'; //Set the end of the message
+    
+    if (i > 0){ // Message received
+      if (!memcmp(payload,"ping",sizeof("ping")-1))
+      {
+        respondPing(payload);
+      }
+    
+      else if (!memcmp(payload,"resp",sizeof("resp")-1))
+      {
+        char buff4[64];
+        sprintf(buff4,"INFO: response: %s",payload);
+        client.publish(publishName, buff4);
+        mapMoris(payload, i);
+      }
+    }
+}
 
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
@@ -697,7 +847,6 @@ void writeUDPSerial()
     client.publish(publishName, "Sent Serial!");
   }
 }
-
 
 void normalOp()
 {

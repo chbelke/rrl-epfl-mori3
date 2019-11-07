@@ -4,23 +4,12 @@ SoftwareSerial gtSerial(8, 7); // Arduino RX, Arduino TX
 
 bool roleAssigned = false;
 char role; // Will contain "L" if Mori is a leader and "F" if it is a follower.
-const int msgLen = 64; //Arbitrary number
+const int msgLen =128; //Arbitrary number
 char payload[msgLen];
 const int nbrSerialPorts = 3; //Each Mori har 3 serial ports (3 sides)
-const int maxNbrMoris = 4;
-int moriMap[maxNbrMoris][nbrSerialPorts];
 
-const int nbrMegaBoards = 2;
-const int moriStructLength = 6;
-//The following array is used to emulate the connexions between Moris 
-//char moriStruct[nbrSerialPorts*nbrMegaBoards][3] = 
-char moriStruct[moriStructLength][3] = 
-             { {"1a2"},//[nbrSerialPorts(2 MEGAs with 3 ports each] [Sender Mori Id + connected port + receiver Mori Id]
-               {"1b3"},//The first element is the Id of the Mori, the second is the connected side of a mori('a','b' or 'c')
-               {"3c1"},//and the last is the receiver Mori
-               {"2b1"},//};/*,
-               {"1c4"},
-               {"4c1"} };//*/
+char* megaId;
+char bossPort;
 
 
 void setup() {
@@ -35,25 +24,17 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  //COntinuously listen on all serial ports
+  //Continuously listen on all serial ports
   if(recvSerial0()){
-    Serial.print("Payload0 = ");
-    Serial.println(payload);
     decodeMsg();
   }
   if(recvSerial1()){
-    Serial.print("Payload1 = ");
-    Serial.println(payload);
     decodeMsg();
   }
   if(recvSerial2()){
-    Serial.print("Payload2 = ");
-    Serial.println(payload);
     decodeMsg();
   }
   if(recvSerial3()){
-    Serial.print("Payload3 = ");
-    Serial.println(payload);
     decodeMsg();
   }
 }
@@ -84,6 +65,9 @@ bool recvSerial0(){
         
         payload[i] = receivedByte;
         Serial.println(payload[i]);
+        
+        delay(10);//Tmortant to ensure the whole message has been received 
+        
         i++;
     }
     payload[i] = '\0'; //Set the end of the message
@@ -117,12 +101,14 @@ bool recvSerial1(){
             Serial1.read();
             break;
         }
-
-        Serial.print("Serial 1 received: ");
-        Serial.println(receivedByte);
-        
         payload[i] = receivedByte;
+        
+        //Serial.print("Serial 1 received: ");
+        //Serial.println(receivedByte);
         Serial.println(payload[i]);
+
+        delay(10);//Tmortant to ensure the whole message has been received 
+        
         i++;
     }
     payload[i] = '\0'; //Set the end of the message
@@ -138,7 +124,6 @@ bool recvSerial1(){
 bool recvSerial2(){
     int i = 0;
     byte receivedByte;
-    
     payload[0] = '\0'; //Reset the payload array
     while (Serial2.available() > 0) {
         //Set the first element of payload to the number of the port on which the message is received
@@ -156,12 +141,14 @@ bool recvSerial2(){
             Serial2.read();
             break;
         }
-
-        Serial.print("Serial 2 received: ");
-        Serial.println(receivedByte);
-        
         payload[i] = receivedByte;
+        
+        //Serial.print("Serial 2 received: ");
+        //Serial.println(receivedByte);
         Serial.println(payload[i]);
+        
+        delay(10);//Tmortant to ensure the whole message has been received 
+        
         i++;
     }
     payload[i] = '\0'; //Set the end of the message
@@ -195,12 +182,14 @@ bool recvSerial3(){
             Serial3.read();
             break;
         }
-
-        Serial.print("Serial 3 received: ");
-        Serial.println(receivedByte);
-        
         payload[i] = receivedByte;
+        
+        //Serial.print("Serial 3 received: ");
+        //Serial.println(receivedByte);
         Serial.println(payload[i]);
+
+        delay(10);//Tmortant to ensure the whole message has been received 
+        
         i++;
     }
     payload[i] = '\0'; //Set the end of the message
@@ -214,109 +203,140 @@ bool recvSerial3(){
 }
 
 void decodeMsg(){
-    //Serial.print("Payload: ");
-    //Serial.println(payload);
+    char pyld[msgLen];
+    //Store the payload in another variable in order to avoir using a global variable
+    for(int i = 0 ; i < msgLen ; i++){
+        pyld[i] = payload[i];
+    }
+    payload[0] = '\0';//Reset the payload
+    Serial.print("Payload: ");
+    Serial.println(pyld);
 
     //First element of the payload = port on which the message was received
-    if (!memcmp(payload+1,"leader",sizeof("leader")-1)){
+    if (!memcmp(pyld+1,"leader",sizeof("leader")-1)){
         Serial.println("Leader defined");
         role = "L";
         roleAssigned = true;
         Serial1.println("follow"); // Other Moris will be followers
         Serial2.println("follow");
         Serial3.println("follow");
-        sendPing(49); //49 is ascii for 1, which is the Mori's Id (leader will always be Id "1" in the emulation)
+        megaId = "00777AAA";
     }
-    else if (!memcmp(payload+1,"follow",sizeof("follow")-1)){
+    else if (!memcmp(pyld+1,"follow",sizeof("follow")-1)){
         Serial.println("Follower defined");
         role = "F";
         roleAssigned = true;
+        megaId = "00888BBB";
     }
-    else if (!memcmp(payload+1,"ping",sizeof("ping")-1)){
+    else if (!memcmp(pyld+1,"ping",sizeof("ping")-1)){
         Serial.println("Ping received");
-        respondPing(payload[0], payload[sizeof("ping")]);
+        bossPort = pyld[0]; //A ping msg is only received by the Mori closest to the leader Mori
+        respondPing(pyld);
     }
-    else if (!memcmp(payload+1,"resp",sizeof("resp")-1)){
+    else if (!memcmp(pyld+1,"resp",sizeof("resp")-1)){
         Serial.println("Ping responded");
-        mapMoris(payload[5],payload[6],payload[0], payload[7]);
+        //If a resp message is received, it must be transmitted to leader Mori (through boss port) for mapping
+        transmitPing(pyld); 
     }
     else{
         Serial.println("Unknown command");
     }
-    payload[0] = '\0'; //Reset the payload
 }
 
-void sendPing(char moriId){
-    char buf[5] = "pingX";
+char* sendPing(char portNbr){
+  //Send a ping to other ports
+  char* buff = "pingXYYYYYYYY";
+  //strcat(buff,megaId);
+  int portIndex = 4;
+  int espIdLen = 8;
+
+  for(int i = 0 ; i < espIdLen ; i++){
+    //Copy the Id of the mega board
+    buff[portIndex+1+i] = megaId[i];
+  }
+  
+  if (portNbr == '1'){
+      buff[portIndex] = '2';
+      Serial2.println(buff);
+      buff[portIndex] = '3';
+      Serial3.println(buff);
+  }
+  else if (portNbr == '2'){
+      buff[portIndex] = '1';
+      Serial1.println(buff);
+      buff[portIndex] = '3';
+      Serial3.println(buff);
+  }
+  else if (portNbr == '3'){
+      buff[portIndex] = '1';
+      Serial1.println(buff);
+      buff[portIndex] = '2';
+      Serial2.println(buff);
+  }
+}
+
+
+void respondPing(char* pyld){
+    //If a ping is received, respond to boss Mori for mapping
+    int portIndex = 13;
+    int espMsgStartIndex = 4;
+    int espMsgLen = 9;
+
+    //MSG: resp-espSendPort-espId-megaReceivePort-megaId
+    char* buff = "respXYYYYYYYYPZZZZZZZZ";
+
+    buff[portIndex] = pyld[0];
+
+    //Send ping to all other ports
+    sendPing(pyld[0]);
+
+    //Create mapping message
+    for(int i = 0 ; i < espMsgLen ; i++){
+      buff[espMsgStartIndex+i] = pyld[espMsgStartIndex+1+i];
+      if(i != espMsgLen-1){
+        //This is to correctly copy the Id of the mega board
+        buff[portIndex+1+i] = megaId[i];
+      }
+    }
+    buff[portIndex] = pyld[0];
+    buff[portIndex+espMsgLen] = '\0'; //Set end of array
     
-    //Normally, a ping would be sent from eache port of each Mori. But here with only 2 Mega boards,
-    //an emulation is needed and the following code cannot be used.
-    /*
-    strcat(buf,ID);
-  
-    Serial1.println(buf);
-    Serial2.println(buf);
-    Serial3.println(buf);
-    */
-  
-    //Send ping messages only to Moris connected (using the correctly emulated ports)
-    for (int i = 0 ; i < moriStructLength ; i++){
-        if (moriStruct[i][0] == moriId){
-            buf[4] = moriId;
-            buf[5] = '\0'; //Set end of array
-            if (moriStruct[i][1] == 'a'){
-                Serial1.println(buf);
-            }
-            else if (moriStruct[i][1] == 'b'){
-                Serial2.println(buf);
-            }
-            else if (moriStruct[i][1] == 'c'){
-                Serial3.println(buf);
-            }
-        }
+    Serial.println(buff);
+
+    //Send back message to boss
+    if (pyld[0] == '1'){
+        //Serial.println("Resp sent");
+        Serial1.println(buff);
+    }
+    else if (pyld[0] == '2'){
+        Serial2.println(buff);
+    }
+    else if (pyld[0] == '3'){
+        Serial3.println(buff);
     }
 }
 
-void respondPing(char portNbr, char senderId){
-    //Normally, a simple respond of the Mori's Id number would be enough but since
-    //the Mega boards do not have an Id, we must look into our emulated system to 
-    //find the correct Mori Id.
-    char buf[6] = "respXY";
+void transmitPing(char* pyld){
+    //Simply transmit the ping respond through the boss port
+    int respLen = 22;
+    char* buff = "respYXXXXXXXXP00000000";
 
-    for (int i = 0 ; i < moriStructLength ; i++){
-        if (moriStruct[i][2] == senderId && moriStruct[i][1] == portNbr + 48){ //48 is to convert to ascii
-            buf[4] = moriStruct[i][2];
-            buf[5] = moriStruct[i][0]; //Only way to find the emulated receiver Mori Id
-            buf[6] =  moriStruct[i][1]; //Send receiver Mori's port
-            buf[7] = '\0'; //Set end of array
-            Serial.println(buf);
-            if (moriStruct[i][1] == 'a'){
-                Serial1.println(buf);
-            }
-            else if (moriStruct[i][1] == 'b'){
-                Serial2.println(buf);
-            }
-            else if (moriStruct[i][1] == 'c'){
-                Serial3.println(buf);
-            }
-        }
+    //Take out the first ele,ent og the payload (corresponds to receive port)
+    for (int i = 0 ; i < respLen ; i++){
+        buff[i] = pyld[i+1];
     }
-}
-
-void mapMoris(char senderMori, char receiverMori, char senderPort, char receiverPort){
-    //This function will create the map of the connected Moris according to the pings sent and received.
+    buff[22] = '\0'; //Set end of array
     
-    //Conversions to fill the moriMap
-    moriMap[senderMori-'1'][senderPort-'1'] = receiverMori-'0';
-    moriMap[receiverMori-'1'][receiverPort-'a'] = senderMori-'0';
-
-    //Display moriMap
-    Serial.println("Mori Map: ");
-    for (int i = 0 ; i < maxNbrMoris ; i++){
-        for (int j = 0 ; j < 3 ; j++){
-            Serial.print(moriMap[i][j]);
-        }
-        Serial.println();
+    Serial.println(buff);
+    
+    if (bossPort == '1'){
+        Serial1.println(buff);
+    }
+    else if (bossPort == '2'){
+        Serial2.println(buff);
+    }
+    else if (bossPort == '3'){
+        Serial3.println(buff);
     }
 }
 
