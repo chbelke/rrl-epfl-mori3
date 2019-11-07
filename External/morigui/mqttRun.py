@@ -228,7 +228,7 @@ class MqttHost(threading.Thread):
                   if pyld[1] == self.leaderFollowerDict.get(espNum)[i]: #Enter if the leader is already leading the follower (error)
                      print(colored("ERROR: ESP" + espNum + " is already the leader of ESP" + pyld[1], "red"))
                      return
-            print("FOLLOWER!!")
+            #print("FOLLOWER!!")
             #Conditions verified => add the follower to the leader's list
             if self.leaderFollowerDict.get(espNum) is None: #First follower for the leader
                self.leaderFollowerDict[espNum] = [pyld[1]]

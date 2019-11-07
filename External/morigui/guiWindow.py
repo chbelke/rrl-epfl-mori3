@@ -212,8 +212,9 @@ class MoriGui(Frame):
         self.mqtthost.exit()
 
     def updateConnected(self): #Updates the number of connected ESPs and the lists
-        #self.update_shape_sliders(False)
-        self.after(1500, self.updateConnected)
+        self.update_shape_sliders(False)
+        self.after(200, self.updateConnected)
+        #self.after(1500, self.updateConnected)
 
         tmp = self.numberConnected.get()
         if tmp != self.mqtthost.getNumberConnected():
