@@ -45,7 +45,7 @@ unsigned long lastMacPub = millis();
 int moriShape[6] = {900, 900, 900, 0, 0, 0};
 
 const int nbrSerialPorts = 3; //Each Mori har 3 serial ports (3 sides)
-const int maxNbrMoris = 6;
+const int maxNbrMoris = 10;
 const int espIdLen = 8;
 int nbrRegisteredMoris = 0;
 int registeredMoris[maxNbrMoris];
@@ -198,7 +198,6 @@ void setup()
   
 }
 
-
 //----------------------- Loooooooop--------------------------------------//
 
 void loop()
@@ -226,7 +225,6 @@ void loop()
   client.loop();
 }
 
-
 void enableOTA()
 {
   Serial.println("StoppingLoop");
@@ -239,14 +237,13 @@ void enableOTA()
   delay(1000);
 }
 
-
 //----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
   //Serial.print("Message arrived in topic: ");
   //Serial.println(topic);
-  //Serial.print("Message length: ");
-  //Serial.println(len);
+  Serial.print("Message length: ");
+  Serial.println(len);
   Serial.print("Message: ");
   char payload2[len]; //Convert the received message to char
   for (int i = 0; i < len; i++) {
@@ -323,6 +320,12 @@ void callback(char* topic, byte* payload, unsigned int len)
     nbrRegisteredMoris = 0;
     sendPing();
   }
+
+  else if (!memcmp(payload2,"trans",sizeof("trans")-1))
+  {
+    findShortestPath(payload2,len);
+  }
+  
   Serial.println();
   //Serial.println("-----------------------");
 
@@ -539,8 +542,7 @@ void command(char* payload){
   }
 }
 
-void establishUDP(char* payld, unsigned int len)
-{
+void establishUDP(char* payld, unsigned int len){
   bool readFlag = false;
   bool writeFlag = false;
   bool msgFlag = false;
@@ -718,23 +720,28 @@ void mapMoris(char* payload, int len){
     client.publish(publishName, buff6);
     //*/
 
-    int counter = 0;
+    int moriOneIndex = -1;
+    int moriTwoIndex = -1;
     for(int i = 0 ; i < nbrRegisteredMoris ; i++){
       if(moriOne == registeredMoris[i]){
-        moriMap[i][payload[serialPort]-'1'] = moriTwo;;
-        moriMap[nbrRegisteredMoris][payload[serialPort+1+espIdLen]-'1'] = moriOne;
+        moriOneIndex = i;
       }
-      else{
-        counter++;
+      else if (moriTwo == registeredMoris[i]){
+        moriTwoIndex = i;
       }
     }
-    if(counter == nbrRegisteredMoris-1){
-      client.publish(publishName, "INFO: Mori successfully added!");
-      registeredMoris[nbrRegisteredMoris] = moriTwo;
-      nbrRegisteredMoris++;
+    if(moriOneIndex < 0){
+      client.publish(publishName, "INFO: Error in adding Mori!");
     }
     else{
-      client.publish(publishName, "INFO: Error in adding Mori!");
+      if(moriTwoIndex < 0){
+        //First reference of moriTwo
+        registeredMoris[nbrRegisteredMoris] = moriTwo;
+        moriTwoIndex = nbrRegisteredMoris;
+        nbrRegisteredMoris++;
+      }
+      moriMap[moriOneIndex][payload[serialPort]-'1'] = moriTwo;
+      moriMap[moriTwoIndex][payload[serialPort+1+espIdLen]-'1'] = moriOne;
     }
   }
   
@@ -753,8 +760,71 @@ void mapMoris(char* payload, int len){
   }
 }
 
+void findShortestPath(char* payload, unsigned int len){
+  int receiverIdStart = 5;
+  int receiver;
+  int path = 0;
+  char receiverId[espIdLen];
+  char pyld[len-receiverIdStart-espIdLen];
+
+  client.publish(publishName, "INFO: Start to find shortest path");
+
+  //First define the final receiver of the message
+  for(int i = 0 ; i < espIdLen ; i++){
+    receiverId[i] = payload[i+receiverIdStart];
+  }
+  receiver = atoi(receiverId);
+
+  //Sepearate the message from the rest of the payload
+  for(int i = 0 ; i < len-receiverIdStart-espIdLen ; i++){
+    pyld[i] = payload[i+receiverIdStart+espIdLen];
+  }
+  pyld[len-receiverIdStart-espIdLen] = '\0';
+  
+  for(int i = 0 ; i < nbrRegisteredMoris ; i++){
+    for(int j = 0 ; j < nbrSerialPorts ; j++){
+      if(moriMap[i][j] == receiver){ //The Mori just before the receiver is found
+        path = (path*10)+j+1; //Save the port for theshorted path
+        receiver = registeredMoris[i]; // Shortes path for the next farthest Mori is to be defined
+        if(i == 0){ //Shortest path is fully defined
+          i = nbrRegisteredMoris;
+          j = nbrSerialPorts;
+        }
+        else{ //Shortest path is still not fully defined
+          i = -1;
+          j = nbrSerialPorts;
+        }
+      }
+    }
+  }
+
+  //Do this because ESPs only have one port
+  if(path < 100){
+    path = path - 10;
+  }
+  else if(path < 1000){
+    path = path - 100;
+  }
+  else if(path < 10000){
+    path = path - 1000;
+  }
+  else if(path < 100000){
+    path = path - 10000;
+  }
+  
+  //Message = pass_path_ _msg
+  char buff[64];
+  sprintf(buff,"pass%d %s",path,pyld);
+  char buff2[64];
+  sprintf(buff2,"INFO: Path message: %s",buff);
+  client.publish(publishName, buff2);
+
+  Serial.println(buff);
+}
+
 bool recvSerial(){
     char payload[32];
+    byte payload2[32];
     int i = 0;
     byte receivedByte;
     
@@ -764,10 +834,12 @@ bool recvSerial(){
         receivedByte = Serial.read();
 
         payload[i] = receivedByte;
+        payload2[i] = receivedByte;
         //Serial.println(payload[i]);
         i++;
     }
     payload[i] = '\0'; //Set the end of the message
+    payload2[i] = '\0';
     
     if (i > 0){ // Message received
       if (!memcmp(payload,"ping",sizeof("ping")-1))
@@ -781,6 +853,20 @@ bool recvSerial(){
         sprintf(buff4,"INFO: response: %s",payload);
         client.publish(publishName, buff4);
         mapMoris(payload, i);
+      }
+
+      else if (!memcmp(payload,"resetMap",sizeof("resetMap")-1))
+      {
+        char* buff = "INFO: Reset Map message received!";
+        client.publish(publishName, buff);
+      }
+      else if (!memcmp(payload,"trans",sizeof("trans")-1))
+      {
+        char* buff = "INFO: Transmit message received!";
+        client.publish(publishName, buff);
+      }
+      else{
+        callback("Serial", payload2, i);
       }
     }
 }

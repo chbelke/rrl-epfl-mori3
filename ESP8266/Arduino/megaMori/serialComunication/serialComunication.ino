@@ -9,16 +9,32 @@ char payload[msgLen];
 const int nbrSerialPorts = 3; //Each Mori har 3 serial ports (3 sides)
 
 char* megaId;
-char bossPort;
+char bossPort = '0';
 
 
 void setup() {
-  //Instanciate all serial ports
-  Serial.begin(115200);
-  Serial1.begin(115200);
-  Serial2.begin(115200);
-  Serial3.begin(115200);
-  Serial.println("Define a leader"); 
+    //Instanciate all serial ports
+    Serial.begin(115200);
+    Serial1.begin(115200);
+    Serial2.begin(115200);
+    Serial3.begin(115200);
+    Serial.println("Define a leader");
+  
+    //Define an Id for the Mega boards
+    pinMode(2,INPUT);
+    pinMode(3,INPUT);
+    pinMode(4,INPUT);
+    delay(500);
+    if(digitalRead(2)){
+        megaId = "00777AAA";
+    }
+    if(digitalRead(3)){
+        megaId = "00888BBB";
+    }
+    if(digitalRead(4)){
+        megaId = "00999CCC";
+    }
+    Serial.println(megaId);
 }
 
 void loop() {
@@ -220,17 +236,14 @@ void decodeMsg(){
         Serial1.println("follow"); // Other Moris will be followers
         Serial2.println("follow");
         Serial3.println("follow");
-        megaId = "00777AAA";
     }
     else if (!memcmp(pyld+1,"follow",sizeof("follow")-1)){
         Serial.println("Follower defined");
         role = "F";
         roleAssigned = true;
-        megaId = "00888BBB";
     }
     else if (!memcmp(pyld+1,"ping",sizeof("ping")-1)){
         Serial.println("Ping received");
-        bossPort = pyld[0]; //A ping msg is only received by the Mori closest to the leader Mori
         respondPing(pyld);
     }
     else if (!memcmp(pyld+1,"resp",sizeof("resp")-1)){
@@ -238,12 +251,71 @@ void decodeMsg(){
         //If a resp message is received, it must be transmitted to leader Mori (through boss port) for mapping
         transmitPing(pyld); 
     }
+    else if (!memcmp(pyld+1,"resetMap",sizeof("resetMap")-1)){
+        Serial.println("Reset map (bossPort = 0)");
+        //If a resp message is received, it must be transmitted to leader Mori (through boss port) for mapping
+        if (bossPort != '0'){
+           bossPort = '0';
+           Serial1.println("resetMap");
+           Serial2.println("resetMap");
+           Serial3.println("resetMap");
+        }
+    }
+    else if (!memcmp(pyld+1,"pass",sizeof("pass")-1)){
+        Serial.println("Pass message received (must pass the message to another mori)");
+        //If a resp message is received, it must be transmitted to leader Mori (through boss port) for mapping
+        passMessage(pyld); 
+    }
     else{
         Serial.println("Unknown command");
     }
 }
 
-char* sendPing(char portNbr){
+void respondPing(char* pyld){
+    //If a ping is received, respond to boss Mori for mapping
+    int portIndex = 13;
+    int espMsgStartIndex = 4;
+    int espMsgLen = 9;
+
+    //MSG: resp-espSendPort-espId-megaReceivePort-megaId
+    char* buff = "respXYYYYYYYYPZZZZZZZZ";
+
+    buff[portIndex] = pyld[0];
+
+    //Enter only if the ping is the first ping received (for loops in mori structures)
+    if (bossPort == '0' || pyld[0] == bossPort){
+         bossPort = pyld[0]; //A ping msg is only received by the Mori closest to the leader Mori
+         //Send ping to all other ports
+        sendPing(pyld[0]);
+    }
+ 
+    //Create mapping message
+    for(int i = 0 ; i < espMsgLen ; i++){
+      buff[espMsgStartIndex+i] = pyld[espMsgStartIndex+1+i];
+      if(i != espMsgLen-1){
+        //This is to correctly copy the Id of the mega board
+        buff[portIndex+1+i] = megaId[i];
+      }
+    }
+    buff[portIndex] = pyld[0];
+    buff[portIndex+espMsgLen] = '\0'; //Set end of array
+    
+    Serial.println(buff);
+
+    //Send back message to boss
+    if (bossPort == '1'){
+        //Serial.println("Resp sent");
+        Serial1.println(buff);
+    }
+    else if (bossPort == '2'){
+        Serial2.println(buff);
+    }
+    else if (bossPort == '3'){
+        Serial3.println(buff);
+    }
+}
+
+void sendPing(char portNbr){
   //Send a ping to other ports
   char* buff = "pingXYYYYYYYY";
   //strcat(buff,megaId);
@@ -275,47 +347,6 @@ char* sendPing(char portNbr){
   }
 }
 
-
-void respondPing(char* pyld){
-    //If a ping is received, respond to boss Mori for mapping
-    int portIndex = 13;
-    int espMsgStartIndex = 4;
-    int espMsgLen = 9;
-
-    //MSG: resp-espSendPort-espId-megaReceivePort-megaId
-    char* buff = "respXYYYYYYYYPZZZZZZZZ";
-
-    buff[portIndex] = pyld[0];
-
-    //Send ping to all other ports
-    sendPing(pyld[0]);
-
-    //Create mapping message
-    for(int i = 0 ; i < espMsgLen ; i++){
-      buff[espMsgStartIndex+i] = pyld[espMsgStartIndex+1+i];
-      if(i != espMsgLen-1){
-        //This is to correctly copy the Id of the mega board
-        buff[portIndex+1+i] = megaId[i];
-      }
-    }
-    buff[portIndex] = pyld[0];
-    buff[portIndex+espMsgLen] = '\0'; //Set end of array
-    
-    Serial.println(buff);
-
-    //Send back message to boss
-    if (pyld[0] == '1'){
-        //Serial.println("Resp sent");
-        Serial1.println(buff);
-    }
-    else if (pyld[0] == '2'){
-        Serial2.println(buff);
-    }
-    else if (pyld[0] == '3'){
-        Serial3.println(buff);
-    }
-}
-
 void transmitPing(char* pyld){
     //Simply transmit the ping respond through the boss port
     int respLen = 22;
@@ -337,6 +368,47 @@ void transmitPing(char* pyld){
     }
     else if (bossPort == '3'){
         Serial3.println(buff);
+    }
+}
+
+void passMessage(char* pyld){
+    char message[64];
+    char pass[4] = "pass";
+    int msgStart = 6;
+    char portNbr = pyld[msgStart-1];
+    int i = 0;
+
+    //Check if the recived message must be transmitted once more or the next recipient is the final receiver.
+    if(pyld[msgStart] == ' '){
+        Serial.println("Last before final recipient");
+        msgStart = 7;
+    }
+    else{
+        //Necessary to keep the correct indexes for the message
+        for(i ; i < 4 ; i++){
+            message[i] = pass[i];
+            msgStart--;
+        }
+    }
+    //Copy the message
+    while(pyld[i] != '\0' && i < 64){
+        message[i] = pyld[i+msgStart];
+        i++;
+    }
+    message[i] = '\0'; //Set end of array
+    
+    Serial.print("Message: ");
+    Serial.println(message);
+
+    //Send message through the correct port
+    if(portNbr == '1'){
+        Serial1.println(message);
+    }
+    if(portNbr == '2'){
+        Serial2.println(message);
+    }
+    if(portNbr == '3'){
+        Serial3.println(message);
     }
 }
 
