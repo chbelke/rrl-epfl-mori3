@@ -32,16 +32,22 @@ class MoriGui(Frame):
         if number == 'None':
             print("No Mori selected")
             return
-        self.mqtthost.publishLocal(number,text)
-        #print("Published \"" + text + "\" to esp/" + number + "/rec")
 
-        leaderDict = self.mqtthost.getLeaderIds()
-        #Enter if the ESP has follower and it is asked to lead
-        if (not(leaderDict.get(number) is None)) and self.leadDict.get(self.leaderListVar.get()):
-            for i in range(len(leaderDict.get(number))):
-                message = "com" + leaderDict.get(number)[i] + text
-                print("Published \"" + message + "\" to esp/" + leaderDict.get(number)[i] + "/rec")
-                self.mqtthost.publishLocal(number,message)
+        if self.mapTransmit: #Transmit the message serially if the checkbox is ticked
+            message = "trans" + number + text
+            #print("Published \"" + message + "\" to esp/" + self.mapBossId + "/rec")
+            self.mqtthost.publishLocal(self.mapBossId,message)
+        else:
+            self.mqtthost.publishLocal(number,text)
+            #print("Published \"" + text + "\" to esp/" + number + "/rec")
+
+            leaderDict = self.mqtthost.getLeaderIds()
+            #Enter if the ESP has follower and it is asked to lead
+            if (not(leaderDict.get(number) is None)) and self.leadDict.get(self.leaderListVar.get()):
+                for i in range(len(leaderDict.get(number))):
+                    message = "com" + leaderDict.get(number)[i] + text
+                    print("Published \"" + message + "\" to esp/" + leaderDict.get(number)[i] + "/rec")
+                    self.mqtthost.publishLocal(number,message)
 
         self.pub_loc_entry.delete(0, 'end')
 
@@ -111,7 +117,12 @@ class MoriGui(Frame):
         else: #To avoid having two spaces
             command = startByte + " " + allocationByte + " " + endByte
 
-        self.mqtthost.publishLocal(number,command)
+        if self.mapTransmit: #Transmit the message serially if the checkbox is ticked
+            message = "trans" + number + command
+            #print("Published \"" + message + "\" to esp/" + self.mapBossId + "/rec")
+            self.mqtthost.publishLocal(self.mapBossId,message)
+        else:
+            self.mqtthost.publishLocal(number,command)
 
         leaderDict = self.mqtthost.getLeaderIds()
         #Enter if the ESP has follower and it is asked to lead
@@ -192,6 +203,22 @@ class MoriGui(Frame):
         print(colored("ESP" + leader + " will lead", "yellow") + colored(" ESP" + follower, "yellow"))
         self.mqtthost.publishLocal(leader,message)
 
+    def publishMapMsg(self, *args):
+        number = self.mapperListVar.get()
+        if number == 'None':
+            print("No Mori selected")
+            return
+        self.mqtthost.publishLocal(number,"map")
+        self.mappedMoris = True
+        self.mapBossId = number
+
+    def resetMap(self, *args):
+        print("Map resetted")
+        self.mqtthost.publishLocal(self.mapperListVar.get(),"resetMap")
+        self.mappedMoris = False
+        self.mapTransmit = False
+        self.mapBossId = 0
+        self.mapTransmitCheckbox.deselect()
     
     #Reset all leaders and followers (used to recreate another hierarchy)
     def resetHandshakes(self):
@@ -243,6 +270,8 @@ class MoriGui(Frame):
             handshakeFollowerMenu.delete(0, "end")
             controllerMenu = self.controllerList["menu"]
             controllerMenu.delete(0, "end")
+            mapperMenu = self.mapperList["menu"]
+            mapperMenu.delete(0,"end")
             moriMenu = self.moriList["menu"]
             moriMenu.delete(0, "end")
 
@@ -269,6 +298,8 @@ class MoriGui(Frame):
                              command=lambda value=mori_individ[1]: self.handshakeFollowerListVar.set(value))
                     moriMenu.add_command(label=mori_individ[1], 
                              command=lambda value=mori_individ[1]: self.moriListVar.set(value))
+                    mapperMenu.add_command(label=mori_individ[1], 
+                             command=lambda value=mori_individ[1]: self.mapperListVar.set(value))
                 else:
                     print(colored("Wrong role for esp: " + mori_individ[1] + " current role: " + mori_individ[0], "red"))
         
@@ -341,6 +372,9 @@ class MoriGui(Frame):
     def mori_option_select(self, *args):
         print("ESP " + self.moriListVar.get() + " selected.")
 
+    def mapper_option_select(self, *args):
+        print("ESP " + self.mapperListVar.get() + " selected.")
+
     def toggleLead(self):
         #Change the leader status (to lead or not to lead :P) when the checkbox is toggled
         if self.leadDict.get(self.leaderListVar.get()) == True:
@@ -383,6 +417,13 @@ class MoriGui(Frame):
                 self.joystickCommand = False
             else:
                 print("No controller-Mori pair defined")
+
+    def toggleMapTransmit(self):
+        if self.mappedMoris == True:
+            self.mapTransmit = True
+        else:
+            print(colored("Moris are not mapped!","red"))
+            self.mapTransmitCheckbox.deselect()
                 
     def createWidgets(self):
         frame_party = Frame(self)
@@ -393,6 +434,7 @@ class MoriGui(Frame):
         frame_moriHandshake = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
         frame_moriLead = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
         frame_controllerMori = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
+        frame_mapMoris = Frame(self, relief = RAISED, borderwidth = 1, pady = 5)
         bottomFrame = Frame(self)
 
 
@@ -591,6 +633,11 @@ class MoriGui(Frame):
         self.joystickControlCheckbox = Checkbutton(frame_moriLead, command = self.toggleJoystick)
         self.joystickControlCheckbox.grid(row=2, column = 1)
 
+        self.mapTransmitCmd0 = Label(frame_moriLead, text="Transmit through Mori map")
+        self.mapTransmitCmd0.grid(row=3, column = 0, ipadx = 20)
+        self.mapTransmitCheckbox = Checkbutton(frame_moriLead, command = self.toggleMapTransmit)
+        self.mapTransmitCheckbox.grid(row=3, column = 1)
+
 
     # ------------------------------Frame 9------------------------------------ # 
         self.controllerList = OptionMenu(frame_controllerMori, self.controllerListVar,*self.moriNumber)
@@ -611,16 +658,35 @@ class MoriGui(Frame):
         self.controlReset = Button(frame_controllerMori, text = "Disconnect", command = self.resetControl)
         self.controlReset.grid(row=0, column = 1, ipadx = 35, sticky = E)
 
+
+    # ------------------------------Frame 10------------------------------------ # 
+        self.mapMorisCmd0 = Label(frame_mapMoris, text="MAP MORIS")
+        self.mapMorisCmd0.grid(row=0, column = 0)
+
+        self.mapperList = OptionMenu(frame_mapMoris, self.mapperListVar,*self.moriNumber)
+        self.mapperList.grid(row=1, column = 1, ipadx = 50)
+        self.mapMorisCmd1 = Label(frame_mapMoris, text="Mapper Mori:")
+        self.mapMorisCmd1.grid(row=1, column = 0, ipadx = 20)
+
+        self.mapButton = Button(frame_mapMoris)
+        self.mapButton["text"] = "Map"
+        self.mapButton.grid(row=2, column = 1, ipadx = 35, sticky = E)
+        self.mapButton["command"] =  lambda: self.publishMapMsg()
+
+        self.mapReset = Button(frame_mapMoris, text = "Reset", command = self.resetMap)
+        self.mapReset.grid(row=0, column = 1, ipadx = 35, sticky = E)
+
  
 
         #frame_party.pack(fill=X)
         frame_moriShapeCommand.pack({"side": "right"})
         frame_controllerMori.pack({"side": "left"})
         frame_listMori.pack(ipadx = 10)
-        frame_interMoriCom.pack()
+        #frame_interMoriCom.pack()
         frame_moriHandshake.pack()
         frame_moriLead.pack()
-        frame_pubg.pack()
+        frame_mapMoris.pack()
+        #frame_pubg.pack()
         #bottomFrame.pack(fill=BOTH, expand=True, pady=5)
         
 
@@ -671,9 +737,16 @@ class MoriGui(Frame):
         self.moriListVar.set(self.moriNumber[0])
         self.moriListVar.trace('w', self.mori_option_select)
 
+        self.mapperListVar = StringVar()
+        self.mapperListVar.set(self.moriNumber[0])
+        self.mapperListVar.trace('w', self.mapper_option_select)
+
         self.leadDict = {}
         self.UDPcommunication = False
         self.joystickCommand = False
+        self.mappedMoris = False
+        self.mapTransmit = False
+        self.mapBossId = 0
 
         self.paaarty = self.partyOn()
 

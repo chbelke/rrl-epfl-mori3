@@ -1,6 +1,8 @@
 
 /**********************************************************************************
-  Written by Kevin Holdcroft (kevin.holdcroft@epfl.ch). All rights reserved RRL EPFL.
+  Written by Kevin Holdcroft (kevin.holdcroft@epfl.ch) 
+  & Louis de La Rochefoucauld (louis.delarochefoucauld@epfl.ch)
+  All rights reserved RRL EPFL.
 
   Tool to compare signal strength between two ESP8266 modules.
 
@@ -319,6 +321,13 @@ void callback(char* topic, byte* payload, unsigned int len)
     }
     nbrRegisteredMoris = 0;
     sendPing();
+  }
+
+  else if (!memcmp(payload,"resetMap",sizeof("resetMap")-1))
+  {
+    char* buff = "INFO: Reset Map message received!";
+    client.publish(publishName, buff);
+    Serial.println("resetMap");
   }
 
   else if (!memcmp(payload2,"trans",sizeof("trans")-1))
@@ -764,6 +773,7 @@ void findShortestPath(char* payload, unsigned int len){
   int receiverIdStart = 5;
   int receiver;
   int path = 0;
+  int pathLength = 0;
   char receiverId[espIdLen];
   char pyld[len-receiverIdStart-espIdLen];
 
@@ -774,7 +784,7 @@ void findShortestPath(char* payload, unsigned int len){
     receiverId[i] = payload[i+receiverIdStart];
   }
   receiver = atoi(receiverId);
-
+  
   //Sepearate the message from the rest of the payload
   for(int i = 0 ; i < len-receiverIdStart-espIdLen ; i++){
     pyld[i] = payload[i+receiverIdStart+espIdLen];
@@ -784,8 +794,10 @@ void findShortestPath(char* payload, unsigned int len){
   for(int i = 0 ; i < nbrRegisteredMoris ; i++){
     for(int j = 0 ; j < nbrSerialPorts ; j++){
       if(moriMap[i][j] == receiver){ //The Mori just before the receiver is found
-        path = (path*10)+j+1; //Save the port for theshorted path
-        receiver = registeredMoris[i]; // Shortes path for the next farthest Mori is to be defined
+        path = path + (pow(10,pathLength)*(j+1)); //Save the port for the shortest path
+        pathLength++;
+        receiver = registeredMoris[i]; //Shortest path for the next farthest Mori is to be defined
+        
         if(i == 0){ //Shortest path is fully defined
           i = nbrRegisteredMoris;
           j = nbrSerialPorts;
@@ -798,27 +810,18 @@ void findShortestPath(char* payload, unsigned int len){
     }
   }
 
-  //Do this because ESPs only have one port
-  if(path < 100){
-    path = path - 10;
-  }
-  else if(path < 1000){
-    path = path - 100;
-  }
-  else if(path < 10000){
-    path = path - 1000;
-  }
-  else if(path < 100000){
-    path = path - 10000;
-  }
   
-  //Message = pass_path_ _msg
+  //Do this because ESPs only have one port
+  path = path - pow(10,pathLength-1);
+  
+  //Message = pass_path_msg
   char buff[64];
   sprintf(buff,"pass%d %s",path,pyld);
   char buff2[64];
   sprintf(buff2,"INFO: Path message: %s",buff);
   client.publish(publishName, buff2);
 
+  delay(1500); //Important to guarantee that the message will be received in  its integrity.
   Serial.println(buff);
 }
 

@@ -4,7 +4,7 @@ SoftwareSerial gtSerial(8, 7); // Arduino RX, Arduino TX
 
 bool roleAssigned = false;
 char role; // Will contain "L" if Mori is a leader and "F" if it is a follower.
-const int msgLen =128; //Arbitrary number
+const int msgLen = 128; //Arbitrary number
 char payload[msgLen];
 const int nbrSerialPorts = 3; //Each Mori har 3 serial ports (3 sides)
 
@@ -82,7 +82,7 @@ bool recvSerial0(){
         payload[i] = receivedByte;
         Serial.println(payload[i]);
         
-        delay(10);//Tmortant to ensure the whole message has been received 
+        delay(10);//Important to ensure the whole message has been received 
         
         i++;
     }
@@ -123,7 +123,7 @@ bool recvSerial1(){
         //Serial.println(receivedByte);
         Serial.println(payload[i]);
 
-        delay(10);//Tmortant to ensure the whole message has been received 
+        delay(10);//Important to ensure the whole message has been received 
         
         i++;
     }
@@ -163,7 +163,7 @@ bool recvSerial2(){
         //Serial.println(receivedByte);
         Serial.println(payload[i]);
         
-        delay(10);//Tmortant to ensure the whole message has been received 
+        delay(10);//Important to ensure the whole message has been received 
         
         i++;
     }
@@ -204,7 +204,7 @@ bool recvSerial3(){
         //Serial.println(receivedByte);
         Serial.println(payload[i]);
 
-        delay(10);//Tmortant to ensure the whole message has been received 
+        delay(15);//Important to ensure the whole message has been received 
         
         i++;
     }

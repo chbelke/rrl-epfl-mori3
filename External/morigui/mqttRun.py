@@ -281,9 +281,9 @@ class MqttHost(threading.Thread):
 
    def getNumberConnected(self):
       #print(self.macOrder)
-      for i in range(len(self.macOrder)-1, -1, -1): #Go through the array  from top to bottom to avoid out ouf range errors
+      for i in range(len(self.macOrder)-1, -1, -1): #Go through the array  from top to bottom to avoid out of range errors
          #print(colored("ESP ", "blue") + self.macOrder[i] + "last connexion time = " + colored(time.time() - self.coTimeDict.get(self.macOrder[i]), "blue") + " ago")
-         if time.time() - self.coTimeDict.get(self.macOrder[i]) > 4: #Consider ESP disonnected if no message has been received in the last 4 seconds
+         if time.time() - self.coTimeDict.get(self.macOrder[i]) > 4: #Consider ESP disconnected if no message has been received in the last 4 seconds
             print(colored("ESP " + self.macOrder[i] + " lost", "red"))
             del self.macOrder[i]
       self.numberModules = len(self.macOrder)
