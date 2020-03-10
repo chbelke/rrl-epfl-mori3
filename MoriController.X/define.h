@@ -39,7 +39,7 @@
 #define MODE_ENC_CON false
 #define MODE_ACC_CON false
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active true
 
 
@@ -49,10 +49,13 @@ extern volatile bool MODE_LED_EDGES;
 
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAngle;
+extern volatile bool Flg_LiveEdges;
 extern volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C;
 extern volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C;
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
+
+extern volatile bool Flg_EdgeDemo;
 
 
 /* ******************** PERIPHERALS ***************************************** */

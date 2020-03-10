@@ -6,7 +6,7 @@
 #include "define.h"
 #include "mcc_generated_files/pwm.h"
 
-uint16_t MotLin_Desired[3] = {512, 512, 512};
+uint16_t MotLin_Desired[3] = {457, 457, 457};
 float lPID_eOld[3] = {0, 0, 0};
 float lPID_I[3] = {0, 0, 0};
 uint8_t Stbl_Count[3] = {0, 0, 0};

@@ -212,64 +212,55 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 
     static int j = 0;
     static int m = 0;
-    j++;
-    if (j >= 150) {
-        m++;
+    if (Flg_EdgeDemo){
+        switch (m) {
+            case 0:
+                MotLin_Set(0, 160);
+                MotLin_Set(1, 160);
+                MotLin_Set(2, 160);
+                break;
+            case 1:
+                MotLin_Set(0, 970);
+                MotLin_Set(1, 160);
+                MotLin_Set(2, 160);
+                break;
+            case 2:
+                MotLin_Set(0, 970);
+                MotLin_Set(1, 970);
+                MotLin_Set(2, 160);
+                break;
+            case 3:
+                MotLin_Set(0, 970);
+                MotLin_Set(1, 970);
+                MotLin_Set(2, 970);
+                break;
+            case 4:
+                MotLin_Set(0, 160);
+                MotLin_Set(1, 970);
+                MotLin_Set(2, 970);
+                break;
+            case 5:
+                MotLin_Set(0, 160);
+                MotLin_Set(1, 160);
+                MotLin_Set(2, 970);
+                break;
+            case 6:
+                m = 0;
+                break;
+            default:
+                m = 0;
+                break;
+        }
+        j++;
+        if (j >= 100) {
+            m++;
+            j = 0;
+        }
+    } else {
+        m = 0;
         j = 0;
     }
-//    switch (m) {
-//        case 0:
-//            MotLin_Set(0, 565);
-//            MotLin_Set(1, 565);
-//            MotLin_Set(2, 565);
-//            break;
-//        case 1:
-//            MotLin_Set(0, 208);
-//            MotLin_Set(1, 208);
-//            MotLin_Set(2, 208);
-//            break;
-//        case 2:
-//            MotLin_Set(0, 922);
-//            MotLin_Set(1, 922);
-//            MotLin_Set(2, 922);
-//            break;
-//        case 3:
-//            MotLin_Set(0, 1022);
-//            MotLin_Set(1, 1022);
-//            MotLin_Set(2, 1022);
-//            break;
-//        case 4:
-//            MotLin_Set(0, 1022);
-//            MotLin_Set(1, 1022);
-//            MotLin_Set(2, 108);
-//            break;
-//        case 5:
-//            MotLin_Set(0, 1022);
-//            MotLin_Set(1, 108);
-//            MotLin_Set(2, 108);
-//            break;
-//        case 6:
-//            MotLin_Set(0, 108);
-//            MotLin_Set(1, 108);
-//            MotLin_Set(2, 108);
-//            break;
-//        case 7:
-//            MotLin_Set(0, 108);
-//            MotLin_Set(1, 108);
-//            MotLin_Set(2, 1022);
-//            break;
-//        case 8:
-//            MotLin_Set(0, 108);
-//            MotLin_Set(1, 1022);
-//            MotLin_Set(2, 1022);
-//            break;
-//        case 9:
-//            m = 3;
-//            break;
-//        default:
-//            m = 0;
-//            break;
-//    }
+    
 }
 
 void  TMR5_SetInterruptHandler(void (* InterruptHandler)(void))

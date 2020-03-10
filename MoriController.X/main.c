@@ -62,12 +62,14 @@ volatile bool MODE_LED_ANGLE = false;
 volatile bool MODE_LED_EDGES = true;
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAngle = false;
+volatile bool Flg_LiveEdges = false;
 volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
 volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
 /* declaration for other source files is contained in define.h */
 
+volatile bool Flg_EdgeDemo = false;
 
 /*
                          Main application
@@ -91,9 +93,9 @@ int main(void)
     MotRot_LIM(1,255);
     MotRot_LIM(2,255);
     
-    MotLin_Set(0,900);
-    MotLin_Set(1,900);
-    MotLin_Set(2,900);
+    MotLin_Set(0,457);
+    MotLin_Set(1,457);
+    MotLin_Set(2,457);
     
     while (1)
     {
