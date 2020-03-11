@@ -59,7 +59,8 @@
 
 /* GLOBAL MODES */
 volatile bool MODE_LED_ANGLE = false;
-volatile bool MODE_LED_EDGES = true;
+volatile bool MODE_LED_EDGES = false;
+volatile bool MODE_LED_RNBOW = true;
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAngle = false;
 volatile bool Flg_LiveEdges = false;
@@ -79,7 +80,7 @@ int main(void)
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = 1;
-    WIFI_EN = 1;
+    WIFI_EN = 0;
     
     SMA_Off(0);
     SMA_Off(1);

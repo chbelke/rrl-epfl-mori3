@@ -208,6 +208,12 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
             }
         }
         LED_SetAll(RGB[0], RGB[1], RGB[2]);
+    } else if (MODE_LED_RNBOW) {
+        static uint8_t RGBow[3] = {0, 80, 160};
+        RGBow[0] += 20;
+        RGBow[1] += 20;
+        RGBow[2] += 20;
+        LED_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
     }
 
     static int j = 0;
