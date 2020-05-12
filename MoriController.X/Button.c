@@ -3,6 +3,7 @@
 #include "mcc_generated_files/uart4.h"
 #include "Coms.h"
 #include "MotRot.h"
+#include "TLC59208.h"
 
 volatile int k = 0;
 

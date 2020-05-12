@@ -13,15 +13,15 @@
   @Description
     This source file provides APIs for driver for UART4. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36b
-        MPLAB             :  MPLAB X v5.25
+        Compiler          :  XC16 v1.41
+        MPLAB             :  MPLAB X v5.30
 */
 
 /*
-    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -74,6 +74,12 @@ static bool volatile rxOverflowed;
 
 */
 
+/* We add one extra byte than requested so that we don't have to have a separate
+ * bit to determine the difference between buffer full and buffer empty, but
+ * still be able to hold the amount of data requested by the user.  Empty is
+ * when head == tail.  So full will result in head/tail being off by one due to
+ * the extra byte.
+ */
 #define UART4_CONFIG_TX_BYTEQ_LENGTH (8+1)
 #define UART4_CONFIG_RX_BYTEQ_LENGTH (8+1)
 
@@ -112,11 +118,11 @@ void UART4_Initialize(void)
     rxHead = rxQueue;
     rxTail = rxQueue;
    
-    rxOverflowed = 0;
+    rxOverflowed = false;
 
-    UART4_SetTxInterruptHandler(UART4_Transmit_ISR);
+    UART4_SetTxInterruptHandler(&UART4_Transmit_CallBack);
 
-    UART4_SetRxInterruptHandler(UART4_Receive_ISR);
+    UART4_SetRxInterruptHandler(&UART4_Receive_CallBack);
 
     IEC5bits.U4RXIE = 1;
     
@@ -131,22 +137,29 @@ void UART4_Initialize(void)
 
 void UART4_SetTxInterruptHandler(void* handler)
 {
+    if(handler == NULL)
+    {
+        UART4_TxDefaultInterruptHandler = &UART4_Transmit_CallBack;
+    }
+    else
+    {
     UART4_TxDefaultInterruptHandler = handler;
 }
+} 
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4TXInterrupt ( void )
 { 
-    (*UART4_TxDefaultInterruptHandler)();
+    if(UART4_TxDefaultInterruptHandler)
+    {
+        UART4_TxDefaultInterruptHandler();
 }
 
-void UART4_Transmit_ISR ( void )
-    {
     if(txHead == txTail)
     {
         IEC5bits.U4TXIE = 0;
-        return;
     }
-
+    else
+    {
     IFS5bits.U4TXIF = 0;
 
     while(!(U4STAbits.UTXBF == 1))
@@ -165,19 +178,33 @@ void UART4_Transmit_ISR ( void )
         }
     }
 }
+}
+
+void __attribute__ ((weak)) UART4_Transmit_CallBack ( void )
+{ 
+
+}
 
 void UART4_SetRxInterruptHandler(void* handler)
 {
+    if(handler == NULL)
+    {
+        UART4_RxDefaultInterruptHandler = &UART4_Receive_CallBack;
+    }
+    else
+    {
     UART4_RxDefaultInterruptHandler = handler;
+}
 }
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4RXInterrupt( void )
 {
-    (*UART4_RxDefaultInterruptHandler)();
+    if(UART4_RxDefaultInterruptHandler)
+    {
+        UART4_RxDefaultInterruptHandler();
 }
 
-void UART4_Receive_ISR(void)
-{
+    IFS5bits.U4RXIF = 0;
 
     while((U4STAbits.URXDA == 1))
     {
@@ -203,8 +230,11 @@ void UART4_Receive_ISR(void)
         
         Coms_ESP_Eval();
     }
+}
 
-    IFS5bits.U4RXIF = false;
+void __attribute__ ((weak)) UART4_Receive_CallBack(void)
+{
+
 }
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4ErrInterrupt( void )
@@ -445,11 +475,11 @@ unsigned int __attribute__((deprecated)) UART4_TransmitBufferSizeGet(void)
     {
         if(txHead > txTail)
         {
-            return(txHead - txTail);
+            return((txHead - txTail) - 1);
         }
         else
         {
-            return(UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead));
+            return((UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead)) - 1);
         } 
     }
     return 0;
@@ -461,11 +491,11 @@ unsigned int __attribute__((deprecated)) UART4_ReceiveBufferSizeGet(void)
     { 
         if(rxHead > rxTail)
         {
-            return(rxHead - rxTail);
+            return((rxHead - rxTail) - 1);
         }
         else
         {
-            return(UART4_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead));
+            return((UART4_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead)) - 1);
         }
     }
     return 0;

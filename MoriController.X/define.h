@@ -46,6 +46,7 @@
 /* ******************** LIVE MODE VARS ************************************** */
 extern volatile bool MODE_LED_ANGLE;
 extern volatile bool MODE_LED_EDGES;
+extern volatile bool MODE_LED_RNBOW;
 
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAngle;
@@ -169,7 +170,7 @@ extern volatile bool Flg_EdgeDemo;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period 60 // SMA on-time (updated in 20 Hz loop) - 100 = 3 sec.
-#define SMA_Duty 20 // 8-bit PWM value
+#define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
+#define SMA_Duty 2 // 8-bit PWM value
 
 #endif	/* DEFINE_H */

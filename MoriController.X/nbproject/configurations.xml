@@ -25,6 +25,8 @@
         <itemPath>mcc_generated_files/system_types.h</itemPath>
         <itemPath>mcc_generated_files/tmr5.h</itemPath>
         <itemPath>mcc_generated_files/ext_int.h</itemPath>
+        <itemPath>mcc_generated_files/adc_module_features.h</itemPath>
+        <itemPath>mcc_generated_files/pwm_module_features.h</itemPath>
       </logicalFolder>
       <itemPath>TLC59208.h</itemPath>
       <itemPath>MMA8452Q.h</itemPath>

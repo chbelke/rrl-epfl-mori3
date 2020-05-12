@@ -14,16 +14,16 @@
 
   @Description:
     This source file provides implementations for PIN MANAGER.
-    Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
+    Generation Information :
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36b
-        MPLAB 	          :  MPLAB X v5.25
+        Compiler          :  XC16 v1.41
+        MPLAB 	          :  MPLAB X v5.30
 */
 
 /*
-    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -52,10 +52,6 @@
 #include <xc.h>
 #include <stdio.h>
 #include "pin_manager.h"
-
-/**
- Section: File specific functions
-*/
 
 /**
  Section: Driver Interface Function Definitions
@@ -96,22 +92,19 @@ void PIN_MANAGER_Initialize (void)
     /****************************************************************************
      * Setting the Analog/Digital Configuration SFR(s)
      ***************************************************************************/
-    ANSELA = 0x0218; // was 0x021A;
-    ANSELB = 0x0380; // was 0x0380;
+    ANSELA = 0x0218;
+    ANSELB = 0x0380;
     ANSELC = 0x000B;
-
-
+    
     /****************************************************************************
      * Set the PPS
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
     RPINR28bits.U4RXR = 0x0026;    //RB6->UART4:U4RX
-    RPOR1bits.RP37R = 0x001D;    //RB5->UART4:U4TX
     RPINR0bits.INT1R = 0x0011;    //RA1->EXT_INT:INT1
+    RPOR1bits.RP37R = 0x001D;    //RB5->UART4:U4TX
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock PPS
-
 }
-
 

@@ -78,7 +78,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 	//***User Area End->code: External Interrupt 1***
     EX_INT1_InterruptFlagClear();
 }
-
 /**
     Section: External Interrupt Initializers
  */
@@ -87,8 +86,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
 
     Initializer for the following external interrupts
     INT1
-    INT3
-    INT4
 */
 void EXT_INT_Initialize(void)
 {
@@ -101,5 +98,4 @@ void EXT_INT_Initialize(void)
     EX_INT1_InterruptFlagClear();   
     EX_INT1_NegativeEdgeSet();
     EX_INT1_InterruptEnable();
-
 }

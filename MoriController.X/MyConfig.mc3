@@ -78,8 +78,8 @@
       </entry>
    </usedClasses>
    <usedLibraries class="java.util.ArrayList">
-      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu16.Mcu16PeripheralLibrary" version="1.145.0"/>
       <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.boardsupportlibrary.BoardSuppportLibrary" version="1.0.0"/>
+      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu16.Mcu16PeripheralLibrary" version="1.166.1"/>
    </usedLibraries>
    <tokenMap class="java.util.HashMap">
       <entry>
@@ -1051,6 +1051,10 @@
          <value>output</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="Pll_Dependent_Clock_Switching"/>
+         <value>disabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="TMR3" registerAlias="TCON"/>
          <value>32800</value>
       </entry>
@@ -1240,7 +1244,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="OSCCON" settingAlias="COSC" alias="PRIPLL"/>
-         <value>2</value>
+         <value>3</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="CSCNA"/>
@@ -1511,12 +1515,12 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT2I" settingAlias="context"/>
-         <value>OFF</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="IOCON1" settingAlias="SWAP"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT2I" settingAlias="context"/>
+         <value>OFF</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM" registerAlias="PDC4"/>
@@ -2691,12 +2695,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TGATE"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="SMPI" alias="Generates interrupt after completion of every 3rd sample/conversion operation"/>
          <value>2</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TGATE"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR3" registerAlias="TCON" settingAlias="TGATE"/>
@@ -2895,12 +2899,12 @@
          <value>Positive Edge</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSH" settingAlias="CSS24" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TSIDL" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCSSH" settingAlias="CSS24" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD6" settingAlias="PWM1MD"/>
@@ -3932,6 +3936,10 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RA1"/>
+         <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC1" name="SCAN_ENABLE"/>
          <value>disabled</value>
       </entry>
       <entry>
@@ -5376,7 +5384,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC1" name="tad"/>
-         <value>2.7126737E-7</value>
+         <value>2.71267E-7</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISC" settingAlias="TRISC2"/>
@@ -5467,12 +5475,12 @@
          <value>30</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INTCON2" settingAlias="GIE"/>
-         <value>enabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON4" settingAlias="CAM"/>
          <value>Edge Aligned</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INTCON2" settingAlias="GIE"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCHS" settingAlias="CH0SB" alias="AN32"/>
@@ -5713,6 +5721,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="ODCC" settingAlias="ODCC6" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="SATDW"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="TMR3_TIISRFunction"/>
@@ -6551,6 +6563,10 @@
          <value>UNSUPPORTED</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="DL"/>
+         <value>0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON1" settingAlias="SSRC" alias="Internal counter ends sampling and starts conversion"/>
          <value>7</value>
       </entry>
@@ -6653,6 +6669,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="INTERNAL OSCILLATOR" name="FrcEnable"/>
          <value>enabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="IF"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="AUXCON1" settingAlias="CHOPLEN" alias="disabled"/>
@@ -6867,12 +6887,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT3I" settingAlias="enable"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TCS" alias="FOSC/2"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT3I" settingAlias="enable"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RESET" registerAlias="RCON" settingAlias="IOPUWR"/>
@@ -7911,11 +7931,11 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EXT_INT" registerAlias="INTCON2" settingAlias="INT1EP" alias="Positive Edge"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="AUXCON4" settingAlias="CHOPHEN" alias="disabled"/>
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="AUXCON4" settingAlias="CHOPHEN" alias="disabled"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EXT_INT" registerAlias="INTCON2" settingAlias="INT1EP" alias="Positive Edge"/>
          <value>0</value>
       </entry>
       <entry>
@@ -7939,12 +7959,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="clockSourceSelect"/>
-         <value>FOSC/2</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON3" settingAlias="SAMC" alias="31"/>
          <value>31</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="clockSourceSelect"/>
+         <value>FOSC/2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON3" settingAlias="SAMC" alias="30"/>
@@ -8067,12 +8087,12 @@
          <value>28</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON3" settingAlias="SAMC" alias="27"/>
-         <value>27</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TGATE" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON3" settingAlias="SAMC" alias="27"/>
+         <value>27</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCON3" settingAlias="SAMC" alias="26"/>
@@ -10207,12 +10227,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="customPR"/>
-         <value>576</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCHS123" settingAlias="CH123SA" alias="CH1=OA2/AN0,CH2=OA5/AN25,CH3=OA3/AN6"/>
          <value>16</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="customPR"/>
+         <value>576</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR1" registerAlias="TCON" settingAlias="TCS"/>
@@ -10268,7 +10288,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON"/>
-         <value>0</value>
+         <value>32</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON6" settingAlias="FLTSRC" alias="FLT2"/>
@@ -10363,12 +10383,12 @@
          <value>41</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="UART4" registerAlias="UMODE" settingAlias="RTSMD" alias="enabled"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR5" registerAlias="TI" settingAlias="flag"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="UART4" registerAlias="UMODE" settingAlias="RTSMD" alias="enabled"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR3" registerAlias="TI" settingAlias="flag"/>
@@ -11455,6 +11475,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="SFA"/>
+         <value>disabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGSTRT" alias="44"/>
          <value>44</value>
       </entry>
@@ -11501,6 +11525,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="INTERNAL OSCILLATOR" registerAlias="PMD2" settingAlias="OC1MD" alias="disabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="US"/>
+         <value>signed</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON4" settingAlias="TRGSTRT" alias="39"/>
@@ -12215,16 +12243,16 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT2I" settingAlias="enable"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="UART4" registerAlias="USTA" settingAlias="UTXBRK" alias="SEND"/>
          <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON6" settingAlias="SWAP" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT2I" settingAlias="enable"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC1" registerAlias="ADCHS" settingAlias="CH0SB" alias="OA2/AN0"/>
@@ -12503,12 +12531,12 @@
          <value>enabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="EXT_INT" name="INT4"/>
-         <value>enabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON6" settingAlias="CLDAT" alias="PWM6L High, PWM6H Low"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="EXT_INT" name="INT4"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="EXT_INT" name="INT0"/>
@@ -12989,6 +13017,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="IOCON2" settingAlias="PENH" alias="enabled"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="IPL3"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR3" name="callBackRate"/>
@@ -14443,12 +14475,12 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EXT_INT" registerAlias="INTCON2" settingAlias="INT2EP" alias="Positive Edge"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON1" settingAlias="TRGSTRT" alias="57"/>
          <value>57</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EXT_INT" registerAlias="INTCON2" settingAlias="INT2EP" alias="Positive Edge"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="TRGCON1" settingAlias="TRGSTRT" alias="56"/>
@@ -14519,12 +14551,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="ABAUD"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR5" registerAlias="TCON" settingAlias="TCS" alias="T5CK"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="ABAUD"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PWM" registerAlias="FCLCON1" settingAlias="FLTSRC" alias="FLT6"/>
@@ -15167,11 +15199,11 @@
          <value>enabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT2I" settingAlias="flag"/>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="MTBS"/>
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="PWMCON2" settingAlias="MTBS"/>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EXT_INT" registerAlias="INT2I" settingAlias="flag"/>
          <value>disabled</value>
       </entry>
       <entry>
@@ -16931,6 +16963,10 @@
          <value>1</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="VAR"/>
+         <value>disabled</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="UART4" registerAlias="UMODE" settingAlias="BRGH"/>
          <value>enabled</value>
       </entry>
@@ -17065,6 +17101,10 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="CNENB" settingAlias="CNIEB8" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="INTERNAL OSCILLATOR" registerAlias="CORCON" settingAlias="EDT"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM" registerAlias="FCLCON4" settingAlias="IFLTMOD"/>
@@ -17294,139 +17334,147 @@
    <generatedFileHashHistoryMap class="java.util.HashMap">
       <entry>
          <file>mcc_generated_files\ext_int.c</file>
-         <hash>94b0ec5b0694faf72cbb916818171a2cb1c4064b87b159d0113838e4182c38e4</hash>
+         <hash>5dfd56fd1fa51eb3d820d73b98a3ab57e9b8ad63b0dd7c0edc048bcf41a15114</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\interrupt_manager.h</file>
-         <hash>eccc5f5c58bd438cbda6364aab4e6d29273f53cd81d06cfcf068c689f6135525</hash>
+         <hash>a91a726a3fe3af63b0dd5c3c8a48f1bc4310d335367866f8dcfe2be92233b446</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\pwm_module_features.h</file>
+         <hash>13d30c48b28d71346a428b6bdbbb1c7f6e8658dcff77cd9911d3dbadb4a737d4</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\i2c1.c</file>
-         <hash>0740a536f0d4c0fd42061105f7d1f927308629174480cc14793703ca77bc39e0</hash>
+         <hash>76c65093fa4a61c2086fdb0667942612030f7bf59fa7309c3e1efd10d6b6c64b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\i2c1.h</file>
-         <hash>b6a4265ed77206d066431fcd8e0733c0adad028dec2cbe27a7e73348ebc17b62</hash>
+         <hash>cf43d5242d420a1bf96036b9339f84fd1447433b3729c04f96218ab081c1976d</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\adc_module_features.h</file>
+         <hash>9093c81156955069fd270a097ff25e5b7c813112f0e515964fc0287edfe1b2a5</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\system_types.h</file>
-         <hash>04a64cb77ecb972c16b992141aae7bb3373885d6439733e68dd1e6ba36bbb9ca</hash>
+         <hash>fa45ff48e6b6a23548e49cc42e2c4bdd530785b1e4f621a5e861cbb75626a949</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\system.h</file>
-         <hash>8a7852829686fe2d5ebaeb7fa4229238106d107faa24d2a6365d782cf8c7af1e</hash>
+         <hash>20e24602c166c2f328bb01585444c1d816fdc8e778e0c957fa937aa1ebfe272d</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\system.c</file>
-         <hash>a948bae2aee9b9ed1d71347783db11a71bd0dbcc8728685688a40e5f55a491e6</hash>
+         <hash>43f3271b29e0ed357cbff027bc1c9c8bbe2e3a5f915116af7e0df838d7a8b7c1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\clock.h</file>
-         <hash>d66e5e5eb647b304768ecd2187221cff21b191cf60261455ab881d77e042f5d0</hash>
+         <hash>31105cb838390e659578bcfdc0a87d0c1e41d80f0093e0374a1cdba381d77ca2</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>
-         <hash>74ae391a3397756ab2d7d948710873341a7b2b4ce425ff38dabad5baae8fb3ba</hash>
+         <hash>b98db9d324e4131c1e37c55903b45d9b75c4b2fd1fdcd2a25ddd7fb834e60c29</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\reset.h</file>
-         <hash>e021615a2996f54b2e48f2a8ddf67fb16b8d22179b648d8c2b0f8425180743a5</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr5.h</file>
-         <hash>56066c840cc5d4514a60f9c39a81875917278d22308abec30002f5ce61bbf92d</hash>
+         <hash>0762973344a788e01397daa41c46f1c25880a068c847140f6198db48b5f19c3b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.h</file>
-         <hash>749947bb751cf6ba7d78bc6fab4febb8396ec0dd45b5cdfac785730c91c7c04a</hash>
+         <hash>09c843973ef3c03ed48881ee7c2f82c88012cba101fcc2d5c316f0c8b37bb3c6</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm.c</file>
-         <hash>d22ff558d28cc7e629e473e7f31b965690dc60e776e4f68485cb4659fa364b93</hash>
+         <hash>5b549bd96064358273892b51364585a18d9df1ef0802adf61ea6611f1d726dcb</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr5.h</file>
+         <hash>a2879cff2cccb22eb94eb14c72c73f055718724278daa2baea982c52bff8ca23</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\uart4.c</file>
-         <hash>312da836f836d40690443eeabd8dc7d01c42f762251ca76fd943b4f2dc06f801</hash>
+         <hash>a16da075bd7c0a82e16e30622806e15350178bd7faa81a04b6d4174027f26965</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\reset.c</file>
-         <hash>6974f211a3de6cbb80f42378e2a616044f06539b1a13aaa5f50f01a10670d060</hash>
+         <hash>0572c932e07941f3989c247394fb6dc99bfb8c6f886d9ecbd01ab51a68cda87e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.h</file>
-         <hash>b56a7b87602747f22de2f0e47a6305c7368b9d64714cc597124cbaf9558f1349</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr5.c</file>
-         <hash>5fea0c3e86dfc093ce9b72082f04b763413e2ff12c6a9ea964fa13c0a84190a6</hash>
+         <hash>432d8e9285ca21eba80c623dd4890be4e8fb7983589754c89a1b07e5604523e3</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\clock.c</file>
-         <hash>451d0bae82bcb0c725b434bcc2522ffa8f104424857b151a4919434a9e211da0</hash>
+         <hash>5ac6eecbfcd2aa2026300db4c18f4d6d9bf924b7a0b39e8f9a76f0b68060f380</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\tmr3.h</file>
-         <hash>ef45f702e16d3853e45f4d377d9af55010dfbf55900db3b08120fcf16de7c094</hash>
+         <file>mcc_generated_files\tmr5.c</file>
+         <hash>900cea0b1b2378207c343021ac45c5cd19b9e4c3f3ed001fb3a9b7749ad50ba7</hash>
       </entry>
       <entry>
          <file>main.c</file>
-         <hash>014c21408afa445d064b3d39f3b5b639d108b6af2e13221a9c89c121a877ff24</hash>
+         <hash>58193045d0c4431093baf10b88c2635ce021dc04143242351cd911a450dc4058</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.c</file>
-         <hash>ec433ced128a5dda13b438f1db3655947969d307be9ee854ded8ce475c9859c3</hash>
+         <hash>b49d52acb37b4d5ca4d2151531dd6e18456205f594eb99f9d076112a78d76a2e</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr3.h</file>
+         <hash>15ed7f17b2294438bc8111b3e430362c09a8e6e001257c36e442994fe3e886e5</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
-         <hash>477e31bb184c5e096d4af852798b01080ae280d502713d5b1bdb63dce52ddf21</hash>
+         <hash>beec0fb824bfe1c1bfd6ca3d1fc96f8b57f266da25046f621ba212790109ec34</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.c</file>
-         <hash>a4433a931611c855e1303215d52fa03e85f71eacea0ecbafe197231201a661ba</hash>
+         <hash>864d4e24d08be5c56df630a1f866490add394631efc54181bbbce253bb0f088a</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr3.c</file>
-         <hash>8aa640f57d036720092ca9bae8b106189d9046b261cc0ce809eebd62ed42feef</hash>
+         <hash>acecefda36ed86f9888e97eb7a4271c656d947fdc97c106b1869d39bce8039f1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\uart4.h</file>
-         <hash>2c110fe77565813b20e54edafa920420cb2771f3ef56c7ee2233d3f591624dbf</hash>
+         <hash>fbdfe70149a64a4d3ae062ba0593e0d5dc4dc2a1ed6b7cb1fe92f8f8db5748e5</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm.h</file>
-         <hash>b860232534498cd0836e0009522e24d1e8aedc8a9f8736889d4b1ca0a95d9ceb</hash>
+         <hash>372c962e328e616c85dd8f5921aa089c96951b38b7dfdf45e7bf7e38faf78ac2</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.c</file>
-         <hash>9c08537926f07825f54a9c6327cbda36e71086c8655c29371beaaa9c7230381d</hash>
+         <hash>5bbb2c7bdbcc621b3551fb213d1b8dd2aab881bb2fd7b299a0c18e5ba012a7ef</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\traps.c</file>
-         <hash>ec9ad973c6d8a8c8e2f8c568ff6b690c82a93e2e05d287685d397f412bd11c9a</hash>
+         <hash>8feca62dcad28c0730b62d2d962fcb195e6f97085dcaf36e97de34c429388a26</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\traps.h</file>
-         <hash>6ea976c2db3e552f8b8ae388916df740c372dff432fcb4c94171cbe719413bbe</hash>
+         <hash>d81cf177ec361d46aa39a1f98e92306b651f3d6c103bcc3d5f0f03dad998ecd7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.h</file>
-         <hash>a1d81c7d04896e4f3a8355027fde1a3a3a0b820982a2d3633c8cb96f8c9281cd</hash>
+         <hash>2ba94ca347ddb87d1eba473c0bf4a2527c5be7866ac4357a0b21de452379f401</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\ext_int.h</file>
-         <hash>ebd074aaa0559e32e5d28dacafdc5ffce50336abf4299253a82d956e6ac95fed</hash>
+         <hash>a33fcabd562f14660435b8ea5225c60bb7cb4bd61760f8f74a22a00e2f3d1a6d</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\interrupt_manager.c</file>
-         <hash>a9dbb37bd15ba3fae572d0b271039c13e45990f9204ab37d8b07c79afe8557b5</hash>
+         <hash>a446a712c8184382d2e787738d55d06821c3a6051058c68a8c81319404d57a6b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\watchdog.h</file>
-         <hash>ab8a8f5fd07e073268d12ba2d64a253434ad621cc4d92455f003c916ad044f50</hash>
+         <hash>db9fff4de901003c01e4a0702f5d0b6930748ff337c44e06c10980bc485081c1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\reset_types.h</file>
-         <hash>461764f92c619ffd3e7848919ef97fb67f7e726b8151fb21bda14066310c59ea</hash>
+         <hash>ff0d853d39065b0098b885974bea21f53430e6981821ced8a4a7618c0a4b2ac4</hash>
       </entry>
    </generatedFileHashHistoryMap>
    <mc3libFileHashHistoryMap class="java.util.HashMap"/>

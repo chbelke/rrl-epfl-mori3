@@ -1,4 +1,3 @@
-
 /**
   ADC1 Generated Driver File
 
@@ -9,20 +8,20 @@
     adc1.c
 
   @Summary
-    This is the generated header file for the ADC1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated driver implementation file for the ADC1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This header file provides APIs for driver for ADC1.
+    This source file provides APIs for ADC1.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36b
-        MPLAB 	          :  MPLAB X v5.25
+        Compiler          :  XC16 v1.41
+        MPLAB 	          :  MPLAB X v5.30
 */
 
 /*
-    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -60,89 +59,63 @@ volatile uint16_t ADC1_ValuesB[4] = {512, 512, 512, 512};
 volatile uint16_t ADC1_ValuesC[4] = {512, 512, 512, 512};
 
 /**
-  Section: Data Type Definitions
+  Section: File Specific Functions
 */
 
-/* ADC Driver Hardware Instance Object
-
-  @Summary
-    Defines the object required for the maintenance of the hardware instance.
-
-  @Description
-    This defines the object required for the maintenance of the hardware
-    instance. This object exists once per hardware instance of the peripheral.
-
- */
-typedef struct
-{
-	uint8_t intSample;
-}
-
-ADC_OBJECT;
-
-static ADC_OBJECT adc1_obj;
+// ADC1 Default Interrupt Handler
+static void (*ADC1_DefaultInterruptHandler)(void) = NULL;
 
 /**
   Section: Driver Interface
 */
 
-
 void ADC1_Initialize (void)
 {
     // ASAM disabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Sequential; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Internal counter ends sampling and starts conversion; AD12B 10-bit; ADON enabled; SSRCG disabled; 
-
    AD1CON1 = 0x80E0;
-
     // CSCNA disabled; VCFG0 AVDD; VCFG1 AVSS; ALTS disabled; BUFM disabled; SMPI Generates interrupt after completion of every sample/conversion operation; CHPS 1 Channel; 
-
    AD1CON2 = 0x00;
-
     // SAMC 12; ADRC FOSC/2; ADCS 0; 
-
    AD1CON3 = 0xC00;
-
     // CH0SA AN29; CH0SB OA2/AN0; CH0NB VREFL; CH0NA VREFL; 
-
    AD1CHS0 = 0x1D;
-
     // CSS26 disabled; CSS25 disabled; CSS24 disabled; CSS31 disabled; CSS30 disabled; CSS29 disabled; CSS28 disabled; CSS27 disabled; 
-
    AD1CSSH = 0x00;
-
     // CSS2 disabled; CSS1 disabled; CSS0 disabled; CSS8 disabled; CSS7 disabled; CSS6 disabled; CSS5 disabled; CSS4 disabled; CSS3 disabled; 
-
    AD1CSSL = 0x00;
-
     // DMABL Allocates 1 word of buffer to each analog input; ADDMAEN disabled; 
-
    AD1CON4 = 0x00;
-
     // CH123SA2 disabled; CH123SB2 CH1=OA2/AN0,CH2=AN1,CH3=AN2; CH123NA disabled; CH123NB CH1=VREF-,CH2=VREF-,CH3=VREF-; 
-
    AD1CHS123 = 0x00;
 
+    //Assign Default Callbacks
+    ADC1_SetInterruptHandler(&ADC1_CallBack);
 
-   adc1_obj.intSample = AD1CON2bits.SMPI;
-   
 }
 
 void __attribute__ ((weak)) ADC1_CallBack(void)
 {
-    // Add your custom callback code here
+
 }
 
-void ADC1_Tasks ( void )
+void ADC1_SetInterruptHandler(void* handler)
+{
+    ADC1_DefaultInterruptHandler = handler;
+}
+
+void __attribute__ ((weak)) ADC1_Tasks ( void )
 {
 	if(IFS0bits.AD1IF)
 	{
-		// ADC1 callback function 
-		ADC1_CallBack();
+        if(ADC1_DefaultInterruptHandler) 
+        { 
+            ADC1_DefaultInterruptHandler(); 
 	}
     
     // clear the ADC interrupt flag
     IFS0bits.AD1IF = false;
 }
-
+}
 
 void ADC1_Update(void) {
     
@@ -159,7 +132,7 @@ void ADC1_Update(void) {
     
     // Edge A
     AD1CON1bits.DONE = false;           // Clear done bit
-    AD1CHS0bits.CH0SA = ADC1_AI_A;      // Select analog input channel
+    AD1CHS0bits.CH0SA = AI_A;      // Select analog input channel
     AD1CON1bits.SAMP = 1;               // Start sampling
     AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
     while (!(AD1CON1bits.DONE));        // Wait for conversion
@@ -168,7 +141,7 @@ void ADC1_Update(void) {
     
     // Edge B
     AD1CON1bits.DONE = false;           // Clear done bit
-    AD1CHS0bits.CH0SA = ADC1_AI_B;      // Select analog input channel
+    AD1CHS0bits.CH0SA = AI_B;      // Select analog input channel
     AD1CON1bits.SAMP = 1;               // Start sampling
     AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
     while (!(AD1CON1bits.DONE));        // Wait for conversion
@@ -177,7 +150,7 @@ void ADC1_Update(void) {
     
     // Edge C
     AD1CON1bits.DONE = false;           // Clear done bit
-    AD1CHS0bits.CH0SA = ADC1_AI_C;      // Select analog input channel
+    AD1CHS0bits.CH0SA = AI_C;      // Select analog input channel
     AD1CON1bits.SAMP = 1;               // Start sampling
     AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
     while (!(AD1CON1bits.DONE));        // Wait for conversion
@@ -209,3 +182,4 @@ uint16_t ADC1_Return(uint8_t channel){
 /**
   End of File
 */
+

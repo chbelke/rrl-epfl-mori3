@@ -13,15 +13,15 @@
   @Description
     This source file provides APIs for PWM.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.145.0
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36b
-        MPLAB 	          :  MPLAB X v5.25
+        Compiler          :  XC16 v1.41
+        MPLAB 	          :  MPLAB X v5.30
 */
 
 /*
-    (c) 2019 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -52,7 +52,6 @@
 /**
   Section: Driver Interface
 */
-
 
 void PWM_Initialize (void)
 {
@@ -245,14 +244,13 @@ void PWM_Initialize (void)
     // CHOPLEN disabled; CHOPHEN disabled; BLANKSEL No state blanking; CHOPSEL No state blanking; 
     AUXCON6 = 0x00;
     
-
     // SYNCOEN disabled; SEIEN disabled; SESTAT disabled; SEVTPS 1; SYNCSRC SYNCI1; SYNCEN disabled; PTSIDL disabled; PTEN enabled; EIPU disabled; SYNCPOL disabled; 
     PTCON = 0x8000;
 }
 
 void __attribute__ ((weak)) PWM_SpecialEvent_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_SpecialEvent_Tasks ( void )
@@ -269,7 +267,7 @@ void PWM_SpecialEvent_Tasks ( void )
 
 void __attribute__ ((weak)) PWM_Generator1_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_Generator1_Tasks ( void )
@@ -283,9 +281,10 @@ void PWM_Generator1_Tasks ( void )
 		IFS5bits.PWM1IF = 0;
 	}
 }
+
 void __attribute__ ((weak)) PWM_Generator2_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_Generator2_Tasks ( void )
@@ -299,9 +298,10 @@ void PWM_Generator2_Tasks ( void )
 		IFS5bits.PWM2IF = 0;
 	}
 }
+
 void __attribute__ ((weak)) PWM_Generator3_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_Generator3_Tasks ( void )
@@ -315,9 +315,10 @@ void PWM_Generator3_Tasks ( void )
 		IFS6bits.PWM3IF = 0;
 	}
 }
+
 void __attribute__ ((weak)) PWM_Generator4_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_Generator4_Tasks ( void )
@@ -331,9 +332,10 @@ void PWM_Generator4_Tasks ( void )
 		IFS6bits.PWM4IF = 0;
 	}
 }
+
 void __attribute__ ((weak)) PWM_Generator5_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_Generator5_Tasks ( void )
@@ -347,9 +349,10 @@ void PWM_Generator5_Tasks ( void )
 		IFS6bits.PWM5IF = 0;
 	}
 }
+
 void __attribute__ ((weak)) PWM_Generator6_CallBack(void)
 {
-    // Add your custom callback code here
+    // Add Application code here
 }
 
 void PWM_Generator6_Tasks ( void )
