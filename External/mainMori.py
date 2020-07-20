@@ -23,7 +23,7 @@ import sys, select, os
 # import matplotlib.pyplot as plt
 from termcolor import colored
 import tkinter as tk
-from threading import Thread
+import threading
 
 from morigui.guiWindow import MoriGui
 
@@ -32,24 +32,15 @@ def main():
     startTime = time.time()
     gui = mainGui()
 
-    # try:
-    #   while(True):
 
-    # except KeyboardInterrupt:
-    #   print("Exiting...")
-    #   gui.mqtthost.exit()
-    #   root.destroy()
-    #   print("Exit Success!")
-
-
-class mainGui(Thread):
+class mainGui(threading.Thread):
 
     def __init__(self):
-        Thread.__init__(self)
+        threading.Thread.__init__(self)
         self.start()
 
     def callback(self):
-        self.gui.mqtthost.exit()
+        self.gui.wifi_host.exit()
         self.root.quit()
 
     def run(self):
