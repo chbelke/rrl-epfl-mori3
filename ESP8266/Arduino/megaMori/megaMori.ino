@@ -1,321 +1,6 @@
+
 /**********************************************************************************
   Written by Kevin Holdcroft (kevin.holdcroft@epfl.ch). All rights reserved RRL EPFL.
-
-  Tool to compare signal strength between two ESP8266 modules.
-
-  Scans for modules with SSID "helloThere", and then relays the measured signal
-  strength and corresponding MAC address over the network.
-
-  Used in conjunction with wifiHandler.py, distanceRanger.py, getData.py, and
-  mqttAnalyzer.py
-
-  Before flashing to ESP8266, please change clientName, publishName, and recieveName
-  to their appropriate values.
-
-**********************************************************************************/
-
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-#include <ArduinoOTA.h>
-
-const char* esp_ssid = "helloThere";
-const char* esp_password =  "generalKenobi1";
-const char* brn_ssid = "rrl_wifi";
-const char* brn_password =  "Bm41254126";
-const char* mqttServer = "192.168.0.50";
-const int mqttPort = 1883;
-
-//char* clientName = (char*)malloc(8*sizeof(char));
-//char* publishName = (char*)malloc(16*sizeof(char));
-//char* recieveName = (char*)malloc(16*sizeof(char));
-
-char clientName[16];
-char publishName[36];
-char recieveName[36];
-
-const float softwareVersion = 0.5;
-
-bool verCheck = false;  //assumes we don't know the version
-bool verGood = true;   //assumes we are up to date unless otherwise
-bool stopLoop = false;  //assumes we are running the proper code
-
-unsigned long lastMessage = millis();
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-//--------------------------- Start ----------------------------------------//
-void setup()
-{
-  Serial.begin(115200);
-  delay(500);
-  Serial.print("ChipID: ");
-  Serial.println(ESP.getChipId());
-  Serial.print("WifiID: ");
-  Serial.println(WiFi.macAddress());
-  sprintf(clientName,"%08X",ESP.getChipId());
-  sprintf(publishName, "esp/%s/pub", clientName);
-  sprintf(recieveName, "esp/%s/rec", clientName);
-  Serial.println(clientName);
-  Serial.println(publishName);
-  Serial.println(recieveName);
-  
-
-  
-//  Serial.println(clientName);
-  // WiFi.setOutputPower(5.0);
-  WiFi.begin(brn_ssid, brn_password);
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.println("Connecting to WiFi..");
-  }
-  Serial.println("Connected to the WiFi network");
-
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(callback);
-
-  while (!client.connected()) {
-    Serial.println("Connecting to MQTT...");
-    if (client.connect(clientName))
-    {
-      Serial.println("connected");
-    } else {
-      Serial.print("failed with state ");
-      Serial.print(client.state());
-      delay(2000);
-    }
-  }
-
-  //--------------------------- MQTT -----------------------------------------//
-
-  client.publish(publishName, "Hello from ESP8266");
-  client.publish(publishName, clientName);
-  client.subscribe(recieveName);
-  client.subscribe("esp/rec");
-
-  WiFi.softAP(esp_ssid, esp_password);
-
-  //----------------------- OAT Handling--------------------------------------//
-  ArduinoOTA.setPort(8266);
-  ArduinoOTA.onStart([]()
-  {
-    char* type;
-    if (ArduinoOTA.getCommand() == U_FLASH) {
-      type = "sketch";
-    } else { // U_SPIFFS
-      type = "filesystem";
-    }
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS
-    // using SPIFFS.end()
-    char message[30];
-    sprintf(message,"Start updating: %s",type);
-    client.publish(publishName, message);
-    Serial.println(message);
-    client.loop();
-  });
-
-  ArduinoOTA.onEnd([]()
-  {
-    client.publish(publishName, "Finished Updating");
-    Serial.println("\nEnd");
-    client.loop();
-    delay(500);
-    ESP.restart();
-  });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-  {
-    Serial.printf("Progress: %i/100", (progress / (total / 100)));
-    if(progress % 10 < 1)
-    {
-      char message[30];
-      sprintf(message, "Progress: %i/100", (progress / (total / 100))); 
-      client.publish(publishName, message);
-      client.loop();
-    }
-      
-  });
-
-  ArduinoOTA.onError([](ota_error_t error)
-  {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) {
-      client.publish(publishName, "ERR: Auth Failed");
-      Serial.println("Auth Failed");
-    } else if (error == OTA_BEGIN_ERROR) {
-      client.publish(publishName, "ERR: Begin Failed");
-      Serial.println("Begin Failed");
-    } else if (error == OTA_CONNECT_ERROR) {
-      client.publish(publishName, "ERR: Connect Failed");
-      Serial.println("Connect Failed");
-    } else if (error == OTA_RECEIVE_ERROR) {
-      client.publish(publishName, "ERR: Finished Updating");
-      Serial.println("Receive Failed");
-    } else if (error == OTA_END_ERROR) {
-      client.publish(publishName, "ERR: Receive Failed");
-      Serial.println("End Failed");
-    }
-    client.loop();
-  });
-  // ArduinoOTA.begin();
-}
-
-
-
-//----------------------- Loooooooop--------------------------------------//
-void loop()
-{
-  if (verCheck == true) //have checked version
-  {
-    if (verGood == true)
-    {
-      scanWifis();
-      if (abs(lastMessage - millis()) > 10000)
-      {
-        client.publish(publishName, "ERR: SSID not found within 10s");
-        lastMessage = millis();
-      }
-    }
-    else //Version is old
-    {
-      if (stopLoop == false)
-      {
-        Serial.println("StoppingLoop");
-        client.publish(publishName, "ERR: Pausing functionality until updated");
-        client.loop();
-        WiFi.mode(WIFI_STA);
-        ArduinoOTA.begin();
-        Serial.println("Ready");
-        Serial.print("IP address: ");
-        Serial.println(WiFi.localIP());
-        delay(1000);
-        stopLoop = true;
-      }
-      //      Serial.println("GODDAMN SNAKES ON THIS GODDAMN PLANE");
-    }
-  }
-  else
-  {
-    pubVersion();
-    delay(2000);
-  }
-  if (stopLoop == true)
-    ArduinoOTA.handle();
-  client.loop();
-}
-
-
-
-
-//----------------------- Recieved Message --------------------------//
-void callback(char* topic, byte* payload, unsigned int len)
-{
-  Serial.print("Message arrived in topic: ");
-  Serial.println(topic);
-  Serial.print("Message:");
-  for (int i = 0; i < len; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-
-  if ('m' == (char)payload[0])
-  {
-    char buff[30];
-    String SSIDstring = String("MAC: ") + WiFi.macAddress();
-    SSIDstring.toCharArray(buff, 30);
-    client.publish(publishName, buff);
-  }
-  else if ('v' == char(payload[0]))
-  {
-    if ('g' == char(payload[1]))
-      verGood = true;
-    if ('b' == char(payload[1]))
-      verGood = false;
-    verCheck = true;
-    Serial.println("version Checked");
-  }
-  else if ('h' == (char)payload[0])
-    client.publish(publishName, "INFO: Hello!");
-
-  Serial.println();
-  Serial.println("-----------------------");
-
-}
-
-
-
-//----------------------- Recieved Message -----------------------------//
-void pubVersion()
-{
-  char buff[100];
-  String IPstring = String("VER: ") + String(softwareVersion)
-                    + String(" ") + String(clientName);
-  IPstring.toCharArray(buff, 100);
-  client.publish(publishName, buff);
-}
-
-
-//--------------------------- Scans Network -----------------------------//
-void scanWifis()
-{
-  int n = WiFi.scanNetworks();
-  while (WiFi.scanComplete() < 0)
-  {
-    delay(50);
-  }
-  for (int i = 0; i < n; i++)
-  {
-    char buff[100];
-    String SSIDstring = WiFi.SSID(i);
-    SSIDstring.toCharArray(buff, 100);
-    if (strcmp(buff, "helloThere") == 0)
-    {
-      Serial.println("GENERAL KENOBI");
-
-      uint8_t* bssid = WiFi.BSSID(i);
-      char message[32];
-
-      char* msgPtr = &message[0];
-      snprintf(msgPtr, 6, "DST: ");
-      msgPtr += 5;
-      for (byte j = 0; j < 6; j++) {
-        snprintf(msgPtr, 3, "%02x", bssid[j]);
-        msgPtr += 2;
-      }
-      snprintf(msgPtr, 3, ", ");
-      msgPtr += 2;
-
-      char cstr[5];
-      itoa(WiFi.RSSI(i), cstr, 10);
-
-      snprintf(msgPtr, 6, cstr);
-
-      Serial.print("Message: ");
-      Serial.println(message);
-
-      client.publish(publishName, message);
-
-      lastMessage = millis();
-    }
-  }
-}
-
-
-char* concatID(char* header, char* footer) {
-//  char* header = String(ESP.getChipId()).c_str();
-  char buf[30];
-  strcpy(buf, "esp/");
-  strcpy(buf, header);
-  strcat(buf, footer);
-  return buf;
-=======
-
-/**********************************************************************************
-  Written by Kevin Holdcroft (kevin.holdcroft@epfl.ch) 
-  & Louis de La Rochefoucauld (louis.delarochefoucauld@epfl.ch)
-  All rights reserved RRL EPFL.
 
   Tool to compare signal strength between two ESP8266 modules.
 
@@ -336,8 +21,8 @@ char* concatID(char* header, char* footer) {
 #include <WiFiUdp.h>
 
 const char* brn_ssid = "rrl_wifi";
-const char* brn_password =  "Bm41254126";//"Bm41254126";
-const char* mqttServer = "192.168.0.50";
+const char* brn_password =  "Bm41254126";
+const char* mqttServer = "192.168.0.52";
 const int mqttPort = 1883;
 
 const char* esp_role = "mori";
@@ -358,13 +43,6 @@ char runState = 0;
 unsigned long lastMessage = millis();
 unsigned long lastMacPub = millis();
 int moriShape[6] = {900, 900, 900, 0, 0, 0};
-
-const int nbrSerialPorts = 3; //Each Mori har 3 serial ports (3 sides)
-const int maxNbrMoris = 10;
-const int espIdLen = 8;
-int nbrRegisteredMoris = 0;
-int registeredMoris[maxNbrMoris];
-int moriMap[maxNbrMoris][nbrSerialPorts];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -513,6 +191,7 @@ void setup()
   
 }
 
+
 //----------------------- Loooooooop--------------------------------------//
 
 void loop()
@@ -530,7 +209,6 @@ void loop()
       break;
     case 3:   //everything is good
       normalOp();
-      recvSerial();
       break;
     case 4:
       normalOp();
@@ -539,6 +217,7 @@ void loop()
   }
   client.loop();
 }
+
 
 void enableOTA()
 {
@@ -552,11 +231,12 @@ void enableOTA()
   delay(1000);
 }
 
+
 //----------------------- Recieved Message --------------------------//
 void callback(char* topic, byte* payload, unsigned int len)
 {
-  //Serial.print("Message arrived in topic: ");
-  //Serial.println(topic);
+  Serial.print("Message arrived in topic: ");
+  Serial.println(topic);
   Serial.print("Message length: ");
   Serial.println(len);
   Serial.print("Message: ");
@@ -623,33 +303,8 @@ void callback(char* topic, byte* payload, unsigned int len)
     establishUDP(payload2, len);
   }
 
-  else if (!memcmp(payload2,"map",sizeof("map")-1))
-  {
-    client.publish(publishName, "INFO: Map msg received");
-    //reset the mori map
-    for(int i = 0 ; i < maxNbrMoris ; i++){
-      for(int j = 0 ; j < nbrSerialPorts ; j++){
-        moriMap[i][j] = 0;
-      }
-    }
-    nbrRegisteredMoris = 0;
-    sendPing();
-  }
-
-  else if (!memcmp(payload,"resetMap",sizeof("resetMap")-1))
-  {
-    char* buff = "INFO: Reset Map message received!";
-    client.publish(publishName, buff);
-    Serial.println("resetMap");
-  }
-
-  else if (!memcmp(payload2,"trans",sizeof("trans")-1))
-  {
-    findShortestPath(payload2,len);
-  }
-  
   Serial.println();
-  //Serial.println("-----------------------");
+  Serial.println("-----------------------");
 
 }
 
@@ -864,7 +519,8 @@ void command(char* payload){
   }
 }
 
-void establishUDP(char* payld, unsigned int len){
+void establishUDP(char* payld, unsigned int len)
+{
   bool readFlag = false;
   bool writeFlag = false;
   bool msgFlag = false;
@@ -977,215 +633,7 @@ void establishUDP(char* payld, unsigned int len){
   } //writeFlag
 }
 
-void sendPing(){
-  //Add the leader's Id number to the list of registered moris
-  //This step is needed in order to know which Moris have been mapped
-  char buff[16];
-  
-  registeredMoris[nbrRegisteredMoris] = atoi(clientName);
-  nbrRegisteredMoris++;
-  
-  sprintf(buff,"ping1%s",clientName); //"1" is for port number 1 (ESPs have only one port)
-  Serial.println(buff);
-  client.publish(publishName, "INFO: Ping sent");
-}
 
-void respondPing(char* payload){
-  int portIndex = 13;
-  int espMsgStartIndex = 4;
-  int espMsgLen = 9;
-
-  //MSG: resp-espSendPort-espId-selfReceivePort-selfId
-  char* buff = "respYXXXXXXXXP00000000";
-
-  for (int i = espMsgStartIndex ; i < portIndex ; i++){
-        buff[i] = payload[i];
-  }
-  buff[portIndex] = '1'; //Esp port
-
-  for (int i = portIndex+1 ; i < portIndex+espMsgLen ; i++){
-        buff[i] = clientName[i-portIndex-1];
-  }
-  buff[portIndex+espMsgLen] = '\0'; //Set end of array
-  
-  Serial.println(buff);
-}
-
-void mapMoris(char* payload, int len){
-  int serialPort = 4; //position of the serialPort nbr in the payload
-  char moriIdOne[espIdLen];
-  char moriIdTwo[espIdLen];
-  int moriOne;
-  int moriTwo;
-  
-  client.publish(publishName, "INFO: Mapping");
-
-  if(len < 16){
-    client.publish(publishName, "INFO: Error in received message!");
-  }
-  else{
-    for(int i = serialPort+1 ; i < serialPort+1+espIdLen ; i++){
-      moriIdOne[i-serialPort-1] = payload[i];
-    }
-    moriIdOne[espIdLen] = '\0';
-    moriOne = atoi(moriIdOne);
-
-    for(int i = serialPort+2+espIdLen ; i < serialPort+2+(2*espIdLen) ; i++){
-      moriIdTwo[i-serialPort-2-espIdLen] = payload[i];
-    }
-    moriIdTwo[espIdLen] = '\0';
-    moriTwo = atoi(moriIdTwo);
-    
-    ///*
-    char buff6[32];
-    sprintf(buff6,"INFO: Mori1: %d , Mori2: %d",moriOne,moriTwo);
-    client.publish(publishName, buff6);
-    //*/
-
-    int moriOneIndex = -1;
-    int moriTwoIndex = -1;
-    for(int i = 0 ; i < nbrRegisteredMoris ; i++){
-      if(moriOne == registeredMoris[i]){
-        moriOneIndex = i;
-      }
-      else if (moriTwo == registeredMoris[i]){
-        moriTwoIndex = i;
-      }
-    }
-    if(moriOneIndex < 0){
-      client.publish(publishName, "INFO: Error in adding Mori!");
-    }
-    else{
-      if(moriTwoIndex < 0){
-        //First reference of moriTwo
-        registeredMoris[nbrRegisteredMoris] = moriTwo;
-        moriTwoIndex = nbrRegisteredMoris;
-        nbrRegisteredMoris++;
-      }
-      moriMap[moriOneIndex][payload[serialPort]-'1'] = moriTwo;
-      moriMap[moriTwoIndex][payload[serialPort+1+espIdLen]-'1'] = moriOne;
-    }
-  }
-  
-  int test;
-  for(int i = 0 ; i < nbrRegisteredMoris ; i++){
-    test = registeredMoris[i];
-    char buff3[32];
-    sprintf(buff3,"INFO: mori%d: %d",i+1,test);
-    client.publish(publishName, buff3);
-  }
-  
-  char buff2[32];
-  for (int j = 0 ; j < nbrRegisteredMoris ; j++){
-    sprintf(buff2,"INFO: Map line %d = %d , %d , %d",j+1, moriMap[j][0],moriMap[j][1],moriMap[j][2]);
-    client.publish(publishName, buff2);
-  }
-}
-
-void findShortestPath(char* payload, unsigned int len){
-  int receiverIdStart = 5;
-  int receiver;
-  int path = 0;
-  int pathLength = 0;
-  char receiverId[espIdLen];
-  char pyld[len-receiverIdStart-espIdLen];
-
-  client.publish(publishName, "INFO: Start to find shortest path");
-
-  //First define the final receiver of the message
-  for(int i = 0 ; i < espIdLen ; i++){
-    receiverId[i] = payload[i+receiverIdStart];
-  }
-  receiver = atoi(receiverId);
-  
-  //Sepearate the message from the rest of the payload
-  for(int i = 0 ; i < len-receiverIdStart-espIdLen ; i++){
-    pyld[i] = payload[i+receiverIdStart+espIdLen];
-  }
-  pyld[len-receiverIdStart-espIdLen] = '\0';
-  
-  for(int i = 0 ; i < nbrRegisteredMoris ; i++){
-    for(int j = 0 ; j < nbrSerialPorts ; j++){
-      if(moriMap[i][j] == receiver){ //The Mori just before the receiver is found
-        path = path + (pow(10,pathLength)*(j+1)); //Save the port for the shortest path
-        pathLength++;
-        receiver = registeredMoris[i]; //Shortest path for the next farthest Mori is to be defined
-        
-        if(i == 0){ //Shortest path is fully defined
-          i = nbrRegisteredMoris;
-          j = nbrSerialPorts;
-        }
-        else{ //Shortest path is still not fully defined
-          i = -1;
-          j = nbrSerialPorts;
-        }
-      }
-    }
-  }
-
-  
-  //Do this because ESPs only have one port
-  path = path - pow(10,pathLength-1);
-  
-  //Message = pass_path_msg
-  char buff[64];
-  sprintf(buff,"pass%d %s",path,pyld);
-  char buff2[64];
-  sprintf(buff2,"INFO: Path message: %s",buff);
-  client.publish(publishName, buff2);
-
-  delay(1500); //Important to guarantee that the message will be received in  its integrity.
-  Serial.println(buff);
-}
-
-bool recvSerial(){
-    char payload[32];
-    byte payload2[32];
-    int i = 0;
-    byte receivedByte;
-    
-    payload[0] = '\0'; //Reset the payload array
-    while (Serial.available() > 0) {
-        //Set the first element of the payload to the number of the port on which the message is received
-        receivedByte = Serial.read();
-
-        payload[i] = receivedByte;
-        payload2[i] = receivedByte;
-        //Serial.println(payload[i]);
-        i++;
-    }
-    payload[i] = '\0'; //Set the end of the message
-    payload2[i] = '\0';
-    
-    if (i > 0){ // Message received
-      if (!memcmp(payload,"ping",sizeof("ping")-1))
-      {
-        respondPing(payload);
-      }
-    
-      else if (!memcmp(payload,"resp",sizeof("resp")-1))
-      {
-        char buff4[64];
-        sprintf(buff4,"INFO: response: %s",payload);
-        client.publish(publishName, buff4);
-        mapMoris(payload, i);
-      }
-
-      else if (!memcmp(payload,"resetMap",sizeof("resetMap")-1))
-      {
-        char* buff = "INFO: Reset Map message received!";
-        client.publish(publishName, buff);
-      }
-      else if (!memcmp(payload,"trans",sizeof("trans")-1))
-      {
-        char* buff = "INFO: Transmit message received!";
-        client.publish(publishName, buff);
-      }
-      else{
-        callback("Serial", payload2, i);
-      }
-    }
-}
 
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
@@ -1249,6 +697,7 @@ void writeUDPSerial()
     client.publish(publishName, "Sent Serial!");
   }
 }
+
 
 void normalOp()
 {

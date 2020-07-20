@@ -20,10 +20,10 @@ to their appropriate values.
 import serial, time
 import datetime
 import sys, select, os
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from termcolor import colored
 import tkinter as tk
-from threading import Thread
+import threading
 
 from morigui.guiWindow import MoriGui
 
@@ -32,35 +32,27 @@ def main():
     startTime = time.time()
     gui = mainGui()
 
-    # try:
-    #   while(True):
 
-    # except KeyboardInterrupt:
-    #   print("Exiting...")
-    #   gui.mqtthost.exit()
-    #   root.destroy()
-    #   print("Exit Success!")
-
-
-class mainGui(Thread):
+class mainGui(threading.Thread):
 
     def __init__(self):
-        Thread.__init__(self)
+        threading.Thread.__init__(self)
         self.start()
 
     def callback(self):
-        self.gui.mqtthost.exit()
+        self.gui.wifi_host.exit()
         self.root.quit()
 
     def run(self):
         self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
+        self.root.title("ESP Communication")
         self.gui = MoriGui(master=self.root)
 
         # label = tk.Label(self.root, text="Hello World")
         # label.pack()
         self.gui.updateConnected()
-
+        
         self.gui.mainloop()
         
 
