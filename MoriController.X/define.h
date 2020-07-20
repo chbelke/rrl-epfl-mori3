@@ -2,7 +2,7 @@
 /* ************************************************************************** */
 /* **********   File:    Defines.h                                 ********** */
 /* **********   Author:  Christoph H. Belke                        ********** */
-/* **********   Date:    09.12.2015                                ********** */
+/* **********   Date:    09.12.2020                                ********** */
 /* ************************************************************************** */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@
 #define MODE_ENC_CON false
 #define MODE_ACC_CON false
 
-#define STAT_MotLin_Active true
+#define STAT_MotLin_Active false
 #define STAT_MotRot_Active true
 
 
@@ -113,7 +113,7 @@ extern volatile bool Flg_EdgeDemo;
 #define MotLin_MIN_C 108            // min pot value C
 #define MotLin_MAX_C 1022           // max pot value C
 #define MotLin_SlowRegion 50        // slow region near min and max
-#define MotLin_SlowFactor 5         // linear slow down factor in slow region
+#define MotLin_SlowFactor 2         // linear slow down factor in slow region
 
 #define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period

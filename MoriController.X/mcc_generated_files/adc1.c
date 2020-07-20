@@ -115,8 +115,7 @@ void __attribute__((__interrupt__, auto_psv, weak)) _AD1Interrupt(void) {
 }
 
 void ADC1_Update(void) {
-    LED_R = 0;
-    
+  
     // update previous values
     ADC1_ValuesA[3] = ADC1_ValuesA[2];
     ADC1_ValuesA[2] = ADC1_ValuesA[1];
@@ -132,31 +131,18 @@ void ADC1_Update(void) {
 
     ADC1_ChannelSelect(AI_A);
     ADC1_SoftwareTriggerEnable();
-//            //Provide Delay
-//            int i = 0;
-//            for(i=0;i <1000;i++)
-//            {
-//            }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_A));
     ADC1_ValuesA[0] = ADC1_ConversionResultGet(AI_A);
 
     ADC1_ChannelSelect(AI_B);
     ADC1_SoftwareTriggerEnable();
-//            //Provide Delay
-//            for(i=0;i <1000;i++)
-//            {
-//            }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_B));
     ADC1_ValuesB[1] = ADC1_ConversionResultGet(AI_B);
 
     ADC1_ChannelSelect(AI_C);
     ADC1_SoftwareTriggerEnable();
-//            //Provide Delay
-//            for(i=0;i <1000;i++)
-//            {
-//            }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_C));
     ADC1_ValuesC[2] = ADC1_ConversionResultGet(AI_C);
@@ -170,51 +156,7 @@ void ADC1_Update(void) {
             + ADC1_ValuesB[3]) / 4;
     ADC1_Values[2] = (ADC1_ValuesC[0] + ADC1_ValuesC[1] + ADC1_ValuesC[2]
             + ADC1_ValuesC[3]) / 4;
-
-    LED_R = 1;
-    //    
-    //    // Edge A
-    //    AD1CON1bits.DONE = false;           // Clear done bit
-    //    AD1CHS0bits.CH0SA = AI_A;      // Select analog input channel
-    //    AD1CON1bits.SAMP = 1;               // Start sampling
-    //    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
-    //    while (!(AD1CON1bits.DONE));        // Wait for conversion
-    //    AD1CON1bits.DONE = 0;
-    //    ADC1_ValuesA[0] = ADC1BUF0;          // Read from register
-    //    
-    //    // Edge B
-    //    AD1CON1bits.DONE = false;           // Clear done bit
-    //    AD1CHS0bits.CH0SA = AI_B;      // Select analog input channel
-    //    AD1CON1bits.SAMP = 1;               // Start sampling
-    //    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
-    //    while (!(AD1CON1bits.DONE));        // Wait for conversion
-    //    AD1CON1bits.DONE = 0;
-    //    ADC1_ValuesB[0] = ADC1BUF0;          // Read from register
-    //    
-    //    // Edge C
-    //    AD1CON1bits.DONE = false;           // Clear done bit
-    //    AD1CHS0bits.CH0SA = AI_C;      // Select analog input channel
-    //    AD1CON1bits.SAMP = 1;               // Start sampling
-    //    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
-    //    while (!(AD1CON1bits.DONE));        // Wait for conversion
-    //    AD1CON1bits.DONE = 0;
-    //    ADC1_ValuesC[0] = ADC1BUF0;          // Read from register
-    //    
-    //    // moving average
-    //    ADC1_Values[0] = (ADC1_ValuesA[0] + ADC1_ValuesA[1] + ADC1_ValuesA[2]
-    //            + ADC1_ValuesA[3]) / 4;
-    //    ADC1_Values[1] = (ADC1_ValuesB[0] + ADC1_ValuesB[1] + ADC1_ValuesB[2]
-    //            + ADC1_ValuesB[3]) / 4;
-    //    ADC1_Values[2] = (ADC1_ValuesC[0] + ADC1_ValuesC[1] + ADC1_ValuesC[2]
-    //            + ADC1_ValuesC[3]) / 4;
-
-
-    // Alternatively:
-    //    ADC1_ChannelSelectSet(ADC1_AI_B);
-    //    ADC1_SamplingStart();
-    //    ADC1_SamplingStop();
-    //    while (!ADC1_IsConversionComplete());
-    //    ADC1_Values[1] = ADC1_Channel0ConversionResultGet();
+ 
 }
 
 uint16_t ADC1_Return(uint8_t channel) {
