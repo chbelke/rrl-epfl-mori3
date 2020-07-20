@@ -33,6 +33,14 @@ Nonstandard libraries:
  MQTT broker is handled by a Raspberry Pi B+
  (simple tutorial [HERE](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/))
 
+## To run the gui:
+Execute `python3 mainMori.py` located in the External folder
+
+Currently it operates in the Ubuntu subenviroment for Windows (found in the app store). Run download and run XLaunch to view the gui. (http://www.straightrunning.com/XmingNotes/)
+
+Uses the following non-standard libraries:
+`termcolor`
+`paho-mqtt`
 
 # Publications
 
