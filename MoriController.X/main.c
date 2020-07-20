@@ -80,7 +80,7 @@ int main(void)
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = 1;
-    WIFI_EN = 0;
+    WIFI_EN = 1;
     
     SMA_Off(0);
     SMA_Off(1);

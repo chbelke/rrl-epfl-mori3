@@ -251,7 +251,7 @@ void pubVersion()
 {
   char buff[100];
   String IPstring = String("VER: ") + String(softwareVersion)
-                    + String(" ") + WiFi.localIP();
+                    + String(" ") + String(clientName);
   IPstring.toCharArray(buff, 100);
   client.publish(publishName, buff);
 }

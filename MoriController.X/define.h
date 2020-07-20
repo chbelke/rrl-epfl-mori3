@@ -113,7 +113,7 @@ extern volatile bool Flg_EdgeDemo;
 #define MotLin_MIN_C 108            // min pot value C
 #define MotLin_MAX_C 1022           // max pot value C
 #define MotLin_SlowRegion 50        // slow region near min and max
-#define MotLin_SlowFactor 1.5         // linear slow down factor in slow region
+#define MotLin_SlowFactor 5         // linear slow down factor in slow region
 
 #define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
@@ -171,6 +171,6 @@ extern volatile bool Flg_EdgeDemo;
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
 #define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
-#define SMA_Duty 2 // 8-bit PWM value
+#define SMA_Duty 100 // 8-bit PWM value
 
 #endif	/* DEFINE_H */

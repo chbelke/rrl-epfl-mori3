@@ -18,7 +18,7 @@
     The generated drivers are tested against the following:
         Compiler          :  XC16 v1.41
         MPLAB 	          :  MPLAB X v5.30
-*/
+ */
 
 /*
     (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -40,11 +40,11 @@
 
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
-*/
+ */
 
 /**
   Section: Included Files
-*/
+ */
 
 #include <xc.h>
 #include <stdbool.h>
@@ -52,6 +52,7 @@
 #include <stdlib.h>
 #include <libpic30.h>
 #include "adc1.h"
+#include "../define.h"
 
 volatile uint16_t ADC1_Values[3] = {512, 512, 512};
 volatile uint16_t ADC1_ValuesA[4] = {512, 512, 512, 512};
@@ -60,64 +61,61 @@ volatile uint16_t ADC1_ValuesC[4] = {512, 512, 512, 512};
 
 /**
   Section: File Specific Functions
-*/
+ */
 
 // ADC1 Default Interrupt Handler
 static void (*ADC1_DefaultInterruptHandler)(void) = NULL;
 
 /**
   Section: Driver Interface
-*/
+ */
 
-void ADC1_Initialize (void)
-{
-    // ASAM disabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Sequential; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Internal counter ends sampling and starts conversion; AD12B 10-bit; ADON enabled; SSRCG disabled; 
-   AD1CON1 = 0x80E0;
+void ADC1_Initialize(void) {
+    // ASAM enabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Sequential; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Internal counter ends sampling and starts conversion; AD12B 10-bit; ADON enabled; SSRCG disabled; 
+    AD1CON1 = 0x80E4;
     // CSCNA disabled; VCFG0 AVDD; VCFG1 AVSS; ALTS disabled; BUFM disabled; SMPI Generates interrupt after completion of every sample/conversion operation; CHPS 1 Channel; 
-   AD1CON2 = 0x00;
+    AD1CON2 = 0x00;
     // SAMC 12; ADRC FOSC/2; ADCS 0; 
-   AD1CON3 = 0xC00;
+    AD1CON3 = 0xC00;
     // CH0SA AN29; CH0SB OA2/AN0; CH0NB VREFL; CH0NA VREFL; 
-   AD1CHS0 = 0x1D;
+    AD1CHS0 = 0x1D;
     // CSS26 disabled; CSS25 disabled; CSS24 disabled; CSS31 disabled; CSS30 disabled; CSS29 disabled; CSS28 disabled; CSS27 disabled; 
-   AD1CSSH = 0x00;
+    AD1CSSH = 0x00;
     // CSS2 disabled; CSS1 disabled; CSS0 disabled; CSS8 disabled; CSS7 disabled; CSS6 disabled; CSS5 disabled; CSS4 disabled; CSS3 disabled; 
-   AD1CSSL = 0x00;
+    AD1CSSL = 0x00;
     // DMABL Allocates 1 word of buffer to each analog input; ADDMAEN disabled; 
-   AD1CON4 = 0x00;
+    AD1CON4 = 0x00;
     // CH123SA2 disabled; CH123SB2 CH1=OA2/AN0,CH2=AN1,CH3=AN2; CH123NA disabled; CH123NB CH1=VREF-,CH2=VREF-,CH3=VREF-; 
-   AD1CHS123 = 0x00;
+    AD1CHS123 = 0x00;
 
     //Assign Default Callbacks
     ADC1_SetInterruptHandler(&ADC1_CallBack);
 
+    // Enabling ADC1 interrupt.
+    IEC0bits.AD1IE = 1;
 }
 
-void __attribute__ ((weak)) ADC1_CallBack(void)
-{
+void __attribute__((weak)) ADC1_CallBack(void) {
 
 }
 
-void ADC1_SetInterruptHandler(void* handler)
-{
+void ADC1_SetInterruptHandler(void* handler) {
     ADC1_DefaultInterruptHandler = handler;
 }
 
-void __attribute__ ((weak)) ADC1_Tasks ( void )
-{
-	if(IFS0bits.AD1IF)
-	{
-        if(ADC1_DefaultInterruptHandler) 
-        { 
-            ADC1_DefaultInterruptHandler(); 
-	}
-    
-    // clear the ADC interrupt flag
-    IFS0bits.AD1IF = false;
-}
+void __attribute__((__interrupt__, auto_psv, weak)) _AD1Interrupt(void) {
+    if (IFS0bits.AD1IF) {
+        if (ADC1_DefaultInterruptHandler) {
+            ADC1_DefaultInterruptHandler();
+        }
+
+        // clear the ADC interrupt flag
+        IFS0bits.AD1IF = false;
+    }
 }
 
 void ADC1_Update(void) {
+    LED_R = 0;
     
     // update previous values
     ADC1_ValuesA[3] = ADC1_ValuesA[2];
@@ -129,34 +127,42 @@ void ADC1_Update(void) {
     ADC1_ValuesC[3] = ADC1_ValuesC[2];
     ADC1_ValuesC[2] = ADC1_ValuesC[1];
     ADC1_ValuesC[1] = ADC1_ValuesC[0];
-    
-    // Edge A
-    AD1CON1bits.DONE = false;           // Clear done bit
-    AD1CHS0bits.CH0SA = AI_A;      // Select analog input channel
-    AD1CON1bits.SAMP = 1;               // Start sampling
-    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
-    while (!(AD1CON1bits.DONE));        // Wait for conversion
-    AD1CON1bits.DONE = 0;
-    ADC1_ValuesA[0] = ADC1BUF0;          // Read from register
-    
-    // Edge B
-    AD1CON1bits.DONE = false;           // Clear done bit
-    AD1CHS0bits.CH0SA = AI_B;      // Select analog input channel
-    AD1CON1bits.SAMP = 1;               // Start sampling
-    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
-    while (!(AD1CON1bits.DONE));        // Wait for conversion
-    AD1CON1bits.DONE = 0;
-    ADC1_ValuesB[0] = ADC1BUF0;          // Read from register
-    
-    // Edge C
-    AD1CON1bits.DONE = false;           // Clear done bit
-    AD1CHS0bits.CH0SA = AI_C;      // Select analog input channel
-    AD1CON1bits.SAMP = 1;               // Start sampling
-    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
-    while (!(AD1CON1bits.DONE));        // Wait for conversion
-    AD1CON1bits.DONE = 0;
-    ADC1_ValuesC[0] = ADC1BUF0;          // Read from register
-    
+
+    ADC1_Enable();
+
+    ADC1_ChannelSelect(AI_A);
+    ADC1_SoftwareTriggerEnable();
+//            //Provide Delay
+//            int i = 0;
+//            for(i=0;i <1000;i++)
+//            {
+//            }
+    ADC1_SoftwareTriggerDisable();
+    while (!ADC1_IsConversionComplete(AI_A));
+    ADC1_ValuesA[0] = ADC1_ConversionResultGet(AI_A);
+
+    ADC1_ChannelSelect(AI_B);
+    ADC1_SoftwareTriggerEnable();
+//            //Provide Delay
+//            for(i=0;i <1000;i++)
+//            {
+//            }
+    ADC1_SoftwareTriggerDisable();
+    while (!ADC1_IsConversionComplete(AI_B));
+    ADC1_ValuesB[1] = ADC1_ConversionResultGet(AI_B);
+
+    ADC1_ChannelSelect(AI_C);
+    ADC1_SoftwareTriggerEnable();
+//            //Provide Delay
+//            for(i=0;i <1000;i++)
+//            {
+//            }
+    ADC1_SoftwareTriggerDisable();
+    while (!ADC1_IsConversionComplete(AI_C));
+    ADC1_ValuesC[2] = ADC1_ConversionResultGet(AI_C);
+
+    ADC1_Disable();
+
     // moving average
     ADC1_Values[0] = (ADC1_ValuesA[0] + ADC1_ValuesA[1] + ADC1_ValuesA[2]
             + ADC1_ValuesA[3]) / 4;
@@ -165,21 +171,58 @@ void ADC1_Update(void) {
     ADC1_Values[2] = (ADC1_ValuesC[0] + ADC1_ValuesC[1] + ADC1_ValuesC[2]
             + ADC1_ValuesC[3]) / 4;
 
-    
+    LED_R = 1;
+    //    
+    //    // Edge A
+    //    AD1CON1bits.DONE = false;           // Clear done bit
+    //    AD1CHS0bits.CH0SA = AI_A;      // Select analog input channel
+    //    AD1CON1bits.SAMP = 1;               // Start sampling
+    //    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
+    //    while (!(AD1CON1bits.DONE));        // Wait for conversion
+    //    AD1CON1bits.DONE = 0;
+    //    ADC1_ValuesA[0] = ADC1BUF0;          // Read from register
+    //    
+    //    // Edge B
+    //    AD1CON1bits.DONE = false;           // Clear done bit
+    //    AD1CHS0bits.CH0SA = AI_B;      // Select analog input channel
+    //    AD1CON1bits.SAMP = 1;               // Start sampling
+    //    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
+    //    while (!(AD1CON1bits.DONE));        // Wait for conversion
+    //    AD1CON1bits.DONE = 0;
+    //    ADC1_ValuesB[0] = ADC1BUF0;          // Read from register
+    //    
+    //    // Edge C
+    //    AD1CON1bits.DONE = false;           // Clear done bit
+    //    AD1CHS0bits.CH0SA = AI_C;      // Select analog input channel
+    //    AD1CON1bits.SAMP = 1;               // Start sampling
+    //    AD1CON1bits.SAMP = 0;               // Stop sampling to start conversion
+    //    while (!(AD1CON1bits.DONE));        // Wait for conversion
+    //    AD1CON1bits.DONE = 0;
+    //    ADC1_ValuesC[0] = ADC1BUF0;          // Read from register
+    //    
+    //    // moving average
+    //    ADC1_Values[0] = (ADC1_ValuesA[0] + ADC1_ValuesA[1] + ADC1_ValuesA[2]
+    //            + ADC1_ValuesA[3]) / 4;
+    //    ADC1_Values[1] = (ADC1_ValuesB[0] + ADC1_ValuesB[1] + ADC1_ValuesB[2]
+    //            + ADC1_ValuesB[3]) / 4;
+    //    ADC1_Values[2] = (ADC1_ValuesC[0] + ADC1_ValuesC[1] + ADC1_ValuesC[2]
+    //            + ADC1_ValuesC[3]) / 4;
+
+
     // Alternatively:
-//    ADC1_ChannelSelectSet(ADC1_AI_B);
-//    ADC1_SamplingStart();
-//    ADC1_SamplingStop();
-//    while (!ADC1_IsConversionComplete());
-//    ADC1_Values[1] = ADC1_Channel0ConversionResultGet();
+    //    ADC1_ChannelSelectSet(ADC1_AI_B);
+    //    ADC1_SamplingStart();
+    //    ADC1_SamplingStop();
+    //    while (!ADC1_IsConversionComplete());
+    //    ADC1_Values[1] = ADC1_Channel0ConversionResultGet();
 }
 
-uint16_t ADC1_Return(uint8_t channel){
+uint16_t ADC1_Return(uint8_t channel) {
     return ADC1_Values[channel];
 }
 
 
 /**
   End of File
-*/
+ */
 

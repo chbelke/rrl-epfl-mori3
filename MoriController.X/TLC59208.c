@@ -5,7 +5,7 @@
 #include <libpic30.h>
 #include "define.h"
 
-volatile uint8_t TLC_Values[8] = {255, 255, 255, 0, 0, 0, 0, 0};
+volatile uint8_t TLC_Values[8] = {10, 10, 10, 0, 0, 0, 0, 0};
 uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
 uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
 uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};

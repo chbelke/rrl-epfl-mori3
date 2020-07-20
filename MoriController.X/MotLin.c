@@ -50,7 +50,7 @@ void MotLin_OUT(uint8_t edge, int16_t duty) {
 }
 
 /* ******************** LINEAR MOTOR PID ************************************ */
-void MotLin_PID(uint8_t edge, int16_t current, int16_t desired) {
+void MotLin_PID(uint8_t edge, uint16_t current, uint16_t desired) {
     // avoid bad control inputs
     switch (edge) {
         case 0:
@@ -73,7 +73,7 @@ void MotLin_PID(uint8_t edge, int16_t current, int16_t desired) {
     }
 
     // calculate error
-    float error = (float) (desired - current);
+    float error = (float)(desired) - (float)(current);
 
     // if desired value changed, reset stable flag
     if (desired != Stbl_dOld[edge]) Stbl_Flag[edge] = false;
