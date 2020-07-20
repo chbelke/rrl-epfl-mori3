@@ -14,16 +14,16 @@
   @Description
     This header file provides APIs for driver for i2c1.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
 
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.41
+        MPLAB             :  MPLAB X v5.30
 */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -45,7 +45,6 @@
 */
 
 #include "i2c1.h"
-#include "../define.h"
 
 /**
  Section: Data Types
@@ -206,7 +205,7 @@ void I2C1_Initialize(void)
     
     // initialize the hardware
     // Baud Rate Generator Value: I2CBRG 8;   
-    I2C1BRG = 0x07;
+    I2C1BRG = 0x07; //changed from 8
     // ACKEN disabled; STREN disabled; GCEN disabled; SMEN disabled; DISSLW disabled; I2CSIDL disabled; ACKDT Sends ACK; SCLREL Holds; RSEN disabled; IPMIEN disabled; A10M 7 Bit; PEN disabled; RCEN disabled; SEN disabled; I2CEN enabled; 
     I2C1CON = 0x8200;
     // BCL disabled; P disabled; S disabled; I2COV disabled; IWCOL disabled; 
@@ -646,7 +645,7 @@ void I2C1_MasterTRBInsert(
         i2c1_object.pTrTail->count     = count;
         i2c1_object.pTrTail->pTrFlag   = pflag;
         i2c1_object.pTrTail++;
-        
+
         // check if the end of the array is reached
         if (i2c1_object.pTrTail == (i2c1_tr_queue + I2C1_CONFIG_TR_QUEUE_LENGTH))
         {

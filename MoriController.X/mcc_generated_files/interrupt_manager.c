@@ -14,14 +14,14 @@
   @Description:
     This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.95-b-SNAPSHOT
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.36
-        MPLAB             :  MPLAB X v5.10
+        Compiler          :  XC16 v1.41
+        MPLAB             :  MPLAB X v5.30
 */
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -56,17 +56,23 @@ void INTERRUPT_Initialize (void)
     //    Priority: 1
         IPC21bits.U4EIP = 1;
     //    UTXI: UART4 Transmitter
-    //    Priority: 3
-        IPC22bits.U4TXIP = 3;
+    //    Priority: 4
+        IPC22bits.U4TXIP = 4;
     //    URXI: UART4 Receiver
-    //    Priority: 3
-        IPC22bits.U4RXIP = 3;
+    //    Priority: 4
+        IPC22bits.U4RXIP = 4;
+    //    ADI: ADC1 Convert Done
+    //    Priority: 1
+        IPC3bits.AD1IP = 1;
+    //    INT1I: External Interrupt 1
+    //    Priority: 2
+        IPC5bits.INT1IP = 2;
     //    MICI: I2C1 Master Events
-    //    Priority: 3
-        IPC4bits.MI2C1IP = 3;
+    //    Priority: 4
+        IPC4bits.MI2C1IP = 4;
     //    SICI: I2C1 Slave Events
-    //    Priority: 3
-        IPC4bits.SI2C1IP = 3;
+    //    Priority: 4
+        IPC4bits.SI2C1IP = 4;
     //    TI: Timer 5
     //    Priority: 1
         IPC7bits.T5IP = 1;
@@ -74,6 +80,6 @@ void INTERRUPT_Initialize (void)
     //    Priority: 2
         IPC2bits.T3IP = 2;
     //    TI: Timer 1
-    //    Priority: 2
-        IPC0bits.T1IP = 2;
+    //    Priority: 3
+        IPC0bits.T1IP = 3;
 }

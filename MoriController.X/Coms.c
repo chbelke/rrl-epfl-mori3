@@ -19,7 +19,8 @@ uint16_t MotRotTemp[3] = {0, 0, 0}; // rotary motor angle value (temporary)
 
 int8_t DrivePWM[3] = {0, 0, 0}; // manual drive mode PWM values by edge
 uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
-#define WHEEL 68.15 // wheel distance from vertex
+#define WHEEL 68.15f // wheel distance from vertex
+#define SxOUT 0.9 // output speed factor for non-primary wheels
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
@@ -96,6 +97,7 @@ void Coms_ESP_Eval() {
                     }
                 } else {
                     EspInCase = 25;
+                    EspInBits = 0;
                 }
             }
             EspInByts = EspInByts + 1;
@@ -297,14 +299,14 @@ void Coms_ESP_Eval() {
                     // set smas
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
-                        if ((EspInAloc >> (5-m)) & 0b00000001){
+                        if (EspInAloc & (0b00100000 >> m)){
                             SMA_On(m);
                         }
                     }
                     // update leds
                     for (m = 0; m <= 2; m++) {
                         if ((EspInAloc >> (2-m)) & 0b00000001){
-                            LED_Set(m, RgbPWM[m]);
+//                            LED_Set(m, RgbPWM[m]);
                         }
                     }
                 } else {
@@ -314,6 +316,9 @@ void Coms_ESP_Eval() {
                 EspIn0End = EspIn0End + 1; // no end byte
             }
             EspInCase = 0;
+            break;
+            
+        case 26:
             break;
             
         default:
@@ -343,8 +348,8 @@ void Coms_ESP_SetMots() {
 
 /* ******************** ESP COMMAND TO DRIVE ******************************** */
 void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
-    float Mo = curve*20;
-    float Sa = speed;
+    float Mo = curve * 137.9;
+    float Sa = speed * 4;
     if (!direc) { // inwards or outwards
         Sa = -1*Sa;
     }
@@ -352,24 +357,24 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float a,b,c; // extension values from 180
     switch (edge) {
         case 0:
-            a = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
-            b = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
-            c = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
+            a = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
+            b = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
+            c = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
             break;
         case 1:
-            a = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
-            b = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
-            c = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
+            a = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
+            b = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
+            c = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
             break;
         case 2:
-            a = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
-            b = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
-            c = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
+            a = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
+            b = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
+            c = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
             break;
         default:
-            a = 180+(MotLin_Get(0)-MotLin_MIN_A)*12/MotLin_MAX_A;
-            b = 180+(MotLin_Get(1)-MotLin_MIN_B)*12/MotLin_MAX_B;
-            c = 180+(MotLin_Get(2)-MotLin_MIN_C)*12/MotLin_MAX_C;
+            a = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
+            b = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
+            c = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
             break;
     }
     
@@ -386,7 +391,7 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float Wc2[2] = {Wc[0]+cosf(PI/2-beta), Wc[1]+sinf(PI/2-beta)};
     
     // centroid coordinates
-    float D[2] = {(b*cosf(gamm)+a)/3, b*sinf(gamm)};
+    float D[2] = {(b*cosf(gamm)+a)/3, b*sinf(gamm)/3};
     
     // moment arm of wheel force to centroid
     float Da = fabsf(D[0]-WHEEL);
@@ -401,27 +406,106 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float Sc = (Mo-Sa*Da)/(Db*cosf(PI/2-beta)/cosf(PI/2-gamm) + Dc);
     float Sb = Sc*cosf(PI/2-beta)/cosf(PI/2-gamm);
     
+    Sc = SxOUT*Sc;
+    Sb = SxOUT*Sb;
+    
     // output depending on driving edge
     switch (edge) {
         case 0:
-            MotRot_OUT(0,Sa*10);
-            MotRot_OUT(1,Sb*10);
-            MotRot_OUT(2,Sc*10);
+            MotRot_OUT(0,Sa);
+            MotRot_OUT(1,Sb);
+            MotRot_OUT(2,Sc);
             break;
         case 1:
-            MotRot_OUT(1,Sa*10);
-            MotRot_OUT(2,Sb*10);
-            MotRot_OUT(0,Sc*10);
+            MotRot_OUT(1,Sa);
+            MotRot_OUT(2,Sb);
+            MotRot_OUT(0,Sc);
             break;
         case 2:
-            MotRot_OUT(2,Sa*10);
-            MotRot_OUT(0,Sb*10);
-            MotRot_OUT(1,Sc*10);
+            MotRot_OUT(2,Sa);
+            MotRot_OUT(0,Sb);
+            MotRot_OUT(1,Sc);
             break;
         default:
-            MotRot_OUT(0,Sa*10);
-            MotRot_OUT(1,Sb*10);
-            MotRot_OUT(2,Sc*10);
+            MotRot_OUT(0,Sa);
+            MotRot_OUT(1,Sb);
+            MotRot_OUT(2,Sc);
             break;
     }
 }
+
+/* Com_ESP_Drive - Online calc verification */
+/* https://repl.it/languages/c
+
+#include <stdio.h>
+#include <stdint.h>
+#include "math.h"
+#define WHEEL 68.15f
+#define PI 3.1415926535897931159979634685441851615905761718750
+#define Sfact 0.9 // Step 3: maximising Sb & Sc at a=b=192,c=180
+
+int
+main ()
+{
+  uint8_t speed = 255;
+  int8_t curve = -127;
+  uint8_t edge = 0;
+  uint8_t direc = 0;
+
+  float Mo = curve * 137.9; // Step 2: minimising Sb & Sc at a=b=180,c=193.5
+  float Sa = speed * 4; // Step 1: from 8 bit to 10 bit
+  if (!direc)
+    {				// inwards or outwards
+      Sa = -1 * Sa;
+    }
+
+  float a = 192;
+  float b = 192;
+  float c = 180;
+
+  // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
+  float beta = acosf ((a * a + c * c - b * b) / (2 * a * c));
+  float gamm = acosf ((a * a + b * b - c * c) / (2 * a * b));
+
+  // wheel coordinates (for a: [WHEEL, 0])
+  float Wb[2] = { (b - WHEEL) * cosf (gamm), (b - WHEEL) * sinf (gamm) };
+  float Wc[2] = { a - WHEEL * cosf (beta), WHEEL * sinf (beta) };
+
+  // second point in wheel direction
+  float Wb2[2] =
+    { Wb[0] - cosf (PI / 2 - gamm), Wb[1] + sinf (PI / 2 - gamm) };
+  float Wc2[2] =
+    { Wc[0] + cosf (PI / 2 - beta), Wc[1] + sinf (PI / 2 - beta) };
+
+  // centroid coordinates
+  float D[2] = { (b * cosf (gamm) + a) / 3, b * sinf (gamm) / 3 };
+
+  printf ("D1: %4.4f \n", D[0]);
+  printf ("D2: %4.4f \n", D[1]);
+
+  // moment arm of wheel force to centroid
+  float Da = fabsf (D[0] - WHEEL);
+  float Db = fabsf ((Wb2[1] - Wb[1]) * D[0]
+		    - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] -
+		    Wb2[1] * Wb[0]) / sqrtf (powf (Wb2[1] - Wb[1],
+						   2) + powf (Wb2[0] - Wb[0],
+							      2));
+  float Dc =
+    fabsf ((Wc2[1] - Wc[1]) * D[0] - (Wc2[0] - Wc[0]) * D[1] +
+	   Wc2[0] * Wc[1] - Wc2[1] * Wc[0]) / sqrtf (powf (Wc2[1] - Wc[1],
+							   2) + powf (Wc2[0] -
+								      Wc[0],
+								      2));
+
+  // wheel speeds
+  float Sc =
+    (Mo - Sa * Da) / (Db * cosf (PI / 2 - beta) / cosf (PI / 2 - gamm) + Dc);
+  float Sb = Sc * cosf (PI / 2 - beta) / cosf (PI / 2 - gamm);
+  
+  printf ("fact: %4.4f \n", cosf (PI / 2 - beta) / cosf (PI / 2 - gamm));
+  printf ("Sa: %4.4f \n", Sa);
+  printf ("Sb: %4.4f \n", Sb*Sfact);
+  printf ("Sc: %4.4f \n", Sc*Sfact);
+  return 0;
+}
+ */

@@ -2,7 +2,7 @@
 /* ************************************************************************** */
 /* **********   File:    Defines.h                                 ********** */
 /* **********   Author:  Christoph H. Belke                        ********** */
-/* **********   Date:    09.12.2015                                ********** */
+/* **********   Date:    09.12.2020                                ********** */
 /* ************************************************************************** */
 /* ************************************************************************** */
 
@@ -12,31 +12,51 @@
 #define FCY 3686400UL               // cycle frequency
 
 #include <xc.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <libpic30.h>
 
-static volatile bool Flg_LiveAngle = false;
-static volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
-static volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
 
 /* ******************** NOTES *********************************************** */
 // Timer info
 /* Timer 1: 100 Hz - angle feedback
  * Timer 3: 20 Hz - extension feedback, coupling controller
- * Timer 5: 5 Hz - updating LEDs */
+ * Timer 5: 5 Hz - updating LEDs 
+ * TMRx_f NOT used to define frequency */
+#define TMR1_f 100
+#define TMR3_f 20
+#define TMR5_f 5
 
 // I2C MCC modification
 /* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
  * is as follows: ((1/0.4 - 0.120)*3.6864)-2 = 6.77
  * FRM: http://ww1.microchip.com/downloads/en/DeviceDoc/70000195g.pdf*/
 
+
 /* ******************** MODE SELECTION ************************************** */
-#define MODE_DEBUG false
+//#define MODE_DEBUG false
+#define MODE_ENC_CON false
+#define MODE_ACC_CON false
+
+#define STAT_MotLin_Active false
+#define STAT_MotRot_Active true
+
 
 /* ******************** LIVE MODE VARS ************************************** */
-static volatile bool MODE_LED_ANGLE = true;
-static volatile bool MODE_LED_EDGES = false;
+extern volatile bool MODE_LED_ANGLE;
+extern volatile bool MODE_LED_EDGES;
+extern volatile bool MODE_LED_RNBOW;
+
+/* ********************  FLAGS ********************************************** */
+extern volatile bool Flg_LiveAngle;
+extern volatile bool Flg_LiveEdges;
+extern volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C;
+extern volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C;
+extern volatile bool Flg_BatLow;
+extern volatile bool Flg_Button;
+
+extern volatile bool Flg_EdgeDemo;
 
 
 /* ******************** PERIPHERALS ***************************************** */
@@ -44,10 +64,14 @@ static volatile bool MODE_LED_EDGES = false;
 #define LED_R LATBbits.LATB0        // blue LED - 1 is off
 #define LED_Y LATBbits.LATB1        // orange LED - 1 is off
 #define BTN_Stat PORTAbits.RA1      // button port
+#define WIFI_EN LATBbits.LATB4      // wifi enable
+#define BAT_LBO PORTBbits.RB7       // low battery indicator
+
 
 /* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
+
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
@@ -57,6 +81,8 @@ static volatile bool MODE_LED_EDGES = false;
 #define LIN_PWM_DutyReg_A SDC3      // generator 3, secondary
 #define LIN_PWM_DutyReg_B SDC2      // generator 2, secondary
 #define LIN_PWM_DutyReg_C SDC1      // generator 1, secondary
+// ROT PWM full range 1024 (SPHASEx, PHASEx)
+// LIN PWM limited to 1024 (SPHASEx)
 
 // Duty cycle selector
 #define ROT_PWM_A 1
@@ -74,6 +100,7 @@ static volatile bool MODE_LED_EDGES = false;
 //#define PWM_Perd_LinB SPHASE2    
 //#define PWM_Perd_LinC SPHASE1    
 
+
 /* ******************** LINEAR MOTORS *************************************** */
 #define LIN_DIR_A LATBbits.LATB10
 #define LIN_DIR_B LATBbits.LATB12
@@ -85,10 +112,10 @@ static volatile bool MODE_LED_EDGES = false;
 #define MotLin_MAX_B 1022           // max pot value B
 #define MotLin_MIN_C 108            // min pot value C
 #define MotLin_MAX_C 1022           // max pot value C
-#define MotLin_SlowRegion 90        // slow region near min and max
+#define MotLin_SlowRegion 50        // slow region near min and max
 #define MotLin_SlowFactor 2         // linear slow down factor in slow region
 
-#define MotLin_PID_de 10            // acceptable error band ~ *0.01mm
+#define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
 #define MotLin_PID_kP 25            // proportional component
 #define MotLin_PID_kI 12            // integral component
@@ -96,6 +123,7 @@ static volatile bool MODE_LED_EDGES = false;
     
 #define MotLin_PID_Imax 15
 #define MotLin_PID_Max 1000
+
 
 /* ******************** ROTARY MOTORS *************************************** */
 #define ROT_DIR_A LATCbits.LATC6
@@ -112,20 +140,24 @@ static volatile bool MODE_LED_EDGES = false;
 #define MotRot_PID_Imax 20
 #define MotRot_PID_Max 1000
 
+
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           20
 #define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      50
+
 
 /* ******************** ENCODERS AS5048B ************************************ */
 #define AS5048B_Address 0x40
 #define AS5048B_Reg_AngleMSB 0xFE
 #define AS5048B_Res 16384.0
 
+
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
 #define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
 #define MMA8452Q_CTRL_REG1 0x01 //Value ctrl reg must be modified to at Setup
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
+
 
 /* ******************** LED DRIVER TLC59208 ****************************** */
 #define TLC59208_ADDRESS 0x20   //Addresss pins A0-A2 tied to GND (not in DS?)
@@ -138,7 +170,7 @@ static volatile bool MODE_LED_EDGES = false;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period 100 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
+#define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
 #define SMA_Duty 100 // 8-bit PWM value
 
 #endif	/* DEFINE_H */

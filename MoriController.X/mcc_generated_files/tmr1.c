@@ -14,15 +14,15 @@
   @Description
     This source file provides APIs for driver for TMR1. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.41
+        MPLAB             :  MPLAB X v5.30
 */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -46,8 +46,11 @@
 /**
   Section: Included Files
 */
-
 #include <xc.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <libpic30.h>
 #include "adc1.h"
 #include "tmr1.h"
 #include "../define.h"
@@ -55,6 +58,13 @@
 #include "../AS5048B.h"
 #include "../TLC59208.h"
 #include "../MMA8452Q.h"
+#include "../Button.h"
+
+/**
+ Section: File specific functions
+*/
+void (*TMR1_InterruptHandler)(void) = NULL;
+void TMR1_CallBack(void);
 
 /**
   Section: Data Type Definitions
@@ -63,10 +73,10 @@
 /** TMR Driver Hardware Instance Object
 
   @Summary
-    Defines the object required for the maintainence of the hardware instance.
+    Defines the object required for the maintenance of the hardware instance.
 
   @Description
-    This defines the object required for the maintainence of the hardware
+    This defines the object required for the maintenance of the hardware
     instance. This object exists once per hardware instance of the peripheral.
 
   Remarks:
@@ -76,9 +86,9 @@
 typedef struct _TMR_OBJ_STRUCT
 {
     /* Timer Elapsed */
-    bool                                                    timerElapsed;
+    volatile bool           timerElapsed;
     /*Software Counter value*/
-    uint8_t                                                 count;
+    volatile uint8_t        count;
 
 } TMR_OBJ;
 
@@ -97,6 +107,10 @@ void TMR1_Initialize (void)
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
     T1CON = 0x8020;
 
+    if(TMR1_InterruptHandler == NULL)
+    {
+        TMR1_SetInterruptHandler(&TMR1_CallBack);
+    }
     
     IFS0bits.T1IF = false;
     IEC0bits.T1IE = true;
@@ -104,7 +118,6 @@ void TMR1_Initialize (void)
     tmr1_obj.timerElapsed = false;
 
 }
-
 
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
@@ -115,7 +128,10 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
 
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes
-    TMR1_CallBack();
+    if(TMR1_InterruptHandler) 
+    { 
+           TMR1_InterruptHandler(); 
+    }
 
     //***User Area End
 
@@ -123,7 +139,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
     tmr1_obj.timerElapsed = true;
     IFS0bits.T1IF = false;
 }
-
 
 void TMR1_Period16BitSet( uint16_t value )
 {
@@ -156,18 +171,48 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
     static int k = 0;
+    static bool light = false;
+    static int m = 0;
     k++;
-    if (k >= 25){
+    if (k >= 10){
         k = 0;
-        LED_Y ^= 1; //toggle yellow LED
+        if (light){
+            LED_Y = 0;
+            if (m < 2){
+                m++;
+            } else if ((m>1) && (m < 2 + Button_ReturnState())){
+//                LED_R = 0;
+                m++;
+            } else {
+                m = 0;
+            }
+        } else {
+            LED_Y = 1;
+//            LED_R = 1;
+        }
+        light = !light;
     }
     
-//    static float angle;
-//    angle = ENC_Read(0);
+    if (MODE_ENC_CON){
+        static uint16_t angle[3];
+        angle[0] = ENC_Read(0);
+        angle[1] = ENC_Read(1);
+        angle[2] = ENC_Read(2);
+    }
+    
+//    UART4_Write(0x0F);
+//    UART4_Write16(angle[2]);
     
     // Rotary Motor PID here
 //    MotRot_PID(0, angle, ((float)ADC1_Return(1))*360/1024-180);
 //    UART4_Write((int8_t)((int16_t)(angle)>>6));
+}
+
+void  TMR1_SetInterruptHandler(void (* InterruptHandler)(void))
+{ 
+    IEC0bits.T1IE = false;
+    TMR1_InterruptHandler = InterruptHandler; 
+    IEC0bits.T1IE = true;
 }
 
 void TMR1_Start( void )
