@@ -18,7 +18,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoOTA.h>
-// #include "UDP_object.h"
+#include "Led.h"
 
 const char* brn_ssid = "rrl_wifi";
 const char* brn_password =  "Bm41254126";
@@ -33,10 +33,6 @@ const char* mqttServer = "192.168.1.2";
 
 //const char* mqttServer = "10.252.50.209";
 const int mqttPort = 1883;
-
-// char* comp_IP = "10.52.91.181";
-
-// UDP_Connection udp_connection_computer(comp_IP, comp_port);
 
 char clientName[16];
 char publishName[36];
@@ -64,6 +60,9 @@ PubSubClient client(espClient);
 bool flag_udp = false;
 bool verbose_flag = true;
 
+#define LED_PIN 0
+Led wifi_ind_led(LED_PIN);
+
 //--------------------------- Start ----------------------------------------//
 void setup()
 {
@@ -77,21 +76,26 @@ void setup()
   verbose_println(publishName);
   verbose_println(recieveName);
 
-  // delay(500);
-  
-//   WiFi.setOutputPower(80);
 
   //--------------------------- Wifi ------------------------------------//
   WiFi.mode(WIFI_STA);
-  delay(500);
+  delay(100);
   WiFi.begin(brn_ssid, brn_password);
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     verbose_println("Connecting to WiFi..");
+    wifi_ind_led.Toggle();
   }
   verbose_println("Connected to the WiFi network");
+
+  for(int i = 0; i<=6; i++)
+  {
+    delay(100);
+    wifi_ind_led.Toggle();
+  }
+
 
   IPAddress IP = WiFi.localIP();
   sprintf(stringIP, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
@@ -109,6 +113,7 @@ void setup()
 
   while (!client.connected()) {
     verbose_println("Connecting to MQTT...");
+    wifi_ind_led.Toggle();
     if (client.connect(clientName))
     {
       verbose_println("connected");
@@ -118,6 +123,7 @@ void setup()
       delay(2000);
     }
   }
+  wifi_ind_led.On();
 
   //--------------------------- MQTT -----------------------------------------//
 
