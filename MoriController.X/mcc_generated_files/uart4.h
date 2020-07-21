@@ -13,15 +13,15 @@
   @Description
     This header file provides APIs for driver for UART4. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.41
+        MPLAB             :  MPLAB X v5.30
  */
 
 /*
-    (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
     THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
@@ -42,185 +42,274 @@
     TERMS.
  */
 
-#ifndef UART4_H
-#define UART4_H
+#ifndef _UART4_H
+#define _UART4_H
 
 /**
  Section: Included Files
  */
 
-#include <xc.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
+
 #ifdef __cplusplus  // Provide C++ Compatibility
 
 extern "C" {
 
 #endif
+/**
+  Section: UART4 Driver Routines
+*/
 
     /**
-      Section: Data Types
-     */
+  @Summary
+    Initializes the UART instance : 4
 
-    /** UART4 Driver Hardware Flags
-
-      @Summary
-        Specifies the status of the hardware receive or transmit
-
-      @Description
-        This type specifies the status of the hardware receive or transmit.
-        More than one of these values may be OR'd together to create a complete
-        status value.  To test a value of this type, the bit of interest must be
-        AND'ed with value and checked to see if the result is non-zero.
-     */
-
-    typedef enum {
-        /* Indicates that Receive buffer has data, at least one more character can be read */
-        UART4_RX_DATA_AVAILABLE
-        /*DOM-IGNORE-BEGIN*/  = (1 << 0) /*DOM-IGNORE-END*/,
-
-        /* Indicates that Receive buffer has overflowed */
-        UART4_RX_OVERRUN_ERROR
-        /*DOM-IGNORE-BEGIN*/  = (1 << 1) /*DOM-IGNORE-END*/,
-
-        /* Indicates that Framing error has been detected for the current character */
-        UART4_FRAMING_ERROR
-        /*DOM-IGNORE-BEGIN*/  = (1 << 2) /*DOM-IGNORE-END*/,
-
-        /* Indicates that Parity error has been detected for the current character */
-        UART4_PARITY_ERROR
-        /*DOM-IGNORE-BEGIN*/  = (1 << 3) /*DOM-IGNORE-END*/,
-
-        /* Indicates that Receiver is Idle */
-        UART4_RECEIVER_IDLE
-        /*DOM-IGNORE-BEGIN*/  = (1 << 4) /*DOM-IGNORE-END*/,
-
-        /* Indicates that the last transmission has completed */
-        UART4_TX_COMPLETE
-        /*DOM-IGNORE-BEGIN*/  = (1 << 8) /*DOM-IGNORE-END*/,
-
-        /* Indicates that Transmit buffer is full */
-        UART4_TX_FULL
-        /*DOM-IGNORE-BEGIN*/  = (1 << 9) /*DOM-IGNORE-END*/
-
-    } UART4_STATUS;
-
-    /** UART4 Driver Transfer Flags
-
-      @Summary
-        Specifies the status of the receive or transmit
-
-      @Description
-        This type specifies the status of the receive or transmit operation.
-        More than one of these values may be OR'd together to create a complete
-        status value.  To test a value of this type, the bit of interest must be
-        AND'ed with value and checked to see if the result is non-zero.
-     */
-
-    typedef enum {
-        /* Indicates that the core driver buffer is full */
-        UART4_TRANSFER_STATUS_RX_FULL
-        /*DOM-IGNORE-BEGIN*/  = (1 << 0) /*DOM-IGNORE-END*/,
-
-        /* Indicates that at least one byte of Data has been received */
-        UART4_TRANSFER_STATUS_RX_DATA_PRESENT
-        /*DOM-IGNORE-BEGIN*/  = (1 << 1) /*DOM-IGNORE-END*/,
-
-        /* Indicates that the core driver receiver buffer is empty */
-        UART4_TRANSFER_STATUS_RX_EMPTY
-        /*DOM-IGNORE-BEGIN*/  = (1 << 2) /*DOM-IGNORE-END*/,
-
-        /* Indicates that the core driver transmitter buffer is full */
-        UART4_TRANSFER_STATUS_TX_FULL
-        /*DOM-IGNORE-BEGIN*/  = (1 << 3) /*DOM-IGNORE-END*/,
-
-        /* Indicates that the core driver transmitter buffer is empty */
-        UART4_TRANSFER_STATUS_TX_EMPTY
-        /*DOM-IGNORE-BEGIN*/  = (1 << 4) /*DOM-IGNORE-END*/
-
-    } UART4_TRANSFER_STATUS;
-
-    /**
-      Section: UART4 Driver Routines
-     */
-
-    /**
-      @Summary
-        Initializes the UART instance : 4
-
-      @Description
-        This routine initializes the UART driver instance for : 4
-        index.
-        This routine must be called before any other UART routine is called.
+  @Description
+    This routine initializes the UART driver instance for : 4
+    index.
+    This routine must be called before any other UART routine is called.
     
-      @Preconditions
-        None.
+  @Preconditions
+    None.
 
-      @Returns
-        None.
+  @Returns
+    None.
 
-      @Param
-        None.
+  @Param
+    None.
 
-      @Comment
-    
+  @Comment
+    None.    
  
-      @Example
-        <code>
-            const uint8_t writeBuffer[35] = "1234567890ABCDEFGHIJKLMNOP\n" ;
-            unsigned int numBytes = 0;
-            int  writebufferLen = strlen((char *)writeBuffer);
-            UART4_Initialize();
-            while(numBytes < writebufferLen)
-            {    
-                int bytesToWrite = UART4_TransmitBufferSizeGet();
-                numBytes += UART4_WriteBuffer ( writeBuffer+numBytes, bytesToWrite)  ;
-            }
-        </code>
+  @Example
+    None.
 
      */
 
-    void UART4_Initialize (void);
+void UART4_Initialize(void);
+
+/**
+      @Summary
+    Read a byte of data from the UART4
+
+      @Description
+    This routine reads a byte of data from the UART4.
+
+  @Preconditions
+    UART4_Initialize function should have been called 
+    before calling this function. The transfer status should be checked to see 
+    if the receiver is not empty before calling this function.
+
+  @Param
+    None.
+
+  @Returns
+    A data byte received by the driver.
+
+  @Example
+    None.
+     */
+
+uint8_t UART4_Read( void);
+
+/**
+  @Summary
+    Writes a byte of data to the UART4
+
+  @Description
+    This routine writes a byte of data to the UART4.
+
+  @Preconditions
+    UART4_Initialize function should have been called 
+    before calling this function. The transfer status should be checked to see if
+    transmitter is not full before calling this function.
+
+  @Param
+    byte         - Data byte to write to the UART4
+
+  @Returns
+    None.
+
+  @Example
+    None.
+*/
+
+void UART4_Write( uint8_t byte);
+
+
+/**
+  @Description
+    Indicates of there is data available to read.
+
+  @Returns
+    true if byte can be read.
+    false if byte can't be read right now.
+*/
+bool UART4_IsRxReady(void);
+
+/**
+      @Description
+    Indicates if a byte can be written.
+ 
+ @Returns
+    true if byte can be written.
+    false if byte can't be written right now.
+     */
+bool UART4_IsTxReady(void);
+
+/**
+  @Description
+    Indicates if all bytes have been transferred.
+
+ @Returns
+    true if all bytes transfered.
+    false if there is still data pending to transfer.
+*/
+bool UART4_IsTxDone(void);
+
+/**
+  @Summary
+    Assigns a function pointer with a transmit callback address.
+
+  @Description
+    This routine assigns a function pointer with a transmit callback address.
+
+  @Param
+    Address of the callback routine.
+
+  @Returns
+    None
+
+  @Example 
+    <code>
+        UART4_SetTxInterruptHandler(&UART4_Transmit_CallBack);
+    </code>
+     */
+void UART4_SetTxInterruptHandler(void* handler);
 
     /**
       @Summary
-        Read a byte of data from the UART4
+    Transmit callback routine.
 
       @Description
-        This routine reads a byte of data from the UART4.
+    This routine is a transmit callback function.
+    
+  @Param
+        None.
 
-      @Preconditions
-        UART4_Initializer function should have been called 
-        before calling this function. The transfer status should be checked to see 
-        if the receiver is not empty before calling this function.
+      @Returns
+    None
+
+  @Example 
+    <code>
+        UART4_SetTxInterruptHandler(&UART4_Transmit_CallBack);
+    </code>
+*/
+void UART4_Transmit_CallBack(void);
+
+/**
+  @Summary
+    Assigns a function pointer with a receive callback address.
+
+  @Description
+    This routine assigns a function pointer with a receive callback address.
+
+      @Param
+    Address of the callback routine.
+
+  @Returns
+    None
+    
+      @Example
+        <code>
+        UART4_SetRxInterruptHandler(&UART4_Receive_CallBack);
+        </code>
+     */
+void UART4_SetRxInterruptHandler(void* handler);
+
+    /**
+      @Summary
+    Receive callback routine.
+
+      @Description
+    This routine is a receive callback function.
 
       @Param
         None.
 
       @Returns
-        A data byte received by the driver.
+    None
 
       @Example
         <code>
-        char            myBuffer[MY_BUFFER_SIZE];
-        unsigned int    numBytes;
+        UART4_SetTxInterruptHandler(&UART4_Receive_CallBack);
+    </code>
+*/
+void UART4_Receive_CallBack(void);
 
-        numBytes = 0;
-        do
+
+/*******************************************************************************
+
+  !!! Deprecated API and types !!!
+  !!! These functions will not be supported in future releases !!!
+
+*******************************************************************************/
+
+/** UART4 Driver Hardware Flags
+
+  @Summary
+    Specifies the status of the hardware receive or transmit
+
+  @Description
+    This type specifies the status of the hardware receive or transmit.
+    More than one of these values may be OR'd together to create a complete
+    status value.  To test a value of this type, the bit of interest must be
+    AND'ed with value and checked to see if the result is non-zero.
+*/
+typedef enum
         {
-            if( UART4_TRANSFER_STATUS_RX_DATA_PRESENT & UART4_TransferStatusGet() )
-            {
-                myBuffer[numBytes++] = UART4_Read();
-            }
+    /* Indicates that Receive buffer has data, at least one more character can be read */
+    UART4_RX_DATA_AVAILABLE = (1 << 0),
+    /* Indicates that Receive buffer has overflowed */
+    UART4_RX_OVERRUN_ERROR = (1 << 1),
+    /* Indicates that Framing error has been detected for the current character */
+    UART4_FRAMING_ERROR = (1 << 2),
+    /* Indicates that Parity error has been detected for the current character */
+    UART4_PARITY_ERROR = (1 << 3),
+    /* Indicates that Receiver is Idle */
+    UART4_RECEIVER_IDLE = (1 << 4),
+    /* Indicates that the last transmission has completed */
+    UART4_TX_COMPLETE = (1 << 8),
+    /* Indicates that Transmit buffer is full */
+    UART4_TX_FULL = (1 << 9) 
+}UART4_STATUS;
 
-            // Do something else...
+/** UART4 Driver Transfer Flags
 
-        } while( numBytes < MY_BUFFER_SIZE);
-        </code>
+  @Summary
+    Specifies the status of the receive or transmit
+
+  @Description
+    This type specifies the status of the receive or transmit operation.
+    More than one of these values may be OR'd together to create a complete
+    status value.  To test a value of this type, the bit of interest must be
+    AND'ed with value and checked to see if the result is non-zero.
      */
 
-    uint8_t UART4_Read ( void);
+typedef enum
+{
+    /* Indicates that the core driver buffer is full */
+    UART4_TRANSFER_STATUS_RX_FULL = (1 << 0) ,
+    /* Indicates that at least one byte of Data has been received */
+    UART4_TRANSFER_STATUS_RX_DATA_PRESENT = (1 << 1) ,
+    /* Indicates that the core driver receiver buffer is empty */
+    UART4_TRANSFER_STATUS_RX_EMPTY = (1 << 2) ,
+    /* Indicates that the core driver transmitter buffer is full */
+    UART4_TRANSFER_STATUS_TX_FULL = (1 << 3) ,
+    /* Indicates that the core driver transmitter buffer is empty */
+    UART4_TRANSFER_STATUS_TX_EMPTY = (1 << 4) 
+} UART4_TRANSFER_STATUS;
 
     /**
       @Summary
@@ -231,7 +320,7 @@ extern "C" {
         application read buffer with the read data.
 
       @Preconditions
-        UART4_Initializer function should have been called 
+    UART4_Initialize function should have been called 
         before calling this function
 
       @Param
@@ -278,48 +367,7 @@ extern "C" {
         }
         </code>
      */
-
-    unsigned int UART4_ReadBuffer ( uint8_t *buffer ,  const unsigned int numbytes);
-
-    /**
-      @Summary
-        Writes a byte of data to the UART4
-
-      @Description
-        This routine writes a byte of data to the UART4.
-
-      @Preconditions
-        UART4_Initializer function should have been called 
-        before calling this function. The transfer status should be checked to see if
-        transmitter is not full before calling this function.
-
-      @Param
-        byte         - Data byte to write to the UART4
-
-      @Returns
-        None.
-
-      @Example
-        <code>
-        char            myBuffer[MY_BUFFER_SIZE];
-        unsigned int    numBytes;
-
-        // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
-
-        numBytes = 0;
-        while( numBytes < MY_BUFFER_SIZE);
-        {
-            if( !(UART4_TRANSFER_STATUS_TX_FULL & UART4_TransferStatusGet()) )
-            {
-                UART4_Write(handle, myBuffer[numBytes++]);
-            }
-
-            // Do something else...
-        }
-        </code>
-     */
-
-    void UART4_Write ( const uint8_t byte);
+unsigned int __attribute__((deprecated)) UART4_ReadBuffer( uint8_t *buffer ,  unsigned int numbytes);
 
     /**
       @Summary
@@ -330,7 +378,7 @@ extern "C" {
         returns the number of bytes added in that queue
 
       @Preconditions
-        UART4_Initializer function should have been called 
+    UART4_Initialize function should have been called 
         before calling this function
 
       @Example
@@ -366,8 +414,7 @@ extern "C" {
         }
         </code>
      */
-
-    unsigned int UART4_WriteBuffer ( const uint8_t *buffer , const unsigned int numbytes );
+unsigned int __attribute__((deprecated)) UART4_WriteBuffer( uint8_t *buffer , unsigned int numbytes );
 
     /**
       @Summary
@@ -382,7 +429,7 @@ extern "C" {
         bit.
 
       @Preconditions
-        UART4_Initializer function should have been called 
+    UART4_Initialize function should have been called 
         before calling this function
 
       @Param
@@ -396,8 +443,7 @@ extern "C" {
         Refer to UART4_ReadBuffer and UART4_WriteBuffer for example
 
      */
-
-    UART4_TRANSFER_STATUS UART4_TransferStatusGet (void );
+UART4_TRANSFER_STATUS __attribute__((deprecated)) UART4_TransferStatusGet (void );
 
     /**
       @Summary
@@ -413,10 +459,10 @@ extern "C" {
     
       @Example 
         <code>
-        const uint8_t readBuffer[5];
+    uint8_t readBuffer[5];
         unsigned int data, numBytes = 0;
         unsigned int readbufferLen = sizeof(readBuffer);
-        UART4_Initializer();
+    UART4_Initialize();
     
         while(numBytes < readbufferLen)        
         {   
@@ -437,213 +483,206 @@ extern "C" {
         </code>
  
      */
-
-    uint8_t UART4_Peek (uint16_t offset);
+uint8_t __attribute__((deprecated)) UART4_Peek(uint16_t offset);
 
     /**
       @Summary
-        Validates the offset input and get the character in the read sequence at the 
-        offset provided, without extracting it
+    Returns the status of the receive buffer
 
       @Description
-        This routine validates the offset input and get the character in the read 
-        sequence at the offset provided, without extracting it. 
+    This routine returns if the receive buffer is empty or not.
  
       @Param
-        dataByte     - Data byte to be read from UART4 RX buffer based on offset position.
-        offset       - UART4 RX buffer peek position. Offset input range is should be
-                       0 to (UART4_CONFIG_RX_BYTEQ_LENGTH - 1).
+    None.
 
-      @Return   
-        false        - If the UART4 RX buffer is empty or dataByte is NULL or UART4 RX 
-                       buffer is empty.
-        true         - Valid offset input position.
+  @Returns
+    True if the receive buffer is empty
+    False if the receive buffer is not empty
  
       @Example 
         <code>
-        const uint8_t readBuffer[5];
-        unsigned int data, numBytes = 0;
-        unsigned int readbufferLen = sizeof(readBuffer);
-        UART4_Initializer();
+    char                     myBuffer[MY_BUFFER_SIZE];
+    unsigned int             numBytes;
+    UART4_TRANSFER_STATUS status ;
     
-        while(numBytes < readbufferLen)        
+    // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
+
+    numBytes = 0;
+    while( numBytes < MY_BUFFER_SIZE);
         {   
-            UART4_TasksReceive ( );
-            //Check for data at a particular place in the buffer
-            if(UART4_PeekSafe(&data, 3))
+        status = UART4_TransferStatusGet ( ) ;
+        if (!UART4_ReceiveBufferIsEmpty())
             {
-                if(data == 5)
+            numBytes += UART4_ReadBuffer( myBuffer + numBytes, MY_BUFFER_SIZE - numBytes )  ;
+            if(numBytes < readbufferLen)
                 {
-                    //discard all other data if byte that is wanted is received.    
-                    //continue other operation
-                    numBytes += UART4_ReadBuffer ( readBuffer + numBytes , readbufferLen ) ;
+                continue;
                 }
                 else
                 {
                     break;
                 }
             }
+        else
+        {
+            continue;
         }
+
+        // Do something else...
+    }
         </code>
  
      */
-
-    bool UART4_PeekSafe (uint8_t *dataByte, uint16_t offset);
+bool __attribute__((deprecated)) UART4_ReceiveBufferIsEmpty (void);
 
     /**
       @Summary
-        Returns the size of the receive buffer
+    Returns the status of the transmit buffer
 
       @Description
-        This routine returns the size of the receive buffer.
+    This routine returns if the transmit buffer is full or not.
 
       @Param
         None.
 
       @Returns
-        Size of receive buffer.
+    True if the transmit buffer is full
+    False if the transmit buffer is not full
     
       @Example 
-        <code>
-        const uint8_t readBuffer[5];
-        unsigned int size, numBytes = 0;
-        unsigned int readbufferLen = sizeof(readBuffer);
-        UART4__Initializer();
+    Refer to UART4_Initialize() for example.
     
-        while(size < readbufferLen)
-        {
-            UART4_TasksReceive ( );
-            size = UART4_ReceiveBufferSizeGet();
-        }
-        numBytes = UART4_ReadBuffer ( readBuffer , readbufferLen ) ;
-        </code>
- 
      */
-
-    unsigned int UART4_ReceiveBufferSizeGet (void);
+bool __attribute__((deprecated)) UART4_TransmitBufferIsFull (void);
 
     /**
       @Summary
-        Returns the size of the transmit buffer
+    Returns the transmitter and receiver status
 
       @Description
-        This routine returns the size of the transmit buffer.
+    This returns the transmitter and receiver status. The returned status may 
+    contain a value with more than one of the bits
+    specified in the UART4_STATUS enumeration set.  
+    The caller should perform an "AND" with the bit of interest and verify if the
+    result is non-zero (as shown in the example) to verify the desired status
+    bit.
+
+  @Preconditions
+    UART4_Initialize function should have been called 
+    before calling this function
 
      @Param
         None.
  
      @Returns
-        Size of transmit buffer.
+    A UART4_STATUS value describing the current status 
+    of the transfer.
 
      @Example
-        Refer to UART4_Initializer(); for example.
+    <code>
+        while(!(UART4_StatusGet & UART4_TX_COMPLETE ))
+        {
+           // Wait for the tranmission to complete
+        }
+    </code>
      */
-
-    unsigned int UART4_TransmitBufferSizeGet (void);
+uint16_t __attribute__((deprecated)) UART4_StatusGet (void );
 
     /**
       @Summary
-        Returns the status of the receive buffer
+    Allows setting of a the enable bit for the UART4 mode
 
       @Description
-        This routine returns if the receive buffer is empty or not.
+    This routine is used to enable the UART4
 
-      @Param
-        None.
+  @Preconditions
+    UART4_Initialize() function should have been 
+    called before calling this function.
  
       @Returns
-        True if the receive buffer is empty
-        False if the receive buffer is not empty
+    None
     
+  @Param
+    None
+  
       @Example
-        <code>
-        char                     myBuffer[MY_BUFFER_SIZE];
-        unsigned int             numBytes;
-        UART4_TRANSFER_STATUS status ;
+    Refer to UART4_Initialize(); for an example
+*/
 
-        // Pre-initialize myBuffer with MY_BUFFER_SIZE bytes of valid data.
+void __attribute__((deprecated)) UART4_Enable(void);
 
-        numBytes = 0;
-        while( numBytes < MY_BUFFER_SIZE);
-        {
-            status = UART4_TransferStatusGet ( ) ;
-            if (!UART4_ReceiveBufferIsEmpty())
-            {
-                numBytes += UART4_ReadBuffer( myBuffer + numBytes, MY_BUFFER_SIZE - numBytes )  ;
-                if(numBytes < readbufferLen)
-                {
-                    continue;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            else
-            {
-                continue;
-            }
+/**
+  @Summary
+    Allows setting of a the disable bit for the UART4 mode
 
-            // Do something else...
-        }
-        </code>
+  @Description
+    This routine is used to disable the UART4
  
+  @Preconditions
+    UART4_Initialize() function should have been 
+    called before calling this function.
+ 
+  @Returns
+    None
+
+  @Param
+    None
+  
+  @Example
+    Refer to UART4_Initialize(); for an example
      */
 
-    bool UART4_ReceiveBufferIsEmpty (void);
+void __attribute__((deprecated)) UART4_Disable(void);
 
     /**
       @Summary
-        Returns the status of the transmit buffer
+    Returns the number of bytes remaining in the receive buffer
 
       @Description
-        This routine returns if the transmit buffer is full or not.
+    This routine returns the number of bytes remaining in the receive buffer.
 
      @Param
         None.
  
      @Returns
-        True if the transmit buffer is full
-        False if the transmit buffer is not full
+    Remaining size of receive buffer.
 
      @Example
-        Refer to UART4_Initializer() for example.
+    <code>
+    uint8_t readBuffer[MY_BUFFER_SIZE];
+    unsigned int size, numBytes = 0;
+    UART4_Initialize();
+ 
+    // Pre-initialize readBuffer with MY_BUFFER_SIZE bytes of valid data.
+    
+    while (size < MY_BUFFER_SIZE) {
+        size = UART4_ReceiveBufferSizeGet();
+    }
+    numBytes = UART4_ReadBuffer(readBuffer, MY_BUFFER_SIZE);
+    </code>
  
      */
 
-    bool UART4_TransmitBufferIsFull (void);
+unsigned int __attribute__((deprecated)) UART4_ReceiveBufferSizeGet(void);
 
     /**
       @Summary
-        Returns the transmitter and receiver status
+    Returns the number of bytes remaining in the transmit buffer.
 
       @Description
-        This returns the transmitter and receiver status. The returned status 
-        contains a 16 bit value.
-        The caller should perform an "AND" with the bit of interest and verify if the
-        result is non-zero (as shown in the example) to verify the desired status
-        bit.
-
-      @Preconditions
-        UART4_Initializer function should have been called 
-        before calling this function
+    This routine returns the number of bytes remaining in the transmit buffer.
 
       @Param
         None.
 
       @Returns
-        16 bit value describing the current status of the transfer.
+    Remaining size of transmit buffer.
 
       @Example
-        <code>
-            while(!(UART4_StatusGet() & UART4_TX_COMPLETE ))
-            {
-               // Wait for the tranmission to complete
-            }
-        </code>
+    Refer to UART4_Initialize(); for example.
      */
 
-    uint16_t UART4_StatusGet (void );
+unsigned int __attribute__((deprecated)) UART4_TransmitBufferSizeGet(void);
 
     ///// CHBXX ADDED FUNCTION /////
     void UART4_Write16 (uint16_t txData);
@@ -654,4 +693,4 @@ extern "C" {
 
 #endif
 
-#endif  // UART4_H
+#endif  // _UART4_H

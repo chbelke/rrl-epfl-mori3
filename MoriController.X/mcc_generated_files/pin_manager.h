@@ -1,5 +1,5 @@
 /**
-  System Interrupts Generated Driver File
+  PIN MANAGER Generated Driver File
 
   @Company:
     Microchip Technology Inc.
@@ -8,40 +8,40 @@
     pin_manager.h
 
   @Summary:
-    This is the generated manager file for the MPLAB(c) Code Configurator device.  This manager
+    This is the generated manager file for the PIC24 / dsPIC33 / PIC32MM MCUs device.  This manager
     configures the pins direction, initial state, analog setting.
     The peripheral pin select, PPS, configuration is also handled by this manager.
 
   @Description:
-    This source file provides implementations for MPLAB(c) Code Configurator interrupts.
+    This source file provides implementations for PIN MANAGER.
     Generation Information :
-        Product Revision  :  MPLAB(c) Code Configurator - pic24-dspic-pic32mm : 1.75.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.35
-        MPLAB             :  MPLAB X v5.05
+        Compiler          :  XC16 v1.41
+        MPLAB 	          :  MPLAB X v5.30
+*/
 
-    Copyright (c) 2013 - 2015 released Microchip Technology Inc.  All rights reserved.
+/*
+    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
+    software and any derivatives exclusively with Microchip products.
 
-    Microchip licenses to you the right to use, modify, copy and distribute
-    Software only when embedded on a Microchip microcontroller or digital signal
-    controller that is integrated into your product or third party product
-    (pursuant to the sublicense terms in the accompanying license agreement).
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+    WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+    PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+    WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
 
-    You should refer to the license agreement accompanying this Software for
-    additional information regarding your rights and obligations.
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+    BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+    FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+    ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+    THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
 
-    SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
-    EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
-    MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
-    IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER
-    CONTRACT, NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR
-    OTHER LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
-    INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
-    CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
-    SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
-    (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
-
+    MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+    TERMS.
 */
 
 #ifndef _PIN_MANAGER_H
@@ -50,6 +50,7 @@
     Section: Includes
 */
 #include <xc.h>
+
 /**
     Section: Device Pin Macros
 */
@@ -76,7 +77,7 @@
     </code>
 
 */
-#define IO_RA0_SetHigh()          _LATA0 = 1
+#define IO_RA0_SetHigh()          (_LATA0 = 1)
 /**
   @Summary
     Sets the GPIO pin, RA0, low using LATA0.
@@ -100,7 +101,7 @@
     </code>
 
 */
-#define IO_RA0_SetLow()           _LATA0 = 0
+#define IO_RA0_SetLow()           (_LATA0 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RA0, using LATA0.
@@ -124,7 +125,7 @@
     </code>
 
 */
-#define IO_RA0_Toggle()           _LATA0 ^= 1
+#define IO_RA0_Toggle()           (_LATA0 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RA0.
@@ -174,7 +175,7 @@
     </code>
 
 */
-#define IO_RA0_SetDigitalInput()  _TRISA0 = 1
+#define IO_RA0_SetDigitalInput()  (_TRISA0 = 1)
 /**
   @Summary
     Configures the GPIO pin, RA0, as an output.
@@ -198,153 +199,7 @@
     </code>
 
 */
-#define IO_RA0_SetDigitalOutput() _TRISA0 = 0
-/**
-  @Summary
-    Sets the GPIO pin, RA1, high using LATA1.
-
-  @Description
-    Sets the GPIO pin, RA1, high using LATA1.
-
-  @Preconditions
-    The RA1 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RA1 high (1)
-    IO_RA1_SetHigh();
-    </code>
-
-*/
-#define IO_RA1_SetHigh()          _LATA1 = 1
-/**
-  @Summary
-    Sets the GPIO pin, RA1, low using LATA1.
-
-  @Description
-    Sets the GPIO pin, RA1, low using LATA1.
-
-  @Preconditions
-    The RA1 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RA1 low (0)
-    IO_RA1_SetLow();
-    </code>
-
-*/
-#define IO_RA1_SetLow()           _LATA1 = 0
-/**
-  @Summary
-    Toggles the GPIO pin, RA1, using LATA1.
-
-  @Description
-    Toggles the GPIO pin, RA1, using LATA1.
-
-  @Preconditions
-    The RA1 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Toggle RA1
-    IO_RA1_Toggle();
-    </code>
-
-*/
-#define IO_RA1_Toggle()           _LATA1 ^= 1
-/**
-  @Summary
-    Reads the value of the GPIO pin, RA1.
-
-  @Description
-    Reads the value of the GPIO pin, RA1.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    uint16_t portValue;
-
-    // Read RA1
-    postValue = IO_RA1_GetValue();
-    </code>
-
-*/
-#define IO_RA1_GetValue()         _RA1
-/**
-  @Summary
-    Configures the GPIO pin, RA1, as an input.
-
-  @Description
-    Configures the GPIO pin, RA1, as an input.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RA1 as an input
-    IO_RA1_SetDigitalInput();
-    </code>
-
-*/
-#define IO_RA1_SetDigitalInput()  _TRISA1 = 1
-/**
-  @Summary
-    Configures the GPIO pin, RA1, as an output.
-
-  @Description
-    Configures the GPIO pin, RA1, as an output.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RA1 as an output
-    IO_RA1_SetDigitalOutput();
-    </code>
-
-*/
-#define IO_RA1_SetDigitalOutput() _TRISA1 = 0
+#define IO_RA0_SetDigitalOutput() (_TRISA0 = 0)
 /**
   @Summary
     Sets the GPIO pin, RA10, high using LATA10.
@@ -368,7 +223,7 @@
     </code>
 
 */
-#define IO_RA10_SetHigh()          _LATA10 = 1
+#define IO_RA10_SetHigh()          (_LATA10 = 1)
 /**
   @Summary
     Sets the GPIO pin, RA10, low using LATA10.
@@ -392,7 +247,7 @@
     </code>
 
 */
-#define IO_RA10_SetLow()           _LATA10 = 0
+#define IO_RA10_SetLow()           (_LATA10 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RA10, using LATA10.
@@ -416,7 +271,7 @@
     </code>
 
 */
-#define IO_RA10_Toggle()           _LATA10 ^= 1
+#define IO_RA10_Toggle()           (_LATA10 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RA10.
@@ -466,7 +321,7 @@
     </code>
 
 */
-#define IO_RA10_SetDigitalInput()  _TRISA10 = 1
+#define IO_RA10_SetDigitalInput()  (_TRISA10 = 1)
 /**
   @Summary
     Configures the GPIO pin, RA10, as an output.
@@ -490,7 +345,7 @@
     </code>
 
 */
-#define IO_RA10_SetDigitalOutput() _TRISA10 = 0
+#define IO_RA10_SetDigitalOutput() (_TRISA10 = 0)
 /**
   @Summary
     Sets the GPIO pin, RA2, high using LATA2.
@@ -514,7 +369,7 @@
     </code>
 
 */
-#define IO_RA2_SetHigh()          _LATA2 = 1
+#define IO_RA2_SetHigh()          (_LATA2 = 1)
 /**
   @Summary
     Sets the GPIO pin, RA2, low using LATA2.
@@ -538,7 +393,7 @@
     </code>
 
 */
-#define IO_RA2_SetLow()           _LATA2 = 0
+#define IO_RA2_SetLow()           (_LATA2 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RA2, using LATA2.
@@ -562,7 +417,7 @@
     </code>
 
 */
-#define IO_RA2_Toggle()           _LATA2 ^= 1
+#define IO_RA2_Toggle()           (_LATA2 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RA2.
@@ -612,7 +467,7 @@
     </code>
 
 */
-#define IO_RA2_SetDigitalInput()  _TRISA2 = 1
+#define IO_RA2_SetDigitalInput()  (_TRISA2 = 1)
 /**
   @Summary
     Configures the GPIO pin, RA2, as an output.
@@ -636,7 +491,7 @@
     </code>
 
 */
-#define IO_RA2_SetDigitalOutput() _TRISA2 = 0
+#define IO_RA2_SetDigitalOutput() (_TRISA2 = 0)
 /**
   @Summary
     Sets the GPIO pin, RA4, high using LATA4.
@@ -660,7 +515,7 @@
     </code>
 
 */
-#define AI_C_SetHigh()          _LATA4 = 1
+#define AI_C_SetHigh()          (_LATA4 = 1)
 /**
   @Summary
     Sets the GPIO pin, RA4, low using LATA4.
@@ -684,7 +539,7 @@
     </code>
 
 */
-#define AI_C_SetLow()           _LATA4 = 0
+#define AI_C_SetLow()           (_LATA4 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RA4, using LATA4.
@@ -708,7 +563,7 @@
     </code>
 
 */
-#define AI_C_Toggle()           _LATA4 ^= 1
+#define AI_C_Toggle()           (_LATA4 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RA4.
@@ -758,7 +613,7 @@
     </code>
 
 */
-#define AI_C_SetDigitalInput()  _TRISA4 = 1
+#define AI_C_SetDigitalInput()  (_TRISA4 = 1)
 /**
   @Summary
     Configures the GPIO pin, RA4, as an output.
@@ -782,7 +637,7 @@
     </code>
 
 */
-#define AI_C_SetDigitalOutput() _TRISA4 = 0
+#define AI_C_SetDigitalOutput() (_TRISA4 = 0)
 /**
   @Summary
     Sets the GPIO pin, RA9, high using LATA9.
@@ -806,7 +661,7 @@
     </code>
 
 */
-#define AI_B_SetHigh()          _LATA9 = 1
+#define AI_B_SetHigh()          (_LATA9 = 1)
 /**
   @Summary
     Sets the GPIO pin, RA9, low using LATA9.
@@ -830,7 +685,7 @@
     </code>
 
 */
-#define AI_B_SetLow()           _LATA9 = 0
+#define AI_B_SetLow()           (_LATA9 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RA9, using LATA9.
@@ -854,7 +709,7 @@
     </code>
 
 */
-#define AI_B_Toggle()           _LATA9 ^= 1
+#define AI_B_Toggle()           (_LATA9 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RA9.
@@ -904,7 +759,7 @@
     </code>
 
 */
-#define AI_B_SetDigitalInput()  _TRISA9 = 1
+#define AI_B_SetDigitalInput()  (_TRISA9 = 1)
 /**
   @Summary
     Configures the GPIO pin, RA9, as an output.
@@ -928,7 +783,7 @@
     </code>
 
 */
-#define AI_B_SetDigitalOutput() _TRISA9 = 0
+#define AI_B_SetDigitalOutput() (_TRISA9 = 0)
 /**
   @Summary
     Sets the GPIO pin, RB0, high using LATB0.
@@ -952,7 +807,7 @@
     </code>
 
 */
-#define IO_RB0_SetHigh()          _LATB0 = 1
+#define IO_RB0_SetHigh()          (_LATB0 = 1)
 /**
   @Summary
     Sets the GPIO pin, RB0, low using LATB0.
@@ -976,7 +831,7 @@
     </code>
 
 */
-#define IO_RB0_SetLow()           _LATB0 = 0
+#define IO_RB0_SetLow()           (_LATB0 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RB0, using LATB0.
@@ -1000,7 +855,7 @@
     </code>
 
 */
-#define IO_RB0_Toggle()           _LATB0 ^= 1
+#define IO_RB0_Toggle()           (_LATB0 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RB0.
@@ -1050,7 +905,7 @@
     </code>
 
 */
-#define IO_RB0_SetDigitalInput()  _TRISB0 = 1
+#define IO_RB0_SetDigitalInput()  (_TRISB0 = 1)
 /**
   @Summary
     Configures the GPIO pin, RB0, as an output.
@@ -1074,7 +929,7 @@
     </code>
 
 */
-#define IO_RB0_SetDigitalOutput() _TRISB0 = 0
+#define IO_RB0_SetDigitalOutput() (_TRISB0 = 0)
 /**
   @Summary
     Sets the GPIO pin, RB1, high using LATB1.
@@ -1098,7 +953,7 @@
     </code>
 
 */
-#define IO_RB1_SetHigh()          _LATB1 = 1
+#define IO_RB1_SetHigh()          (_LATB1 = 1)
 /**
   @Summary
     Sets the GPIO pin, RB1, low using LATB1.
@@ -1122,7 +977,7 @@
     </code>
 
 */
-#define IO_RB1_SetLow()           _LATB1 = 0
+#define IO_RB1_SetLow()           (_LATB1 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RB1, using LATB1.
@@ -1146,7 +1001,7 @@
     </code>
 
 */
-#define IO_RB1_Toggle()           _LATB1 ^= 1
+#define IO_RB1_Toggle()           (_LATB1 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RB1.
@@ -1196,7 +1051,7 @@
     </code>
 
 */
-#define IO_RB1_SetDigitalInput()  _TRISB1 = 1
+#define IO_RB1_SetDigitalInput()  (_TRISB1 = 1)
 /**
   @Summary
     Configures the GPIO pin, RB1, as an output.
@@ -1220,7 +1075,7 @@
     </code>
 
 */
-#define IO_RB1_SetDigitalOutput() _TRISB1 = 0
+#define IO_RB1_SetDigitalOutput() (_TRISB1 = 0)
 /**
   @Summary
     Sets the GPIO pin, RB10, high using LATB10.
@@ -1244,7 +1099,7 @@
     </code>
 
 */
-#define IO_RB10_SetHigh()          _LATB10 = 1
+#define IO_RB10_SetHigh()          (_LATB10 = 1)
 /**
   @Summary
     Sets the GPIO pin, RB10, low using LATB10.
@@ -1268,7 +1123,7 @@
     </code>
 
 */
-#define IO_RB10_SetLow()           _LATB10 = 0
+#define IO_RB10_SetLow()           (_LATB10 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RB10, using LATB10.
@@ -1292,7 +1147,7 @@
     </code>
 
 */
-#define IO_RB10_Toggle()           _LATB10 ^= 1
+#define IO_RB10_Toggle()           (_LATB10 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RB10.
@@ -1342,7 +1197,7 @@
     </code>
 
 */
-#define IO_RB10_SetDigitalInput()  _TRISB10 = 1
+#define IO_RB10_SetDigitalInput()  (_TRISB10 = 1)
 /**
   @Summary
     Configures the GPIO pin, RB10, as an output.
@@ -1366,7 +1221,7 @@
     </code>
 
 */
-#define IO_RB10_SetDigitalOutput() _TRISB10 = 0
+#define IO_RB10_SetDigitalOutput() (_TRISB10 = 0)
 /**
   @Summary
     Sets the GPIO pin, RB12, high using LATB12.
@@ -1390,7 +1245,7 @@
     </code>
 
 */
-#define IO_RB12_SetHigh()          _LATB12 = 1
+#define IO_RB12_SetHigh()          (_LATB12 = 1)
 /**
   @Summary
     Sets the GPIO pin, RB12, low using LATB12.
@@ -1414,7 +1269,7 @@
     </code>
 
 */
-#define IO_RB12_SetLow()           _LATB12 = 0
+#define IO_RB12_SetLow()           (_LATB12 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RB12, using LATB12.
@@ -1438,7 +1293,7 @@
     </code>
 
 */
-#define IO_RB12_Toggle()           _LATB12 ^= 1
+#define IO_RB12_Toggle()           (_LATB12 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RB12.
@@ -1488,7 +1343,7 @@
     </code>
 
 */
-#define IO_RB12_SetDigitalInput()  _TRISB12 = 1
+#define IO_RB12_SetDigitalInput()  (_TRISB12 = 1)
 /**
   @Summary
     Configures the GPIO pin, RB12, as an output.
@@ -1512,7 +1367,7 @@
     </code>
 
 */
-#define IO_RB12_SetDigitalOutput() _TRISB12 = 0
+#define IO_RB12_SetDigitalOutput() (_TRISB12 = 0)
 /**
   @Summary
     Sets the GPIO pin, RB14, high using LATB14.
@@ -1536,7 +1391,7 @@
     </code>
 
 */
-#define IO_RB14_SetHigh()          _LATB14 = 1
+#define IO_RB14_SetHigh()          (_LATB14 = 1)
 /**
   @Summary
     Sets the GPIO pin, RB14, low using LATB14.
@@ -1560,7 +1415,7 @@
     </code>
 
 */
-#define IO_RB14_SetLow()           _LATB14 = 0
+#define IO_RB14_SetLow()           (_LATB14 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RB14, using LATB14.
@@ -1584,7 +1439,7 @@
     </code>
 
 */
-#define IO_RB14_Toggle()           _LATB14 ^= 1
+#define IO_RB14_Toggle()           (_LATB14 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RB14.
@@ -1634,7 +1489,7 @@
     </code>
 
 */
-#define IO_RB14_SetDigitalInput()  _TRISB14 = 1
+#define IO_RB14_SetDigitalInput()  (_TRISB14 = 1)
 /**
   @Summary
     Configures the GPIO pin, RB14, as an output.
@@ -1658,7 +1513,7 @@
     </code>
 
 */
-#define IO_RB14_SetDigitalOutput() _TRISB14 = 0
+#define IO_RB14_SetDigitalOutput() (_TRISB14 = 0)
 /**
   @Summary
     Sets the GPIO pin, RB4, high using LATB4.
@@ -1682,7 +1537,7 @@
     </code>
 
 */
-#define IO_RB4_SetHigh()          _LATB4 = 1
+#define IO_RB4_SetHigh()          (_LATB4 = 1)
 /**
   @Summary
     Sets the GPIO pin, RB4, low using LATB4.
@@ -1706,7 +1561,7 @@
     </code>
 
 */
-#define IO_RB4_SetLow()           _LATB4 = 0
+#define IO_RB4_SetLow()           (_LATB4 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RB4, using LATB4.
@@ -1730,7 +1585,7 @@
     </code>
 
 */
-#define IO_RB4_Toggle()           _LATB4 ^= 1
+#define IO_RB4_Toggle()           (_LATB4 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RB4.
@@ -1780,7 +1635,7 @@
     </code>
 
 */
-#define IO_RB4_SetDigitalInput()  _TRISB4 = 1
+#define IO_RB4_SetDigitalInput()  (_TRISB4 = 1)
 /**
   @Summary
     Configures the GPIO pin, RB4, as an output.
@@ -1804,7 +1659,7 @@
     </code>
 
 */
-#define IO_RB4_SetDigitalOutput() _TRISB4 = 0
+#define IO_RB4_SetDigitalOutput() (_TRISB4 = 0)
 /**
   @Summary
     Sets the GPIO pin, RC0, high using LATC0.
@@ -1828,7 +1683,7 @@
     </code>
 
 */
-#define IO_RC0_SetHigh()          _LATC0 = 1
+#define IO_RC0_SetHigh()          (_LATC0 = 1)
 /**
   @Summary
     Sets the GPIO pin, RC0, low using LATC0.
@@ -1852,7 +1707,7 @@
     </code>
 
 */
-#define IO_RC0_SetLow()           _LATC0 = 0
+#define IO_RC0_SetLow()           (_LATC0 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RC0, using LATC0.
@@ -1876,7 +1731,7 @@
     </code>
 
 */
-#define IO_RC0_Toggle()           _LATC0 ^= 1
+#define IO_RC0_Toggle()           (_LATC0 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RC0.
@@ -1926,7 +1781,7 @@
     </code>
 
 */
-#define IO_RC0_SetDigitalInput()  _TRISC0 = 1
+#define IO_RC0_SetDigitalInput()  (_TRISC0 = 1)
 /**
   @Summary
     Configures the GPIO pin, RC0, as an output.
@@ -1950,7 +1805,7 @@
     </code>
 
 */
-#define IO_RC0_SetDigitalOutput() _TRISC0 = 0
+#define IO_RC0_SetDigitalOutput() (_TRISC0 = 0)
 /**
   @Summary
     Sets the GPIO pin, RC1, high using LATC1.
@@ -1974,7 +1829,7 @@
     </code>
 
 */
-#define IO_RC1_SetHigh()          _LATC1 = 1
+#define IO_RC1_SetHigh()          (_LATC1 = 1)
 /**
   @Summary
     Sets the GPIO pin, RC1, low using LATC1.
@@ -1998,7 +1853,7 @@
     </code>
 
 */
-#define IO_RC1_SetLow()           _LATC1 = 0
+#define IO_RC1_SetLow()           (_LATC1 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RC1, using LATC1.
@@ -2022,7 +1877,7 @@
     </code>
 
 */
-#define IO_RC1_Toggle()           _LATC1 ^= 1
+#define IO_RC1_Toggle()           (_LATC1 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RC1.
@@ -2072,7 +1927,7 @@
     </code>
 
 */
-#define IO_RC1_SetDigitalInput()  _TRISC1 = 1
+#define IO_RC1_SetDigitalInput()  (_TRISC1 = 1)
 /**
   @Summary
     Configures the GPIO pin, RC1, as an output.
@@ -2096,7 +1951,7 @@
     </code>
 
 */
-#define IO_RC1_SetDigitalOutput() _TRISC1 = 0
+#define IO_RC1_SetDigitalOutput() (_TRISC1 = 0)
 /**
   @Summary
     Sets the GPIO pin, RC2, high using LATC2.
@@ -2120,7 +1975,7 @@
     </code>
 
 */
-#define IO_RC2_SetHigh()          _LATC2 = 1
+#define IO_RC2_SetHigh()          (_LATC2 = 1)
 /**
   @Summary
     Sets the GPIO pin, RC2, low using LATC2.
@@ -2144,7 +1999,7 @@
     </code>
 
 */
-#define IO_RC2_SetLow()           _LATC2 = 0
+#define IO_RC2_SetLow()           (_LATC2 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RC2, using LATC2.
@@ -2168,7 +2023,7 @@
     </code>
 
 */
-#define IO_RC2_Toggle()           _LATC2 ^= 1
+#define IO_RC2_Toggle()           (_LATC2 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RC2.
@@ -2218,7 +2073,7 @@
     </code>
 
 */
-#define IO_RC2_SetDigitalInput()  _TRISC2 = 1
+#define IO_RC2_SetDigitalInput()  (_TRISC2 = 1)
 /**
   @Summary
     Configures the GPIO pin, RC2, as an output.
@@ -2242,7 +2097,7 @@
     </code>
 
 */
-#define IO_RC2_SetDigitalOutput() _TRISC2 = 0
+#define IO_RC2_SetDigitalOutput() (_TRISC2 = 0)
 /**
   @Summary
     Sets the GPIO pin, RC3, high using LATC3.
@@ -2266,7 +2121,7 @@
     </code>
 
 */
-#define AI_A_SetHigh()          _LATC3 = 1
+#define AI_A_SetHigh()          (_LATC3 = 1)
 /**
   @Summary
     Sets the GPIO pin, RC3, low using LATC3.
@@ -2290,7 +2145,7 @@
     </code>
 
 */
-#define AI_A_SetLow()           _LATC3 = 0
+#define AI_A_SetLow()           (_LATC3 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RC3, using LATC3.
@@ -2314,7 +2169,7 @@
     </code>
 
 */
-#define AI_A_Toggle()           _LATC3 ^= 1
+#define AI_A_Toggle()           (_LATC3 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RC3.
@@ -2364,7 +2219,7 @@
     </code>
 
 */
-#define AI_A_SetDigitalInput()  _TRISC3 = 1
+#define AI_A_SetDigitalInput()  (_TRISC3 = 1)
 /**
   @Summary
     Configures the GPIO pin, RC3, as an output.
@@ -2388,7 +2243,7 @@
     </code>
 
 */
-#define AI_A_SetDigitalOutput() _TRISC3 = 0
+#define AI_A_SetDigitalOutput() (_TRISC3 = 0)
 /**
   @Summary
     Sets the GPIO pin, RC6, high using LATC6.
@@ -2412,7 +2267,7 @@
     </code>
 
 */
-#define IO_RC6_SetHigh()          _LATC6 = 1
+#define IO_RC6_SetHigh()          (_LATC6 = 1)
 /**
   @Summary
     Sets the GPIO pin, RC6, low using LATC6.
@@ -2436,7 +2291,7 @@
     </code>
 
 */
-#define IO_RC6_SetLow()           _LATC6 = 0
+#define IO_RC6_SetLow()           (_LATC6 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RC6, using LATC6.
@@ -2460,7 +2315,7 @@
     </code>
 
 */
-#define IO_RC6_Toggle()           _LATC6 ^= 1
+#define IO_RC6_Toggle()           (_LATC6 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RC6.
@@ -2510,7 +2365,7 @@
     </code>
 
 */
-#define IO_RC6_SetDigitalInput()  _TRISC6 = 1
+#define IO_RC6_SetDigitalInput()  (_TRISC6 = 1)
 /**
   @Summary
     Configures the GPIO pin, RC6, as an output.
@@ -2534,7 +2389,7 @@
     </code>
 
 */
-#define IO_RC6_SetDigitalOutput() _TRISC6 = 0
+#define IO_RC6_SetDigitalOutput() (_TRISC6 = 0)
 /**
   @Summary
     Sets the GPIO pin, RC7, high using LATC7.
@@ -2558,7 +2413,7 @@
     </code>
 
 */
-#define IO_RC7_SetHigh()          _LATC7 = 1
+#define IO_RC7_SetHigh()          (_LATC7 = 1)
 /**
   @Summary
     Sets the GPIO pin, RC7, low using LATC7.
@@ -2582,7 +2437,7 @@
     </code>
 
 */
-#define IO_RC7_SetLow()           _LATC7 = 0
+#define IO_RC7_SetLow()           (_LATC7 = 0)
 /**
   @Summary
     Toggles the GPIO pin, RC7, using LATC7.
@@ -2606,7 +2461,7 @@
     </code>
 
 */
-#define IO_RC7_Toggle()           _LATC7 ^= 1
+#define IO_RC7_Toggle()           (_LATC7 ^= 1)
 /**
   @Summary
     Reads the value of the GPIO pin, RC7.
@@ -2656,7 +2511,7 @@
     </code>
 
 */
-#define IO_RC7_SetDigitalInput()  _TRISC7 = 1
+#define IO_RC7_SetDigitalInput()  (_TRISC7 = 1)
 /**
   @Summary
     Configures the GPIO pin, RC7, as an output.
@@ -2680,7 +2535,7 @@
     </code>
 
 */
-#define IO_RC7_SetDigitalOutput() _TRISC7 = 0
+#define IO_RC7_SetDigitalOutput() (_TRISC7 = 0)
 
 /**
     Section: Function Prototypes
@@ -2691,7 +2546,7 @@
     The peripheral pin select, PPS, configuration is also handled by this manager.
 
   @Description
-    This is the generated manager file for the MPLAB(c) Code Configurator device.  This manager
+    This is the generated manager file for the PIC24 / dsPIC33 / PIC32MM MCUs device.  This manager
     configures the pins direction, initial state, analog setting.
     The peripheral pin select, PPS, configuration is also handled by this manager.
 
@@ -2714,6 +2569,8 @@
     </code>
 
 */
-void PIN_MANAGER_Initialize(void);
+void PIN_MANAGER_Initialize (void);
+
+
 
 #endif

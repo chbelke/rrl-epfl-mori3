@@ -24,6 +24,9 @@
         <itemPath>mcc_generated_files/system.h</itemPath>
         <itemPath>mcc_generated_files/system_types.h</itemPath>
         <itemPath>mcc_generated_files/tmr5.h</itemPath>
+        <itemPath>mcc_generated_files/ext_int.h</itemPath>
+        <itemPath>mcc_generated_files/adc_module_features.h</itemPath>
+        <itemPath>mcc_generated_files/pwm_module_features.h</itemPath>
       </logicalFolder>
       <itemPath>TLC59208.h</itemPath>
       <itemPath>MMA8452Q.h</itemPath>
@@ -33,6 +36,8 @@
       <itemPath>define.h</itemPath>
       <itemPath>AS5048B.h</itemPath>
       <itemPath>Coms.h</itemPath>
+      <itemPath>Battery.h</itemPath>
+      <itemPath>Button.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -58,6 +63,7 @@
         <itemPath>mcc_generated_files/clock.c</itemPath>
         <itemPath>mcc_generated_files/system.c</itemPath>
         <itemPath>mcc_generated_files/tmr5.c</itemPath>
+        <itemPath>mcc_generated_files/ext_int.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>TLC59208.c</itemPath>
@@ -67,6 +73,8 @@
       <itemPath>MotLin.c</itemPath>
       <itemPath>AS5048B.c</itemPath>
       <itemPath>Coms.c</itemPath>
+      <itemPath>Battery.c</itemPath>
+      <itemPath>Button.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
