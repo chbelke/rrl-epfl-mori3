@@ -1,18 +1,15 @@
 //----------------------- Recieved Message -----------------------------//
 void pubVersion()
 {
-  char buff[100];
-  String IPstring = String("VER: ") + String(softwareVersion)
-                    + String(" ") + String(clientName);
-  IPstring.toCharArray(buff, 100);
+  char buff[40];
+  sprintf(buff, "VER: %f %s", softwareVersion, clientName);
   publish(buff);
 }
 
-void pubMac(String header)
+void pubMac(char* header)
 {
   char buff[50];
-  String SSIDstring = String(header) + WiFi.macAddress();
-  SSIDstring.toCharArray(buff, 30);
+  sprintf(buff, "%s%s", header, charMAC);
   publish(buff);
 }
 
@@ -21,8 +18,6 @@ void pubIP()
 {
   char buff[40] = "IP: ";
   strcat(buff, stringIP);
-  Serial.println(stringIP);
-  Serial.println(buff);
   publish(buff);
 }
 

@@ -16,14 +16,14 @@ def getVersion(self, pyld, espNum):
 		espVer = float(pyld[1])
 		if(espVer == self.version):
 			print("ESP/{} Software up to date".format(espNum))
-			self.publishLocal("vg",espNum)   #version good
+			self.publishLocal("gver",espNum)   #version good
 			print("after version")
 		
 		elif(espVer < self.version):
 			print("ESP/{} Software out date".format(espNum))
 			print("ESP/{}: {}".format(espNum,espVer))
 			print("Curr: {}".format(self.version))
-			self.publishLocal("vb",espNum)   #version bad
+			self.publishLocal("bver",espNum)   #version bad
 
 		elif(espVer > self.version):
 			print("Kevin is an idiot and forgot to update this to match newest version")

@@ -41,8 +41,8 @@ void verbose_print(char* msg)
 {
   if(verbose_flag)
   {
-    // Serial.print(msg);
-    write_serial(msg, 0);
+    Serial.print(msg);
+    // write_serial(msg, 0);
   }
 }
 
@@ -50,9 +50,9 @@ void verbose_println(char* msg)
 {
   if(verbose_flag)
   {
-    // Serial.println(msg);
-    write_serial(msg, 0);
-    write_serial(nl, 0);
+    Serial.println(msg);
+    // write_serial(msg, 0);
+    // write_serial(nl, 0);
   }
 }
 
@@ -60,9 +60,10 @@ void verbose_println(int msg)
 {
   if(verbose_flag)
   {
-    char buf[4];
-    sprintf (buf, "%03i", msg);
-    write_serial(buf, 0);
+    // char buf[4];
+    // sprintf (buf, "%03i", msg);
+    // write_serial(buf, 0);
+    Serial.println(msg);
   }
 }
 
@@ -70,6 +71,7 @@ void verbose_println()
 {
   if(verbose_flag)
   {
-    write_serial(nl, 0);
+    // write_serial(nl, 0);
+    Serial.println();
   }
 }

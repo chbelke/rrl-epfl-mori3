@@ -44,7 +44,10 @@ char recieveName[36];
 
 const float softwareVersion = 0.5;
 
+char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "shape", "udp", "noudp", "verb", "noverb", "hi0", "hi1", "hi2", "hi3"};
+
 char stringIP[16];
+char charMAC[18];
 
 bool verCheck = false;  //assumes we don't know the version
 bool verGood = true;   //assumes we are up to date unless otherwise
@@ -57,7 +60,6 @@ int moriShape[6] = {200, 200, 200, 0, 0, 0};
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
 
 bool flag_udp = false;
 bool verbose_flag = true;
@@ -90,12 +92,17 @@ void setup()
     verbose_println("Connecting to WiFi..");
   }
   verbose_println("Connected to the WiFi network");
+
   IPAddress IP = WiFi.localIP();
   sprintf(stringIP, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
-
-
   verbose_print("IP address: ");
   verbose_println(stringIP);
+
+  for(int i = 0; i < 17; i++)
+    charMAC[i] = (char)WiFi.macAddress()[i];
+  verbose_print("MAC: ");
+  verbose_println(charMAC);  
+  Serial.println();
 
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
@@ -123,7 +130,7 @@ void setup()
   handleOTA();
   
   //----------------------- UDP Handling--------------------------------------//
-  verbose_flag = false;
+  // verbose_flag = false;
 }
 
 
