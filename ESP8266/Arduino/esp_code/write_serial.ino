@@ -2,6 +2,7 @@ void relay(byte* payload, unsigned int len)
 {
   verbose_println();
   int i = 0;
+
   while(payload[i] != 0b00100000)   //0b00100000 = whitespace
   {
     i++;
@@ -12,6 +13,22 @@ void relay(byte* payload, unsigned int len)
     }
   }
   i++;
+
+  if(verbose_flag)
+  {
+    for (int j = i; j < len; j++)
+    {
+      byte val = payload[j];
+      for (int k = 0; k < 8; k++)
+      {
+          bool b = val & 0x80;
+          Serial.print(b);
+          val = val << 1;
+      }
+      Serial.println();
+    }    
+  }
+
 
   while(i < len)
   {

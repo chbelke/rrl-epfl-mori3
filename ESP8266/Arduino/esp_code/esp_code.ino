@@ -60,7 +60,7 @@ PubSubClient client(espClient);
 bool flag_udp = false;
 bool verbose_flag = false;
 
-#define LED_PIN 0
+#define LED_PIN 4
 Led wifi_ind_led(LED_PIN);
 
 //--------------------------- Start ----------------------------------------//
