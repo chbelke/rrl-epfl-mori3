@@ -33,8 +33,14 @@ void readUDP()
   verbose_println("Received UDP");
   
   UDP.read(udpInBuff, PACKET_SIZE);
+  unsigned int len = int(udpInBuff[0]);
+  byte udp_packet[len];
+  for(int i=0; i< len; i++)
+  {
+    udp_packet[i] = udpInBuff[i+1];
+  }
 
-  commands(udpInBuff, PACKET_SIZE);
+  commands(udp_packet, len);
 
   // char msg[40];
   // int i;
