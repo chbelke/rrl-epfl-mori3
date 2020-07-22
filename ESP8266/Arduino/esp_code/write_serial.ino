@@ -1,4 +1,27 @@
- char* nl = "\n";
+void relay(byte* payload, unsigned int len)
+{
+  verbose_println();
+  int i = 0;
+  while(payload[i] != 0b00100000)   //0b00100000 = whitespace
+  {
+    i++;
+    if(i > len)
+    {
+      publish("ERR: payload has no space");
+      break;
+    }
+  }
+  i++;
+
+  while(i < len)
+  {
+    Serial.write(payload[i]);
+    i++;
+  }
+
+  verbose_println();
+}
+
 
 void write_serial(char* msg, int mode)
 {
@@ -38,6 +61,15 @@ void write_serial(char* msg, int mode)
 }
 
 void verbose_print(char* msg)
+{
+  if(verbose_flag)
+  {
+    Serial.print(msg);
+    // write_serial(msg, 0);
+  }
+}
+
+void verbose_print(char msg)
 {
   if(verbose_flag)
   {

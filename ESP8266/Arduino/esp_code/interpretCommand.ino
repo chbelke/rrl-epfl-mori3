@@ -1,11 +1,17 @@
 //----------------------- Recieved Message --------------------------//
-void commands(char* payload)
+void commands(byte* payload, unsigned int len)
 {
   int sw_case = 14;
+
+  char topic[3];
+  for(int i=0; i < 3; i++)
+  {
+    topic[i] = (char)payload[i];
+  }
   
   for(int i=0; i < 13; i++)
   {
-    if (!memcmp(payload, cmdLine[i], 4)) //4 is number of bytes in memory to compare (3 chars + stop)
+    if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
       sw_case = i;
       break;
@@ -40,7 +46,7 @@ void commands(char* payload)
       client.publish(publishName, "INFO: Hello!");
       break;
 
-    case 5:   //shape
+    case 5:   //g_shape (set shape)
       pubShape();
       break;
 
@@ -64,20 +70,17 @@ void commands(char* payload)
       verbose_println("Stopping Verbose Operation");
       break;
 
-    case 10:  //hi0
-      write_serial("HELLO", 0);
+    case 10:  //shape (set shape)
+      relay(payload, len);
       break;
 
     case 11:  //hi1
-      write_serial("WORLD", 0);
       break;
 
     case 12:  //hi2      
-      write_serial("BIG", 2);
       break;
 
     case 13:
-      write_serial("CHUNGUS", 3);
       break;
 
     default:
@@ -85,5 +88,6 @@ void commands(char* payload)
   }
 
   verbose_println("-----------------------");
-
 }
+
+

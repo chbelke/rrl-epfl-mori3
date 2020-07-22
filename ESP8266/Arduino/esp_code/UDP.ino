@@ -34,17 +34,19 @@ void readUDP()
   
   UDP.read(udpInBuff, PACKET_SIZE);
 
-  char msg[40];
-  int i;
-  for(i=0; udpInBuff[i] != 0 ;i++)
-  {
-    msg[i] = (char)udpInBuff[i];
-  }
-  msg[i] = '\0';
-  verbose_print("MSG: ");
-  verbose_println(msg);
+  commands(udpInBuff, PACKET_SIZE);
 
-  commands(msg);
+  // char msg[40];
+  // int i;
+  // for(i=0; udpInBuff[i] != 0 ;i++)
+  // {
+  //   msg[i] = (char)udpInBuff[i];
+  // }
+  // msg[i] = '\0';
+  // verbose_print("MSG: ");
+  // verbose_println(msg);
+
+  // commands(msg);
 }
 
 

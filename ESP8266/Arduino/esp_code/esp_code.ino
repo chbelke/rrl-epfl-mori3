@@ -40,7 +40,7 @@ char recieveName[36];
 
 const float softwareVersion = 0.5;
 
-char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "shape", "udp", "noudp", "verb", "noverb", "hi0", "hi1", "hi2", "hi3"};
+char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "hi1", "hi2", "hi3"};
 
 char stringIP[16];
 char charMAC[18];
@@ -58,7 +58,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 bool flag_udp = false;
-bool verbose_flag = true;
+bool verbose_flag = false;
 
 #define LED_PIN 0
 Led wifi_ind_led(LED_PIN);
@@ -106,7 +106,6 @@ void setup()
     charMAC[i] = (char)WiFi.macAddress()[i];
   verbose_print("MAC: ");
   verbose_println(charMAC);  
-  Serial.println();
 
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
@@ -128,7 +127,6 @@ void setup()
   //--------------------------- MQTT -----------------------------------------//
 
   client.publish(publishName, "INFO: Hello from ESP8266");
-//  client.publish(publishName, clientName);
   client.subscribe(recieveName);
   client.subscribe("esp/rec");
 
@@ -136,7 +134,7 @@ void setup()
   handleOTA();
   
   //----------------------- UDP Handling--------------------------------------//
-  // verbose_flag = false;
+  verbose_flag = false;
 }
 
 
