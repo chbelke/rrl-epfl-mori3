@@ -145,14 +145,14 @@ void SMA_Set(uint8_t edge, uint8_t duty) {
 void SMA_On(uint8_t edge) {
     SMA_Count[edge] = SMA_Period;
     SMA_Set(edge, SMA_Duty);
-    LED_R = 0;
+    LED_R = LED_On;
 }
 
 void SMA_Off(uint8_t edge) {
     SMA_Count[edge] = 0;
     SMA_Set(edge, 0);
     if (edge == 0){
-        LED_R = 1;
+        LED_R = LED_Off;
     }
 }
 

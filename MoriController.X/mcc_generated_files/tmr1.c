@@ -177,18 +177,16 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     if (k >= 10){
         k = 0;
         if (light){
-            LED_Y = 0;
+            LED_Y = LED_On;
             if (m < 2){
                 m++;
             } else if ((m>1) && (m < 2 + Button_ReturnState())){
-//                LED_R = 0;
                 m++;
             } else {
                 m = 0;
             }
         } else {
-            LED_Y = 1;
-//            LED_R = 1;
+            LED_Y = LED_Off;
         }
         light = !light;
     }

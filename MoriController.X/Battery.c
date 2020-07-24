@@ -2,7 +2,6 @@
 #include "define.h"
 
 uint8_t BatCount = 0;
-#define BatCountMax 5 // seconds
 
 // called in TMR5
 void Battery_Check() {

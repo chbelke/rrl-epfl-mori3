@@ -18,29 +18,29 @@ void MotLin_OUT(uint8_t edge, int16_t duty) {
     if (!STAT_MotLin_Active) duty = 0; // linear motors off
     switch (edge) {
         case 0:
-            if (duty > 0) LIN_DIR_A = 0; // direction output
-            else LIN_DIR_A = 1;
+            if (duty > 0) LIN_DIR_1 = 0; // direction output
+            else LIN_DIR_1 = 1;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon_A) || (Flg_EdgeCon_A && Flg_EdgeSyn_A)) {
-                PWM_Set(LIN_PWM_A, abs(duty)); // pwm output
+            if ((!Flg_EdgeCon_1) || (Flg_EdgeCon_1 && Flg_EdgeSyn_1)) {
+                PWM_Set(LIN_PWM_1, abs(duty)); // pwm output
             }
             break;
 
         case 1:
-            if (duty > 0) LIN_DIR_B = 0; // direction output
-            else LIN_DIR_B = 1;
+            if (duty > 0) LIN_DIR_2 = 0; // direction output
+            else LIN_DIR_2 = 1;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon_A) || (Flg_EdgeCon_A && Flg_EdgeSyn_A)) {
-                PWM_Set(LIN_PWM_B, abs(duty)); // pwm output
+            if ((!Flg_EdgeCon_1) || (Flg_EdgeCon_1 && Flg_EdgeSyn_1)) {
+                PWM_Set(LIN_PWM_2, abs(duty)); // pwm output
             }
             break;
 
         case 2:
-            if (duty > 0) LIN_DIR_C = 0; // direction output
-            else LIN_DIR_C = 1;
+            if (duty > 0) LIN_DIR_3 = 0; // direction output
+            else LIN_DIR_3 = 1;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon_A) || (Flg_EdgeCon_A && Flg_EdgeSyn_A)) {
-                PWM_Set(LIN_PWM_C, abs(duty)); // pwm output
+            if ((!Flg_EdgeCon_1) || (Flg_EdgeCon_1 && Flg_EdgeSyn_1)) {
+                PWM_Set(LIN_PWM_3, abs(duty)); // pwm output
             }
             break;
 
@@ -54,18 +54,18 @@ void MotLin_PID(uint8_t edge, uint16_t current, uint16_t desired) {
     // avoid bad control inputs
     switch (edge) {
         case 0:
-            if (desired < MotLin_MIN_A) desired = MotLin_MIN_A;
-            else if (desired > MotLin_MAX_A) desired = MotLin_MAX_A;
+            if (desired < MotLin_MIN_1) desired = MotLin_MIN_1;
+            else if (desired > MotLin_MAX_1) desired = MotLin_MAX_1;
             break;
 
         case 1:
-            if (desired < MotLin_MIN_B) desired = MotLin_MIN_B;
-            else if (desired > MotLin_MAX_B) desired = MotLin_MAX_B;
+            if (desired < MotLin_MIN_2) desired = MotLin_MIN_2;
+            else if (desired > MotLin_MAX_2) desired = MotLin_MAX_2;
             break;
 
         case 2:
-            if (desired < MotLin_MIN_C) desired = MotLin_MIN_C;
-            else if (desired > MotLin_MAX_C) desired = MotLin_MAX_C;
+            if (desired < MotLin_MIN_3) desired = MotLin_MIN_3;
+            else if (desired > MotLin_MAX_3) desired = MotLin_MAX_3;
             break;
 
         default:
@@ -104,20 +104,20 @@ void MotLin_PID(uint8_t edge, uint16_t current, uint16_t desired) {
     // slow down motors near min/max
     switch (edge) {
         case 0:
-            if ((current < (MotLin_MIN_A + MotLin_SlowRegion))
-                    || (current > (MotLin_MAX_A - MotLin_SlowRegion)))
+            if ((current < (MotLin_MIN_1 + MotLin_SlowRegion))
+                    || (current > (MotLin_MAX_1 - MotLin_SlowRegion)))
                 outf = outf / MotLin_SlowFactor;
             break;
 
         case 1:
-            if ((current < (MotLin_MIN_B + MotLin_SlowRegion))
-                    || (current > (MotLin_MAX_B - MotLin_SlowRegion)))
+            if ((current < (MotLin_MIN_2 + MotLin_SlowRegion))
+                    || (current > (MotLin_MAX_2 - MotLin_SlowRegion)))
                 outf = outf / MotLin_SlowFactor;
             break;
 
         case 2:
-            if ((current < (MotLin_MIN_C + MotLin_SlowRegion))
-                    || (current > (MotLin_MAX_C - MotLin_SlowRegion)))
+            if ((current < (MotLin_MIN_3 + MotLin_SlowRegion))
+                    || (current > (MotLin_MAX_3 - MotLin_SlowRegion)))
                 outf = outf / MotLin_SlowFactor;
             break;
 

@@ -62,7 +62,6 @@
  void __attribute__ ((weak)) EX_INT1_CallBack(void)
 {
     // Add your custom callback code here
-//    LED_R ^=1; 
     Flg_Button = true;
 }
 
