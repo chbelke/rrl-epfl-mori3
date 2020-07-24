@@ -14,29 +14,29 @@ void MotRot_OUT(uint8_t edge, int16_t duty) {
     if (!STAT_MotRot_Active) duty = 0; // linear motors off
     switch (edge) {
         case 0:
-            if (duty > 0) ROT_DIR_A = 1; // direction output
-            else ROT_DIR_A = 0;
+            if (duty > 0) ROT_DIR_1 = 1; // direction output
+            else ROT_DIR_1 = 0;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon_A) || (Flg_EdgeCon_A && Flg_EdgeSyn_A)) {
-                PWM_Set(ROT_PWM_A, abs(duty)); // pwm output
+            if ((!Flg_EdgeCon_1) || (Flg_EdgeCon_1 && Flg_EdgeSyn_1)) {
+                PWM_Set(ROT_PWM_1, abs(duty)); // pwm output
             }
             break;
             
         case 1:
-            if (duty > 0) ROT_DIR_B = 1; // direction output
-            else ROT_DIR_B = 0;
+            if (duty > 0) ROT_DIR_2 = 1; // direction output
+            else ROT_DIR_2 = 0;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon_B) || (Flg_EdgeCon_B && Flg_EdgeSyn_B)) {
-                PWM_Set(ROT_PWM_B, abs(duty)); // pwm output
+            if ((!Flg_EdgeCon_2) || (Flg_EdgeCon_2 && Flg_EdgeSyn_2)) {
+                PWM_Set(ROT_PWM_2, abs(duty)); // pwm output
             }
             break;
             
         case 2:
-            if (duty > 0) ROT_DIR_C = 1; // direction output
-            else ROT_DIR_C = 0;
+            if (duty > 0) ROT_DIR_3 = 1; // direction output
+            else ROT_DIR_3 = 0;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon_C) || (Flg_EdgeCon_C && Flg_EdgeSyn_C)) {
-                PWM_Set(ROT_PWM_C, abs(duty)); // pwm output
+            if ((!Flg_EdgeCon_3) || (Flg_EdgeCon_3 && Flg_EdgeSyn_3)) {
+                PWM_Set(ROT_PWM_3, abs(duty)); // pwm output
             }
             break;
             

@@ -39,9 +39,12 @@
 #define MODE_ENC_CON false
 #define MODE_ACC_CON false
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active true
 
+
+/* ******************** BATTERY ********************************************* */
+#define BatCountMax 10 // seconds of continuos low bat before flag is triggered
 
 /* ******************** LIVE MODE VARS ************************************** */
 extern volatile bool MODE_LED_ANGLE;
@@ -51,8 +54,8 @@ extern volatile bool MODE_LED_RNBOW;
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAngle;
 extern volatile bool Flg_LiveEdges;
-extern volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C;
-extern volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C;
+extern volatile bool Flg_EdgeCon_1, Flg_EdgeCon_2, Flg_EdgeCon_3;
+extern volatile bool Flg_EdgeSyn_1, Flg_EdgeSyn_2, Flg_EdgeSyn_3;
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
 
@@ -67,6 +70,11 @@ extern volatile bool Flg_EdgeDemo;
 #define WIFI_EN LATBbits.LATB4      // wifi enable
 #define BAT_LBO PORTBbits.RB7       // low battery indicator
 
+// On-off confusion prevention
+#define LED_On 0                    // drained by pin, low V = led on
+#define LED_Off 1
+#define WIFI_On 1                   // high enables ESP
+#define WIFI_Off 0
 
 /* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
@@ -75,22 +83,22 @@ extern volatile bool Flg_EdgeDemo;
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
-#define ROT_PWM_DutyReg_A SDC5      // generator 5, secondary
-#define ROT_PWM_DutyReg_B PDC5      // generator 5, primary
-#define ROT_PWM_DutyReg_C SDC4      // generator 4, secondary
-#define LIN_PWM_DutyReg_A SDC3      // generator 3, secondary
-#define LIN_PWM_DutyReg_B SDC2      // generator 2, secondary
-#define LIN_PWM_DutyReg_C SDC1      // generator 1, secondary
+#define ROT_PWM_DutyReg_1 SDC5      // generator 5, secondary
+#define ROT_PWM_DutyReg_2 PDC5      // generator 5, primary
+#define ROT_PWM_DutyReg_3 SDC4      // generator 4, secondary
+#define LIN_PWM_DutyReg_1 SDC3      // generator 3, secondary
+#define LIN_PWM_DutyReg_2 SDC2      // generator 2, secondary
+#define LIN_PWM_DutyReg_3 SDC1      // generator 1, secondary
 // ROT PWM full range 1024 (SPHASEx, PHASEx)
 // LIN PWM limited to 1024 (SPHASEx)
 
 // Duty cycle selector
-#define ROT_PWM_A 1
-#define ROT_PWM_B 2
-#define ROT_PWM_C 3
-#define LIN_PWM_A 4
-#define LIN_PWM_B 5
-#define LIN_PWM_C 6
+#define ROT_PWM_1 1
+#define ROT_PWM_2 2
+#define ROT_PWM_3 3
+#define LIN_PWM_1 4
+#define LIN_PWM_2 5
+#define LIN_PWM_3 6
 
 // Ensure the following are set in the PWM Register selector
 //#define PWM_Perd_RotA SPHASE5
@@ -102,16 +110,16 @@ extern volatile bool Flg_EdgeDemo;
 
 
 /* ******************** LINEAR MOTORS *************************************** */
-#define LIN_DIR_A LATBbits.LATB10
-#define LIN_DIR_B LATBbits.LATB12
-#define LIN_DIR_C LATBbits.LATB14
+#define LIN_DIR_1 LATBbits.LATB10
+#define LIN_DIR_2 LATBbits.LATB12
+#define LIN_DIR_3 LATBbits.LATB14
 
-#define MotLin_MIN_A 108            // min pot value A
-#define MotLin_MAX_A 1022           // max pot value A
-#define MotLin_MIN_B 108            // min pot value B
-#define MotLin_MAX_B 1022           // max pot value B
-#define MotLin_MIN_C 108            // min pot value C
-#define MotLin_MAX_C 1022           // max pot value C
+#define MotLin_MIN_1 108            // min pot value A
+#define MotLin_MAX_1 1022           // max pot value A
+#define MotLin_MIN_2 108            // min pot value B
+#define MotLin_MAX_2 1022           // max pot value B
+#define MotLin_MIN_3 108            // min pot value C
+#define MotLin_MAX_3 1022           // max pot value C
 #define MotLin_SlowRegion 50        // slow region near min and max
 #define MotLin_SlowFactor 2         // linear slow down factor in slow region
 
@@ -126,9 +134,9 @@ extern volatile bool Flg_EdgeDemo;
 
 
 /* ******************** ROTARY MOTORS *************************************** */
-#define ROT_DIR_A LATCbits.LATC6
-#define ROT_DIR_B LATCbits.LATC7
-#define ROT_DIR_C LATAbits.LATA10
+#define ROT_DIR_1 LATCbits.LATC6
+#define ROT_DIR_2 LATCbits.LATC7
+#define ROT_DIR_3 LATAbits.LATA10
 
 #define MotRot_AngleRange 180       // overall range (in degrees)
 

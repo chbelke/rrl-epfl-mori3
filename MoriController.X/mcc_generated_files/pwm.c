@@ -369,23 +369,23 @@ void PWM_Generator6_Tasks ( void )
 
 void PWM_Set(uint8_t PWM_Output, uint16_t PWM_Duty){
     switch(PWM_Output) {
-        case ROT_PWM_A:
-            ROT_PWM_DutyReg_A = PWM_Duty;
+        case ROT_PWM_1:
+            ROT_PWM_DutyReg_1 = PWM_Duty;
             break;
-        case ROT_PWM_B:
-            ROT_PWM_DutyReg_B = PWM_Duty;
+        case ROT_PWM_2:
+            ROT_PWM_DutyReg_2 = PWM_Duty;
             break;
-        case ROT_PWM_C:
-            ROT_PWM_DutyReg_C = PWM_Duty;
+        case ROT_PWM_3:
+            ROT_PWM_DutyReg_3 = PWM_Duty;
             break;
-        case LIN_PWM_A:
-            LIN_PWM_DutyReg_A = PWM_Duty;
+        case LIN_PWM_1:
+            LIN_PWM_DutyReg_1 = PWM_Duty;
             break;
-        case LIN_PWM_B:
-            LIN_PWM_DutyReg_B = PWM_Duty;
+        case LIN_PWM_2:
+            LIN_PWM_DutyReg_2 = PWM_Duty;
             break;
-        case LIN_PWM_C:
-            LIN_PWM_DutyReg_C = PWM_Duty;
+        case LIN_PWM_3:
+            LIN_PWM_DutyReg_3 = PWM_Duty;
             break;
     }
     

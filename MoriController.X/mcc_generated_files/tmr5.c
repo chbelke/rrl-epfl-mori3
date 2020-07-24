@@ -172,12 +172,12 @@ uint16_t TMR5_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
-    if (Flg_Button){
+    if (Flg_Button){ // if button has been pressed, process
         Button_Eval();
         Flg_Button = false;
     }
     
-    Battery_Check(); 
+    Battery_Check();
 
     if (MODE_LED_ANGLE && MODE_ACC_CON) {
         MMA8452Q_Read();
