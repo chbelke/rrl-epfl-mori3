@@ -83,10 +83,10 @@ class UDPHost():
         print(self.wifi_host.IPDict[addr])
         ip_addr = (self.wifi_host.IPDict[addr], self.udp_port)
         msg = bytearray(len(message).to_bytes(1, byteorder='big'))
-        print(msg)
-        msg.extend(message.encode())
-
-        print(msg)
+        if isinstance(message, bytearray):
+            msg.extend(message)
+        else:
+            msg.extend(message.encode())
         sent = self.udp_sock.sendto(msg, ip_addr)
 
 

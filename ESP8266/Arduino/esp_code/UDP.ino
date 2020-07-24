@@ -5,6 +5,7 @@
 const int PACKET_SIZE = 42; //how many bytes the buffers hold
 char* ip_address = "RRLB201957";
 int ip_port = 50001;
+int controller_port = 50002;
 
 WiFiUDP UDP;
 
@@ -41,19 +42,21 @@ void readUDP()
   }
 
   commands(udp_packet, len);
-
-  // char msg[40];
-  // int i;
-  // for(i=0; udpInBuff[i] != 0 ;i++)
-  // {
-  //   msg[i] = (char)udpInBuff[i];
-  // }
-  // msg[i] = '\0';
-  // verbose_print("MSG: ");
-  // verbose_println(msg);
-
-  // commands(msg);
 }
+
+void startController()
+{
+  UDP.begin(controller_port);
+  verbose_println("began Controller UDP");  
+}
+
+
+void stopController()
+{
+  UDP.stop();
+  verbose_println("Stopped Conteroller UDP");
+}
+
 
 
 void writeUDP(char* buff)

@@ -1,0 +1,5 @@
+udp/w/p50001/i10.52.91.181/
+
+udp/w/p/i/
+
+echo "This is my data" > /dev/udp/127.0.0.1/3000
