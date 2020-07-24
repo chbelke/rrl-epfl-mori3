@@ -60,12 +60,12 @@
 /* GLOBAL MODES */
 volatile bool MODE_LED_ANGLE = false;
 volatile bool MODE_LED_EDGES = false;
-volatile bool MODE_LED_RNBOW = true;
+volatile bool MODE_LED_RNBOW = false;
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAngle = false;
 volatile bool Flg_LiveEdges = false;
-volatile bool Flg_EdgeCon_A, Flg_EdgeCon_B, Flg_EdgeCon_C = false;
-volatile bool Flg_EdgeSyn_A, Flg_EdgeSyn_B, Flg_EdgeSyn_C = false;
+volatile bool Flg_EdgeCon_1, Flg_EdgeCon_2, Flg_EdgeCon_3 = false;
+volatile bool Flg_EdgeSyn_1, Flg_EdgeSyn_2, Flg_EdgeSyn_3 = false;
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
 /* declaration for other source files is contained in define.h */
@@ -79,8 +79,8 @@ int main(void)
 {
     SYSTEM_Initialize(); // initialize the device
 
-    LED_R = 1;
-    WIFI_EN = 1;
+    LED_R = LED_Off;
+    WIFI_EN = WIFI_On;
     
     SMA_Off(0);
     SMA_Off(1);
@@ -97,6 +97,8 @@ int main(void)
     MotLin_Set(0,457);
     MotLin_Set(1,457);
     MotLin_Set(2,457);
+    
+    LED_SetAll(0,10,2);
     
     while (1)
     {

@@ -306,7 +306,7 @@ void Coms_ESP_Eval() {
                     // update leds
                     for (m = 0; m <= 2; m++) {
                         if ((EspInAloc >> (2-m)) & 0b00000001){
-//                            LED_Set(m, RgbPWM[m]);
+                            LED_Set(m, RgbPWM[m]);
                         }
                     }
                 } else {
@@ -357,24 +357,24 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float a,b,c; // extension values from 180
     switch (edge) {
         case 0:
-            a = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
-            b = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
-            c = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
+            a = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
+            b = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
+            c = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
             break;
         case 1:
-            a = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
-            b = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
-            c = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
+            a = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
+            b = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
+            c = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
             break;
         case 2:
-            a = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
-            b = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
-            c = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
+            a = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
+            b = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
+            c = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
             break;
         default:
-            a = 180+(MotLin_MAX_A-MotLin_Get(0))*12/(MotLin_MAX_A-MotLin_MIN_A);
-            b = 180+(MotLin_MAX_B-MotLin_Get(0))*12/(MotLin_MAX_B-MotLin_MIN_B);
-            c = 180+(MotLin_MAX_C-MotLin_Get(0))*12/(MotLin_MAX_C-MotLin_MIN_C);
+            a = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
+            b = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
+            c = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
             break;
     }
     
