@@ -46,6 +46,7 @@
 /**
   Section: Included Files
 */
+
 #include <xc.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -102,8 +103,8 @@ void TMR1_Initialize (void)
 {
     //TMR1 0; 
     TMR1 = 0x00;
-    //Period = 0.01 s; Frequency = 3686400 Hz; PR1 576; 
-    PR1 = 0x240;
+    //Period = 0.01 s; Frequency = 3686400 Hz; PR1 575; 
+    PR1 = 0x23F;
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
     T1CON = 0x8020;
 
