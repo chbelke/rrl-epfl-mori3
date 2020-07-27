@@ -54,8 +54,9 @@ extern volatile bool MODE_LED_RNBOW;
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAngle;
 extern volatile bool Flg_LiveEdges;
-extern volatile bool Flg_EdgeCon_1, Flg_EdgeCon_2, Flg_EdgeCon_3;
-extern volatile bool Flg_EdgeSyn_1, Flg_EdgeSyn_2, Flg_EdgeSyn_3;
+extern volatile bool Flg_EdgeCon[3];
+extern volatile bool Flg_EdgeSyn[3];
+extern volatile bool Flg_EdgeAct[3];
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
 
@@ -80,6 +81,9 @@ extern volatile bool Flg_EdgeDemo;
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
 
+/* ******************** EDGE COMMUNICATION *********************************** */
+#define EDG_Beg 15                  // start byte
+#define EDG_End 42                  // end byte
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register

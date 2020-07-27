@@ -1,4 +1,4 @@
-#include "Coms.h"
+#include "Coms_ESP.h"
 #include "define.h"
 #include "MotLin.h"
 #include "MotRot.h"
@@ -339,7 +339,7 @@ void Coms_ESP_SetMots() {
     }
 
     // Set rotary motors (not yet implemented)
-    for (k = 1; k == 3; k++) {
+    for (k = 1; k <= 3; k++) {
         if ((EspInAloc >> (2 - (k - 1))) & 0x01) {
             //            MotLin_Set(k-1,MotLinTemp[k]);
         }

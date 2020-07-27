@@ -1,17 +1,17 @@
 /**
-  UART4 Generated Driver File 
+  UART1 Generated Driver File 
 
   @Company
     Microchip Technology Inc.
 
   @File Name
-    uart4.c
+    uart1.c
 
-  @Summary 
-    This is the generated source file for the UART4 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+  @Summary
+    This is the generated source file for the UART1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This source file provides APIs for driver for UART4. 
+    This source file provides APIs for driver for UART1. 
     Generation Information : 
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
         Device            :  dsPIC33EP512GM604
@@ -47,9 +47,10 @@
  */
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include "xc.h"
-#include "uart4.h"
-#include "../Coms_ESP.h"
+#include "uart1.h"
+#include "../Coms_123.h"
 
 /**
   Section: Data Type Definitions
@@ -80,8 +81,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART4_CONFIG_TX_BYTEQ_LENGTH (8+1)
-#define UART4_CONFIG_RX_BYTEQ_LENGTH (8+1)
+#define UART1_CONFIG_TX_BYTEQ_LENGTH (8+1)
+#define UART1_CONFIG_RX_BYTEQ_LENGTH (8+1)
 
 /** UART Driver Queue
 
@@ -90,27 +91,27 @@ static bool volatile rxOverflowed;
 
  */
 
-static uint8_t txQueue[UART4_CONFIG_TX_BYTEQ_LENGTH];
-static uint8_t rxQueue[UART4_CONFIG_RX_BYTEQ_LENGTH];
+static uint8_t txQueue[UART1_CONFIG_TX_BYTEQ_LENGTH];
+static uint8_t rxQueue[UART1_CONFIG_RX_BYTEQ_LENGTH];
 
-void (*UART4_TxDefaultInterruptHandler)(void);
-void (*UART4_RxDefaultInterruptHandler)(void);
+void (*UART1_TxDefaultInterruptHandler)(void);
+void (*UART1_RxDefaultInterruptHandler)(void);
 
 /**
   Section: Driver Interface
  */
 
-void UART4_Initialize(void) {
-    IEC5bits.U4TXIE = 0;
-    IEC5bits.U4RXIE = 0;
+void UART1_Initialize(void) {
+    IEC0bits.U1TXIE = 0;
+    IEC0bits.U1RXIE = 0;
 
     // STSEL 1; IREN disabled; PDSEL 8N; UARTEN enabled; RTSMD disabled; USIDL disabled; WAKE disabled; ABAUD disabled; LPBACK disabled; BRGH enabled; URXINV disabled; UEN TX_RX; 
     // Data Bits = 8; Parity = None; Stop Bits = 1;
-    U4MODE = (0x8008 & ~(1 << 15)); // disabling UART ON bit
+    U1MODE = (0x8008 & ~(1 << 15)); // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
-    U4STA = 0x00;
+    U1STA = 0x00;
     // BaudRate = 115200; Frequency = 3686400 Hz; BRG 7; 
-    U4BRG = 0x07;
+    U1BRG = 0x07;
 
     txHead = txQueue;
     txTail = txQueue;
@@ -119,43 +120,43 @@ void UART4_Initialize(void) {
 
     rxOverflowed = false;
 
-    UART4_SetTxInterruptHandler(&UART4_Transmit_CallBack);
+    UART1_SetTxInterruptHandler(&UART1_Transmit_CallBack);
 
-    UART4_SetRxInterruptHandler(&UART4_Receive_CallBack);
+    UART1_SetRxInterruptHandler(&UART1_Receive_CallBack);
 
-    IEC5bits.U4RXIE = 1;
+    IEC0bits.U1RXIE = 1;
 
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
-    U4MODEbits.UARTEN = 1; // enabling UART ON bit
-    U4STAbits.UTXEN = 1;
+    U1MODEbits.UARTEN = 1; // enabling UART ON bit
+    U1STAbits.UTXEN = 1;
 }
 
 /**
     Maintains the driver's transmitter state machine and implements its ISR
  */
 
-void UART4_SetTxInterruptHandler(void* handler) {
+void UART1_SetTxInterruptHandler(void* handler) {
     if (handler == NULL) {
-        UART4_TxDefaultInterruptHandler = &UART4_Transmit_CallBack;
+        UART1_TxDefaultInterruptHandler = &UART1_Transmit_CallBack;
     } else {
-        UART4_TxDefaultInterruptHandler = handler;
+        UART1_TxDefaultInterruptHandler = handler;
     }
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U4TXInterrupt(void) {
-    if (UART4_TxDefaultInterruptHandler) {
-        UART4_TxDefaultInterruptHandler();
+void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void) {
+    if (UART1_TxDefaultInterruptHandler) {
+        UART1_TxDefaultInterruptHandler();
     }
 
     if (txHead == txTail) {
-        IEC5bits.U4TXIE = 0;
+        IEC0bits.U1TXIE = 0;
     } else {
-        IFS5bits.U4TXIF = 0;
+        IFS0bits.U1TXIF = 0;
 
-        while (!(U4STAbits.UTXBF == 1)) {
-            U4TXREG = *txHead++;
+        while (!(U1STAbits.UTXBF == 1)) {
+            U1TXREG = *txHead++;
 
-            if (txHead == (txQueue + UART4_CONFIG_TX_BYTEQ_LENGTH)) {
+            if (txHead == (txQueue + UART1_CONFIG_TX_BYTEQ_LENGTH)) {
                 txHead = txQueue;
             }
 
@@ -167,63 +168,65 @@ void __attribute__((interrupt, no_auto_psv)) _U4TXInterrupt(void) {
     }
 }
 
-void __attribute__((weak)) UART4_Transmit_CallBack(void) {
+void __attribute__((weak)) UART1_Transmit_CallBack(void) {
 
 }
 
-void UART4_SetRxInterruptHandler(void* handler) {
+void UART1_SetRxInterruptHandler(void* handler) {
     if (handler == NULL) {
-        UART4_RxDefaultInterruptHandler = &UART4_Receive_CallBack;
+        UART1_RxDefaultInterruptHandler = &UART1_Receive_CallBack;
     } else {
-        UART4_RxDefaultInterruptHandler = handler;
+        UART1_RxDefaultInterruptHandler = handler;
     }
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U4RXInterrupt(void) {
-    if (UART4_RxDefaultInterruptHandler) {
-        UART4_RxDefaultInterruptHandler();
+void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void) {
+    if (UART1_RxDefaultInterruptHandler) {
+        UART1_RxDefaultInterruptHandler();
     }
 
-    IFS5bits.U4RXIF = 0;
+    IFS0bits.U1RXIF = 0;
 
-    while ((U4STAbits.URXDA == 1)) {
-        *rxTail = U4RXREG;
+    while ((U1STAbits.URXDA == 1)) {
+        *rxTail = U1RXREG;
 
         // Will the increment not result in a wrap and not result in a pure collision?
         // This is most often condition so check first
-        if ((rxTail != (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH - 1)) &&
+        if ((rxTail != (rxQueue + UART1_CONFIG_RX_BYTEQ_LENGTH - 1)) &&
                 ((rxTail + 1) != rxHead)) {
             rxTail++;
-        } else if ((rxTail == (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH - 1)) &&
+        }
+        else if ((rxTail == (rxQueue + UART1_CONFIG_RX_BYTEQ_LENGTH - 1)) &&
                 (rxHead != rxQueue)) {
             // Pure wrap no collision
             rxTail = rxQueue;
-        } else // must be collision
+        }
+        else // must be collision
         {
             rxOverflowed = true;
         }
-
-        Coms_ESP_Eval();
+        
+        Coms_123_Eval(0);
     }
 }
 
-void __attribute__((weak)) UART4_Receive_CallBack(void) {
+void __attribute__((weak)) UART1_Receive_CallBack(void) {
 
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U4ErrInterrupt(void) {
-    if ((U4STAbits.OERR == 1)) {
-        U4STAbits.OERR = 0;
+void __attribute__((interrupt, no_auto_psv)) _U1ErrInterrupt(void) {
+    if ((U1STAbits.OERR == 1)) {
+        U1STAbits.OERR = 0;
     }
 
-    IFS5bits.U4EIF = 0;
+    IFS4bits.U1EIF = 0;
 }
 
 /**
   Section: UART Driver Client Routines
  */
 
-uint8_t UART4_Read(void) {
+uint8_t UART1_Read(void) {
     uint8_t data = 0;
 
     while (rxHead == rxTail) {
@@ -233,47 +236,47 @@ uint8_t UART4_Read(void) {
 
     rxHead++;
 
-    if (rxHead == (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH)) {
+    if (rxHead == (rxQueue + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
         rxHead = rxQueue;
     }
     return data;
 }
 
-void UART4_Write(uint8_t byte) {
-    while (UART4_IsTxReady() == 0) {
+void UART1_Write(uint8_t byte) {
+    while (UART1_IsTxReady() == 0) {
     }
 
     *txTail = byte;
 
     txTail++;
 
-    if (txTail == (txQueue + UART4_CONFIG_TX_BYTEQ_LENGTH)) {
+    if (txTail == (txQueue + UART1_CONFIG_TX_BYTEQ_LENGTH)) {
         txTail = txQueue;
     }
 
-    IEC5bits.U4TXIE = 1;
+    IEC0bits.U1TXIE = 1;
 }
 
-bool UART4_IsRxReady(void) {
+bool UART1_IsRxReady(void) {
     return !(rxHead == rxTail);
 }
 
-bool UART4_IsTxReady(void) {
+bool UART1_IsTxReady(void) {
     uint16_t size;
     uint8_t *snapshot_txHead = (uint8_t*) txHead;
 
     if (txTail < snapshot_txHead) {
         size = (snapshot_txHead - txTail - 1);
     } else {
-        size = (UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
+        size = (UART1_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
     }
 
     return (size != 0);
 }
 
-bool UART4_IsTxDone(void) {
+bool UART1_IsTxDone(void) {
     if (txTail == txHead) {
-        return (bool) U4STAbits.TRMT;
+        return (bool) U1STAbits.TRMT;
     }
 
     return false;
@@ -286,12 +289,12 @@ bool UART4_IsTxDone(void) {
 
  *******************************************************************************/
 
-static uint8_t UART4_RxDataAvailable(void) {
+static uint8_t UART1_RxDataAvailable(void) {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*) rxTail;
 
     if (snapshot_rxTail < rxHead) {
-        size = (UART4_CONFIG_RX_BYTEQ_LENGTH - (rxHead - snapshot_rxTail));
+        size = (UART1_CONFIG_RX_BYTEQ_LENGTH - (rxHead - snapshot_rxTail));
     } else {
         size = ((snapshot_rxTail - rxHead));
     }
@@ -303,14 +306,14 @@ static uint8_t UART4_RxDataAvailable(void) {
     return size;
 }
 
-static uint8_t UART4_TxDataAvailable(void) {
+static uint8_t UART1_TxDataAvailable(void) {
     uint16_t size;
     uint8_t *snapshot_txHead = (uint8_t*) txHead;
 
     if (txTail < snapshot_txHead) {
         size = (snapshot_txHead - txTail - 1);
     } else {
-        size = (UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
+        size = (UART1_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
     }
 
     if (size > 0xFF) {
@@ -320,8 +323,8 @@ static uint8_t UART4_TxDataAvailable(void) {
     return size;
 }
 
-unsigned int __attribute__((deprecated)) UART4_ReadBuffer(uint8_t *buffer, unsigned int numbytes) {
-    unsigned int rx_count = UART4_RxDataAvailable();
+unsigned int __attribute__((deprecated)) UART1_ReadBuffer(uint8_t *buffer, unsigned int numbytes) {
+    unsigned int rx_count = UART1_RxDataAvailable();
     unsigned int i;
 
     if (numbytes < rx_count) {
@@ -329,14 +332,14 @@ unsigned int __attribute__((deprecated)) UART4_ReadBuffer(uint8_t *buffer, unsig
     }
 
     for (i = 0; i < rx_count; i++) {
-        *buffer++ = UART4_Read();
+        *buffer++ = UART1_Read();
     }
 
     return rx_count;
 }
 
-unsigned int __attribute__((deprecated)) UART4_WriteBuffer(uint8_t *buffer, unsigned int numbytes) {
-    unsigned int tx_count = UART4_TxDataAvailable();
+unsigned int __attribute__((deprecated)) UART1_WriteBuffer(uint8_t *buffer, unsigned int numbytes) {
+    unsigned int tx_count = UART1_TxDataAvailable();
     unsigned int i;
 
     if (numbytes < tx_count) {
@@ -344,35 +347,35 @@ unsigned int __attribute__((deprecated)) UART4_WriteBuffer(uint8_t *buffer, unsi
     }
 
     for (i = 0; i < tx_count; i++) {
-        UART4_Write(*buffer++);
+        UART1_Write(*buffer++);
     }
 
     return tx_count;
 }
 
-UART4_TRANSFER_STATUS __attribute__((deprecated)) UART4_TransferStatusGet(void) {
-    UART4_TRANSFER_STATUS status = 0;
-    uint8_t rx_count = UART4_RxDataAvailable();
-    uint8_t tx_count = UART4_TxDataAvailable();
+UART1_TRANSFER_STATUS __attribute__((deprecated)) UART1_TransferStatusGet(void) {
+    UART1_TRANSFER_STATUS status = 0;
+    uint8_t rx_count = UART1_RxDataAvailable();
+    uint8_t tx_count = UART1_TxDataAvailable();
 
     switch (rx_count) {
         case 0:
-            status |= UART4_TRANSFER_STATUS_RX_EMPTY;
+            status |= UART1_TRANSFER_STATUS_RX_EMPTY;
             break;
-        case UART4_CONFIG_RX_BYTEQ_LENGTH:
-            status |= UART4_TRANSFER_STATUS_RX_FULL;
+        case UART1_CONFIG_RX_BYTEQ_LENGTH:
+            status |= UART1_TRANSFER_STATUS_RX_FULL;
             break;
         default:
-            status |= UART4_TRANSFER_STATUS_RX_DATA_PRESENT;
+            status |= UART1_TRANSFER_STATUS_RX_DATA_PRESENT;
             break;
     }
 
     switch (tx_count) {
         case 0:
-            status |= UART4_TRANSFER_STATUS_TX_FULL;
+            status |= UART1_TRANSFER_STATUS_TX_FULL;
             break;
-        case UART4_CONFIG_RX_BYTEQ_LENGTH:
-            status |= UART4_TRANSFER_STATUS_TX_EMPTY;
+        case UART1_CONFIG_RX_BYTEQ_LENGTH:
+            status |= UART1_TRANSFER_STATUS_TX_EMPTY;
             break;
         default:
             break;
@@ -381,72 +384,56 @@ UART4_TRANSFER_STATUS __attribute__((deprecated)) UART4_TransferStatusGet(void) 
     return status;
 }
 
-uint8_t __attribute__((deprecated)) UART4_Peek(uint16_t offset) {
+uint8_t __attribute__((deprecated)) UART1_Peek(uint16_t offset) {
     uint8_t *peek = rxHead + offset;
 
-    while (peek > (rxQueue + UART4_CONFIG_RX_BYTEQ_LENGTH)) {
-        peek -= UART4_CONFIG_RX_BYTEQ_LENGTH;
+    while (peek > (rxQueue + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
+        peek -= UART1_CONFIG_RX_BYTEQ_LENGTH;
     }
 
     return *peek;
 }
 
-bool __attribute__((deprecated)) UART4_ReceiveBufferIsEmpty(void) {
-    return (UART4_RxDataAvailable() == 0);
+bool __attribute__((deprecated)) UART1_ReceiveBufferIsEmpty(void) {
+    return (UART1_RxDataAvailable() == 0);
 }
 
-bool __attribute__((deprecated)) UART4_TransmitBufferIsFull(void) {
-    return (UART4_TxDataAvailable() == 0);
+bool __attribute__((deprecated)) UART1_TransmitBufferIsFull(void) {
+    return (UART1_TxDataAvailable() == 0);
 }
 
-uint16_t __attribute__((deprecated)) UART4_StatusGet(void) {
-    return U4STA;
+uint16_t __attribute__((deprecated)) UART1_StatusGet(void) {
+    return U1STA;
 }
 
-unsigned int __attribute__((deprecated)) UART4_TransmitBufferSizeGet(void) {
-    if (UART4_TxDataAvailable() != 0) {
+unsigned int __attribute__((deprecated)) UART1_TransmitBufferSizeGet(void) {
+    if (UART1_TxDataAvailable() != 0) {
         if (txHead > txTail) {
             return ((txHead - txTail) - 1);
         } else {
-            return ((UART4_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead)) - 1);
+            return ((UART1_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead)) - 1);
         }
     }
     return 0;
 }
 
-unsigned int __attribute__((deprecated)) UART4_ReceiveBufferSizeGet(void) {
-    if (UART4_RxDataAvailable() != 0) {
+unsigned int __attribute__((deprecated)) UART1_ReceiveBufferSizeGet(void) {
+    if (UART1_RxDataAvailable() != 0) {
         if (rxHead > rxTail) {
             return ((rxHead - rxTail) - 1);
         } else {
-            return ((UART4_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead)) - 1);
+            return ((UART1_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead)) - 1);
         }
     }
     return 0;
 }
 
-void __attribute__((deprecated)) UART4_Enable(void) {
-    U4MODEbits.UARTEN = 1;
-    U4STAbits.UTXEN = 1;
+void __attribute__((deprecated)) UART1_Enable(void) {
+    U1MODEbits.UARTEN = 1;
+    U1STAbits.UTXEN = 1;
 }
 
-void __attribute__((deprecated)) UART4_Disable(void) {
-    U4MODEbits.UARTEN = 0;
-    U4STAbits.UTXEN = 0;
-}
-
-
-///// ADDED FUNCTION /////
-void UART4_Write16(uint16_t txData) {
-    uint8_t LSByte;
-    uint8_t MSByte;
-
-    // Extract LSB and MSB 
-    LSByte = txData & 0x00FF;
-    MSByte = (txData >> 8) & 0x00FF;
-
-    //MSByte FIRST! (uart write lsbit of the byte first though)
-    UART4_Write(MSByte);
-
-    UART4_Write(LSByte);
+void __attribute__((deprecated)) UART1_Disable(void) {
+    U1MODEbits.UARTEN = 0;
+    U1STAbits.UTXEN = 0;
 }

@@ -62,14 +62,14 @@ void PIN_MANAGER_Initialize (void)
      * Setting the Output Latch SFR(s)
      ***************************************************************************/
     LATA = 0x0000;
-    LATB = 0x0030;
-    LATC = 0x0002;
+    LATB = 0x0230;
+    LATC = 0x0003;
 
     /****************************************************************************
      * Setting the GPIO Direction SFR(s)
      ***************************************************************************/
-    TRISA = 0x031B;
-    TRISB = 0x03CC;
+    TRISA = 0x031F;
+    TRISB = 0x01CC;
     TRISC = 0x003C;
 
     /****************************************************************************
@@ -93,8 +93,8 @@ void PIN_MANAGER_Initialize (void)
      * Setting the Analog/Digital Configuration SFR(s)
      ***************************************************************************/
     ANSELA = 0x0218;
-    ANSELB = 0x0380;
-    ANSELC = 0x000B;
+    ANSELB = 0x0180;
+    ANSELC = 0x0008;
     
     /****************************************************************************
      * Set the PPS
@@ -102,8 +102,14 @@ void PIN_MANAGER_Initialize (void)
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
     RPINR28bits.U4RXR = 0x0026;    //RB6->UART4:U4RX
-    RPINR0bits.INT1R = 0x0011;    //RA1->EXT_INT:INT1
     RPOR1bits.RP37R = 0x001D;    //RB5->UART4:U4TX
+    RPOR5bits.RP48R = 0x0001;    //RC0->UART1:U1TX
+    RPINR27bits.U3RXR = 0x0010;    //RA0->UART3:U3RX
+    RPINR0bits.INT1R = 0x0011;    //RA1->EXT_INT:INT1
+    RPOR3bits.RP41R = 0x001B;    //RB9->UART3:U3TX
+    RPOR5bits.RP49R = 0x0003;    //RC1->UART2:U2TX
+    RPINR18bits.U1RXR = 0x0012;    //RA2->UART1:U1RX
+    RPINR19bits.U2RXR = 0x0032;    //RC2->UART2:U2RX
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock PPS
 }
