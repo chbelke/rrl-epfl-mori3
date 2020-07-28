@@ -10,6 +10,7 @@ uint8_t EdgInAloc[3] = {0,0,0}; // incoming allocation byte (explanation below)
 uint8_t NeighbourID[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 uint8_t NeighbourIDTemp[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 uint8_t NeighbourByteCount[3] = {0,0,0};
+uint8_t EdgByteCount[3] = {0,0,0};
 
 uint16_t EdgLngCmd[3] = {0,0,0}; // edge length command received by neighbour
 
@@ -64,8 +65,7 @@ void Coms_123_Eval(uint8_t edge){
                 case 4: // xxx == 100, connection detected or acknowledged
                     EdgInCase[edge] = 20;
                 case 7: // xxx == 111, relay (Kevin)
-                    // Hi Kevin
-                    EdgInCase[edge] = 30;
+                    EdgInCase[edge] = 30 + (EdgInAloc[edge] & 0b00011111);
                     break;
             }
             break;
@@ -132,9 +132,32 @@ void Coms_123_Eval(uint8_t edge){
                 NeighbourByteCount[edge] = 0;
             }
             break;
-        case 30: // RELAY MODE **************************************************
-            // Hi Kevin I want your babies
+            
+// **************************************************************************
+// ***************************** RELAY MODE *********************************
+// **************************************************************************            
+        
+        case 30: // Verbose ****************************************
+            if(EdgByteCount[edge] != 2)
+            {
+                EdgByteCount[edge]++;
+                break;
+            }
+            else if (EdgIn == EDG_End)
+            {
+//                Flg_Verbose = !Flg_Verbose;
+                Flg_Verbose = true;
+                EdgInCase[edge] = 0;
+                EdgByteCount[edge] = 0;
+            }
             break;
+        
+        case 31: // Verbose ****************************************
+            break;
+            
+// **************************************************************************
+// ****************************** Default ***********************************
+// **************************************************************************            
         default:
             EdgInCase[edge] = 0;
             break;

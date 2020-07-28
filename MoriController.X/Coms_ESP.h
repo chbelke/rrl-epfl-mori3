@@ -13,6 +13,7 @@
 void Coms_ESP_Eval (void);
 void Coms_ESP_SetMots (void);
 void Coms_ESP_Drive (uint8_t, int8_t, uint8_t, uint8_t);
+void Coms_ESP_Verbose (void);
 
 #endif	/* COMS_ESP_H */
 

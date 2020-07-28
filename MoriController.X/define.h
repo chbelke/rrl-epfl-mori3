@@ -62,6 +62,7 @@ extern volatile bool Flg_Button;
 
 extern volatile bool Flg_EdgeDemo;
 
+extern volatile bool Flg_Verbose;
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
@@ -184,5 +185,8 @@ extern volatile bool Flg_EdgeDemo;
 
 #define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
 #define SMA_Duty 100 // 8-bit PWM value
+
+/* ************************ ESP8622 Comms ********************************** */
+#define WIFI_RELAY_BYTE 0b00000101
 
 #endif	/* DEFINE_H */
