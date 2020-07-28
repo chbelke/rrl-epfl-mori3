@@ -60,9 +60,9 @@ ESP8266/Arduino/_libraries/
 
 
 # Ignoring files according to http://microchip.wikidot.com/faq:72
-/MoriController.X/build/
-/MoriController.X/dist/
+MoriController.X/build/
+MoriController.X/dist/
 #Ingoring private Makefiles, to create them open the MPLAB IDE or use the C:\Program Files (x86)\Microchip\MPLABX\<VERSION>\mplab_ide\bin\prjMakefilesGenerator.bat script
-/MoriController.X/nbproject/Makefile-*
-/MoriController.X/nbproject/Package-*
-/MoriController.X/nbproject/private/
+MoriController.X/nbproject/Makefile-*
+MoriController.X/nbproject/Package-*
+MoriController.X/nbproject/private/
