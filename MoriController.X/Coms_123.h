@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   Coms_123.h
  * Author: belke
  *
@@ -11,6 +11,10 @@
 #include "mcc_generated_files/mcc.h"
 
 void Coms_123_Eval (uint8_t);
+void Coms_123_IdleEval (uint8_t);
+void Coms_123_ConHandle (void);
+void Coms_123_Write (uint8_t, uint8_t);
+void Coms_123_WriteID (uint8_t);
 
 #endif	/* COMS_123_H */
 

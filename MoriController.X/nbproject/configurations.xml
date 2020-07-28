@@ -38,10 +38,10 @@
       <itemPath>MotRot.h</itemPath>
       <itemPath>define.h</itemPath>
       <itemPath>AS5048B.h</itemPath>
-      <itemPath>Coms.h</itemPath>
       <itemPath>Battery.h</itemPath>
       <itemPath>Button.h</itemPath>
       <itemPath>Coms_123.h</itemPath>
+      <itemPath>Coms_ESP.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -79,10 +79,10 @@
       <itemPath>MotRot.c</itemPath>
       <itemPath>MotLin.c</itemPath>
       <itemPath>AS5048B.c</itemPath>
-      <itemPath>Coms.c</itemPath>
       <itemPath>Battery.c</itemPath>
       <itemPath>Button.c</itemPath>
       <itemPath>Coms_123.c</itemPath>
+      <itemPath>Coms_ESP.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

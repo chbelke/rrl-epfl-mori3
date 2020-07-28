@@ -81,8 +81,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART1_CONFIG_TX_BYTEQ_LENGTH (8+1)
-#define UART1_CONFIG_RX_BYTEQ_LENGTH (8+1)
+#define UART1_CONFIG_TX_BYTEQ_LENGTH (16+1)
+#define UART1_CONFIG_RX_BYTEQ_LENGTH (16+1)
 
 /** UART Driver Queue
 
@@ -107,7 +107,7 @@ void UART1_Initialize(void) {
 
     // STSEL 1; IREN disabled; PDSEL 8N; UARTEN enabled; RTSMD disabled; USIDL disabled; WAKE disabled; ABAUD disabled; LPBACK disabled; BRGH enabled; URXINV disabled; UEN TX_RX; 
     // Data Bits = 8; Parity = None; Stop Bits = 1;
-    U1MODE = (0x8008 & ~(1 << 15)); // disabling UART ON bit
+    U1MODE = (0x8008 & ~(1<<15));  // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U1STA = 0x00;
     // BaudRate = 115200; Frequency = 3686400 Hz; BRG 7; 
@@ -127,7 +127,7 @@ void UART1_Initialize(void) {
     IEC0bits.U1RXIE = 1;
 
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
-    U1MODEbits.UARTEN = 1; // enabling UART ON bit
+    U1MODEbits.UARTEN = 1;   // enabling UART ON bit
     U1STAbits.UTXEN = 1;
 }
 

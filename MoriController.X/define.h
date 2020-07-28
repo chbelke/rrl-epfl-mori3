@@ -39,8 +39,8 @@
 #define MODE_ENC_CON false
 #define MODE_ACC_CON false
 
-#define STAT_MotLin_Active true
-#define STAT_MotRot_Active true
+#define STAT_MotLin_Active false
+#define STAT_MotRot_Active false
 
 
 /* ******************** BATTERY ********************************************* */
@@ -84,6 +84,7 @@ extern volatile bool Flg_EdgeDemo;
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_Beg 15                  // start byte
 #define EDG_End 42                  // end byte
+#define EDG_IdleReset 5             // reduced at 5Hz, 5 = 1 second
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
