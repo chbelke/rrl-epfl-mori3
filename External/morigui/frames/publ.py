@@ -17,6 +17,9 @@ class PublishLocal():
         self.listMoriVar.trace('w', self.option_select)        
         self.load()
 
+        self.frame.master.bind('<Return>', 
+            lambda event=None: self.pub_loc_button.invoke())
+
 
     def load(self):
         self.listMoriLabel = tk.Label(self.frame, text="Mori Available:")

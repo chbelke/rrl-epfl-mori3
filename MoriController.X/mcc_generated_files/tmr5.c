@@ -61,6 +61,7 @@
 #include "../MMA8452Q.h"
 #include "../Battery.h"
 #include "../Button.h"
+#include "../Coms_ESP.h"
 
 /**
  Section: File specific functions
@@ -265,6 +266,15 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     } else {
         m = 0;
         j = 0;
+    }
+    
+    if (Flg_Verbose)
+    {
+        static int k = 0;
+        if(!(k % 5)){
+            Coms_ESP_Verbose();
+        }
+        
     }
     
 }
