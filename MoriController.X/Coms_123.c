@@ -145,8 +145,7 @@ void Coms_123_Eval(uint8_t edge){
             }
             else if (EdgIn == EDG_End)
             {
-//                Flg_Verbose = !Flg_Verbose;
-                Flg_Verbose = true;
+                Flg_Verbose = !Flg_Verbose;
                 EdgInCase[edge] = 0;
                 EdgByteCount[edge] = 0;
             }
