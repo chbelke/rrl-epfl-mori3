@@ -9,6 +9,7 @@ import runMqtt.operations.getOn as getOn
 import runMqtt.operations.getShape as getShape
 import runMqtt.operations.getControl as getControl
 import runMqtt.operations.getUDP as getUDP
+import runMqtt.operations.getVerbose as getVerbose
 
 
 commands = {
@@ -23,4 +24,5 @@ commands = {
    'SHAPE:': getShape.getShape,
    'CONTROL:': getControl.getControl,
    'UDP:': getUDP.startUDP,
+   'VBS:': getVerbose.getVerbose,
 }   

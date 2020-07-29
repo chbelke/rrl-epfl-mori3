@@ -135,7 +135,8 @@ void setup()
   handleOTA();
   
   //----------------------- UDP Handling--------------------------------------//
-  verbose_flag = false;
+  // verbose_flag = false;
+  // verbose_flag = true;
 }
 
 
@@ -215,6 +216,7 @@ void publish(char* buff)
 void normalOp()
 {
 //  scanWifis();
+  readSerial();
   long unsigned currentTime = millis();
   if(currentTime - lastMacPub > 2000)
   {

@@ -6,6 +6,7 @@
 #include "math.h"
 #include "dsp.h"
 #include "mcc_generated_files/uart4.h"
+#include "mcc_generated_files/adc1.h"
 
 uint8_t EspInCase = 0; // switch case variable
 uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
@@ -438,6 +439,17 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
 
 uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
     return SelfID[byteNum];
+}
+
+
+void Coms_ESP_Verbose() {
+    UART4_Write(WIFI_RELAY_BYTE);
+    UART4_Write(6);           // Message length
+    uint8_t i;
+    for(i = 0; i < 3; i++){     
+        UART4_Write16(ADC1_Return(i));
+    }
+    UART4_Write(ESP_End);
 }
 
 /* Com_ESP_Drive - Online calc verification */

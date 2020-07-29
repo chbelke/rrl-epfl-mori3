@@ -23,8 +23,20 @@ def splitMessage(msg):
       return
 
    espNum = topic[1]
-   pyld = msg.payload.decode('UTF-8')
-   pyld = pyld.rsplit(' ')
+
+   try:
+      pyld = msg.payload.decode('UTF-8')
+      pyld = pyld.rsplit(' ')
+   except:
+      pyld = []
+      pyld.append(msg.payload[0:4].decode('UTF-8'))
+      pyld.append(msg.payload[5:-1])
+      # if start == "VBS:":
+      #    end = bytearray.fromhex(msg.payload[4:-1]).decode()
+      #    print("end: ", end)
+      #    pyld = [start, end].flatten()
+      #    print(pyld)
+
    
    return pyld, espNum
 
