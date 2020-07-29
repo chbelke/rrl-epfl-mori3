@@ -64,8 +64,9 @@ volatile bool MODE_LED_RNBOW = false;
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAngle = false;
 volatile bool Flg_LiveEdges = false;
-volatile bool Flg_EdgeCon_1, Flg_EdgeCon_2, Flg_EdgeCon_3 = false;
-volatile bool Flg_EdgeSyn_1, Flg_EdgeSyn_2, Flg_EdgeSyn_3 = false;
+volatile bool Flg_EdgeCon[3] = {false, false, false}; // connection detected
+volatile bool Flg_EdgeSyn[3] = {false, false, false}; // connection acknowledged
+volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
 /* declaration for other source files is contained in define.h */
@@ -98,7 +99,7 @@ int main(void)
     MotLin_Set(1,457);
     MotLin_Set(2,457);
     
-    LED_SetAll(0,10,2);
+    LED_SetAll(0,1,2);
     
     while (1)
     {

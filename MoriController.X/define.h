@@ -39,8 +39,8 @@
 #define MODE_ENC_CON false
 #define MODE_ACC_CON false
 
-#define STAT_MotLin_Active true
-#define STAT_MotRot_Active true
+#define STAT_MotLin_Active false
+#define STAT_MotRot_Active false
 
 
 /* ******************** BATTERY ********************************************* */
@@ -54,8 +54,9 @@ extern volatile bool MODE_LED_RNBOW;
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAngle;
 extern volatile bool Flg_LiveEdges;
-extern volatile bool Flg_EdgeCon_1, Flg_EdgeCon_2, Flg_EdgeCon_3;
-extern volatile bool Flg_EdgeSyn_1, Flg_EdgeSyn_2, Flg_EdgeSyn_3;
+extern volatile bool Flg_EdgeCon[3];
+extern volatile bool Flg_EdgeSyn[3];
+extern volatile bool Flg_EdgeAct[3];
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
 
@@ -80,6 +81,10 @@ extern volatile bool Flg_EdgeDemo;
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
 
+/* ******************** EDGE COMMUNICATION *********************************** */
+#define EDG_Beg 15                  // start byte
+#define EDG_End 42                  // end byte
+#define EDG_IdleInterval 5             // reduced at 5Hz, 5 = 1 second
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register

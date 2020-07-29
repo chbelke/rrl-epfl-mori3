@@ -61,6 +61,7 @@
 #include "../MMA8452Q.h"
 #include "../Battery.h"
 #include "../Button.h"
+#include "../Coms_123.h"
 
 /**
  Section: File specific functions
@@ -177,6 +178,8 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         Flg_Button = false;
     }
     
+    Coms_123_ConHandle(); // inter-module connection handler
+    
     Battery_Check();
 
     if (MODE_LED_ANGLE && MODE_ACC_CON) {
@@ -216,56 +219,58 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         LED_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
     }
 
-    static int j = 0;
-    static int m = 0;
-    if (Flg_EdgeDemo){
-        switch (m) {
-            case 0:
-                MotLin_Set(0, 160);
-                MotLin_Set(1, 160);
-                MotLin_Set(2, 160);
-                break;
-            case 1:
-                MotLin_Set(0, 970);
-                MotLin_Set(1, 160);
-                MotLin_Set(2, 160);
-                break;
-            case 2:
-                MotLin_Set(0, 970);
-                MotLin_Set(1, 970);
-                MotLin_Set(2, 160);
-                break;
-            case 3:
-                MotLin_Set(0, 970);
-                MotLin_Set(1, 970);
-                MotLin_Set(2, 970);
-                break;
-            case 4:
-                MotLin_Set(0, 160);
-                MotLin_Set(1, 970);
-                MotLin_Set(2, 970);
-                break;
-            case 5:
-                MotLin_Set(0, 160);
-                MotLin_Set(1, 160);
-                MotLin_Set(2, 970);
-                break;
-            case 6:
-                m = 0;
-                break;
-            default:
-                m = 0;
-                break;
-        }
-        j++;
-        if (j >= 100) {
-            m++;
-            j = 0;
-        }
-    } else {
-        m = 0;
-        j = 0;
-    }
+
+    
+//    static int j = 0;
+//    static int m = 0;
+//    if (Flg_EdgeDemo){
+//        switch (m) {
+//            case 0:
+//                MotLin_Set(0, 160);
+//                MotLin_Set(1, 160);
+//                MotLin_Set(2, 160);
+//                break;
+//            case 1:
+//                MotLin_Set(0, 970);
+//                MotLin_Set(1, 160);
+//                MotLin_Set(2, 160);
+//                break;
+//            case 2:
+//                MotLin_Set(0, 970);
+//                MotLin_Set(1, 970);
+//                MotLin_Set(2, 160);
+//                break;
+//            case 3:
+//                MotLin_Set(0, 970);
+//                MotLin_Set(1, 970);
+//                MotLin_Set(2, 970);
+//                break;
+//            case 4:
+//                MotLin_Set(0, 160);
+//                MotLin_Set(1, 970);
+//                MotLin_Set(2, 970);
+//                break;
+//            case 5:
+//                MotLin_Set(0, 160);
+//                MotLin_Set(1, 160);
+//                MotLin_Set(2, 970);
+//                break;
+//            case 6:
+//                m = 0;
+//                break;
+//            default:
+//                m = 0;
+//                break;
+//        }
+//        j++;
+//        if (j >= 100) {
+//            m++;
+//            j = 0;
+//        }
+//    } else {
+//        m = 0;
+//        j = 0;
+//    }
     
 }
 

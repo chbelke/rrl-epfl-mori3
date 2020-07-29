@@ -52,18 +52,21 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "tmr1.h"
-#include "tmr3.h"
+#include "ext_int.h"
 #include "i2c1.h"
+#include "reset.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "pwm.h"
-#include "reset.h"
-#include "ext_int.h"
+#include "tmr3.h"
+#include "tmr1.h"
 #include "watchdog.h"
+#include "uart4.h"
+#include "uart3.h"
 #include "adc1.h"
 #include "tmr5.h"
-#include "uart4.h"
+#include "uart2.h"
+#include "pwm.h"
+#include "uart1.h"
 
 #ifndef _XTAL_FREQ
 #define _XTAL_FREQ  7372800UL
