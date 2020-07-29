@@ -83,9 +83,9 @@ extern volatile bool Flg_Verbose;
 #define ESP_End 14                  // end byte
 
 /* ******************** EDGE COMMUNICATION *********************************** */
-#define EDG_Beg 15                  // start byte
 #define EDG_End 42                  // end byte
-#define EDG_IdleInterval 5             // reduced at 5Hz, 5 = 1 second
+#define EDG_IdlIntrvl 5             // idle check at 5Hz, 5 = 1 sec = con lost
+#define EDG_ConIntrvl 10            // con check at 5Hz, 5 = 2 sec = con lost
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
