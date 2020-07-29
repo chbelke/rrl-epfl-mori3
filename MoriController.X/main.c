@@ -99,7 +99,7 @@ int main(void)
     MotLin_Set(1,457);
     MotLin_Set(2,457);
     
-    LED_SetAll(0,10,2);
+    LED_SetAll(0,1,2);
     
     while (1)
     {

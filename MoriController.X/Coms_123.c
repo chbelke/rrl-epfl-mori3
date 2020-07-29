@@ -7,21 +7,26 @@
 #include "TLC59208.h"
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
-uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explanation below)
+uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
+uint8_t EdgIdleCount[3] = {0, 0, 0};
 
-uint8_t NeighbourID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t NeighbourIDTemp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t NeighbourByteCount[3] = {0, 0, 0};
+bool Flg_IDCnfd[3] = {false, false, false};
+bool Flg_IDRcvd[3] = {false, false, false};
+
+// Neighbour ID variables
+uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t NbrIDTemp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t NbrIDCount[3] = {0, 0, 0};
 
 uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
 
-uint8_t EdgIdleCount[3] = {0, 0, 0};
-
+// Outcoing bytes based on mode (EdgInAloc explanation below)
 #define COMS_123_Conn 0b10010000
 #define COMS_123_Ackn 0b10001000
+#define COMS_123_IDOk 0b10001100
 #define COMS_123_Idle 0b01100000
 
-
+// EdgInAloc Explanation
 /* EdgInAloc: 
  * 0bxxx00000, where xxx = indicator
  * 000 = stop moving
@@ -42,21 +47,8 @@ uint8_t EdgIdleCount[3] = {0, 0, 0};
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) {
-    uint8_t EdgIn; // Incoming byte
-    uint8_t i;
-    switch (edge) {
-        case 0:
-            EdgIn = UART1_Read();
-            break;
-        case 1:
-            EdgIn = UART2_Read();
-            break;
-        case 2:
-            EdgIn = UART3_Read();
-            break;
-    }
-    LED_Set(1,0);
-    switch (EdgInCase[edge]) {
+    uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
+    switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             EdgInAloc[edge] = EdgIn;
             switch ((EdgInAloc[edge] >> 5) & 0x07) {
@@ -72,7 +64,6 @@ void Coms_123_Eval(uint8_t edge) {
                     break;
                 case 4: // xxx == 100, connection detected or acknowledged
                     EdgInCase[edge] = 20;
-                    LED_Set(0,20);
                     break;
                 case 7: // xxx == 111, relay (Kevin)
                     // Hi Kevin
@@ -80,14 +71,16 @@ void Coms_123_Eval(uint8_t edge) {
                     break;
             }
             break;
+
         case 1: // EMERGENCY STOP **********************************************
             if (EdgIn == EDG_End) {
                 Flg_EdgeSyn[edge] = false;
             }
             EdgInCase[edge] = 0;
             break;
+
         case 2: // ACTION COMMAND RECEIVED *************************************
-            if (EdgInAloc[edge] & 0b00010000) { // angle command received
+            if (EdgInAloc[edge] & 0b00010000) { // angle command
                 // first angle byte
                 EdgInCase[edge] = 3;
                 break;
@@ -99,7 +92,7 @@ void Coms_123_Eval(uint8_t edge) {
                 break;
             }
         case 4:
-            if (EdgInAloc[edge] & 0b00001000) { // length command received
+            if (EdgInAloc[edge] & 0b00001000) { // length command
                 // first length byte
                 EdgInCase[edge] = 5;
                 break;
@@ -111,7 +104,7 @@ void Coms_123_Eval(uint8_t edge) {
                 break;
             }
         case 6:
-            if (EdgInAloc[edge] & 0b00000100) { // coupling command received
+            if (EdgInAloc[edge] & 0b00000100) { // coupling command
                 // open coupling ?
                 EdgInCase[edge] = 7;
                 break;
@@ -122,37 +115,50 @@ void Coms_123_Eval(uint8_t edge) {
             }
             EdgInCase[edge] = 0;
             break;
+
         case 10: // IDLE MODE **************************************************
             if (EdgIn == EDG_End) {
-                EdgIdleCount[edge] = EDG_IdleReset;
+                EdgIdleCount[edge] = EDG_IdleInterval; // reset interval
+                if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge])
+                    Flg_EdgeSyn[edge] = true;
             }
             EdgInCase[edge] = 0;
             break;
-        case 20: // CONNECTION ACKNOWLEDGED OR ACKNOWLEDGED ********************
-            if ((EdgInAloc[edge] & 0b00010000) == 1) { // connection detected
+
+        case 20: // CONNECTION DETECTED OR ACKNOWLEDGED ************************
+            if ((EdgInAloc[edge] & 0b00010000)) { // con detected
                 if (EdgIn == EDG_End) {
                     Flg_EdgeCon[edge] = true;
                     Flg_EdgeSyn[edge] = false;
-                    LED_R = LED_On;
+                    Flg_IDCnfd[edge] = false;
+                    Flg_IDRcvd[edge] = false;
                 }
                 EdgInCase[edge] = 0;
-            } else if ((EdgInAloc[edge] & 0b00001000) == 1) { // expect ID
-                if (NeighbourByteCount[edge] < 6) {
-                    NeighbourIDTemp[NeighbourByteCount[edge] + 6 * edge] = EdgIn;
-                    NeighbourByteCount[edge] = NeighbourByteCount[edge] + 1;
+            } else if ((EdgInAloc[edge] & 0b00001000)) { // con acknowledged
+                // acknowledge byte followed by ID
+                if (NbrIDCount[edge] < 6) {
+                    NbrIDTemp[NbrIDCount[edge] + 6 * edge] = EdgIn;
+                    NbrIDCount[edge]++;
                 } else {
                     if (EdgIn == EDG_End) {
+                        uint8_t i;
                         for (i = 0 + 6 * edge; i <= 5 + 6 * edge; i++) {
-                            NeighbourID[i] = NeighbourIDTemp[i];
+                            NbrID[i] = NbrIDTemp[i];
                         }
-                        Flg_EdgeSyn[edge] = true;
+                        Flg_EdgeCon[edge] = true; // make sure flag is set
+                        Flg_IDRcvd[edge] = true; // ID received, tell neighbour
+                        Flg_EdgeSyn[edge] = false; // reset synced
                     }
-                    NeighbourByteCount[edge] = 0;
+                    NbrIDCount[edge] = 0;
                     EdgInCase[edge] = 0;
+                }
+                if ((EdgInAloc[edge] & 0b00000100)) {
+                    Flg_IDCnfd[edge] = true; // ID confirmed
                 }
             }
             break;
-        case 30: // RELAY MODE **************************************************
+
+        case 30: // RELAY MODE *************************************************
             // Hi Kevin I want your babies
             break;
         default:
@@ -161,35 +167,48 @@ void Coms_123_Eval(uint8_t edge) {
     }
 }
 
-// called in tmr5 at 5Hz
-void Coms_123_ConHandle() {
-    uint8_t edge;
-    uint8_t byte;
+/* ******************** NEIGHBOUR CONNECTION HANDLE ************************* */
+void Coms_123_ConHandle() { // called in tmr5 at 5Hz
+    uint8_t edge, byte;
     for (edge = 0; edge < 3; edge++) {
-        // check if something has been received in interval
-        if (EdgIdleCount[edge] == 0) {
+        // check if idle byte received in EDG_IdleInterval when synced
+        if ((EdgIdleCount[edge] == 0) && (Flg_EdgeSyn[edge])) { // con lost
             Flg_EdgeCon[edge] = false;
-        } else {
-            EdgIdleCount[edge] = EdgIdleCount[edge] - 1;
+            Flg_EdgeSyn[edge] = false;
+            Flg_IDCnfd[edge] = false;
+            Flg_IDRcvd[edge] = false;
+        } else if (EdgIdleCount[edge]) {
+            EdgIdleCount[edge]--; // count down interval
+        }
+        
+        // check if ID received and confirmed = synced
+        if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge] && Flg_IDCnfd[edge]) {
+            Flg_EdgeSyn[edge] = true;
+            EdgIdleCount[edge] = EDG_IdleInterval;
         }
 
-        if (Flg_EdgeSyn[edge] && Flg_EdgeCon[edge]) {
+        // determine byte to be sent depending on con state flags
+        if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
+        } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
+            byte = COMS_123_IDOk;
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
         } else {
             byte = COMS_123_Conn; // send connect search
         }
 
+        // write byte (ID if in con but no sync) and end byte
         Coms_123_Write(edge, byte);
-        if (byte == COMS_123_Ackn)
+        if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
             Coms_123_WriteID(edge);
         Coms_123_Write(edge, EDG_End);
     }
 }
 
+/* ******************** WRITE BYTE TO EDGE ********************************** */
 void Coms_123_Write(uint8_t edge, uint8_t byte) {
-    switch (edge) {
+    switch (edge) { // send byte to specific UART based on edge
         case 0:
             UART1_Write(byte);
             break;
@@ -202,10 +221,28 @@ void Coms_123_Write(uint8_t edge, uint8_t byte) {
     }
 }
 
-void Coms_123_WriteID(uint8_t edge) {
+/* ******************** WRITE ID TO EDGE ************************************ */
+void Coms_123_WriteID(uint8_t edge) { // called in Coms_123_ConHandle
     uint8_t i, byte;
-    for (i = 0; i < 6; i++) {
-        byte = Coms_ESP_ReturnID(i);
-        Coms_123_Write(edge, byte);
+    for (i = 0; i < 6; i++) { // loop through 6 ID bytes
+        byte = Coms_ESP_ReturnID(i); // get byte from ESP Coms
+        Coms_123_Write(edge, byte); // write to edge
     }
+}
+
+/* ******************** READ BYTE FROM EDGE ********************************* */
+uint8_t Coms_123_Read(uint8_t edge) {
+    uint8_t byte;
+    switch (edge) {
+        case 0:
+            byte = UART1_Read();
+            break;
+        case 1:
+            byte = UART2_Read();
+            break;
+        case 2:
+            byte = UART3_Read();
+            break;
+    }
+    return byte;
 }
