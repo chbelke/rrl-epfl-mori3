@@ -16,7 +16,7 @@ void readSerial()
     		if (c == char(5))
     		{
     			memset(serial_packet, 0, sizeof(serial_packet));
-    			sprintf(serial_packet, "INFO: ");
+    			sprintf(serial_packet, "VBS: ");
     			readCase = 1;
     		}
     		break;
@@ -28,7 +28,7 @@ void readSerial()
 			break;
 
 		case 2:
-			serial_packet[serial_buf_loc+6] = c;
+			serial_packet[serial_buf_loc+5] = c;
 
 			if ((c == char(14)) && (serial_buf_loc == serial_len))
 			{
