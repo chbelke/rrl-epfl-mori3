@@ -17,7 +17,7 @@ bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 // Neighbour ID variables
 uint8_t EdgByteCount[3] = {0, 0, 0};
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t NbrIDTemp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
 
 uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
@@ -140,13 +140,13 @@ void Coms_123_Eval(uint8_t edge) {
             } else if ((EdgInAloc[edge] & 0b00001000)) { // con acknowledged
                 // acknowledge byte followed by ID
                 if (NbrIDCount[edge] < 6) {
-                    NbrIDTemp[NbrIDCount[edge] + 6 * edge] = EdgIn;
+                    NbrIDTmp[NbrIDCount[edge] + 6 * edge] = EdgIn;
                     NbrIDCount[edge]++;
                 } else {
                     if (EdgIn == EDG_End) {
                         uint8_t i;
                         for (i = 0 + 6 * edge; i <= 5 + 6 * edge; i++) {
-                            NbrID[i] = NbrIDTemp[i];
+                            NbrID[i] = NbrIDTmp[i];
                         }
                         Flg_EdgeCon[edge] = true; // make sure flag is set
                         Flg_IDRcvd[edge] = true; // ID received, tell neighbour
@@ -233,12 +233,12 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
 void Coms_123_ActHandle() { // called in tmr3 at 20Hz
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) {
-        if (Flg_EdgeAct[edge]){
-            
+        if (Flg_EdgeAct[edge]) {
+
         }
     }
 }
-   
+
 /* ******************** WRITE BYTE TO EDGE ********************************** */
 void Coms_123_Write(uint8_t edge, uint8_t byte) {
     switch (edge) { // send byte to specific UART based on edge

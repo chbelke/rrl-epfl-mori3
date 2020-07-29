@@ -25,7 +25,7 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
-uint8_t SelfID[6] = {0,0,0,0,0,0};
+uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 
 /* EspInAloc: 
@@ -91,7 +91,7 @@ void Coms_ESP_Eval() {
                     }
                 }
             } else if (((EspInAloc >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
-                if (EspInAloc & 0b00000111) { 
+                if (EspInAloc & 0b00000111) {
                     EspInCase = 22;
                     // only last three bits relevant when counting rec. bytes
                     uint8_t EspInAlocTemp = (EspInAloc & 0b00000111);
@@ -233,7 +233,7 @@ void Coms_ESP_Eval() {
                 if (EspInByts == (2 + EspInBits)) {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
-                        if ((EspInAloc >> (2-m)) & 0b00000001){
+                        if ((EspInAloc >> (2 - m)) & 0b00000001) {
                             MotRot_OUT(m, DrivePWM[m]*8);
                         }
                     }
@@ -245,24 +245,24 @@ void Coms_ESP_Eval() {
             }
             EspInCase = 0;
             break;
-            
+
         case 19: // AUTOMATIC DRIVE MODE ***************************************
             DriveSpd = EspIn;
             EspInByts = EspInByts + 1;
             EspInCase = 20;
             break;
-        
+
         case 20:
             DriveCrv = EspIn;
             EspInByts = EspInByts + 1;
             EspInCase = 21;
             break;
-            
+
         case 21: // verify drive inputs
             if (EspIn == ESP_End) {
                 if (EspInByts == 4) {
-                    Coms_ESP_Drive(DriveSpd, DriveCrv, 
-                            ((EspInAloc & 0x18)>>3), ((EspInAloc & 0x04)>>2));
+                    Coms_ESP_Drive(DriveSpd, DriveCrv,
+                            ((EspInAloc & 0x18) >> 3), ((EspInAloc & 0x04) >> 2));
                 } else {
                     EspInLost = EspInLost + 1; // data lost
                 }
@@ -271,7 +271,7 @@ void Coms_ESP_Eval() {
             }
             EspInCase = 0;
             break;
-            
+
         case 22: // COUPLING & LED INPUT ***************************************
             if (EspInAloc & 0b00000100) {
                 RgbPWM[0] = EspIn;
@@ -279,36 +279,36 @@ void Coms_ESP_Eval() {
                 EspInCase = 23;
                 break;
             }
-        
-            case 23:
+
+        case 23:
             if (EspInAloc & 0b00000010) {
                 RgbPWM[1] = EspIn;
                 EspInByts = EspInByts + 1;
                 EspInCase = 24;
                 break;
             }
-            
-            case 24:
+
+        case 24:
             if (EspInAloc & 0b00000001) {
                 RgbPWM[2] = EspIn;
                 EspInByts = EspInByts + 1;
                 EspInCase = 25;
                 break;
             }
-            
+
         case 25: // verify coupling inputs
             if (EspIn == ESP_End) {
                 if (EspInByts == (2 + EspInBits)) {
                     // set smas
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
-                        if (EspInAloc & (0b00100000 >> m)){
+                        if (EspInAloc & (0b00100000 >> m)) {
                             SMA_On(m);
                         }
                     }
                     // update leds
                     for (m = 0; m <= 2; m++) {
-                        if ((EspInAloc >> (2-m)) & 0b00000001){
+                        if ((EspInAloc >> (2 - m)) & 0b00000001) {
                             LED_Set(m, RgbPWM[m]);
                         }
                     }
@@ -320,10 +320,10 @@ void Coms_ESP_Eval() {
             }
             EspInCase = 0;
             break;
-            
+
         case 26:
             break;
-            
+
         default:
             EspInCase = 0;
             break;
@@ -354,101 +354,109 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float Mo = curve * 137.9;
     float Sa = speed * 4;
     if (!direc) { // inwards or outwards
-        Sa = -1*Sa;
+        Sa = -1 * Sa;
     }
-    
-    float a,b,c; // extension values from 180
+
+    float a, b, c; // extension values from 180
     switch (edge) {
         case 0:
-            a = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
-            b = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
-            c = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
+            a = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            b = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            c = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             break;
         case 1:
-            a = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
-            b = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
-            c = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
+            a = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            b = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            c = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
             break;
         case 2:
-            a = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
-            b = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
-            c = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
+            a = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            b = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            c = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
             break;
         default:
-            a = 180+(MotLin_MAX_1-MotLin_Get(0))*12/(MotLin_MAX_1-MotLin_MIN_1);
-            b = 180+(MotLin_MAX_2-MotLin_Get(0))*12/(MotLin_MAX_2-MotLin_MIN_2);
-            c = 180+(MotLin_MAX_3-MotLin_Get(0))*12/(MotLin_MAX_3-MotLin_MIN_3);
+            a = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            b = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            c = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             break;
     }
-    
+
     // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
-    float beta = acosf((a*a + c*c - b*b)/(2*a*c));
-    float gamm = acosf((a*a + b*b - c*c)/(2*a*b));
-    
+    float beta = acosf((a * a + c * c - b * b) / (2 * a * c));
+    float gamm = acosf((a * a + b * b - c * c) / (2 * a * b));
+
     // wheel coordinates (for a: [WHEEL, 0])
-    float Wb[2] = {(b-WHEEL)*cosf(gamm), (b-WHEEL)*sinf(gamm)};
-    float Wc[2] = {a-WHEEL*cosf(beta), WHEEL*sinf(beta)};
-    
+    float Wb[2] = {(b - WHEEL) * cosf(gamm), (b - WHEEL) * sinf(gamm)};
+    float Wc[2] = {a - WHEEL * cosf(beta), WHEEL * sinf(beta)};
+
     // second point in wheel direction
-    float Wb2[2] = {Wb[0]-cosf(PI/2-gamm), Wb[1]+sinf(PI/2-gamm)};
-    float Wc2[2] = {Wc[0]+cosf(PI/2-beta), Wc[1]+sinf(PI/2-beta)};
-    
+    float Wb2[2] = {Wb[0] - cosf(PI / 2 - gamm), Wb[1] + sinf(PI / 2 - gamm)};
+    float Wc2[2] = {Wc[0] + cosf(PI / 2 - beta), Wc[1] + sinf(PI / 2 - beta)};
+
     // centroid coordinates
-    float D[2] = {(b*cosf(gamm)+a)/3, b*sinf(gamm)/3};
-    
+    float D[2] = {(b * cosf(gamm) + a) / 3, b * sinf(gamm) / 3};
+
     // moment arm of wheel force to centroid
-    float Da = fabsf(D[0]-WHEEL);
-    float Db = fabsf((Wb2[1]-Wb[1])*D[0]
-        - (Wb2[0]-Wb[0])*D[1] + Wb2[0]*Wb[1] - Wb2[1]*Wb[0]) 
-        / sqrtf(powf(Wb2[1]-Wb[1],2) + powf(Wb2[0]-Wb[0],2));
-    float Dc = fabsf((Wc2[1]-Wc[1])*D[0]
-        - (Wc2[0]-Wc[0])*D[1] + Wc2[0]*Wc[1] - Wc2[1]*Wc[0])
-        / sqrtf(powf(Wc2[1]-Wc[1],2) + powf(Wc2[0]-Wc[0],2));
-    
+    float Da = fabsf(D[0] - WHEEL);
+    float Db = fabsf((Wb2[1] - Wb[1]) * D[0]
+            - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] - Wb2[1] * Wb[0])
+            / sqrtf(powf(Wb2[1] - Wb[1], 2) + powf(Wb2[0] - Wb[0], 2));
+    float Dc = fabsf((Wc2[1] - Wc[1]) * D[0]
+            - (Wc2[0] - Wc[0]) * D[1] + Wc2[0] * Wc[1] - Wc2[1] * Wc[0])
+            / sqrtf(powf(Wc2[1] - Wc[1], 2) + powf(Wc2[0] - Wc[0], 2));
+
     // wheel speeds
-    float Sc = (Mo-Sa*Da)/(Db*cosf(PI/2-beta)/cosf(PI/2-gamm) + Dc);
-    float Sb = Sc*cosf(PI/2-beta)/cosf(PI/2-gamm);
-    
+    float Sc = (Mo - Sa * Da) / (Db * cosf(PI / 2 - beta) / cosf(PI / 2 - gamm) + Dc);
+    float Sb = Sc * cosf(PI / 2 - beta) / cosf(PI / 2 - gamm);
+
     Sc = SxOUT*Sc;
     Sb = SxOUT*Sb;
-    
+
     // output depending on driving edge
     switch (edge) {
         case 0:
-            MotRot_OUT(0,Sa);
-            MotRot_OUT(1,Sb);
-            MotRot_OUT(2,Sc);
+            MotRot_OUT(0, Sa);
+            MotRot_OUT(1, Sb);
+            MotRot_OUT(2, Sc);
             break;
         case 1:
-            MotRot_OUT(1,Sa);
-            MotRot_OUT(2,Sb);
-            MotRot_OUT(0,Sc);
+            MotRot_OUT(1, Sa);
+            MotRot_OUT(2, Sb);
+            MotRot_OUT(0, Sc);
             break;
         case 2:
-            MotRot_OUT(2,Sa);
-            MotRot_OUT(0,Sb);
-            MotRot_OUT(1,Sc);
+            MotRot_OUT(2, Sa);
+            MotRot_OUT(0, Sb);
+            MotRot_OUT(1, Sc);
             break;
         default:
-            MotRot_OUT(0,Sa);
-            MotRot_OUT(1,Sb);
-            MotRot_OUT(2,Sc);
+            MotRot_OUT(0, Sa);
+            MotRot_OUT(1, Sb);
+            MotRot_OUT(2, Sc);
             break;
     }
 }
 
+/* ******************** RETURN ID BY BYTE *********************************** */
 uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
     return SelfID[byteNum];
 }
 
-
+/* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose() {
-    UART4_Write(WIFI_RELAY_BYTE);
-    UART4_Write(6);           // Message length
+    UART4_Write(ESP_Relay);
+    UART4_Write(6); // Message length
     uint8_t i;
-    for(i = 0; i < 3; i++){     
+    for (i = 0; i < 3; i++) {
         UART4_Write16(ADC1_Return(i));
     }
+    UART4_Write(ESP_End);
+}
+
+/* ******************** SET ESP EDGE LEDS *********************************** */
+void Coms_ESP_SetLEDs(uint8_t edge, uint8_t blink) {
+    UART4_Write(ESP_Interpret);
+    UART4_Write((0xF0 & (edge << 4)) | (0x0F & blink))
     UART4_Write(ESP_End);
 }
 
@@ -504,16 +512,16 @@ main ()
   // moment arm of wheel force to centroid
   float Da = fabsf (D[0] - WHEEL);
   float Db = fabsf ((Wb2[1] - Wb[1]) * D[0]
-		    - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] -
-		    Wb2[1] * Wb[0]) / sqrtf (powf (Wb2[1] - Wb[1],
-						   2) + powf (Wb2[0] - Wb[0],
-							      2));
+            - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] -
+            Wb2[1] * Wb[0]) / sqrtf (powf (Wb2[1] - Wb[1],
+                           2) + powf (Wb2[0] - Wb[0],
+                                  2));
   float Dc =
     fabsf ((Wc2[1] - Wc[1]) * D[0] - (Wc2[0] - Wc[0]) * D[1] +
-	   Wc2[0] * Wc[1] - Wc2[1] * Wc[0]) / sqrtf (powf (Wc2[1] - Wc[1],
-							   2) + powf (Wc2[0] -
-								      Wc[0],
-								      2));
+       Wc2[0] * Wc[1] - Wc2[1] * Wc[0]) / sqrtf (powf (Wc2[1] - Wc[1],
+                               2) + powf (Wc2[0] -
+                                      Wc[0],
+                                      2));
 
   // wheel speeds
   float Sc =

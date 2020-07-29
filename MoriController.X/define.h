@@ -81,6 +81,8 @@ extern volatile bool Flg_Verbose;
 /* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
+#define ESP_Relay 0b00000101
+#define ESP
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte
@@ -186,8 +188,5 @@ extern volatile bool Flg_Verbose;
 
 #define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
 #define SMA_Duty 100 // 8-bit PWM value
-
-/* ************************ ESP8622 Comms ********************************** */
-#define WIFI_RELAY_BYTE 0b00000101
 
 #endif	/* DEFINE_H */
