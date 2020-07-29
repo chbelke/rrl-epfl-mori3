@@ -73,7 +73,7 @@ void MotLin_PID(uint8_t edge, uint16_t current, uint16_t desired) {
     }
 
     // calculate error
-    float error = (float)(desired) - (float)(current);
+    float error = (float) (desired) - (float) (current);
 
     // if desired value changed, reset stable flag
     if (desired != Stbl_dOld[edge]) Stbl_Flag[edge] = false;

@@ -8,14 +8,14 @@
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
-uint8_t EdgIdleCount[3] = {0, 0, 0}; // no idle byte received counter
-uint8_t EdgConnCount[3] = {0, 0, 0}; // no conn/ackn byte received counter
+uint8_t EdgIdlCnt[3] = {0, 0, 0}; // no idle byte received counter
+uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
 
-bool Flg_IDCnfd[3] = {false, false, false};
-bool Flg_IDRcvd[3] = {false, false, false};
+bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
+bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 
 // Neighbour ID variables
-uint8_t EdgByteCount[3] = {0,0,0};
+uint8_t EdgByteCount[3] = {0, 0, 0};
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDTemp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
@@ -119,7 +119,8 @@ void Coms_123_Eval(uint8_t edge) {
 
         case 10: // IDLE MODE **************************************************
             if (EdgIn == EDG_End) {
-                EdgIdleCount[edge] = 0; // reset interval
+                EdgIdlCnt[edge] = 0; // reset interval
+                EdgConCnt[edge] = 0; // reset interval
                 if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge])
                     Flg_EdgeSyn[edge] = true;
             }
@@ -133,6 +134,7 @@ void Coms_123_Eval(uint8_t edge) {
                     Flg_EdgeSyn[edge] = false;
                     Flg_IDCnfd[edge] = false;
                     Flg_IDRcvd[edge] = false;
+                    EdgConCnt[edge] = 0;
                 }
                 EdgInCase[edge] = 0;
             } else if ((EdgInAloc[edge] & 0b00001000)) { // con acknowledged
@@ -149,6 +151,7 @@ void Coms_123_Eval(uint8_t edge) {
                         Flg_EdgeCon[edge] = true; // make sure flag is set
                         Flg_IDRcvd[edge] = true; // ID received, tell neighbour
                         Flg_EdgeSyn[edge] = false; // reset synced
+                        EdgConCnt[edge] = 0;
                     }
                     NbrIDCount[edge] = 0;
                     EdgInCase[edge] = 0;
@@ -158,32 +161,22 @@ void Coms_123_Eval(uint8_t edge) {
                 }
             }
             break;
-            
-// **************************************************************************
-// ***************************** RELAY MODE *********************************
-// **************************************************************************            
-        
-        case 30: // Verbose ****************************************
-            if(EdgByteCount[edge] != 2)
-            {
+
+        case 30: // VERBOSE ****************************************************
+            if (EdgByteCount[edge] != 2) {
                 EdgByteCount[edge]++;
                 break;
-            }
-            else if (EdgIn == EDG_End)
-            {
+            } else if (EdgIn == EDG_End) {
                 Flg_Verbose = !Flg_Verbose;
                 EdgInCase[edge] = 0;
                 EdgByteCount[edge] = 0;
             }
             break;
-        
-        case 31: // Verbose ****************************************
+
+        case 31:
             break;
-            
-// **************************************************************************
-// ****************************** Default ***********************************
-// **************************************************************************            
-        default:
+
+        default: // DEFAULT ****************************************************
             EdgInCase[edge] = 0;
             break;
     }
@@ -193,40 +186,39 @@ void Coms_123_Eval(uint8_t edge) {
 void Coms_123_ConHandle() { // called in tmr5 at 5Hz
     uint8_t edge, byte;
     for (edge = 0; edge < 3; edge++) {
-        // check if idle byte received in EDG_IdleInterval when synced
-        if (((EdgIdleCount[edge] >= EDG_IdleInterval) && Flg_EdgeSyn[edge]) ||
-                ((EdgConnCount[edge] >= EDG_ConnInterval) && Flg_EdgeCon[edge])) { // con lost
+        // check if idle byte received in EDG_IdlIntrvl when synced
+        if (((EdgIdlCnt[edge] >= EDG_IdlIntrvl) && Flg_EdgeSyn[edge]) || // lost
+                ((EdgConCnt[edge] >= EDG_ConIntrvl) && Flg_EdgeCon[edge])) {
             Flg_EdgeCon[edge] = false;
             Flg_EdgeSyn[edge] = false;
             Flg_IDCnfd[edge] = false;
             Flg_IDRcvd[edge] = false;
         } else {
-            if (EdgIdleCount[edge] < EDG_IdleInterval)
-                EdgIdleCount[edge]++;
-            if (EdgConnCount[edge] < EDG_ConnInterval)
-                EdgConnCount[edge]++;
+            if (EdgIdlCnt[edge] < EDG_IdlIntrvl)
+                EdgIdlCnt[edge]++;
+            if (EdgConCnt[edge] < EDG_ConIntrvl)
+                EdgConCnt[edge]++;
         }
-        
-        
+
         // check if ID received and confirmed = synced
         if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge] && Flg_IDCnfd[edge]) {
             Flg_EdgeSyn[edge] = true;
-            EdgIdleCount[edge] = 0;
+            EdgIdlCnt[edge] = 0;
         }
 
         // determine byte to be sent depending on con state flags
         if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
-            LED_Set(edge, 20);
+            LED_Set(edge, 20); // XXX replace with function to turn esp leds on
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
-            LED_Set(edge, 0);
+            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
-            LED_Set(edge, 0);
+            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
         } else {
             byte = COMS_123_Conn; // send connect search
-            LED_Set(edge, 0);
+            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
         }
 
         // write byte (ID if in con but no sync) and end byte
