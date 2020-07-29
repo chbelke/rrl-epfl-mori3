@@ -79,9 +79,15 @@ class UDPHost():
 
     def write(self, message, addr):
         print(message, addr)
+        print(len(message))
         print(self.wifi_host.IPDict[addr])
         ip_addr = (self.wifi_host.IPDict[addr], self.udp_port)
-        sent = self.udp_sock.sendto(message.encode(), ip_addr)
+        msg = bytearray(len(message).to_bytes(1, byteorder='big'))
+        if isinstance(message, bytearray):
+            msg.extend(message)
+        else:
+            msg.extend(message.encode())
+        sent = self.udp_sock.sendto(msg, ip_addr)
 
 
     def exit(self):

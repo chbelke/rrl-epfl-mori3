@@ -20,17 +20,3 @@ void pubIP()
   strcat(buff, stringIP);
   publish(buff);
 }
-
-void pubShape()
-{
-  char buff[130];
-  String shapeMsg = String("SHAPE: ") + WiFi.macAddress();
-
-  for (int i = 0 ; i < 6 ; i++) {
-    shapeMsg = String(shapeMsg) + String(" ") + String(moriShape[i]);
-  }
-
-  shapeMsg.toCharArray(buff, 130);
-  verbose_println(buff);
-  publish(buff);
-}

@@ -31,7 +31,6 @@ const char* brn_password =  "Bm41254126";
 // const char* mqttServer = "mqtt-host";
 const char* mqttServer = "192.168.1.2";
 
-//const char* mqttServer = "10.252.50.209";
 const int mqttPort = 1883;
 
 char clientName[16];
@@ -40,7 +39,7 @@ char recieveName[36];
 
 const float softwareVersion = 0.5;
 
-char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "cont", "nocon", "hi3"};
+char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "hi1", "hi2", "hi3"};
 
 char stringIP[16];
 char charMAC[18];
@@ -58,11 +57,12 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 bool flag_udp = false;
-bool flag_control = false;
-bool verbose_flag = false;
+// bool verbose_flag = false;
+bool verbose_flag = true;
 
-#define LED_PIN 4
+#define LED_PIN 0
 Led wifi_ind_led(LED_PIN);
+
 
 //--------------------------- Start ----------------------------------------//
 void setup()
@@ -133,9 +133,11 @@ void setup()
 
   //----------------------- OAT Handling--------------------------------------//
   handleOTA();
-  
+
+
+  // msgBuf = "rel ";
   //----------------------- UDP Handling--------------------------------------//
-  verbose_flag = false;
+  // verbose_flag = false;
 }
 
 
@@ -145,49 +147,28 @@ void loop()
 {
   switch(runState){
     case 0:   //booting up
-      pubVersion();
-      delay(500);
+      startUDP();
+      flag_udp = true;
+      publish("UDP: Start");
+      runState = 3;
       break;
     case 1:   //version bad - enable auto updates
       enableOTA();
       runState = 2;
+      break;
     case 2:   //handle OTA
       ArduinoOTA.handle();
       break;
     case 3:   //everything is good
       normalOp();
+      sendSerial();
       break;
-    case 4:   //WiFi hub
-      startUDP();
-      flag_udp = true;
-      publish("UDP: Start");
-      runState = 5;
-      break;
-    case 5:
-      readUDP();
-      normalOp();
-      break;
-    case 6:
+    case 4:
       stopUDP();
+      runState = 5;
+    case 5:
       normalOp();
       publish("UDP: Stop");
-      runState = 3;
-    case 7:   //Start Controller
-      startController();
-      flag_control = true;
-      publish("INFO: Controller Started");
-      runState = 8;
-      break;
-    case 8: //controller (note publish is via MQTT if not case 5)
-      readUDP();
-      normalOp();
-      break;
-    case 9:
-      flag_control = false;
-      stopUDP();
-      normalOp();
-      publish("INFO: Controller Stopped");
-      runState = 3;
   }
 
   client.loop();
@@ -198,17 +179,8 @@ void publish(char* buff)
 {
   verbose_print("Sent ");
   verbose_print(buff);
-  verbose_print(" via ");
-  if(runState != 5)
-  {
-    client.publish(publishName, buff);
-    verbose_println("MQTT");
-  } 
-  else
-  {
-    writeUDP(buff);
-    verbose_println("UDP");
-  }
+  client.publish(publishName, buff);
+  verbose_println(" via MQTT");
 }
 
 

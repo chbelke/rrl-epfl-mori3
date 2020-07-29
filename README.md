@@ -36,7 +36,7 @@ Nonstandard libraries:
 ## To run the gui:
 Execute `python3 mainMori.py` located in the External folder
 
-Currently it operates in the Ubuntu subenviroment for Windows (found in the app store). Run download and run XLaunch to view the gui. (http://www.straightrunning.com/XmingNotes/)
+Currently it operates in the Ubuntu subenviroment for Windows (found in the app store). Run download and run XLaunch to view the GUI. (https://sourceforge.net/projects/vcxsrv/)
 
 Uses the following non-standard libraries:
 `termcolor`
