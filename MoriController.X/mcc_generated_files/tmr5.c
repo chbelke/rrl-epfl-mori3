@@ -62,6 +62,7 @@
 #include "../Battery.h"
 #include "../Button.h"
 #include "../Coms_123.h"
+#include "../Coms_ESP.h"
 
 /**
  Section: File specific functions
@@ -221,56 +222,15 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 
 
     
-//    static int j = 0;
-//    static int m = 0;
-//    if (Flg_EdgeDemo){
-//        switch (m) {
-//            case 0:
-//                MotLin_Set(0, 160);
-//                MotLin_Set(1, 160);
-//                MotLin_Set(2, 160);
-//                break;
-//            case 1:
-//                MotLin_Set(0, 970);
-//                MotLin_Set(1, 160);
-//                MotLin_Set(2, 160);
-//                break;
-//            case 2:
-//                MotLin_Set(0, 970);
-//                MotLin_Set(1, 970);
-//                MotLin_Set(2, 160);
-//                break;
-//            case 3:
-//                MotLin_Set(0, 970);
-//                MotLin_Set(1, 970);
-//                MotLin_Set(2, 970);
-//                break;
-//            case 4:
-//                MotLin_Set(0, 160);
-//                MotLin_Set(1, 970);
-//                MotLin_Set(2, 970);
-//                break;
-//            case 5:
-//                MotLin_Set(0, 160);
-//                MotLin_Set(1, 160);
-//                MotLin_Set(2, 970);
-//                break;
-//            case 6:
-//                m = 0;
-//                break;
-//            default:
-//                m = 0;
-//                break;
-//        }
-//        j++;
-//        if (j >= 100) {
-//            m++;
-//            j = 0;
-//        }
-//    } else {
-//        m = 0;
-//        j = 0;
-//    }
+    if (Flg_Verbose)
+    {
+        static int k = 0;
+        if(!(k % 5)){
+            Coms_ESP_Verbose();
+        }
+        k++;        
+    }
+        
     
 }
 

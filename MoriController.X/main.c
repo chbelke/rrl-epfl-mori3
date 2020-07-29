@@ -69,6 +69,8 @@ volatile bool Flg_EdgeSyn[3] = {false, false, false}; // connection acknowledged
 volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
+
+volatile bool Flg_Verbose = true;
 /* declaration for other source files is contained in define.h */
 
 volatile bool Flg_EdgeDemo = false;
