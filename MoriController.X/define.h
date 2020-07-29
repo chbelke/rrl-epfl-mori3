@@ -85,6 +85,7 @@ extern volatile bool Flg_EdgeDemo;
 #define EDG_Beg 15                  // start byte
 #define EDG_End 42                  // end byte
 #define EDG_IdleInterval 5             // reduced at 5Hz, 5 = 1 second
+#define EDG_ConnInterval 10
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
