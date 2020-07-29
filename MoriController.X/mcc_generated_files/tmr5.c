@@ -227,8 +227,8 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         static int k = 0;
         if(!(k % 5)){
             Coms_ESP_Verbose();
-            k++;
         }
+        k++;        
     }
         
     
