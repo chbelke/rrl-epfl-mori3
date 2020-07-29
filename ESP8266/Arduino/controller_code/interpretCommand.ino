@@ -1,11 +1,6 @@
 //----------------------- Recieved Message --------------------------//
 void commands(byte* payload, unsigned int len)
 {
-  for(int i=0; i<len; i++)
-  {
-    verbose_print((char)payload[i]);
-  }
-  
   int sw_case = 14;
 
   char topic[3];
@@ -43,7 +38,7 @@ void commands(byte* payload, unsigned int len)
       break;
 
     case 3:   //stopudp
-      runState = 3;
+      runState = 4;
       verbose_println("UDP communication paused");
       break;
 
@@ -52,17 +47,16 @@ void commands(byte* payload, unsigned int len)
       break;
 
     case 5:   //g_shape (set shape)
-      pubShape();
       break;
 
     case 6:   //udp
       verbose_println("Recieved UDP Command");
-      runState = 4;
+      runState = 0;
       break;
 
     case 7:   //noudp
       verbose_println("Stop UDP Operation");
-      runState = 6;
+      runState = 4;
       break;
 
     case 8:   //verb
@@ -79,14 +73,10 @@ void commands(byte* payload, unsigned int len)
       relay(payload, len);
       break;
 
-    case 11:  //cont
-      runState = 7;
-      verbose_println("Starting Controller");
+    case 11:  //hi1
       break;
 
-    case 12:  //nocon      
-      runState = 9;
-      verbose_println("Starting Controller");
+    case 12:  //hi2      
       break;
 
     case 13:
