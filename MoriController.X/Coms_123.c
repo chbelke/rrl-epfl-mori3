@@ -229,6 +229,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
     }
 }
 
+/* ******************** NEIGHBOUR ACTION HANDLE ***************************** */
+void Coms_123_ActHandle() { // called in tmr3 at 20Hz
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++) {
+        if (Flg_EdgeAct[edge]){
+            
+        }
+    }
+}
+   
 /* ******************** WRITE BYTE TO EDGE ********************************** */
 void Coms_123_Write(uint8_t edge, uint8_t byte) {
     switch (edge) { // send byte to specific UART based on edge

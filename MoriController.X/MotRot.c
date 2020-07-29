@@ -17,7 +17,7 @@ void MotRot_OUT(uint8_t edge, int16_t duty) {
             if (duty > 0) ROT_DIR_1 = 1; // direction output
             else ROT_DIR_1 = 0;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[0]) || (Flg_EdgeCon[0] && Flg_EdgeSyn[0])) {
+            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
                 PWM_Set(ROT_PWM_1, abs(duty)); // pwm output
             }
             break;
@@ -26,7 +26,7 @@ void MotRot_OUT(uint8_t edge, int16_t duty) {
             if (duty > 0) ROT_DIR_2 = 1; // direction output
             else ROT_DIR_2 = 0;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[1]) || (Flg_EdgeCon[1] && Flg_EdgeSyn[1])) {
+            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
                 PWM_Set(ROT_PWM_2, abs(duty)); // pwm output
             }
             break;
@@ -35,7 +35,7 @@ void MotRot_OUT(uint8_t edge, int16_t duty) {
             if (duty > 0) ROT_DIR_3 = 1; // direction output
             else ROT_DIR_3 = 0;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[2]) || (Flg_EdgeCon[2] && Flg_EdgeSyn[2])) {
+            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
                 PWM_Set(ROT_PWM_3, abs(duty)); // pwm output
             }
             break;

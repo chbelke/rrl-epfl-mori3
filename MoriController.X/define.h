@@ -84,7 +84,7 @@ extern volatile bool Flg_Verbose;
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte
-#define EDG_IdlIntrvl 5             // idle check at 5Hz, 5 = 1 sec = con lost
+#define EDG_IdlIntrvl 3             // idle check at 5Hz, 5 = 1 sec = con lost
 #define EDG_ConIntrvl 10            // con check at 5Hz, 5 = 2 sec = con lost
 
 /* ******************** PWM GENERATOR *************************************** */
