@@ -62,6 +62,7 @@
 #include "../AS5048B.h"
 #include "../TLC59208.h"
 #include "../MMA8452Q.h"
+#include "../Coms_123.h"
 
 /**
  Section: File specific functions
@@ -174,15 +175,16 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
 {
     // Add your custom callback code here
 
-    // coupling sma controller
-    SMA_Ctrl();
+    SMA_Ctrl(); // coupling sma controller
     
-    // read analog pot inputs
-    ADC1_Update();
-    // edge extension control loops
-    MotLin_PID(0, ADC1_Return(0), MotLin_Get(0));
-    MotLin_PID(1, ADC1_Return(1), MotLin_Get(1));
-    MotLin_PID(2, ADC1_Return(2), MotLin_Get(2));
+    Coms_123_ActHandle(); // action synchronisation handle
+    
+    ADC1_Update(); // read analog potentiometer inputs
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++){
+        if (Flg_EdgeAct[edge] || !Flg_EdgeCon) // extension control loops
+            MotLin_PID(edge, ADC1_Return(edge), MotLin_Get(edge));
+    }
 }
 
 void  TMR3_SetInterruptHandler(void (* InterruptHandler)(void))

@@ -455,9 +455,9 @@ void Coms_ESP_Verbose() {
 
 /* ******************** SET ESP EDGE LEDS *********************************** */
 void Coms_ESP_SetLEDs(uint8_t edge, uint8_t blink) {
-    UART4_Write(ESP_Interpret);
-    UART4_Write((0xF0 & (edge << 4)) | (0x0F & blink))
-    UART4_Write(ESP_End);
+    //UART4_Write(ESP_Interpret);
+    //UART4_Write((0xF0 & (edge << 4)) | (0x0F & blink))
+    //UART4_Write(ESP_End);
 }
 
 /* Com_ESP_Drive - Online calc verification */

@@ -62,8 +62,8 @@ volatile bool MODE_LED_ANGLE = false;
 volatile bool MODE_LED_EDGES = false;
 volatile bool MODE_LED_RNBOW = false;
 /* GLOBAL FLAGS */
-volatile bool Flg_LiveAngle = false;
-volatile bool Flg_LiveEdges = false;
+volatile bool Flg_LiveAng = false;
+volatile bool Flg_LiveExt = false;
 volatile bool Flg_EdgeCon[3] = {false, false, false}; // connection detected
 volatile bool Flg_EdgeSyn[3] = {false, false, false}; // connection acknowledged
 volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action

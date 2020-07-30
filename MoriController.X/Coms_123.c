@@ -11,6 +11,10 @@ uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
 uint8_t EdgIdlCnt[3] = {0, 0, 0}; // no idle byte received counter
 uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
 
+//bool Flg_ActAng[3] = {false, false, false}; // edge action angle flag
+//bool Flg_ActExt[3] = {false, false, false}; // edge action extension flag
+//bool Flg_ActCpl[3] = {false, false, false}; // edge action coupling flag
+
 bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 
@@ -34,17 +38,20 @@ uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
  * 000 = stop moving
  * - 0b000xxxxx check if xxxxx is 11111, execute upon end byte
  * 001 = not used because of end byte
- * 010 = action byte
+ * 010 = action sync byte
  * - 0b010xoooo angle command received, follows in two bytes
  * - 0b010oxooo length command received, follows in two bytes
  * - 0b010ooxoo coupling command received
+ * - 0b010oooxo confirm match
  * 011 = idle mode
  * - 0b011ooooo
  * 100 = connection detected or acknowledged
  * - 0b100xoooo if x is 1, connection search only
  * - 0b100oxooo if x is 1, synchronisation byte, expect ID
- * 111 = Relay mode - Kevin
- * - 0b111xxxxx
+ * 110 = Command for central controller (interpreted in Coms_CMD)
+ * 111 = Relay mode (managed by Coms_REL)
+ * - 0b111000xx xx defines edge/wifi: 00 = edg1, 01 = edg2, 10 = edg3, 11 = wifi
+ * - 0b11100x00 if x is 1, relay to all (and ignore last two bits)
  */
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
@@ -58,7 +65,7 @@ void Coms_123_Eval(uint8_t edge) {
                     if ((EdgInAloc[edge] & 0x1F) == 37)
                         EdgInCase[edge] = 1;
                     break;
-                case 2: // xxx == 010, action command received
+                case 2: // xxx == 010, action sync received
                     EdgInCase[edge] = 2;
                     break;
                 case 3: // xxx == 011, idle mode
@@ -67,8 +74,11 @@ void Coms_123_Eval(uint8_t edge) {
                 case 4: // xxx == 100, connection detected or acknowledged
                     EdgInCase[edge] = 20;
                     break;
-                case 7: // xxx == 111, relay (Kevin)
-                    EdgInCase[edge] = 30 + (EdgInAloc[edge] & 0b00011111);
+                case 6: // xxx == 110, command
+                    EdgInCase[edge] = 30;
+                    break;
+                case 7: // xxx == 111, relay
+                    EdgInCase[edge] = 40;
                     break;
             }
             break;
@@ -162,18 +172,20 @@ void Coms_123_Eval(uint8_t edge) {
             }
             break;
 
-        case 30: // VERBOSE ****************************************************
-            if (EdgByteCount[edge] != 2) {
-                EdgByteCount[edge]++;
-                break;
-            } else if (EdgIn == EDG_End) {
-                Flg_Verbose = !Flg_Verbose;
-                EdgInCase[edge] = 0;
-                EdgByteCount[edge] = 0;
-            }
+        case 30: // COMMAND ****************************************************
+            Coms_REL
+            
+//            if (EdgByteCount[edge] != 2) {
+//                EdgByteCount[edge]++;
+//                break;
+//            } else if (EdgIn == EDG_End) {
+//                Flg_Verbose = !Flg_Verbose;
+//                EdgInCase[edge] = 0;
+//                EdgByteCount[edge] = 0;
+//            }
             break;
 
-        case 31:
+        case 40: // RELAY ****************************************************
             break;
 
         default: // DEFAULT ****************************************************
@@ -231,12 +243,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
 
 /* ******************** NEIGHBOUR ACTION HANDLE ***************************** */
 void Coms_123_ActHandle() { // called in tmr3 at 20Hz
-    uint8_t edge;
-    for (edge = 0; edge < 3; edge++) {
-        if (Flg_EdgeAct[edge]) {
-
-        }
-    }
+//    uint8_t edge;
+//    uint8_t byte = 0b01000000;
+//    for (edge = 0; edge < 3; edge++) {
+//        if (Flg_ActAng[edge])
+//            byte = byte | 0b00010000;
+//        if (Flg_ActExt[edge])
+//            byte = byte | 0b00001000;
+//        if (Flg_ActExt[edge])
+//            byte = byte | 0b00000100;
+//    }
 }
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */

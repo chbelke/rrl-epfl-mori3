@@ -52,8 +52,8 @@ extern volatile bool MODE_LED_EDGES;
 extern volatile bool MODE_LED_RNBOW;
 
 /* ********************  FLAGS ********************************************** */
-extern volatile bool Flg_LiveAngle;
-extern volatile bool Flg_LiveEdges;
+extern volatile bool Flg_LiveAng;
+extern volatile bool Flg_LiveExt;
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
