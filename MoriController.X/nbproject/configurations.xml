@@ -36,6 +36,8 @@
       <itemPath>Button.h</itemPath>
       <itemPath>Coms_123.h</itemPath>
       <itemPath>Coms_ESP.h</itemPath>
+      <itemPath>Coms_REL.h</itemPath>
+      <itemPath>Coms_CMD.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -77,6 +79,8 @@
       <itemPath>Button.c</itemPath>
       <itemPath>Coms_123.c</itemPath>
       <itemPath>Coms_ESP.c</itemPath>
+      <itemPath>Coms_REL.c</itemPath>
+      <itemPath>Coms_CMD.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

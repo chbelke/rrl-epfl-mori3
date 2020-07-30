@@ -1,5 +1,7 @@
 #include "Coms_123.h"
 #include "Coms_ESP.h"
+#include "Coms_REL.h"
+#include "Coms_CMD.h"
 #include "define.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
@@ -10,10 +12,6 @@ uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
 uint8_t EdgIdlCnt[3] = {0, 0, 0}; // no idle byte received counter
 uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
-
-//bool Flg_ActAng[3] = {false, false, false}; // edge action angle flag
-//bool Flg_ActExt[3] = {false, false, false}; // edge action extension flag
-//bool Flg_ActCpl[3] = {false, false, false}; // edge action coupling flag
 
 bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
@@ -75,9 +73,11 @@ void Coms_123_Eval(uint8_t edge) {
                     EdgInCase[edge] = 20;
                     break;
                 case 6: // xxx == 110, command
+                    Coms_CMD_Handle(edge, EdgInAloc[edge] & 0x00011111);
                     EdgInCase[edge] = 30;
                     break;
                 case 7: // xxx == 111, relay
+                    Coms_REL_Handle(edge, EdgInAloc[edge] & 0x07);
                     EdgInCase[edge] = 40;
                     break;
             }
@@ -173,21 +173,15 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 30: // COMMAND ****************************************************
-            Coms_REL
+            if (Coms_CMD_Handle(edge, EdgIn)){
+                break;
+            }
             
-//            if (EdgByteCount[edge] != 2) {
-//                EdgByteCount[edge]++;
-//                break;
-//            } else if (EdgIn == EDG_End) {
-//                Flg_Verbose = !Flg_Verbose;
-//                EdgInCase[edge] = 0;
-//                EdgByteCount[edge] = 0;
-//            }
-            break;
-
         case 40: // RELAY ****************************************************
-            break;
-
+            if (Coms_REL_Handle(edge, EdgIn)){
+                break;
+            }
+            
         default: // DEFAULT ****************************************************
             EdgInCase[edge] = 0;
             break;
@@ -243,16 +237,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
 
 /* ******************** NEIGHBOUR ACTION HANDLE ***************************** */
 void Coms_123_ActHandle() { // called in tmr3 at 20Hz
-//    uint8_t edge;
-//    uint8_t byte = 0b01000000;
-//    for (edge = 0; edge < 3; edge++) {
-//        if (Flg_ActAng[edge])
-//            byte = byte | 0b00010000;
-//        if (Flg_ActExt[edge])
-//            byte = byte | 0b00001000;
-//        if (Flg_ActExt[edge])
-//            byte = byte | 0b00000100;
-//    }
+    //    uint8_t edge;
+    //    uint8_t byte = 0b01000000;
+    //    for (edge = 0; edge < 3; edge++) {
+    //        if (Flg_ActAng[edge])
+    //            byte = byte | 0b00010000;
+    //        if (Flg_ActExt[edge])
+    //            byte = byte | 0b00001000;
+    //        if (Flg_ActExt[edge])
+    //            byte = byte | 0b00000100;
+    //    }
 }
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */

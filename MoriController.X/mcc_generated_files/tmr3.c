@@ -182,7 +182,7 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
     ADC1_Update(); // read analog potentiometer inputs
     uint8_t edge;
     for (edge = 0; edge < 3; edge++){
-        if (Flg_EdgeAct[edge] || !Flg_EdgeCon) // extension control loops
+        if (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]) // extension control loops
             MotLin_PID(edge, ADC1_Return(edge), MotLin_Get(edge));
     }
 }
