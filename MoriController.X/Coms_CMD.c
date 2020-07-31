@@ -21,16 +21,16 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
     switch (state) {
         case 0:
             if(Coms_CMD_Verbose())
-                return Coms_CMD_Reset(state, alloc);
+                return Coms_CMD_Reset(&state, &alloc);
             break;
             
         case 13:
-            if(Coms_CMD_Shape())
-                return Coms_CMD_Reset(state, alloc);
+            if(Coms_CMD_Shape(edge, byte))
+                return Coms_CMD_Reset(&state, &alloc);
             break;
         
         default:
-            return Coms_CMD_Reset(state, alloc);
+            return Coms_CMD_Reset(&state, &alloc);
     }  
     return false;
 }

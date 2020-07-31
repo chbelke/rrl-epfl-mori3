@@ -1,4 +1,3 @@
-#include "Coms_123.h"
 #include "Coms_ESP.h"
 #include "Coms_REL.h"
 #include "Coms_CMD.h"
@@ -8,6 +7,7 @@
 #include "mcc_generated_files/uart3.h"
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
+#include "Coms_123.h"
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
