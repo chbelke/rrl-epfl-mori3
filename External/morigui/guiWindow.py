@@ -12,6 +12,7 @@ from morigui.frames.publ import PublishLocal
 from morigui.frames.startstop import StartStop
 from morigui.frames.listudp import ListUDP
 from morigui.frames.pubbulk import PublishBulk
+from morigui.frames.pubbinary import PublishBinary
 
 
 class MoriGui(tk.Frame):
@@ -37,6 +38,7 @@ class MoriGui(tk.Frame):
         frame3 = tk.Frame(self)
         frame4 = tk.Frame(self)
         frame5 = tk.Frame(self)
+        frame6 = tk.Frame(self)
 
         self.frame_party = PartyFrame(frame1)
         self.frame_start = StartStop(frame1, self.wifi_host)
@@ -44,10 +46,12 @@ class MoriGui(tk.Frame):
         self.frame_publ = PublishLocal(frame3, self, self.wifi_host)
         self.frame_udp = ListUDP(frame4, self, self.wifi_host)
         self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)
+        self.frame_binary = PublishBinary(frame6, self, self.wifi_host)
 
         frame5.pack(side="right", padx=10, pady=10, expand=True)
         frame1.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
         frame4.pack(side="right", padx=10, pady=10, expand=True)
+        frame6.pack(side="bottom", padx=10, pady=10, expand=True)
         frame2.pack(side="bottom", padx=10, pady=10, expand=True)
         frame3.pack(padx = 10)
 
@@ -68,4 +72,5 @@ class MoriGui(tk.Frame):
                 self.moriNumber.append(esp[espOrder[i]])
 
             self.frame_publ.update_menu(self.moriNumber)
+            self.frame_binary.update_menu(self.moriNumber)
         self.frame_udp.update_udp()

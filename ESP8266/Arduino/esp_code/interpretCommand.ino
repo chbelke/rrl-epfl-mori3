@@ -6,7 +6,7 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 14;
+  int sw_case = 17;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +14,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 13; i++)
+  for(int i=0; i < 16; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -89,7 +89,16 @@ void commands(byte* payload, unsigned int len)
       verbose_println("Starting Controller");
       break;
 
-    case 13:
+    case 13:  //rled
+      led_red.Blink();
+      break;
+
+    case 14:  //gled
+      led_green.Blink();
+      break;
+
+    case 15:  //bled
+      led_blue.Blink();
       break;
 
     default:

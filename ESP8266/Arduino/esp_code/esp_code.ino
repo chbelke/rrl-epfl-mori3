@@ -40,7 +40,7 @@ char recieveName[36];
 
 const float softwareVersion = 0.5;
 
-char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "cont", "nocon", "hi3"};
+char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "cont", "nocon", "rled", "gled", "bled"};
 
 char stringIP[16];
 char charMAC[18];
@@ -60,9 +60,15 @@ PubSubClient client(espClient);
 bool flag_udp = false;
 bool flag_control = false;
 bool verbose_flag = false;
+bool led_cycle = false;
+
+unsigned long led_sel_time = millis();
 
 #define LED_PIN 4
 Led wifi_ind_led(LED_PIN);
+Led led_red(14);
+Led led_green(12);
+Led led_blue(5);
 
 //--------------------------- Start ----------------------------------------//
 void setup()
@@ -161,6 +167,7 @@ void loop()
     case 4:   //WiFi hub
       startUDP();
       flag_udp = true;
+      normalOp();
       publish("UDP: Start");
       runState = 5;
       break;
@@ -176,6 +183,7 @@ void loop()
     case 7:   //Start Controller
       startController();
       flag_control = true;
+      normalOp();
       publish("INFO: Controller Started");
       runState = 8;
       break;
@@ -233,4 +241,36 @@ void normalOp()
 //    client.publish(publishName, "INFO: Just chillin");
     lastMessage = millis();
   }
+
+  if(led_cycle)
+  {
+    static int led_sel = 0;
+    switch(led_sel){
+      case 0:
+        led_red.On();
+        led_green.On();
+        led_blue.Off();
+        led_sel = 1;
+        break;
+      case 1:
+        led_red.Off();
+        led_green.On();
+        led_blue.On();
+        led_sel = 2;
+        break;
+      case 2:
+        led_red.On();
+        led_green.Off();
+        led_blue.On();
+        led_sel = 0;
+        break;
+    }
+    led_sel_time = millis();
+  } else {
+    led_red.Update();
+    led_green.Update();
+    led_blue.Update();
+  }
+
 }
+

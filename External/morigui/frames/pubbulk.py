@@ -110,6 +110,7 @@ class PublishBulk():
             for cmd_bytes in follow_bytes:
                 message.extend(cmd_bytes.to_bytes(1, byteorder='big'))
             message.append(END_BYTE)
+            print(message)
             self.mqtthost.publishLocal(message, esp)
         
 
