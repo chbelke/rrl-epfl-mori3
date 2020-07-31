@@ -1,5 +1,5 @@
-#ifndef TLC59208_H
-#define	TLC59208_H
+#ifndef MNGE_PWM_H
+#define	MNGE_PWM_H
 
 #include "mcc_generated_files/mcc.h"
 

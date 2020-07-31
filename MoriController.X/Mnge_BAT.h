@@ -5,8 +5,8 @@
  * Created on September 20, 2019, 11:51 AM
  */
 
-#ifndef BATTERY_H
-#define	BATTERY_H
+#ifndef MNGE_BAT_H
+#define	MNGE_BAT_H
 
 #include "mcc_generated_files/mcc.h"
 

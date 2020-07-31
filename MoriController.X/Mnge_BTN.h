@@ -5,8 +5,8 @@
  * Created on September 20, 2019, 2:25 PM
  */
 
-#ifndef BUTTON_H
-#define	BUTTON_H
+#ifndef MNGE_BTN_H
+#define	MNGE_BTN_H
 
 #include "mcc_generated_files/mcc.h"
 
