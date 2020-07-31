@@ -77,7 +77,7 @@ void Coms_123_Eval(uint8_t edge) {
                     EdgInCase[edge] = 20;
                     break;
                 case 6: // xxx == 110, command
-                    Coms_CMD_Handle(edge, EdgInAloc[edge] & 0x00011111);
+                    Coms_CMD_Handle(edge, EdgInAloc[edge] & 0b00011111);
                     EdgInCase[edge] = 30;
                     break;
                 case 7: // xxx == 111, relay

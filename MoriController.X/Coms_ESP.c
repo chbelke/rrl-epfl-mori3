@@ -83,7 +83,7 @@ void Coms_ESP_Eval() {
 //                    EdgInCase[edge] = 20;
 //                    break;
                 case 6: // xxx == 110, command
-                    Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0x00011111);
+                    Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 6;
                     break;
                 case 7: // xxx == 111, relay
