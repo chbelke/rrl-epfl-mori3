@@ -9,6 +9,8 @@
 #include "dsp.h"
 #include "mcc_generated_files/uart4.h"
 #include "mcc_generated_files/adc1.h"
+#include "Coms_CMD.h"
+#include "Coms_REL.h"
 
 uint8_t EspInCase = 0; // switch case variable
 uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
@@ -17,13 +19,12 @@ uint8_t EspInByts = 0; // incoming byte count
 uint16_t EspInLost = 0; // counting lost byte instances since start
 uint16_t EspIn0End = 0; // counting instances of no end byte since start
 
-uint16_t MotLinTemp[3] = {0, 0, 0}; // linear motor extension value (temporary)
-uint16_t MotRotTemp[3] = {0, 0, 0}; // rotary motor angle value (temporary)
-
 int8_t DrivePWM[3] = {0, 0, 0}; // manual drive mode PWM values by edge
 uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
+
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9 // output speed factor for non-primary wheels
+#define ESP_URT_NUM 4
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
@@ -61,294 +62,46 @@ uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 /* ******************** ESP COMMAND EVALUATION ****************************** */
 void Coms_ESP_Eval() {
+    static uint8_t EspInCase = 0;
     uint8_t EspIn = UART4_Read(); // Incoming byte
-    switch (EspInCase) {
-        case 0: // CHECK START BYTE
-            if (EspIn == ESP_Beg) {
-                EspInCase = 1;
-                EspInByts = 1;
+    switch (EspInCase) { // select case set by previous byte
+        case 0: // INPUT ALLOCATION ********************************************
+            switch ((EspIn >> 5) & 0x07) {
+                case 0: // xxx == 000, emergency stop
+                    if ((EspIn & 0x1F) == 37)
+                        EspInCase = 1;
+                    break;
+//                case 2: // xxx == 010, action sync received
+//                    EdgInCase[edge] = 2;
+//                    break;
+//                case 3: // xxx == 011, idle mode
+//                    EdgInCase[edge] = 10;
+//                    break;
+//                case 4: // xxx == 100, connection detected or acknowledged
+//                    EdgInCase[edge] = 20;
+//                    break;
+                case 6: // xxx == 110, command
+                    Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0x00011111);
+                    EspInCase = 6;
+                    break;
+                case 7: // xxx == 111, relay
+                    Coms_REL_Handle(ESP_URT_NUM, EspIn & 0x07);
+                    EspInCase = 7;
+                    break;
             }
-            break;
-
-        case 1: // INPUT ALLOCATION ********************************************
-            EspInAloc = EspIn;
-            // if xx == 00, count bits 
-            if (((EspInAloc >> 6) & 0x03) == 0) { // *** ANGLE & EXTENSION INPUT
-                EspInCase = 2;
-                // Brian Kernighan: http://graphics.stanford.edu ...
-                //  ... /~seander/bithacks.html#CountBitsSetNaive
-                uint8_t EspInAlocTemp = EspInAloc;
-                for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
-                    EspInAlocTemp &= EspInAlocTemp - 1; // clear the LSB set
-                }
-            } else if (((EspInAloc >> 6) & 0x03) == 1) { // ******** DRIVE INPUT
-                if (EspInAloc & 0b00100000) { // automatic drive mode
-                    EspInCase = 19;
-                } else { // manual drive mode
-                    EspInCase = 15;
-                    // only last three bits relevant when counting rec. bytes
-                    uint8_t EspInAlocTemp = (EspInAloc & 0b00000111);
-                    for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
-                        EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
-                    }
-                }
-            } else if (((EspInAloc >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
-                if (EspInAloc & 0b00000111) {
-                    EspInCase = 22;
-                    // only last three bits relevant when counting rec. bytes
-                    uint8_t EspInAlocTemp = (EspInAloc & 0b00000111);
-                    for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
-                        EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
-                    }
-                } else {
-                    EspInCase = 25;
-                    EspInBits = 0;
-                }
-            }
-            EspInByts = EspInByts + 1;
-            break;
-
-        case 2: // LINEAR MOTOR INPUTS *****************************************
-            /* cases 2 to 7, two bytes per motor input */
-            if (EspInAloc & 0b00100000) {
-                MotLinTemp[0] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInByts = EspInByts + 1;
-                EspInCase = 3;
-                break;
-            }
-        case 3:
-            if (EspInAloc & 0b00100000) {
-                MotLinTemp[0] = MotLinTemp[0] | (uint16_t) EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 4;
-                break;
-            }
-        case 4:
-            if (EspInAloc & 0b00010000) {
-                MotLinTemp[1] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInByts = EspInByts + 1;
-                EspInCase = 5;
-                break;
-            }
-        case 5:
-            if (EspInAloc & 0b00010000) {
-                MotLinTemp[1] = MotLinTemp[1] | (uint16_t) EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 6;
-                break;
-            }
+            break;   
+            
         case 6:
-            if (EspInAloc & 0b00001000) {
-                MotLinTemp[2] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInByts = EspInByts + 1;
-                EspInCase = 7;
-                break;
-            }
+            if (Coms_CMD_Handle(ESP_URT_NUM, EspIn))
+                EspInCase = 0;
+            break;
+            
         case 7:
-            if (EspInAloc & 0b00001000) {
-                MotLinTemp[2] = MotLinTemp[2] | (uint16_t) EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 8;
-                break;
-            }
-
-        case 8: // ROTARY MOTOR INPUTS *****************************************
-            /* cases 8 to 13, two bytes per motor input */
-            if (EspInAloc & 0b00000100) {
-                MotRotTemp[0] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInByts = EspInByts + 1;
-                EspInCase = 9;
-                break;
-            }
-        case 9:
-            if (EspInAloc & 0b00000100) {
-                MotRotTemp[0] = MotRotTemp[0] | (uint16_t) EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 10;
-                break;
-            }
-        case 10:
-            if (EspInAloc & 0b00000010) {
-                MotRotTemp[1] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInByts = EspInByts + 1;
-                EspInCase = 11;
-                break;
-            }
-        case 11:
-            if (EspInAloc & 0b00000010) {
-                MotRotTemp[1] = MotRotTemp[1] | (uint16_t) EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 12;
-                break;
-            }
-        case 12:
-            if (EspInAloc & 0b00000001) {
-                MotRotTemp[2] = ((uint16_t) (EspIn) << 8) & 0xFF00;
-                EspInByts = EspInByts + 1;
-                EspInCase = 13;
-                break;
-            }
-        case 13:
-            if (EspInAloc & 0b00000001) {
-                MotRotTemp[2] = MotRotTemp[2] | (uint16_t) EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 14;
-                break;
-            }
-
-        case 14: // verify motor inputs
-            if (EspIn == ESP_End) {
-                if (EspInByts == (2 + EspInBits * 2)) {
-                    Coms_ESP_SetMots();
-                } else {
-                    EspInLost = EspInLost + 1; // data lost
-                }
-            } else {
-                EspIn0End = EspIn0End + 1; // no end byte
-            }
-            EspInCase = 0;
-            break;
-
-        case 15: // MANUAL DRIVE MODE ******************************************
-            if (EspInAloc & 0b00000100) {
-                DrivePWM[0] = EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 16;
-                break;
-            }
-        case 16:
-            if (EspInAloc & 0b00000010) {
-                DrivePWM[1] = EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 17;
-                break;
-            }
-        case 17:
-            if (EspInAloc & 0b00000001) {
-                DrivePWM[2] = EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 18;
-                break;
-            }
-        case 18: // verify drive inputs
-            if (EspIn == ESP_End) {
-                if (EspInByts == (2 + EspInBits)) {
-                    uint8_t m;
-                    for (m = 0; m <= 2; m++) {
-                        if ((EspInAloc >> (2 - m)) & 0b00000001) {
-                            Acts_ROT_Out(m, DrivePWM[m]*8);
-                        }
-                    }
-                } else {
-                    EspInLost = EspInLost + 1; // data lost
-                }
-            } else {
-                EspIn0End = EspIn0End + 1; // no end byte
-            }
-            EspInCase = 0;
-            break;
-
-        case 19: // AUTOMATIC DRIVE MODE ***************************************
-            DriveSpd = EspIn;
-            EspInByts = EspInByts + 1;
-            EspInCase = 20;
-            break;
-
-        case 20:
-            DriveCrv = EspIn;
-            EspInByts = EspInByts + 1;
-            EspInCase = 21;
-            break;
-
-        case 21: // verify drive inputs
-            if (EspIn == ESP_End) {
-                if (EspInByts == 4) {
-                    Coms_ESP_Drive(DriveSpd, DriveCrv,
-                            ((EspInAloc & 0x18) >> 3), ((EspInAloc & 0x04) >> 2));
-                } else {
-                    EspInLost = EspInLost + 1; // data lost
-                }
-            } else {
-                EspIn0End = EspIn0End + 1; // no end byte
-            }
-            EspInCase = 0;
-            break;
-
-        case 22: // COUPLING & LED INPUT ***************************************
-            if (EspInAloc & 0b00000100) {
-                RgbPWM[0] = EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 23;
-                break;
-            }
-
-        case 23:
-            if (EspInAloc & 0b00000010) {
-                RgbPWM[1] = EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 24;
-                break;
-            }
-
-        case 24:
-            if (EspInAloc & 0b00000001) {
-                RgbPWM[2] = EspIn;
-                EspInByts = EspInByts + 1;
-                EspInCase = 25;
-                break;
-            }
-
-        case 25: // verify coupling inputs
-            if (EspIn == ESP_End) {
-                if (EspInByts == (2 + EspInBits)) {
-                    // set smas
-                    uint8_t m;
-                    for (m = 0; m <= 2; m++) {
-                        if (EspInAloc & (0b00100000 >> m)) {
-                            Acts_CPL_On(m);
-                        }
-                    }
-                    // update leds
-                    for (m = 0; m <= 2; m++) {
-                        if ((EspInAloc >> (2 - m)) & 0b00000001) {
-                            Mnge_RGB_Set(m, RgbPWM[m]);
-                        }
-                    }
-                } else {
-                    EspInLost = EspInLost + 1; // data lost
-                }
-            } else {
-                EspIn0End = EspIn0End + 1; // no end byte
-            }
-            EspInCase = 0;
-            break;
-
-        case 26:
-            break;
-
-        default:
-            EspInCase = 0;
+            if (Coms_REL_Handle(ESP_URT_NUM, EspIn))
+                EspInCase = 0;
             break;
     }
-}
-
-/* ******************** ESP COMMAND TO MOTORS ******************************* */
-void Coms_ESP_SetMots() {
-    uint8_t j, k;
-
-    // Set linear motors
-    for (j = 1; j <= 3; j++) {
-        if ((EspInAloc >> (5 - (j - 1)))) {
-            Acts_LIN_SetTarget(j - 1, MotLinTemp[j - 1]);
-        }
-    }
-
-    // Set rotary motors (not yet implemented)
-    for (k = 1; k <= 3; k++) {
-        if ((EspInAloc >> (2 - (k - 1))) & 0x01) {
-            //            MotLin_Set(k-1,MotLinTemp[k]);
-        }
-    }
+            
 }
 
 /* ******************** ESP COMMAND TO DRIVE ******************************** */

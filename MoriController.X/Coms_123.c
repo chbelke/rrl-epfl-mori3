@@ -31,6 +31,9 @@ uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
 #define COMS_123_IDOk 0b10001100
 #define COMS_123_Idle 0b01100000
 
+#define WHEEL 68.15f // wheel distance from vertex
+#define SxOUT 0.9 // output speed factor for non-primary wheels
+
 // EdgInAloc Explanation
 /* EdgInAloc: 
  * 0bxxx00000, where xxx = indicator
