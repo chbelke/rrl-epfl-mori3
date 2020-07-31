@@ -1,6 +1,6 @@
-#include "DAC5574.h"
+#include "Mnge_DAC.h"
 
-void DAC5574_Write(uint8_t channel, uint8_t value) {
+void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB;
     static uint8_t *pWrite, writeBuffer[3], nCount = 3;

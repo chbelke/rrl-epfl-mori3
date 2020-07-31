@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <libpic30.h>
 #include <stdbool.h>
-#include "define.h"
+#include "Defs.h"
 #include "mcc_generated_files/pwm.h"
 
 uint16_t MotLin_Desired[3] = {457, 457, 457};
@@ -14,14 +14,14 @@ int16_t Stbl_dOld[3] = {0, 0, 0};
 bool Stbl_Flag[3] = {false, false, false};
 
 /* ******************** LINEAR MOTOR OUTPUTS ******************************** */
-void MotLin_OUT(uint8_t edge, int16_t duty) {
+void Acts_LIN_Out(uint8_t edge, int16_t duty) {
     if (!STAT_MotLin_Active) duty = 0; // linear motors off
     switch (edge) {
         case 0:
             if (duty > 0) LIN_DIR_1 = 0; // direction output
             else LIN_DIR_1 = 1;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[0]) || (Flg_EdgeCon[0] && Flg_EdgeSyn[0])) {
+            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
                 PWM_Set(LIN_PWM_1, abs(duty)); // pwm output
             }
             break;
@@ -30,7 +30,7 @@ void MotLin_OUT(uint8_t edge, int16_t duty) {
             if (duty > 0) LIN_DIR_2 = 0; // direction output
             else LIN_DIR_2 = 1;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[1]) || (Flg_EdgeCon[1] && Flg_EdgeSyn[1])) {
+            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
                 PWM_Set(LIN_PWM_2, abs(duty)); // pwm output
             }
             break;
@@ -39,7 +39,7 @@ void MotLin_OUT(uint8_t edge, int16_t duty) {
             if (duty > 0) LIN_DIR_3 = 0; // direction output
             else LIN_DIR_3 = 1;
             // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[2]) || (Flg_EdgeCon[2] && Flg_EdgeSyn[2])) {
+            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
                 PWM_Set(LIN_PWM_3, abs(duty)); // pwm output
             }
             break;
@@ -50,7 +50,7 @@ void MotLin_OUT(uint8_t edge, int16_t duty) {
 }
 
 /* ******************** LINEAR MOTOR PID ************************************ */
-void MotLin_PID(uint8_t edge, uint16_t current, uint16_t desired) {
+void Acts_LIN_PID(uint8_t edge, uint16_t current, uint16_t desired) {
     // avoid bad control inputs
     switch (edge) {
         case 0:
@@ -127,15 +127,15 @@ void MotLin_PID(uint8_t edge, uint16_t current, uint16_t desired) {
 
     // update motor control output
     if (Stbl_Flag[edge]) outf = 0; // extension value stable
-    MotLin_OUT(edge, (int16_t) outf);
+    Acts_LIN_Out(edge, (int16_t) outf);
 }
 
 /* ******************** GET DESIRED EXTENSION ******************************* */
-uint16_t MotLin_Get(uint8_t edge) {
+uint16_t Acts_LIN_GetTarget(uint8_t edge) {
     return MotLin_Desired[edge];
 }
 
 /* ******************** SET DESIRED EXTENSION ******************************* */
-void MotLin_Set(uint8_t edge, uint16_t desired) {
+void Acts_LIN_SetTarget(uint8_t edge, uint16_t desired) {
     MotLin_Desired[edge] = desired;
 }

@@ -56,12 +56,14 @@
 #include "tmr3.h"
 #include "adc1.h"
 #include "uart4.h"
-#include "../MotLin.h"
-#include "../define.h"
-#include "../MotRot.h"
-#include "../AS5048B.h"
-#include "../TLC59208.h"
-#include "../MMA8452Q.h"
+#include "../Acts_LIN.h"
+#include "../Defs.h"
+#include "../Acts_ROT.h"
+#include "../Acts_CPL.h"
+#include "../Sens_ENC.h"
+#include "../Mnge_PWM.h"
+#include "../Sens_ACC.h"
+#include "../Coms_123.h"
 
 /**
  Section: File specific functions
@@ -174,15 +176,16 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
 {
     // Add your custom callback code here
 
-    // coupling sma controller
-    SMA_Ctrl();
+    Acts_CPL_Ctrl(); // coupling sma controller
     
-    // read analog pot inputs
-    ADC1_Update();
-    // edge extension control loops
-    MotLin_PID(0, ADC1_Return(0), MotLin_Get(0));
-    MotLin_PID(1, ADC1_Return(1), MotLin_Get(1));
-    MotLin_PID(2, ADC1_Return(2), MotLin_Get(2));
+    Coms_123_ActHandle(); // action synchronisation handle
+    
+    ADC1_Update(); // read analog potentiometer inputs
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++){
+        if (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]) // extension control loops
+            Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
+    }
 }
 
 void  TMR3_SetInterruptHandler(void (* InterruptHandler)(void))

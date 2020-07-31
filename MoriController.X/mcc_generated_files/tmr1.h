@@ -53,7 +53,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "mcc.h"
-#include "..\MMA8452Q.h"
+#include "..\Sens_ACC.h"
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

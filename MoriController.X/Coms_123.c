@@ -1,10 +1,13 @@
 #include "Coms_123.h"
 #include "Coms_ESP.h"
-#include "define.h"
+#include "Coms_REL.h"
+#include "Coms_CMD.h"
+#include "Defs.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
-#include "TLC59208.h"
+#include "Mnge_PWM.h"
+#include "Mnge_RGB.h"
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
@@ -17,7 +20,7 @@ bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 // Neighbour ID variables
 uint8_t EdgByteCount[3] = {0, 0, 0};
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t NbrIDTemp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
 
 uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
@@ -34,17 +37,20 @@ uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
  * 000 = stop moving
  * - 0b000xxxxx check if xxxxx is 11111, execute upon end byte
  * 001 = not used because of end byte
- * 010 = action byte
+ * 010 = action sync byte
  * - 0b010xoooo angle command received, follows in two bytes
  * - 0b010oxooo length command received, follows in two bytes
  * - 0b010ooxoo coupling command received
+ * - 0b010oooxo confirm match
  * 011 = idle mode
  * - 0b011ooooo
  * 100 = connection detected or acknowledged
  * - 0b100xoooo if x is 1, connection search only
  * - 0b100oxooo if x is 1, synchronisation byte, expect ID
- * 111 = Relay mode - Kevin
- * - 0b111xxxxx
+ * 110 = Command for central controller (interpreted in Coms_CMD)
+ * 111 = Relay mode (managed by Coms_REL)
+ * - 0b111000xx xx defines edge/wifi: 00 = edg1, 01 = edg2, 10 = edg3, 11 = wifi
+ * - 0b11100x00 if x is 1, relay to all (and ignore last two bits)
  */
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
@@ -58,7 +64,7 @@ void Coms_123_Eval(uint8_t edge) {
                     if ((EdgInAloc[edge] & 0x1F) == 37)
                         EdgInCase[edge] = 1;
                     break;
-                case 2: // xxx == 010, action command received
+                case 2: // xxx == 010, action sync received
                     EdgInCase[edge] = 2;
                     break;
                 case 3: // xxx == 011, idle mode
@@ -67,8 +73,13 @@ void Coms_123_Eval(uint8_t edge) {
                 case 4: // xxx == 100, connection detected or acknowledged
                     EdgInCase[edge] = 20;
                     break;
-                case 7: // xxx == 111, relay (Kevin)
-                    EdgInCase[edge] = 30 + (EdgInAloc[edge] & 0b00011111);
+                case 6: // xxx == 110, command
+                    Coms_CMD_Handle(edge, EdgInAloc[edge] & 0x00011111);
+                    EdgInCase[edge] = 30;
+                    break;
+                case 7: // xxx == 111, relay
+                    Coms_REL_Handle(edge, EdgInAloc[edge] & 0x07);
+                    EdgInCase[edge] = 40;
                     break;
             }
             break;
@@ -140,13 +151,13 @@ void Coms_123_Eval(uint8_t edge) {
             } else if ((EdgInAloc[edge] & 0b00001000)) { // con acknowledged
                 // acknowledge byte followed by ID
                 if (NbrIDCount[edge] < 6) {
-                    NbrIDTemp[NbrIDCount[edge] + 6 * edge] = EdgIn;
+                    NbrIDTmp[NbrIDCount[edge] + 6 * edge] = EdgIn;
                     NbrIDCount[edge]++;
                 } else {
                     if (EdgIn == EDG_End) {
                         uint8_t i;
                         for (i = 0 + 6 * edge; i <= 5 + 6 * edge; i++) {
-                            NbrID[i] = NbrIDTemp[i];
+                            NbrID[i] = NbrIDTmp[i];
                         }
                         Flg_EdgeCon[edge] = true; // make sure flag is set
                         Flg_IDRcvd[edge] = true; // ID received, tell neighbour
@@ -162,20 +173,16 @@ void Coms_123_Eval(uint8_t edge) {
             }
             break;
 
-        case 30: // VERBOSE ****************************************************
-            if (EdgByteCount[edge] != 2) {
-                EdgByteCount[edge]++;
+        case 30: // COMMAND ****************************************************
+            if (Coms_CMD_Handle(edge, EdgIn)){
                 break;
-            } else if (EdgIn == EDG_End) {
-                Flg_Verbose = !Flg_Verbose;
-                EdgInCase[edge] = 0;
-                EdgByteCount[edge] = 0;
             }
-            break;
-
-        case 31:
-            break;
-
+            
+        case 40: // RELAY ****************************************************
+            if (Coms_REL_Handle(edge, EdgIn)){
+                break;
+            }
+            
         default: // DEFAULT ****************************************************
             EdgInCase[edge] = 0;
             break;
@@ -209,16 +216,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         // determine byte to be sent depending on con state flags
         if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
-            LED_Set(edge, 20); // XXX replace with function to turn esp leds on
+            Mnge_RGB_Set(edge, 20); // XXX replace with function to turn esp leds on
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
-            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
-            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
         } else {
             byte = COMS_123_Conn; // send connect search
-            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
         }
 
         // write byte (ID if in con but no sync) and end byte
@@ -227,6 +234,20 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_123_WriteID(edge);
         Coms_123_Write(edge, EDG_End);
     }
+}
+
+/* ******************** NEIGHBOUR ACTION HANDLE ***************************** */
+void Coms_123_ActHandle() { // called in tmr3 at 20Hz
+    //    uint8_t edge;
+    //    uint8_t byte = 0b01000000;
+    //    for (edge = 0; edge < 3; edge++) {
+    //        if (Flg_ActAng[edge])
+    //            byte = byte | 0b00010000;
+    //        if (Flg_ActExt[edge])
+    //            byte = byte | 0b00001000;
+    //        if (Flg_ActExt[edge])
+    //            byte = byte | 0b00000100;
+    //    }
 }
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */

@@ -55,12 +55,13 @@
 #include "tmr5.h"
 #include "uart4.h"
 #include "adc1.h"
-#include "../define.h"
-#include "../MotLin.h"
-#include "../TLC59208.h"
-#include "../MMA8452Q.h"
-#include "../Battery.h"
-#include "../Button.h"
+#include "../Defs.h"
+#include "../Acts_LIN.h"
+#include "../Mnge_PWM.h"
+#include "../Sens_ACC.h"
+#include "../Mnge_BAT.h"
+#include "../Mnge_BTN.h"
+#include "../Mnge_RGB.h"
 #include "../Coms_123.h"
 #include "../Coms_ESP.h"
 
@@ -184,10 +185,10 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     Battery_Check();
 
     if (MODE_LED_ANGLE && MODE_ACC_CON) {
-        MMA8452Q_Read();
+        Sens_ACC_Read();
         int16_t RGB[3] = {0, 0, 0};
-        RGB[0] = ACC_Get(0) / 16 + 64;
-        RGB[1] = ACC_Get(1) / 16 + 64;
+        RGB[0] = Sens_ACC_Get(0) / 16 + 64;
+        RGB[1] = Sens_ACC_Get(1) / 16 + 64;
         RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
         uint8_t m;
         for (m = 0; m <= 2; m++) {
@@ -197,7 +198,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
                 RGB[m] = 255;
             }
         }
-        LED_SetAll(RGB[0] / 2, RGB[1] / 2, RGB[2]);
+        Mnge_RGB_SetAll(RGB[0] / 2, RGB[1] / 2, RGB[2]);
     } else if (MODE_LED_EDGES) {
         uint16_t RGB[3];
         RGB[0] = (1024 - (ADC1_Return(0))) / 60;
@@ -211,13 +212,13 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
                 RGB[m] = 255;
             }
         }
-        LED_SetAll(RGB[0], RGB[1], RGB[2]);
+        Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
     } else if (MODE_LED_RNBOW) {
         static uint8_t RGBow[3] = {0, 80, 160};
         RGBow[0] += 20;
         RGBow[1] += 20;
         RGBow[2] += 20;
-        LED_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
+        Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
     }
 
 

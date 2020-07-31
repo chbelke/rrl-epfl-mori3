@@ -47,7 +47,7 @@
 */
 
 #include "pwm.h"
-#include "../define.h"
+#include "../Defs.h"
 
 /**
   Section: Driver Interface

@@ -6,8 +6,8 @@
 /* ************************************************************************** */
 /* ************************************************************************** */
 
-#ifndef DEFINE_H
-#define	DEFINE_H
+#ifndef DEFS_H
+#define	DEFS_H
 
 #define FCY 3686400UL               // cycle frequency
 
@@ -52,8 +52,8 @@ extern volatile bool MODE_LED_EDGES;
 extern volatile bool MODE_LED_RNBOW;
 
 /* ********************  FLAGS ********************************************** */
-extern volatile bool Flg_LiveAngle;
-extern volatile bool Flg_LiveEdges;
+extern volatile bool Flg_LiveAng;
+extern volatile bool Flg_LiveExt;
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
@@ -81,10 +81,12 @@ extern volatile bool Flg_Verbose;
 /* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
+#define ESP_Relay 0b00000101
+#define ESP
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte
-#define EDG_IdlIntrvl 5             // idle check at 5Hz, 5 = 1 sec = con lost
+#define EDG_IdlIntrvl 3             // idle check at 5Hz, 5 = 1 sec = con lost
 #define EDG_ConIntrvl 10            // con check at 5Hz, 5 = 2 sec = con lost
 
 /* ******************** PWM GENERATOR *************************************** */
@@ -187,7 +189,4 @@ extern volatile bool Flg_Verbose;
 #define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
 #define SMA_Duty 100 // 8-bit PWM value
 
-/* ************************ ESP8622 Comms ********************************** */
-#define WIFI_RELAY_BYTE 0b00000101
-
-#endif	/* DEFINE_H */
+#endif	/* DEFS_H */
