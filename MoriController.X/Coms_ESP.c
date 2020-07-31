@@ -65,8 +65,7 @@ uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 void Coms_ESP_Eval() {
     static uint8_t EspInCase = 0;
     uint8_t EspIn = UART4_Read(); // Incoming byte
-    char message[] = "hello";
-    Coms_ESP_Verbose_Write(message);
+    Coms_ESP_Verbose_Write("hello", 5);
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             switch ((EspIn >> 5) & 0x07) {
@@ -202,7 +201,7 @@ uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
 
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose() {
-    UART4_Write(ESP_Relay);
+    UART4_Write(0);
     UART4_Write(6); // Message length
     uint8_t i;
     for (i = 0; i < 3; i++) {
@@ -213,9 +212,8 @@ void Coms_ESP_Verbose() {
 
 
 /* ******************** VERBOSE OUTPUT ************************************** */
-void Coms_ESP_Verbose_Write(char* message) {
-    UART4_Write(ESP_Relay);
-    uint8_t len = strlen(message);
+void Coms_ESP_Verbose_Write(char* message, uint8_t len) {
+    UART4_Write(0);
     UART4_Write(len); // Message length
     uint8_t i;
     for (i = 0; i < len; i++) {
