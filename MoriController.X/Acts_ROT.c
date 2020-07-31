@@ -2,15 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpic30.h>
-#include "define.h"
-#include "DAC5574.h"
+#include "Defs.h"
+#include "Mnge_DAC.h"
 
 float rPID_eOld[3] = {0, 0, 0};
 float rPID_I[3] = {0, 0, 0};
 float rPID_D[3] = {0, 0, 0};
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
-void MotRot_OUT(uint8_t edge, int16_t duty) {
+void Acts_ROT_Out(uint8_t edge, int16_t duty) {
     if (!STAT_MotRot_Active) duty = 0; // linear motors off
     switch (edge) {
         case 0:
@@ -46,7 +46,7 @@ void MotRot_OUT(uint8_t edge, int16_t duty) {
 }
 
 /* ******************** ROTARY MOTOR PID ************************************ */
-void MotRot_PID(uint8_t edge, float current, float desired) {
+void Acts_ROT_PID(uint8_t edge, float current, float desired) {
     // avoid bad control inputs
     if (desired < -MotRot_AngleRange / 2) desired = -MotRot_AngleRange / 2;
     else if (desired > MotRot_AngleRange / 2) desired = MotRot_AngleRange / 2;
@@ -75,10 +75,10 @@ void MotRot_PID(uint8_t edge, float current, float desired) {
     else if (outf > MotRot_PID_Max) outf = MotRot_PID_Max;
 
     // update motor control output
-    MotRot_OUT(edge, (int16_t) outf);
+    Acts_ROT_Out(edge, (int16_t) outf);
 }
 
 /* ******************** ROTARY MOTOR CURRENT ******************************** */
-void MotRot_LIM(uint8_t edge, uint8_t voltagelevel) {
-    DAC5574_Write(edge, voltagelevel);
+void Acts_ROT_Limit(uint8_t edge, uint8_t voltagelevel) {
+    Mnge_DAC_Write(edge, voltagelevel);
 }

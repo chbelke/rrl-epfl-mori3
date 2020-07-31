@@ -1,9 +1,11 @@
-#include "MMA8452Q.h"
-#include "define.h"
+#include "Sens_ACC.h"
+#include "Defs.h"
+
+// Accelerometer MMA8452Q
 
 volatile int16_t ACC_Data[3] = {0, 0, 0};
 
-void MMA8452Q_Setup(void) {
+void Sens_ACC_Setup(void) {
     I2C1_MESSAGE_STATUS status;
     I2C1_TRANSACTION_REQUEST_BLOCK TRB;
     uint8_t *pWrite, writeBuffer[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1};
@@ -50,7 +52,7 @@ void MMA8452Q_Setup(void) {
 
 }
 
-void MMA8452Q_Read(void) {
+void Sens_ACC_Read(void) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
     static uint8_t writeBuffer, readBuffer[6], *pWrite, *pRead;
@@ -108,6 +110,6 @@ void MMA8452Q_Read(void) {
 }
 
 // acceleration values between -2047 and 2047
-int16_t ACC_Get(uint8_t axis) { //axis 0 corresponds to x, 1 to y, 2 to z
+int16_t Sens_ACC_Get(uint8_t axis) { //axis 0 corresponds to x, 1 to y, 2 to z
     return ACC_Data[axis];
 }

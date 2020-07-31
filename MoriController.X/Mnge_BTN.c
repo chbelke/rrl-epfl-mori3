@@ -1,9 +1,9 @@
-#include "Button.h"
-#include "define.h"
+#include "Mnge_BTN.h"
+#include "Defs.h"
 #include "mcc_generated_files/uart4.h"
 #include "Coms_ESP.h"
-#include "MotRot.h"
-#include "TLC59208.h"
+#include "Acts_ROT.h"
+#include "Mnge_PWM.h"
 
 volatile int k = 0;
 void Button_Eval() {
@@ -28,8 +28,6 @@ void Button_Eval() {
 //            k = 0;
 //            break;
 //    }
-    
-    SMA_On(0);
 }
 
 int Button_ReturnState() {

@@ -1,8 +1,10 @@
 #include "Coms_ESP.h"
-#include "define.h"
-#include "MotLin.h"
-#include "MotRot.h"
-#include "TLC59208.h"
+#include "Defs.h"
+#include "Acts_LIN.h"
+#include "Acts_ROT.h"
+#include "Acts_CPL.h"
+#include "Mnge_PWM.h"
+#include "Mnge_RGB.h"
 #include "math.h"
 #include "dsp.h"
 #include "mcc_generated_files/uart4.h"
@@ -234,7 +236,7 @@ void Coms_ESP_Eval() {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
                         if ((EspInAloc >> (2 - m)) & 0b00000001) {
-                            MotRot_OUT(m, DrivePWM[m]*8);
+                            Acts_ROT_Out(m, DrivePWM[m]*8);
                         }
                     }
                 } else {
@@ -303,13 +305,13 @@ void Coms_ESP_Eval() {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
                         if (EspInAloc & (0b00100000 >> m)) {
-                            SMA_On(m);
+                            Acts_CPL_On(m);
                         }
                     }
                     // update leds
                     for (m = 0; m <= 2; m++) {
                         if ((EspInAloc >> (2 - m)) & 0b00000001) {
-                            LED_Set(m, RgbPWM[m]);
+                            Mnge_RGB_Set(m, RgbPWM[m]);
                         }
                     }
                 } else {
@@ -337,7 +339,7 @@ void Coms_ESP_SetMots() {
     // Set linear motors
     for (j = 1; j <= 3; j++) {
         if ((EspInAloc >> (5 - (j - 1)))) {
-            MotLin_Set(j - 1, MotLinTemp[j - 1]);
+            Acts_LIN_SetTarget(j - 1, MotLinTemp[j - 1]);
         }
     }
 
@@ -360,24 +362,24 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float a, b, c; // extension values from 180
     switch (edge) {
         case 0:
-            a = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-            b = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-            c = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            a = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             break;
         case 1:
-            a = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-            b = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
-            c = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            a = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            b = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            c = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
             break;
         case 2:
-            a = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
-            b = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-            c = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            a = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            b = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            c = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
             break;
         default:
-            a = 180 + (MotLin_MAX_1 - MotLin_Get(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-            b = 180 + (MotLin_MAX_2 - MotLin_Get(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-            c = 180 + (MotLin_MAX_3 - MotLin_Get(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            a = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
+            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             break;
     }
 
@@ -415,24 +417,24 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     // output depending on driving edge
     switch (edge) {
         case 0:
-            MotRot_OUT(0, Sa);
-            MotRot_OUT(1, Sb);
-            MotRot_OUT(2, Sc);
+            Acts_ROT_Out(0, Sa);
+            Acts_ROT_Out(1, Sb);
+            Acts_ROT_Out(2, Sc);
             break;
         case 1:
-            MotRot_OUT(1, Sa);
-            MotRot_OUT(2, Sb);
-            MotRot_OUT(0, Sc);
+            Acts_ROT_Out(1, Sa);
+            Acts_ROT_Out(2, Sb);
+            Acts_ROT_Out(0, Sc);
             break;
         case 2:
-            MotRot_OUT(2, Sa);
-            MotRot_OUT(0, Sb);
-            MotRot_OUT(1, Sc);
+            Acts_ROT_Out(2, Sa);
+            Acts_ROT_Out(0, Sb);
+            Acts_ROT_Out(1, Sc);
             break;
         default:
-            MotRot_OUT(0, Sa);
-            MotRot_OUT(1, Sb);
-            MotRot_OUT(2, Sc);
+            Acts_ROT_Out(0, Sa);
+            Acts_ROT_Out(1, Sb);
+            Acts_ROT_Out(2, Sc);
             break;
     }
 }

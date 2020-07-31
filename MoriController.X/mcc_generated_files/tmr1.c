@@ -54,12 +54,12 @@
 #include <libpic30.h>
 #include "adc1.h"
 #include "tmr1.h"
-#include "../define.h"
-#include "../MotRot.h"
-#include "../AS5048B.h"
-#include "../TLC59208.h"
-#include "../MMA8452Q.h"
-#include "../Button.h"
+#include "../Defs.h"
+#include "../Acts_ROT.h"
+#include "../Sens_ENC.h"
+#include "../Mnge_PWM.h"
+#include "../Sens_ACC.h"
+#include "../Mnge_BTN.h"
 
 /**
  Section: File specific functions
@@ -194,9 +194,9 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     
     if (MODE_ENC_CON){
         static uint16_t angle[3];
-        angle[0] = ENC_Read(0);
-        angle[1] = ENC_Read(1);
-        angle[2] = ENC_Read(2);
+        angle[0] = Sens_ENC_Read(0);
+        angle[1] = Sens_ENC_Read(1);
+        angle[2] = Sens_ENC_Read(2);
     }
     
 //    UART4_Write(0x0F);

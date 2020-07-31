@@ -59,7 +59,7 @@
 #include "tmr3.h"
 #include "i2c1.h"
 #include "ext_int.h"
-#include "../TLC59208.h"
+#include "../Mnge_PWM.h"
 
 void SYSTEM_Initialize(void)
 {
@@ -76,8 +76,8 @@ void SYSTEM_Initialize(void)
     ADC1_Initialize();
     TMR3_Initialize();
     
-    TLC59208_Setup();           // TLC59208 Init
-    MMA8452Q_Setup();           // MMA8452Q Init
+    Mnge_PWM_Setup();           // TLC59208 Init
+    Sens_ACC_Setup();           // MMA8452Q Init
     
     TMR5_Initialize();
     TMR1_Initialize();

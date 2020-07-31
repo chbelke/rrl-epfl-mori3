@@ -56,12 +56,13 @@
 #include "tmr3.h"
 #include "adc1.h"
 #include "uart4.h"
-#include "../MotLin.h"
-#include "../define.h"
-#include "../MotRot.h"
-#include "../AS5048B.h"
-#include "../TLC59208.h"
-#include "../MMA8452Q.h"
+#include "../Acts_LIN.h"
+#include "../Defs.h"
+#include "../Acts_ROT.h"
+#include "../Acts_CPL.h"
+#include "../Sens_ENC.h"
+#include "../Mnge_PWM.h"
+#include "../Sens_ACC.h"
 #include "../Coms_123.h"
 
 /**
@@ -175,7 +176,7 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
 {
     // Add your custom callback code here
 
-    SMA_Ctrl(); // coupling sma controller
+    Acts_CPL_Ctrl(); // coupling sma controller
     
     Coms_123_ActHandle(); // action synchronisation handle
     
@@ -183,7 +184,7 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
     uint8_t edge;
     for (edge = 0; edge < 3; edge++){
         if (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]) // extension control loops
-            MotLin_PID(edge, ADC1_Return(edge), MotLin_Get(edge));
+            Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
     }
 }
 

@@ -25,19 +25,20 @@
         <itemPath>mcc_generated_files/uart3.h</itemPath>
         <itemPath>mcc_generated_files/uart4.h</itemPath>
       </logicalFolder>
-      <itemPath>TLC59208.h</itemPath>
-      <itemPath>MMA8452Q.h</itemPath>
-      <itemPath>DAC5574.h</itemPath>
-      <itemPath>MotLin.h</itemPath>
-      <itemPath>MotRot.h</itemPath>
-      <itemPath>define.h</itemPath>
-      <itemPath>AS5048B.h</itemPath>
-      <itemPath>Battery.h</itemPath>
-      <itemPath>Button.h</itemPath>
       <itemPath>Coms_123.h</itemPath>
       <itemPath>Coms_ESP.h</itemPath>
       <itemPath>Coms_REL.h</itemPath>
       <itemPath>Coms_CMD.h</itemPath>
+      <itemPath>Acts_CPL.h</itemPath>
+      <itemPath>Mnge_BTN.h</itemPath>
+      <itemPath>Mnge_BAT.h</itemPath>
+      <itemPath>Acts_LIN.h</itemPath>
+      <itemPath>Acts_ROT.h</itemPath>
+      <itemPath>Sens_ACC.h</itemPath>
+      <itemPath>Sens_ENC.h</itemPath>
+      <itemPath>Mnge_DAC.h</itemPath>
+      <itemPath>Mnge_PWM.h</itemPath>
+      <itemPath>Mnge_RGB.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -69,18 +70,20 @@
         <itemPath>mcc_generated_files/uart3.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
-      <itemPath>TLC59208.c</itemPath>
-      <itemPath>MMA8452Q.c</itemPath>
-      <itemPath>DAC5574.c</itemPath>
-      <itemPath>MotRot.c</itemPath>
-      <itemPath>MotLin.c</itemPath>
-      <itemPath>AS5048B.c</itemPath>
-      <itemPath>Battery.c</itemPath>
-      <itemPath>Button.c</itemPath>
       <itemPath>Coms_123.c</itemPath>
       <itemPath>Coms_ESP.c</itemPath>
       <itemPath>Coms_REL.c</itemPath>
       <itemPath>Coms_CMD.c</itemPath>
+      <itemPath>Acts_CPL.c</itemPath>
+      <itemPath>Acts_LIN.c</itemPath>
+      <itemPath>Acts_ROT.c</itemPath>
+      <itemPath>Mnge_BAT.c</itemPath>
+      <itemPath>Mnge_BTN.c</itemPath>
+      <itemPath>Mnge_DAC.c</itemPath>
+      <itemPath>Mnge_PWM.c</itemPath>
+      <itemPath>Sens_ACC.c</itemPath>
+      <itemPath>Sens_ENC.c</itemPath>
+      <itemPath>Mnge_RGB.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

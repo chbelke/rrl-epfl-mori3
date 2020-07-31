@@ -1,6 +1,6 @@
 #include "Coms_123.h"
 #include "Coms_REL.h"
-#include "define.h"
+#include "Defs.h"
 #include "mcc_generated_files/uart4.h"
 
 uint8_t RelSwitch[4] = {0}; // switch case variable

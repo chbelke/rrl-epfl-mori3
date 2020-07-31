@@ -47,13 +47,15 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "define.h"
-#include "TLC59208.h"
-#include "MMA8452Q.h"
-#include "DAC5574.h"
-#include "MotRot.h"
-#include "MotLin.h"
-#include "AS5048B.h"
+#include "Defs.h"
+#include "Mnge_PWM.h"
+#include "Mnge_RGB.h"
+#include "Sens_ACC.h"
+#include "Mnge_DAC.h"
+#include "Acts_ROT.h"
+#include "Acts_LIN.h"
+#include "Acts_CPL.h"
+#include "Sens_ENC.h"
 #include "mcc_generated_files/system.h"
 #include "mcc_generated_files/mcc.h"
 
@@ -85,23 +87,23 @@ int main(void)
     LED_R = LED_Off;
     WIFI_EN = WIFI_On;
     
-    SMA_Off(0);
-    SMA_Off(1);
-    SMA_Off(2);
+    Acts_CPL_Off(0);
+    Acts_CPL_Off(1);
+    Acts_CPL_Off(2);
     
     // - Set rotary motor current limits -
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    MotRot_LIM(0,255);
-    MotRot_LIM(1,255);
-    MotRot_LIM(2,255);
+    Acts_ROT_Limit(0,255);
+    Acts_ROT_Limit(1,255);
+    Acts_ROT_Limit(2,255);
     
-    MotLin_Set(0,457);
-    MotLin_Set(1,457);
-    MotLin_Set(2,457);
+    Acts_LIN_SetTarget(0,457);
+    Acts_LIN_SetTarget(1,457);
+    Acts_LIN_SetTarget(2,457);
     
-    LED_SetAll(0,1,2);
+    Mnge_RGB_SetAll(0,1,2);
     
     while (1)
     {

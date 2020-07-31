@@ -2,11 +2,12 @@
 #include "Coms_ESP.h"
 #include "Coms_REL.h"
 #include "Coms_CMD.h"
-#include "define.h"
+#include "Defs.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
-#include "TLC59208.h"
+#include "Mnge_PWM.h"
+#include "Mnge_RGB.h"
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
@@ -215,16 +216,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         // determine byte to be sent depending on con state flags
         if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
-            LED_Set(edge, 20); // XXX replace with function to turn esp leds on
+            Mnge_RGB_Set(edge, 20); // XXX replace with function to turn esp leds on
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
-            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
-            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
         } else {
             byte = COMS_123_Conn; // send connect search
-            LED_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
         }
 
         // write byte (ID if in con but no sync) and end byte

@@ -6,8 +6,8 @@
 /* ************************************************************************** */
 /* ************************************************************************** */
 
-#ifndef DEFINE_H
-#define	DEFINE_H
+#ifndef DEFS_H
+#define	DEFS_H
 
 #define FCY 3686400UL               // cycle frequency
 
@@ -189,4 +189,4 @@ extern volatile bool Flg_Verbose;
 #define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
 #define SMA_Duty 100 // 8-bit PWM value
 
-#endif	/* DEFINE_H */
+#endif	/* DEFS_H */

@@ -1,8 +1,10 @@
-#include "define.h"
-#include "AS5048B.h"
+#include "Defs.h"
+#include "Sens_ENC.h"
 #include "mcc_generated_files/i2c1.h"
 
-float ENC_Read(uint8_t encoder) {
+// Encoder AS5048B
+
+float Sens_ENC_Read(uint8_t encoder) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
     static uint8_t writeBuffer, readBuffer[2], *pWrite, *pRead;
