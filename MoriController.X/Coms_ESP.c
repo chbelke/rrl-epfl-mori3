@@ -215,6 +215,24 @@ void Coms_ESP_SetLEDs(uint8_t edge, uint8_t blink) {
     //UART4_Write(ESP_End);
 }
 
+void Coms_ESP_Interpret() {
+    static uint8_t ESP_bnk_frq = 128;
+    UART4_Write(0b01001010);  // LED R, Set Blink Freq
+    UART4_Write(ESP_bnk_frq);
+    UART4_Write(ESP_End);
+    ESP_bnk_frq++;
+    
+//    UART4_Write(0b00100000);  //Interpret
+//    UART4_Write(5);           // Message length
+//    uint8_t i;
+//    char message[] = "hello";
+//    for (i=0; i<5; i++)
+//    {
+//        UART4_Write(message[i]);
+//    }
+//    UART4_Write(ESP_End);
+}
+
 /* Com_ESP_Drive - Online calc verification */
 /* https://repl.it/languages/c
 

@@ -223,13 +223,14 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 
 
     
-    if (Flg_Verbose)
+    if (Flg_Verbose && WIFI_EN)
     {
         static int k = 0;
         if(!(k % 5)){
             Coms_ESP_Verbose();
         }
-        k++;        
+        k++;
+        Coms_ESP_Interpret();
     }
         
     
