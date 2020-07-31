@@ -65,7 +65,7 @@ uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 void Coms_ESP_Eval() {
     static uint8_t EspInCase = 0;
     uint8_t EspIn = UART4_Read(); // Incoming byte
-    Coms_ESP_Verbose_Write(&EspIn, 1);
+//    Coms_ESP_Verbose_Write(&EspIn, 1);
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             switch ((EspIn >> 5) & 0x07) {
