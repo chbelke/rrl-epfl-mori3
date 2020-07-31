@@ -11,6 +11,7 @@
 #include "mcc_generated_files/adc1.h"
 #include "Coms_CMD.h"
 #include "Coms_REL.h"
+#include <string.h>
 
 uint8_t EspInCase = 0; // switch case variable
 uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
@@ -64,6 +65,7 @@ uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 void Coms_ESP_Eval() {
     static uint8_t EspInCase = 0;
     uint8_t EspIn = UART4_Read(); // Incoming byte
+    Coms_ESP_Verbose_Write("hello");
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             switch ((EspIn >> 5) & 0x07) {
@@ -207,6 +209,20 @@ void Coms_ESP_Verbose() {
     }
     UART4_Write(ESP_End);
 }
+
+
+/* ******************** VERBOSE OUTPUT ************************************** */
+void Coms_ESP_Verbose_Write(char* message) {
+    UART4_Write(ESP_Relay);
+    uint8_t len = strlen(message);
+    UART4_Write(len); // Message length
+    uint8_t i;
+    for (i = 0; i < len; i++) {
+        UART4_Write(message[i]);
+    }
+    UART4_Write(ESP_End);
+}
+
 
 /* ******************** SET ESP EDGE LEDS *********************************** */
 void Coms_ESP_SetLEDs(uint8_t edge, uint8_t blink) {
