@@ -1,22 +1,23 @@
 void relay(byte* payload, unsigned int len)
 {
   verbose_println();
-  int i = 0;
+  int byte_count = 0;
 
-  while(payload[i] != 0b00100000)   //0b00100000 = whitespace
+  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
   {
-    i++;
-    if(i > len)
+    byte_count++;
+    if(byte_count > len)
     {
       publish("ERR: payload has no space");
       break;
     }
   }
-  i++;
+  byte_count++;
+  Serial.println(len);
 
   if(verbose_flag)
   {
-    for (int j = i; j < len; j++)
+    for (int j = byte_count; j < len; j++)
     {
       byte val = payload[j];
       for (int k = 0; k < 8; k++)
@@ -29,11 +30,28 @@ void relay(byte* payload, unsigned int len)
     }    
   }
 
-
-  while(i < len)
+  for (int jj = byte_count; jj < len; jj++)
   {
-    Serial.write(payload[i]);
-    i++;
+    byte val = payload[jj];
+    for (int kk = 0; kk < 8; kk++)
+    {
+        bool f = val & 0x80;
+
+        char buff[10];
+        sprintf(buff, "INFO: %c", f);
+        publish(buff);        
+        
+        val = val << 1;
+        // delay(1000);
+    }
+    publish("INFO: ");
+  }  
+
+
+  while(byte_count < len)
+  {
+    Serial.write(payload[byte_count]);
+    byte_count++;
   }
 
   verbose_println();

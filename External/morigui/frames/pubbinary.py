@@ -8,7 +8,7 @@ import json
 
 
 INPUT = 13
-END_BYTE = 14
+END_BYTE = 0b00001110
 
 class PublishBinary():
 

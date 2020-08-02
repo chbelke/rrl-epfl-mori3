@@ -17,6 +17,9 @@ void Coms_ESP_Verbose (void);
 void Coms_ESP_SetLEDs (uint8_t, uint8_t);
 void Coms_ESP_Interpret(void);
 void Coms_ESP_Verbose_Write(uint8_t*, uint8_t);
+void Coms_ESP_LED_Blk(uint8_t, uint8_t);
+void Coms_ESP_LED_On(uint8_t, bool);
+
 
 #endif	/* COMS_ESP_H */
 

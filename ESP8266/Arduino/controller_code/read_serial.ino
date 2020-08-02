@@ -15,7 +15,7 @@ void sendSerial()
     		if(c == char(13))
     		{
     			Serial.println("in 13 loop");
-    			msgBuf[bufLoc] = c;
+    			msgBuf[bufLoc] = 0b11001101;
     			bufLoc++;
     			readCase = 1;
     		}

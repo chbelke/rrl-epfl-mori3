@@ -219,16 +219,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         // determine byte to be sent depending on con state flags
         if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
-            Mnge_RGB_Set(edge, 20); // XXX replace with function to turn esp leds on
+            Coms_ESP_LED_On(edge, WIFI_LED_ON); // XXX replace with function to turn esp leds on
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
-            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Coms_ESP_LED_On(edge, WIFI_LED_OFF); // XXX replace with function to turn esp leds off
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
-            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Coms_ESP_LED_On(edge, WIFI_LED_OFF); // XXX replace with function to turn esp leds off
         } else {
             byte = COMS_123_Conn; // send connect search
-            Mnge_RGB_Set(edge, 0); // XXX replace with function to turn esp leds off
+            Coms_ESP_LED_On(edge, WIFI_LED_OFF); // XXX replace with function to turn esp leds off
         }
 
         // write byte (ID if in con but no sync) and end byte

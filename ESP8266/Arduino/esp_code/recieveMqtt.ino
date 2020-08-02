@@ -14,7 +14,11 @@ void callback(char* topic, byte* payload, unsigned int len)
     verbose_println();
   }
 
+  byte msg[len];
+  for (int i = 0; i < len; i++) {
+    msg[i] = payload[i];
+  }
 
-  commands(payload, len);
+  commands(msg, len);
 
 }

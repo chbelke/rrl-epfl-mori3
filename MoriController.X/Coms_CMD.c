@@ -50,6 +50,24 @@ bool Coms_CMD_Verbose()
     return true;
 }
 
+
+/* EspInAloc: 
+ * 0bxx000000, where xx = indicator
+ * 00 = extension and angular values
+ * - 0b00xxxxxx linear & rotary indicators 0,1,2 (1 = value follows in order)
+ * 01 = drive input
+ * - 0b01xooooo 1 = automatic (modules evaluates), 0 = manual (direct to PWM)
+ * - 0b010ooxxx manual indicator followed by 3 pwm values (1 signed byte each)
+ * - 0b011xxooo automatic indicator followed by reference edge 0,1,2
+ * - 0b011ooxoo direction (0 = inwards, 1 = outwards)
+ * - 0b011oooxx tbd
+ * 10 = coupling & led input
+ * - 0b10xxxooo retract couplings 0,1,2 (if already open, interval prolonged)
+ * - 0b10oooxxx rgb led values follow in order
+ * 11 = tbd - mode selection?
+ * - 0b11xxxxxx tbd
+ */
+
 bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
 {
     static uint16_t MotLinTemp[3] = {0, 0, 0}; // linear motor extension value (temporary)

@@ -143,8 +143,46 @@ bool setLEDs(byte c)
         return true;        
       }
       break;
-    
+
     case 1:
+      if ((c == char(14)) && (byteCount == serial_len))
+      {
+        if(LED == 1)
+        {
+          led_red.On();
+        } else if (LED == 2)
+        {
+          led_green.On();
+        } else {
+          led_blue.On();
+        }
+        byteCount = 0;
+        readCase = 0;
+        LED = 0;
+        return true;        
+      }
+      break;    
+    
+    case 2:
+      if ((c == char(14)) && (byteCount == serial_len))
+      {
+        if(LED == 1)
+        {
+          led_red.Off();
+        } else if (LED == 2)
+        {
+          led_green.Off();
+        } else {
+          led_blue.Off();
+        }
+        byteCount = 0;
+        readCase = 0;
+        LED = 0;
+        return true;        
+      }
+      break; 
+
+    case 3:
       if ((c == char(14)) && (byteCount == serial_len))
       {
         if(LED == 1)
@@ -162,7 +200,7 @@ bool setLEDs(byte c)
         return true;        
       }      
     
-    case 2:
+    case 4:
       if ((c == char(14)) && (byteCount == serial_len))
       {
         if(LED == 1)

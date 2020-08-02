@@ -230,7 +230,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
             Coms_ESP_Verbose();
         }
         k++;
-        Coms_ESP_Interpret();
+//        Coms_ESP_Interpret();
     }
         
     

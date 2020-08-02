@@ -32,22 +32,6 @@ uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 
-/* EspInAloc: 
- * 0bxx000000, where xx = indicator
- * 00 = extension and angular values
- * - 0b00xxxxxx linear & rotary indicators 0,1,2 (1 = value follows in order)
- * 01 = drive input
- * - 0b01xooooo 1 = automatic (modules evaluates), 0 = manual (direct to PWM)
- * - 0b010ooxxx manual indicator followed by 3 pwm values (1 signed byte each)
- * - 0b011xxooo automatic indicator followed by reference edge 0,1,2
- * - 0b011ooxoo direction (0 = inwards, 1 = outwards)
- * - 0b011oooxx tbd
- * 10 = coupling & led input
- * - 0b10xxxooo retract couplings 0,1,2 (if already open, interval prolonged)
- * - 0b10oooxxx rgb led values follow in order
- * 11 = tbd - mode selection?
- * - 0b11xxxxxx tbd
- */
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
  * It gets called from the ISR each time a byte is received. It first checks
@@ -224,28 +208,28 @@ void Coms_ESP_Verbose_Write(uint8_t* message, uint8_t len) {
 
 
 /* ******************** SET ESP EDGE LEDS *********************************** */
-void Coms_ESP_SetLEDs(uint8_t edge, uint8_t blink) {
-    //UART4_Write(ESP_Interpret);
-    //UART4_Write((0xF0 & (edge << 4)) | (0x0F & blink))
-    //UART4_Write(ESP_End);
+void Coms_ESP_LED_On(uint8_t edge, bool OnOff) {
+    uint8_t alloc = 0b01000001 + OnOff;   // Cmd, ---, blink
+    alloc |= (edge << 3) & 0b00011000;
+    UART4_Write(alloc);  // LED R, Set Blink Freq
+    UART4_Write(ESP_End);
+}
+
+
+void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) {
+    uint8_t alloc = 0b01000100;   // Cmd, ---, blink
+    alloc |= (edge << 3) & 0b00011000;
+    UART4_Write(alloc);  // LED R, Set Blink Freq
+    UART4_Write(blink);
+    UART4_Write(ESP_End);
 }
 
 void Coms_ESP_Interpret() {
     static uint8_t ESP_bnk_frq = 128;
-    UART4_Write(0b01001010);  // LED R, Set Blink Freq
+    UART4_Write(0b01001100);  // LED R, Set Blink Freq
     UART4_Write(ESP_bnk_frq);
     UART4_Write(ESP_End);
     ESP_bnk_frq++;
-    
-//    UART4_Write(0b00100000);  //Interpret
-//    UART4_Write(5);           // Message length
-//    uint8_t i;
-//    char message[] = "hello";
-//    for (i=0; i<5; i++)
-//    {
-//        UART4_Write(message[i]);
-//    }
-//    UART4_Write(ESP_End);
 }
 
 /* Com_ESP_Drive - Online calc verification */

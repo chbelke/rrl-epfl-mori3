@@ -77,6 +77,8 @@ extern volatile bool Flg_Verbose;
 #define LED_Off 1
 #define WIFI_On 1                   // high enables ESP
 #define WIFI_Off 0
+#define WIFI_LED_ON 1
+#define WIFI_LED_OFF 0
 
 /* ******************** ESP COMMUNICATION *********************************** */
 #define ESP_Beg 13                  // start byte
