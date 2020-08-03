@@ -62,6 +62,7 @@ extern volatile bool Flg_Button;
 
 extern volatile bool Flg_EdgeDemo;
 
+extern volatile bool Flg_DelayStart;
 extern volatile bool Flg_Verbose;
 
 /* ******************** PERIPHERALS ***************************************** */

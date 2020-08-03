@@ -174,6 +174,20 @@ uint16_t TMR5_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
+    if(Flg_DelayStart)
+    {
+        static uint8_t start = 0;
+        if(start > 1)
+        {
+            Flg_DelayStart = false;
+        }
+        else
+        {
+            start++;
+            return;
+        }        
+    }   
+    
     // Add your custom callback code here
     if (Flg_Button){ // if button has been pressed, process
         Button_Eval();

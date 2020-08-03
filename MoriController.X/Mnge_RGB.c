@@ -22,7 +22,7 @@ void Mnge_RGB_Set(uint8_t RGBcolor, uint8_t duty) {
 /* ******************** SET ALL RGB LEDS ************************************ */
 void Mnge_RGB_SetAll(uint8_t R, uint8_t G, uint8_t B) {
     Mnge_PWM_SetValues(2, R); // red
-    Mnge_PWM_SetValues(2, G);  // green
-    Mnge_PWM_SetValues(2, B);  // blue
+    Mnge_PWM_SetValues(1, G);  // green
+    Mnge_PWM_SetValues(0, B);  // blue
     Mnge_PWM_Write();
 }

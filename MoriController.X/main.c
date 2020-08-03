@@ -72,6 +72,7 @@ volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
 
+volatile bool Flg_DelayStart = true;
 volatile bool Flg_Verbose = true;
 /* declaration for other source files is contained in define.h */
 
@@ -81,11 +82,13 @@ volatile bool Flg_EdgeDemo = false;
                          Main application
  */
 int main(void)
-{
+{      
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = LED_Off;
     WIFI_EN = WIFI_On;
+
+    while(Flg_DelayStart);
     
     Acts_CPL_Off(0);
     Acts_CPL_Off(1);
