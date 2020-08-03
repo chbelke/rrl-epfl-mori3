@@ -180,10 +180,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         Flg_Button = false;
     }
     
-    static uint8_t flg_coms_called = 0;
-    bool trigger = (flg_coms_called+1)%5;
-    Coms_123_ConHandle(trigger); // inter-module connection handler
-    flg_coms_called++;
+    Coms_123_ConHandle(); // inter-module connection handler
     
     Battery_Check();
 

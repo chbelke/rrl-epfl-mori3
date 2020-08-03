@@ -12,7 +12,7 @@
 
 void Coms_123_Eval (uint8_t);
 void Coms_123_IdleEval (uint8_t);
-void Coms_123_ConHandle (bool);
+void Coms_123_ConHandle (void);
 void Coms_123_ActHandle (void);
 void Coms_123_Write (uint8_t, uint8_t);
 void Coms_123_WriteID (uint8_t);

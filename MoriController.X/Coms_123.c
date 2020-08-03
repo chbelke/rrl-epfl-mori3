@@ -193,7 +193,7 @@ void Coms_123_Eval(uint8_t edge) {
 }
 
 /* ******************** NEIGHBOUR CONNECTION HANDLE ************************* */
-void Coms_123_ConHandle(bool coms_esp_led_flag) { // called in tmr5 at 5Hz
+void Coms_123_ConHandle() { // called in tmr5 at 5Hz
     uint8_t edge, byte;
     for (edge = 0; edge < 3; edge++) {
         // check if idle byte received in EDG_IdlIntrvl when synced
@@ -219,28 +219,18 @@ void Coms_123_ConHandle(bool coms_esp_led_flag) { // called in tmr5 at 5Hz
         // determine byte to be sent depending on con state flags
         if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
-            if(coms_esp_led_flag)
-            {
-                Coms_ESP_LED_On(edge, WIFI_LED_ON); // XXX replace with function to turn esp leds off
-            }
+            Coms_ESP_LED_State(edge, 1);
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
-            if(coms_esp_led_flag)
-            {
-                Coms_ESP_LED_On(edge, WIFI_LED_OFF); // XXX replace with function to turn esp leds off
-            }
+            Coms_ESP_LED_Set_Blink_Freq(edge, 50);
+            Coms_ESP_LED_State(edge, 3);
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
-            if(coms_esp_led_flag)
-            {
-                Coms_ESP_LED_On(edge, WIFI_LED_OFF); // XXX replace with function to turn esp leds off
-            }
+            Coms_ESP_LED_Set_Blink_Freq(edge, 50);
+            Coms_ESP_LED_State(edge, 3);
         } else {
             byte = COMS_123_Conn; // send connect search
-            if(coms_esp_led_flag)
-            {
-                Coms_ESP_LED_On(edge, WIFI_LED_OFF); // XXX replace with function to turn esp leds off
-            }
+            Coms_ESP_LED_State(edge, 0); // XXX replace with function to turn esp leds off
             
         }
 

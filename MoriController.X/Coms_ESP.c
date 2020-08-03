@@ -31,7 +31,9 @@ uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
 uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
-
+uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
+uint8_t WIFI_LED_BLINK_ACT[3] = {0, 0, 0};
+uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
  * It gets called from the ISR each time a byte is received. It first checks
@@ -206,6 +208,39 @@ void Coms_ESP_Verbose_Write(uint8_t* message, uint8_t len) {
     UART4_Write(ESP_End);
 }
 
+void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
+{
+    if((WIFI_LED_STATE[edge] - state) == 0)
+    {
+        return;
+    }
+    switch(state){
+        case 0: //off
+            Coms_ESP_LED_On(edge, WIFI_LED_OFF);
+            break;
+
+        case 1: //on
+            Coms_ESP_LED_On(edge, WIFI_LED_ON);
+            break;
+
+        case 2: //toggle
+            Coms_ESP_LED_Tgl(edge);
+            break;
+
+        case 3: //blink
+            if(WIFI_LED_BLINK_DES[edge] != WIFI_LED_BLINK_ACT[edge])
+            {
+                Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);
+                WIFI_LED_BLINK_ACT[edge] = WIFI_LED_BLINK_DES[edge];
+            }
+            break;
+        default:
+            break;
+    }
+    WIFI_LED_STATE[edge] = state;
+}         
+
+
 
 /* ******************** SET ESP EDGE LEDS *********************************** */
 void Coms_ESP_LED_On(uint8_t edge, bool OnOff) {
@@ -217,12 +252,27 @@ void Coms_ESP_LED_On(uint8_t edge, bool OnOff) {
 }
 
 
+void Coms_ESP_LED_Tgl(uint8_t edge) {
+    uint8_t alloc = 0b01000000;   // Cmd, ---, blink
+    edge++;
+    alloc |= (edge << 3) & 0b00011000;
+    UART4_Write(alloc);  // LED R, Set Blink Freq
+    UART4_Write(ESP_End);
+}
+
+
 void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) {
     uint8_t alloc = 0b01000100;   // Cmd, ---, blink
+    edge++;
     alloc |= (edge << 3) & 0b00011000;
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(blink);
     UART4_Write(ESP_End);
+}
+
+void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
+{
+    WIFI_LED_BLINK_DES[edge] = blink;
 }
 
 void Coms_ESP_Interpret() {
