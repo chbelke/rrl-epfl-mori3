@@ -103,7 +103,7 @@ bool readVerbose(byte c)
 }
 
 
-bool setLEDs(byte c)
+bool setLEDs(byte d)
 {
   static byte readCase = 0;
   static byte LED = 0;
@@ -111,12 +111,14 @@ bool setLEDs(byte c)
   static byte serial_len;
   static byte packet;
 
+  byte c = d;
+
 
   if(LED == 0)
   {
     LED = ((c & 0b00011000) >> 3);
     readCase = (c & 0b0000111);
-    if (readCase > 1)
+    if (readCase > 3)
     {
       serial_len = 2;
     } else {
@@ -124,8 +126,31 @@ bool setLEDs(byte c)
     }
   }
 
+
+  // for (int kk = 0; kk < 8; kk++)
+  // {
+  //     bool f = c & 0x80;
+
+  //     char buff[10];
+  //     sprintf(buff, "INFO: %c", f);
+  //     publish(buff);        
+      
+  //     c = c << 1;
+  //     // delay(1000);
+  // }
+  // publish("INFO: ByteEND");
+
+  // char nuff[50];
+  // sprintf(nuff, "INFO: char = %d", int(c));
+  // publish(nuff);  
+
+  // char fuff[50];
+  // sprintf(fuff, "INFO: buf = %d, ser = %d", int(byteCount), int(serial_len));
+  // publish(fuff);  
+
   switch(readCase){
     case 0:
+      publish("INFO: Case 0");
       if ((c == char(14)) && (byteCount == serial_len))
       {
         if(LED == 1)
@@ -145,7 +170,8 @@ bool setLEDs(byte c)
       break;
 
     case 1:
-      if ((c == char(14)) && (byteCount == serial_len))
+      publish("INFO: Case 1");
+      if ((c == 0b0001110) && (byteCount == serial_len))
       {
         if(LED == 1)
         {
@@ -164,6 +190,7 @@ bool setLEDs(byte c)
       break;    
     
     case 2:
+      publish("INFO: Case 2");
       if ((c == char(14)) && (byteCount == serial_len))
       {
         if(LED == 1)

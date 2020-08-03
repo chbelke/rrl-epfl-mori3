@@ -30,22 +30,22 @@ void relay(byte* payload, unsigned int len)
     }    
   }
 
-  for (int jj = byte_count; jj < len; jj++)
-  {
-    byte val = payload[jj];
-    for (int kk = 0; kk < 8; kk++)
-    {
-        bool f = val & 0x80;
+  // for (int jj = byte_count; jj < len; jj++)
+  // {
+  //   byte val = payload[jj];
+  //   for (int kk = 0; kk < 8; kk++)
+  //   {
+  //       bool f = val & 0x80;
 
-        char buff[10];
-        sprintf(buff, "INFO: %c", f);
-        publish(buff);        
+  //       char buff[10];
+  //       sprintf(buff, "INFO: %c", f);
+  //       publish(buff);        
         
-        val = val << 1;
-        // delay(1000);
-    }
-    publish("INFO: ");
-  }  
+  //       val = val << 1;
+  //       // delay(1000);
+  //   }
+  //   publish("INFO: ");
+  // }  
 
 
   while(byte_count < len)

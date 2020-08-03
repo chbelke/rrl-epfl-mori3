@@ -210,6 +210,7 @@ void Coms_ESP_Verbose_Write(uint8_t* message, uint8_t len) {
 /* ******************** SET ESP EDGE LEDS *********************************** */
 void Coms_ESP_LED_On(uint8_t edge, bool OnOff) {
     uint8_t alloc = 0b01000001 + OnOff;   // Cmd, ---, blink
+    edge++;
     alloc |= (edge << 3) & 0b00011000;
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(ESP_End);

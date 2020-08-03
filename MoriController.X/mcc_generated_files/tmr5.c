@@ -181,8 +181,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     }
     
     static uint8_t flg_coms_called = 0;
-//    bool trigger = flg_coms_called % 10;
-    bool trigger = false;
+    bool trigger = (flg_coms_called+1)%5;
     Coms_123_ConHandle(trigger); // inter-module connection handler
     flg_coms_called++;
     
