@@ -1,17 +1,25 @@
+import traceback
 from termcolor import colored
 import codecs
 
 def getVerbose(self, pyld, espNum):
+    
     try:
-        msgld = codecs.decode(pyld[1], 'utf-8')
-        print(colored(espNum + "-" + msgld, 'yellow'))
+        if isinstance(pyld[1],str):
+            print(colored(espNum + "-" + (pyld[1]), 'yellow'))
+        else:
+            try:
+                msgld = codecs.decode(pyld[1], 'utf-8')
+                print(colored(espNum + "-" + msgld, 'yellow'))
+            except:
+                print(colored(espNum + "-", 'yellow'), end="")
+                for i in range(len(pyld[1])-1):
+                    if i % 2 is 1:
+                        continue
+                    print(pyld[1][i]*256 + pyld[1][i+1], end=" ")
+                print();
     except:
-        # msgld = codecs.decode(pyld[1], 'latin-1')
-        print(colored(espNum + "-", 'yellow'), end="")
-        for i in range(len(pyld[1])-1):
-            if i % 2 is 1:
-                continue
-            print(pyld[1][i]*256 + pyld[1][i+1], end=" ")
-        print();
-    # print(colored(espNum + "-" + msgld, 'yellow'))
+        print(colored("IN TRACEBACK", 'red'))
+        traceback.print_exc()
+    
     return

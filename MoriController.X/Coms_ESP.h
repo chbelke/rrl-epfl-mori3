@@ -16,7 +16,7 @@ uint8_t Coms_ESP_ReturnID (uint8_t);
 void Coms_ESP_Verbose (void);
 
 void Coms_ESP_SetLEDs (uint8_t, uint8_t);
-void Coms_ESP_Verbose_Write(uint8_t*, uint8_t);
+void Coms_ESP_Verbose_Write(const char*);
 
 void Coms_ESP_LED_State(uint8_t, uint8_t);
 void Coms_ESP_LED_On(uint8_t, bool);

@@ -58,6 +58,10 @@ bool readVerbose(byte c)
   static byte serial_buf_loc = 0;
   static byte serial_len;
   static byte readCase = 0;
+
+  // char nuff[50];
+  // sprintf(nuff, "INFO: char = %d", int(c));
+  // publish(nuff);    
   
   switch(readCase){
     case 0: 
@@ -72,14 +76,20 @@ bool readVerbose(byte c)
 
     case 2:
       serial_packet[serial_buf_loc+5] = c;
-
       if ((c == char(14)) && (serial_buf_loc == serial_len))
       {
+        // char new_serial[serial_len];
+        // memset(new_serial, 0, sizeof(new_serial));
+        // sprintf(serial_packet, "VBS: ");
+        // for(int i=5; i < serial_len; i++)
+        //   new_serial[i] = serial_packet[i];
+        // publish(new_serial); 
         publish(serial_packet); 
         serial_buf_loc = 0;
         readCase = 0;
         return true;
       }
+      // serial_packet[serial_buf_loc+5] = c;
       if (serial_buf_loc > serial_len)
       {
         publish("ERR: buf_loc > serial_len");

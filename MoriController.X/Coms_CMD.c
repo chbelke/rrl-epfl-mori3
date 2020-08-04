@@ -81,9 +81,11 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
     static uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curv
     static uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 //    static uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
+    const char *message = "there";
     
     switch (EspInCase) {
     case 0: // CHECK START BYTE
+            Coms_ESP_Verbose_Write(message);
             EspInCase = 1;
             EspInByts = 1;
         break;

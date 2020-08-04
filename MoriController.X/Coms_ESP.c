@@ -51,7 +51,7 @@ uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 void Coms_ESP_Eval() {
     static uint8_t EspInCase = 0;
     uint8_t EspIn = UART4_Read(); // Incoming byte
-//    Coms_ESP_Verbose_Write(&EspIn, 1);
+    const char *message = "hello";
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             switch ((EspIn >> 5) & 0x07) {
@@ -69,6 +69,7 @@ void Coms_ESP_Eval() {
 //                    EdgInCase[edge] = 20;
 //                    break;
                 case 6: // xxx == 110, command
+                    Coms_ESP_Verbose_Write(message);
                     Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 6;
                     break;
@@ -198,12 +199,17 @@ void Coms_ESP_Verbose() {
 
 
 /* ******************** VERBOSE OUTPUT ************************************** */
-void Coms_ESP_Verbose_Write(uint8_t* message, uint8_t len) {
+void Coms_ESP_Verbose_Write(const char *message) {
+    
     UART4_Write(0);
+    uint8_t len = strlen(message);
     UART4_Write(len); // Message length
+    
     uint8_t i;
-    for (i = 0; i < len; i++) {
-        UART4_Write(message[i]);
+    for(i=0; i<len; i++)
+    {
+        UART4_Write(*message);
+        message++;
     }
     UART4_Write(ESP_End);
 }
