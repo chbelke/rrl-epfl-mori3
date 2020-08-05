@@ -16,7 +16,7 @@ EXT_MOTOR_MAX = 900
 EXT_MOTOR_SLOPE = (EXT_MOTOR_MAX-EXT_MOTOR_MIN) / MAX_INPUT  
 
 INPUT = 205
-END_BYTE = 0b00001110
+END_BYTE = 14
 
 class PublishBulk():
 
@@ -36,7 +36,12 @@ class PublishBulk():
         self.Mqtt_pub = tk.Button(self.frame)
         self.Mqtt_pub["text"] = "Publish",
         self.Mqtt_pub["command"] = lambda: self.PublishBulk()
-        self.Mqtt_pub.pack({"side": "bottom"}, fill=tk.X, expand=True)
+        self.Mqtt_pub.pack({"side": "left"}, fill=tk.X, expand=True)
+
+        self.Mqtt_clear = tk.Button(self.frame)
+        self.Mqtt_clear["text"] = "Clear",
+        self.Mqtt_clear["command"] = lambda: self.ClearBulk()
+        self.Mqtt_clear.pack({"side": "right"}, fill=tk.X, expand=True)
 
 
     def PublishBulk (self):
@@ -49,6 +54,8 @@ class PublishBulk():
                         self.InterpretShape(text, key, esp)
             elif type(text[esp]) is str:
                 self.mqtthost.publishLocal(text[esp], esp)
+
+    def ClearBulk(self):
         self.pub_cmd.delete("1.0", 'end')
 
 
