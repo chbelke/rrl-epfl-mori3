@@ -78,12 +78,6 @@ bool readVerbose(byte c)
       serial_packet[serial_buf_loc+5] = c;
       if ((c == char(14)) && (serial_buf_loc == serial_len))
       {
-        // char new_serial[serial_len];
-        // memset(new_serial, 0, sizeof(new_serial));
-        // sprintf(serial_packet, "VBS: ");
-        // for(int i=5; i < serial_len; i++)
-        //   new_serial[i] = serial_packet[i];
-        // publish(new_serial); 
         publish(serial_packet); 
         serial_buf_loc = 0;
         readCase = 0;

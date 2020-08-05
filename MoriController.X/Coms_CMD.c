@@ -15,12 +15,12 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
     {
         state = byte;
         alloc = false;
-        return true;
+        return false;
     }
     
     switch (state) {
         case 0:
-            if(Coms_CMD_Verbose())
+            if(Coms_CMD_Verbose(byte))
                 return Coms_CMD_Reset(&state, &alloc);
             break;
             
@@ -44,9 +44,14 @@ bool Coms_CMD_Reset(uint8_t* state, bool* alloc)
 }
 
 
-bool Coms_CMD_Verbose()
+bool Coms_CMD_Verbose(uint8_t byte)
 {
-    Flg_Verbose = !Flg_Verbose;
+    if (byte == ESP_End) {
+        Flg_Verbose = !Flg_Verbose;
+    } else {
+        const char *casetoo = "tooLong";    
+        Coms_ESP_Verbose_Write(casetoo);
+    }
     return true;
 }
 
@@ -70,6 +75,7 @@ bool Coms_CMD_Verbose()
 
 bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
 {
+    static uint8_t alloc = 0;
     static uint16_t MotLinTemp[3] = {0, 0, 0}; // linear motor extension value (temporary)
     static uint16_t MotRotTemp[3] = {0, 0, 0}; // rotary motor angle value (temporary)
     static uint8_t EspInCase = 0;
@@ -82,17 +88,35 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
     static uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 //    static uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
     const char *message = "there";
+    const char *message2 = "general";
+//    const char *message3 = "kenobi";
+//    const char *message4 = "dontdoit";    
+    
+    const char *caseMsg1 = "Case1";    
+    const char *caseMsg2 = "Case2";    
+    const char *caseMsg3 = "Case3";    
+    const char *caseMsg4 = "Case4";    
+    
+    const char *caseMsg5 = "Case5";    
+    const char *caseMsg6 = "Case6";    
+    const char *caseMsg7 = "Case7";    
+    const char *caseMsg8 = "Case8";    
+    
     
     switch (EspInCase) {
     case 0: // CHECK START BYTE
             Coms_ESP_Verbose_Write(message);
             EspInCase = 1;
             EspInByts = 1;
-        break;
+            alloc = byte;
+            
 
     case 1: // INPUT ALLOCATION ********************************************
         // if xx == 00, count bits 
+        Coms_ESP_Verbose_Write(caseMsg1);
+        
         if (((byte >> 6) & 0x03) == 0) { // *** ANGLE & EXTENSION INPUT
+            Coms_ESP_Verbose_Write(caseMsg5);
             EspInCase = 2;
             // Brian Kernighan: http://graphics.stanford.edu ...
             //  ... /~seander/bithacks.html#CountBitsSetNaive
@@ -101,6 +125,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
                 EspInAlocTemp &= EspInAlocTemp - 1; // clear the LSB set
             }
         } else if (((byte >> 6) & 0x03) == 1) { // ******** DRIVE INPUT
+            Coms_ESP_Verbose_Write(caseMsg6);
             if (byte & 0b00100000) { // automatic drive mode
                 EspInCase = 19;
             } else { // manual drive mode
@@ -112,6 +137,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
                 }
             }
         } else if (((byte >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
+            Coms_ESP_Verbose_Write(caseMsg7);
             if (byte & 0b00000111) {
                 EspInCase = 22;
                 // only last three bits relevant when counting rec. bytes
@@ -120,6 +146,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
                     EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
                 }
             } else {
+                Coms_ESP_Verbose_Write(caseMsg8);
                 EspInCase = 25;
                 EspInBits = 0;
             }
@@ -129,42 +156,42 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
 
     case 2: // LINEAR MOTOR INPUTS *****************************************
         /* cases 2 to 7, two bytes per motor input */
-        if (byte & 0b00100000) {
+        if (alloc & 0b00100000) {
             MotLinTemp[0] = ((uint16_t) (byte) << 8) & 0xFF00;
             EspInByts = EspInByts + 1;
             EspInCase = 3;
             break;
         }
     case 3:
-        if (byte & 0b00100000) {
+        if (alloc & 0b00100000) {
             MotLinTemp[0] = MotLinTemp[0] | (uint16_t) byte;
             EspInByts = EspInByts + 1;
             EspInCase = 4;
             break;
         }
     case 4:
-        if (byte & 0b00010000) {
+        if (alloc & 0b00010000) {
             MotLinTemp[1] = ((uint16_t) (byte) << 8) & 0xFF00;
             EspInByts = EspInByts + 1;
             EspInCase = 5;
             break;
         }
     case 5:
-        if (byte & 0b00010000) {
+        if (alloc & 0b00010000) {
             MotLinTemp[1] = MotLinTemp[1] | (uint16_t) byte;
             EspInByts = EspInByts + 1;
             EspInCase = 6;
             break;
         }
     case 6:
-        if (byte & 0b00001000) {
+        if (alloc & 0b00001000) {
             MotLinTemp[2] = ((uint16_t) (byte) << 8) & 0xFF00;
             EspInByts = EspInByts + 1;
             EspInCase = 7;
             break;
         }
     case 7:
-        if (byte & 0b00001000) {
+        if (alloc & 0b00001000) {
             MotLinTemp[2] = MotLinTemp[2] | (uint16_t) byte;
             EspInByts = EspInByts + 1;
             EspInCase = 8;
@@ -173,42 +200,42 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
 
     case 8: // ROTARY MOTOR INPUTS *****************************************
         /* cases 8 to 13, two bytes per motor input */
-        if (byte & 0b00000100) {
+        if (alloc & 0b00000100) {
             MotRotTemp[0] = ((uint16_t) (byte) << 8) & 0xFF00;
             EspInByts = EspInByts + 1;
             EspInCase = 9;
             break;
         }
     case 9:
-        if (byte & 0b00000100) {
+        if (alloc & 0b00000100) {
             MotRotTemp[0] = MotRotTemp[0] | (uint16_t) byte;
             EspInByts = EspInByts + 1;
             EspInCase = 10;
             break;
         }
     case 10:
-        if (byte & 0b00000010) {
+        if (alloc & 0b00000010) {
             MotRotTemp[1] = ((uint16_t) (byte) << 8) & 0xFF00;
             EspInByts = EspInByts + 1;
             EspInCase = 11;
             break;
         }
     case 11:
-        if (byte & 0b00000010) {
+        if (alloc & 0b00000010) {
             MotRotTemp[1] = MotRotTemp[1] | (uint16_t) byte;
             EspInByts = EspInByts + 1;
             EspInCase = 12;
             break;
         }
     case 12:
-        if (byte & 0b00000001) {
+        if (alloc & 0b00000001) {
             MotRotTemp[2] = ((uint16_t) (byte) << 8) & 0xFF00;
             EspInByts = EspInByts + 1;
             EspInCase = 13;
             break;
         }
     case 13:
-        if (byte & 0b00000001) {
+        if (alloc & 0b00000001) {
             MotRotTemp[2] = MotRotTemp[2] | (uint16_t) byte;
             EspInByts = EspInByts + 1;
             EspInCase = 14;
@@ -216,7 +243,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         }
 
     case 14: // verify motor inputs
-        if (byte == ESP_End) {
+        if (alloc == ESP_End) {
             if (EspInByts == (2 + EspInBits * 2)) {
                 Coms_ESP_SetMots(byte, MotLinTemp);
             } else {
@@ -230,28 +257,28 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         break;
 
     case 15: // MANUAL DRIVE MODE ******************************************
-        if (byte & 0b00000100) {
+        if (alloc & 0b00000100) {
             DrivePWM[0] = byte;
             EspInByts = EspInByts + 1;
             EspInCase = 16;
             break;
         }
     case 16:
-        if (byte & 0b00000010) {
+        if (alloc & 0b00000010) {
             DrivePWM[1] = byte;
             EspInByts = EspInByts + 1;
             EspInCase = 17;
             break;
         }
     case 17:
-        if (byte & 0b00000001) {
+        if (alloc & 0b00000001) {
             DrivePWM[2] = byte;
             EspInByts = EspInByts + 1;
             EspInCase = 18;
             break;
         }
     case 18: // verify drive inputs
-        if (byte == ESP_End) {
+        if (alloc == ESP_End) {
             if (EspInByts == (2 + EspInBits)) {
                 uint8_t m;
                 for (m = 0; m <= 2; m++) {
@@ -282,7 +309,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         break;
 
     case 21: // verify drive inputs
-        if (byte == ESP_End) {
+        if (alloc == ESP_End) {
             if (EspInByts == 4) {
                 Coms_ESP_Drive(DriveSpd, DriveCrv,
                         ((byte & 0x18) >> 3), ((byte & 0x04) >> 2));
@@ -297,7 +324,8 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         break;
 
     case 22: // COUPLING & LED INPUT ***************************************
-        if (byte & 0b00000100) {
+        Coms_ESP_Verbose_Write(caseMsg2);
+        if (alloc & 0b00000100) {
             RgbPWM[0] = byte;
             EspInByts = EspInByts + 1;
             EspInCase = 23;
@@ -305,7 +333,8 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         }
 
     case 23:
-        if (byte & 0b00000010) {
+        Coms_ESP_Verbose_Write(caseMsg3);
+        if (alloc & 0b00000010) {
             RgbPWM[1] = byte;
             EspInByts = EspInByts + 1;
             EspInCase = 24;
@@ -313,7 +342,8 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         }
 
     case 24:
-        if (byte & 0b00000001) {
+        Coms_ESP_Verbose_Write(caseMsg4);
+        if (alloc & 0b00000001) {
             RgbPWM[2] = byte;
             EspInByts = EspInByts + 1;
             EspInCase = 25;
@@ -321,25 +351,29 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         }
 
     case 25: // verify coupling inputs
+//        Coms_ESP_Verbose_Write(message);
         if (byte == ESP_End) {
+//            Coms_ESP_Verbose_Write(message2);
             if (EspInByts == (2 + EspInBits)) {
                 // set smas
                 uint8_t m;
                 for (m = 0; m <= 2; m++) {
-                    if (byte & (0b00100000 >> m)) {
+                    if (alloc & (0b00100000 >> m)) {
                         Acts_CPL_On(m);
                     }
                 }
                 // update leds
                 for (m = 0; m <= 2; m++) {
-                    if ((byte >> (2 - m)) & 0b00000001) {
+                    if ((alloc >> (2 - m)) & 0b00000001) {
                         Mnge_RGB_Set(m, RgbPWM[m]);
                     }
                 }
             } else {
+                Coms_ESP_Verbose_Write(message);
                 EspInLost = EspInLost + 1; // data lost
             }
         } else {
+//            Coms_ESP_Verbose_Write(message4);
             EspIn0End = EspIn0End + 1; // no end byte
         }
         EspInCase = 0;
