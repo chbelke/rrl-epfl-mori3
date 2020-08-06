@@ -25,7 +25,7 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9 // output speed factor for non-primary wheels
-#define ESP_URT_NUM 4
+#define ESP_URT_NUM 3
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
