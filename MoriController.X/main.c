@@ -74,6 +74,7 @@ volatile bool Flg_Button = false;
 
 volatile bool Flg_DelayStart = true;
 volatile bool Flg_Verbose = true;
+volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
 /* declaration for other source files is contained in define.h */
 
 volatile bool Flg_EdgeDemo = false;

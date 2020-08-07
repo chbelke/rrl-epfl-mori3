@@ -55,9 +55,11 @@ uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
  * - 0b111000xx xx defines edge/wifi: 00 = edg1, 01 = edg2, 10 = edg3, 11 = wifi
  * - 0b11100x00 if x is 1, relay to all (and ignore last two bits)
  */
+//const char *coms_message = "Ctrl";  
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) {
+    
     uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
@@ -77,6 +79,7 @@ void Coms_123_Eval(uint8_t edge) {
                     EdgInCase[edge] = 20;
                     break;
                 case 6: // xxx == 110, command
+//                    Coms_ESP_Verbose_Write(coms_message);
                     Coms_CMD_Handle(edge, EdgInAloc[edge] & 0b00011111);
                     EdgInCase[edge] = 30;
                     break;
@@ -133,10 +136,7 @@ void Coms_123_Eval(uint8_t edge) {
 
         case 10: // IDLE MODE **************************************************
             if (EdgIn == EDG_End) {
-                EdgIdlCnt[edge] = 0; // reset interval
-                EdgConCnt[edge] = 0; // reset interval
-                if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge])
-                    Flg_EdgeSyn[edge] = true;
+                Coms_123_reset_intervals(edge);
             }
             EdgInCase[edge] = 0;
             break;
@@ -177,12 +177,15 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 30: // COMMAND ****************************************************
+            Coms_123_reset_intervals(edge);
             if (Coms_CMD_Handle(edge, EdgIn)){
+                EdgInCase[edge] = 0;
                 break;
             }
             
         case 40: // RELAY ****************************************************
             if (Coms_REL_Handle(edge, EdgIn)){
+                EdgInCase[edge] = 0;
                 break;
             }
             
@@ -190,6 +193,14 @@ void Coms_123_Eval(uint8_t edge) {
             EdgInCase[edge] = 0;
             break;
     }
+}
+
+void Coms_123_reset_intervals(uint8_t edge)
+{
+    EdgIdlCnt[edge] = 0; // reset interval
+    EdgConCnt[edge] = 0; // reset interval
+    if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge])
+        Flg_EdgeSyn[edge] = true;
 }
 
 /* ******************** NEIGHBOUR CONNECTION HANDLE ************************* */
@@ -233,12 +244,17 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_ESP_LED_State(edge, 0); // XXX replace with function to turn esp leds off
             
         }
-
-        // write byte (ID if in con but no sync) and end byte
-        Coms_123_Write(edge, byte);
-        if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
-            Coms_123_WriteID(edge);
-        Coms_123_Write(edge, EDG_End);
+        
+        if(!Flg_Uart_Lock[edge])
+        {
+            Flg_Uart_Lock[edge] = true;
+            // write byte (ID if in con but no sync) and end byte
+            Coms_123_Write(edge, byte);
+            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
+                Coms_123_WriteID(edge);
+            Coms_123_Write(edge, EDG_End);            
+            Flg_Uart_Lock[edge] = false;
+        }
     }
 }
 

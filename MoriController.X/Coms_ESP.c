@@ -186,7 +186,10 @@ uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
 }
 
 /* ******************** VERBOSE OUTPUT ************************************** */
-void Coms_ESP_Verbose() {
+void Coms_ESP_Verbose() 
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM]);   //wait for uart to unlock
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0);
     UART4_Write(6); // Message length
     uint8_t i;
@@ -194,11 +197,15 @@ void Coms_ESP_Verbose() {
         UART4_Write16(ADC1_Return(i));
     }
     UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
 /* ******************** VERBOSE OUTPUT ************************************** */
-void Coms_ESP_Verbose_Write(const char *message) {
+void Coms_ESP_Verbose_Write(const char *message) 
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM]);   //wait for uart to unlock
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted        
     
     UART4_Write(0);
     uint8_t len = strlen(message);
@@ -211,6 +218,7 @@ void Coms_ESP_Verbose_Write(const char *message) {
         message++;
     }
     UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
@@ -252,8 +260,11 @@ void Coms_ESP_LED_On(uint8_t edge, bool OnOff) {
     uint8_t alloc = 0b01000001 + OnOff;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
+    while(Flg_Uart_Lock[ESP_URT_NUM]);   //wait for uart to unlock
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
@@ -261,8 +272,11 @@ void Coms_ESP_LED_Tgl(uint8_t edge) {
     uint8_t alloc = 0b01000000;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
+    while(Flg_Uart_Lock[ESP_URT_NUM]);   //wait for uart to unlock
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
@@ -270,9 +284,12 @@ void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) {
     uint8_t alloc = 0b01000100;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
+    while(Flg_Uart_Lock[ESP_URT_NUM]);   //wait for uart to unlock
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(blink);
     UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
@@ -282,9 +299,12 @@ void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
 
 void Coms_ESP_Interpret() {
     static uint8_t ESP_bnk_frq = 128;
+    while(Flg_Uart_Lock[ESP_URT_NUM]);   //wait for uart to unlock
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(0b01001100);  // LED R, Set Blink Freq
     UART4_Write(ESP_bnk_frq);
     UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
     ESP_bnk_frq++;
 }
 

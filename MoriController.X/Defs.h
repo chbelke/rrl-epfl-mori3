@@ -64,6 +64,7 @@ extern volatile bool Flg_EdgeDemo;
 
 extern volatile bool Flg_DelayStart;
 extern volatile bool Flg_Verbose;
+extern volatile bool Flg_Uart_Lock[4];
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs

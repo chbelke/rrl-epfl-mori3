@@ -6,6 +6,14 @@
 #include "Acts_ROT.h"
 #include "Mnge_RGB.h"
 
+const char *coms_message = "Ctrl";  
+const char *coms_end = "end";  
+
+const char *coms_1 = "State1";  
+const char *coms_2 = "State2";  
+const char *coms_3 = "State3";  
+const char *coms_4 = "State4";  
+
 /* ******************** COMMAND HANDLER************************************** */
 bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
     static bool alloc = true;
@@ -26,7 +34,10 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
             
         case 13:
             if(Coms_CMD_Shape(edge, byte))
+            {
+                Coms_ESP_Verbose_Write(coms_message);
                 return Coms_CMD_Reset(&state, &alloc);
+            }
             break;
         
         default:
@@ -49,8 +60,11 @@ bool Coms_CMD_Verbose(uint8_t byte)
     if (byte == ESP_End) {
         Flg_Verbose = !Flg_Verbose;
     } else {
+        while(Flg_Uart_Lock[3]);   //wait for uart to unlock
+        Flg_Uart_Lock[3] = true;        
         const char *casetoo = "tooLong";    
         Coms_ESP_Verbose_Write(casetoo);
+        Flg_Uart_Lock[3] = false;
     }
     return true;
 }
@@ -118,6 +132,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
                 }
             }
         } else if (((byte >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
+            Coms_ESP_Verbose_Write(coms_message);
             if (byte & 0b00000111) {
                 EspInCase = 22;
                 // only last three bits relevant when counting rec. bytes
@@ -125,6 +140,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
                 for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
                     EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
                 }
+                Coms_ESP_Verbose_Write(coms_1);
             } else {
                 EspInCase = 25;
                 EspInBits = 0;
@@ -303,6 +319,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         break;
 
     case 22: // COUPLING & LED INPUT ***************************************
+        Coms_ESP_Verbose_Write(coms_message);
         if (alloc & 0b00000100) {
             RgbPWM[0] = byte;
             EspInByts = EspInByts + 1;
@@ -328,7 +345,9 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
 
     case 25: // verify coupling inputs
         if (byte == ESP_End) {
+            Coms_ESP_Verbose_Write(coms_end);
             if (EspInByts == (2 + EspInBits)) {
+                Coms_ESP_Verbose_Write(coms_3);
                 // set smas
                 uint8_t m;
                 for (m = 0; m <= 2; m++) {
@@ -344,6 +363,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
                 }
             } else {
                 EspInLost = EspInLost + 1; // data lost
+                Coms_ESP_Verbose_Write(coms_2);
             }
         } else {
             EspIn0End = EspIn0End + 1; // no end byte
