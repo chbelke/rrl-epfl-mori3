@@ -87,286 +87,287 @@ bool Coms_CMD_Verbose(uint8_t byte)
 
 bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
 {
-    static uint8_t alloc = 0;
-    static uint16_t MotLinTemp[3] = {0, 0, 0}; // linear motor extension value (temporary)
-    static uint16_t MotRotTemp[3] = {0, 0, 0}; // rotary motor angle value (temporary)
-    static uint8_t EspInCase = 0;
-    static uint8_t EspInBits = 0;
-    static uint8_t EspInByts = 0;
-    static uint16_t EspInLost = 0; // counting lost byte instances since start
-    static uint16_t EspIn0End = 0; // counting instances of no end byte since start
-    static int8_t DrivePWM[3] = {0, 0, 0}; // manual drive mode PWM values by edge
-    static uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curv
-    static uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
+    static uint8_t alloc[4];
+    static uint16_t MotLinTemp[4][3]; // linear motor extension value (temporary)
+    static uint16_t MotRotTemp[4][3]; // rotary motor angle value (temporary)
+    static uint8_t EspInCase[4];
+    static uint8_t EspInBits[4];
+    static uint8_t EspInByts[4];
+    static uint16_t EspInLost[4]; // counting lost byte instances since start
+    static uint16_t EspIn0End[4]; // counting instances of no end byte since start
+    static int8_t DrivePWM[4][3]; // manual drive mode PWM values by edge
+    static uint8_t DriveSpd[3];
+    static uint8_t DriveCrv[3]; // automatic drive mode speed and curv
+    static uint8_t RgbPWM[4][3]; // rgb led values
 //    static uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0}; 
     
     
-    switch (EspInCase) {
+    switch (EspInCase[edge]) {
     case 0: // CHECK START BYTE
-            EspInCase = 1;
-            EspInByts = 1;
-            alloc = byte;
+            EspInCase[edge] = 1;
+            EspInByts[edge] = 1;
+            alloc[edge] = byte;
             
 
     case 1: // INPUT ALLOCATION ********************************************
         // if xx == 00, count bits         
         if (((byte >> 6) & 0x03) == 0) { // *** ANGLE & EXTENSION INPUT
-            EspInCase = 2;
+            EspInCase[edge] = 2;
             // Brian Kernighan: http://graphics.stanford.edu ...
             //  ... /~seander/bithacks.html#CountBitsSetNaive
             uint8_t EspInAlocTemp = byte;
-            for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
+            for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
                 EspInAlocTemp &= EspInAlocTemp - 1; // clear the LSB set
             }
         } else if (((byte >> 6) & 0x03) == 1) { // ******** DRIVE INPUT
             if (byte & 0b00100000) { // automatic drive mode
-                EspInCase = 19;
+                EspInCase[edge] = 19;
             } else { // manual drive mode
-                EspInCase = 15;
+                EspInCase[edge] = 15;
                 // only last three bits relevant when counting rec. bytes
                 uint8_t EspInAlocTemp = (byte & 0b00000111);
-                for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
+                for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
                     EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
                 }
             }
         } else if (((byte >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
             Coms_ESP_Verbose_Write(coms_message);
             if (byte & 0b00000111) {
-                EspInCase = 22;
+                EspInCase[edge] = 22;
                 // only last three bits relevant when counting rec. bytes
                 uint8_t EspInAlocTemp = (byte & 0b00000111);
-                for (EspInBits = 0; EspInAlocTemp; EspInBits++) {
+                for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
                     EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
                 }
                 Coms_ESP_Verbose_Write(coms_1);
             } else {
-                EspInCase = 25;
-                EspInBits = 0;
+                EspInCase[edge] = 25;
+                EspInBits[edge] = 0;
             }
         }
-        EspInByts = EspInByts + 1;
+        EspInByts[edge] = EspInByts[edge] + 1;
         break;
 
     case 2: // LINEAR MOTOR INPUTS *****************************************
         /* cases 2 to 7, two bytes per motor input */
-        if (alloc & 0b00100000) {
-            MotLinTemp[0] = ((uint16_t) (byte) << 8) & 0xFF00;
-            EspInByts = EspInByts + 1;
-            EspInCase = 3;
+        if (alloc[edge] & 0b00100000) {
+            MotLinTemp[edge][0] = ((uint16_t) (byte) << 8) & 0xFF00;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 3;
             break;
         }
     case 3:
-        if (alloc & 0b00100000) {
-            MotLinTemp[0] = MotLinTemp[0] | (uint16_t) byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 4;
+        if (alloc[edge] & 0b00100000) {
+            MotLinTemp[edge][0] = MotLinTemp[edge][0] | (uint16_t) byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 4;
             break;
         }
     case 4:
-        if (alloc & 0b00010000) {
-            MotLinTemp[1] = ((uint16_t) (byte) << 8) & 0xFF00;
-            EspInByts = EspInByts + 1;
-            EspInCase = 5;
+        if (alloc[edge] & 0b00010000) {
+            MotLinTemp[edge][1] = ((uint16_t) (byte) << 8) & 0xFF00;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 5;
             break;
         }
     case 5:
-        if (alloc & 0b00010000) {
-            MotLinTemp[1] = MotLinTemp[1] | (uint16_t) byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 6;
+        if (alloc[edge] & 0b00010000) {
+            MotLinTemp[edge][1] = MotLinTemp[edge][1] | (uint16_t) byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 6;
             break;
         }
     case 6:
-        if (alloc & 0b00001000) {
-            MotLinTemp[2] = ((uint16_t) (byte) << 8) & 0xFF00;
-            EspInByts = EspInByts + 1;
-            EspInCase = 7;
+        if (alloc[edge] & 0b00001000) {
+            MotLinTemp[edge][2] = ((uint16_t) (byte) << 8) & 0xFF00;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 7;
             break;
         }
     case 7:
-        if (alloc & 0b00001000) {
-            MotLinTemp[2] = MotLinTemp[2] | (uint16_t) byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 8;
+        if (alloc[edge] & 0b00001000) {
+            MotLinTemp[edge][2] = MotLinTemp[edge][2] | (uint16_t) byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 8;
             break;
         }
 
     case 8: // ROTARY MOTOR INPUTS *****************************************
         /* cases 8 to 13, two bytes per motor input */
-        if (alloc & 0b00000100) {
-            MotRotTemp[0] = ((uint16_t) (byte) << 8) & 0xFF00;
-            EspInByts = EspInByts + 1;
-            EspInCase = 9;
+        if (alloc[edge] & 0b00000100) {
+            MotRotTemp[edge][0] = ((uint16_t) (byte) << 8) & 0xFF00;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 9;
             break;
         }
     case 9:
-        if (alloc & 0b00000100) {
-            MotRotTemp[0] = MotRotTemp[0] | (uint16_t) byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 10;
+        if (alloc[edge] & 0b00000100) {
+            MotRotTemp[edge][0] = MotRotTemp[edge][0] | (uint16_t) byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 10;
             break;
         }
     case 10:
-        if (alloc & 0b00000010) {
-            MotRotTemp[1] = ((uint16_t) (byte) << 8) & 0xFF00;
-            EspInByts = EspInByts + 1;
-            EspInCase = 11;
+        if (alloc[edge] & 0b00000010) {
+            MotRotTemp[edge][1] = ((uint16_t) (byte) << 8) & 0xFF00;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 11;
             break;
         }
     case 11:
-        if (alloc & 0b00000010) {
-            MotRotTemp[1] = MotRotTemp[1] | (uint16_t) byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 12;
+        if (alloc[edge] & 0b00000010) {
+            MotRotTemp[edge][1] = MotRotTemp[edge][1] | (uint16_t) byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 12;
             break;
         }
     case 12:
-        if (alloc & 0b00000001) {
-            MotRotTemp[2] = ((uint16_t) (byte) << 8) & 0xFF00;
-            EspInByts = EspInByts + 1;
-            EspInCase = 13;
+        if (alloc[edge] & 0b00000001) {
+            MotRotTemp[edge][2] = ((uint16_t) (byte) << 8) & 0xFF00;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 13;
             break;
         }
     case 13:
-        if (alloc & 0b00000001) {
-            MotRotTemp[2] = MotRotTemp[2] | (uint16_t) byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 14;
+        if (alloc[edge] & 0b00000001) {
+            MotRotTemp[edge][2] = MotRotTemp[edge][2] | (uint16_t) byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 14;
             break;
         }
 
     case 14: // verify motor inputs
-        if (alloc == ESP_End) {
-            if (EspInByts == (2 + EspInBits * 2)) {
-                Coms_ESP_SetMots(alloc, MotLinTemp);
+        if (alloc[edge] == ESP_End) {
+            if (EspInByts[edge] == (2 + EspInBits[edge] * 2)) {
+                Coms_ESP_SetMots(alloc[edge], MotLinTemp[edge]);
             } else {
-                EspInLost = EspInLost + 1; // data lost
+                EspInLost[edge] = EspInLost[edge] + 1; // data lost
             }
         } else {
-            EspIn0End = EspIn0End + 1; // no end byte
+            EspIn0End[edge] = EspIn0End[edge] + 1; // no end byte
         }
-        EspInCase = 0;
+        EspInCase[edge] = 0;
         return true;
         break;
 
     case 15: // MANUAL DRIVE MODE ******************************************
-        if (alloc & 0b00000100) {
-            DrivePWM[0] = byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 16;
+        if (alloc[edge] & 0b00000100) {
+            DrivePWM[edge][0] = byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 16;
             break;
         }
     case 16:
-        if (alloc & 0b00000010) {
-            DrivePWM[1] = byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 17;
+        if (alloc[edge] & 0b00000010) {
+            DrivePWM[edge][1] = byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 17;
             break;
         }
     case 17:
-        if (alloc & 0b00000001) {
-            DrivePWM[2] = byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 18;
+        if (alloc[edge] & 0b00000001) {
+            DrivePWM[edge][2] = byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 18;
             break;
         }
     case 18: // verify drive inputs
-        if (alloc == ESP_End) {
-            if (EspInByts == (2 + EspInBits)) {
+        if (alloc[edge] == ESP_End) {
+            if (EspInByts[edge] == (2 + EspInBits[edge])) {
                 uint8_t m;
                 for (m = 0; m <= 2; m++) {
-                    if ((alloc >> (2 - m)) & 0b00000001) {
-                        Acts_ROT_Out(m, DrivePWM[m]*8);
+                    if ((alloc[edge] >> (2 - m)) & 0b00000001) {
+                        Acts_ROT_Out(m, DrivePWM[edge][m]*8);
                     }
                 }
             } else {
-                EspInLost = EspInLost + 1; // data lost
+                EspInLost[edge] = EspInLost[edge] + 1; // data lost
             }
         } else {
-            EspIn0End = EspIn0End + 1; // no end byte
+            EspIn0End[edge] = EspIn0End[edge] + 1; // no end byte
         }
-        EspInCase = 0;
+        EspInCase[edge] = 0;
         return true;
         break;
 
     case 19: // AUTOMATIC DRIVE MODE ***************************************
-        DriveSpd = byte;
-        EspInByts = EspInByts + 1;
-        EspInCase = 20;
+        DriveSpd[edge] = byte;
+        EspInByts[edge] = EspInByts[edge] + 1;
+        EspInCase[edge] = 20;
         break;
 
     case 20:
-        DriveCrv = byte;
-        EspInByts = EspInByts + 1;
-        EspInCase = 21;
+        DriveCrv[edge] = byte;
+        EspInByts[edge] = EspInByts[edge] + 1;
+        EspInCase[edge] = 21;
         break;
 
     case 21: // verify drive inputs
-        if (alloc == ESP_End) {
-            if (EspInByts == 4) {
-                Coms_ESP_Drive(DriveSpd, DriveCrv,
-                        ((alloc & 0x18) >> 3), ((alloc & 0x04) >> 2));
+        if (alloc[edge] == ESP_End) {
+            if (EspInByts[edge] == 4) {
+                Coms_ESP_Drive(DriveSpd[edge], DriveCrv[edge],
+                        ((alloc[edge] & 0x18) >> 3), ((alloc[edge] & 0x04) >> 2));
             } else {
-                EspInLost = EspInLost + 1; // data lost
+                EspInLost[edge] = EspInLost[edge] + 1; // data lost
             }
         } else {
-            EspIn0End = EspIn0End + 1; // no end byte
+            EspIn0End[edge] = EspIn0End[edge] + 1; // no end byte
         }
-        EspInCase = 0;
+        EspInCase[edge] = 0;
         return true;
         break;
 
     case 22: // COUPLING & LED INPUT ***************************************
         Coms_ESP_Verbose_Write(coms_message);
-        if (alloc & 0b00000100) {
-            RgbPWM[0] = byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 23;
+        if (alloc[edge] & 0b00000100) {
+            RgbPWM[edge][0] = byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 23;
             break;
         }
 
     case 23:
-        if (alloc & 0b00000010) {
-            RgbPWM[1] = byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 24;
+        if (alloc[edge] & 0b00000010) {
+            RgbPWM[edge][1] = byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 24;
             break;
         }
 
     case 24:
-        if (alloc & 0b00000001) {
-            RgbPWM[2] = byte;
-            EspInByts = EspInByts + 1;
-            EspInCase = 25;
+        if (alloc[edge] & 0b00000001) {
+            RgbPWM[edge][2] = byte;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            EspInCase[edge] = 25;
             break;
         }
 
     case 25: // verify coupling inputs
         if (byte == ESP_End) {
             Coms_ESP_Verbose_Write(coms_end);
-            if (EspInByts == (2 + EspInBits)) {
+            if (EspInByts[edge] == (2 + EspInBits[edge])) {
                 Coms_ESP_Verbose_Write(coms_3);
                 // set smas
                 uint8_t m;
                 for (m = 0; m <= 2; m++) {
-                    if (alloc & (0b00100000 >> m)) {
+                    if (alloc[edge] & (0b00100000 >> m)) {
                         Acts_CPL_On(m);
                     }
                 }
                 // update leds
                 for (m = 0; m <= 2; m++) {
-                    if ((alloc >> (2 - m)) & 0b00000001) {
-                        Mnge_RGB_Set(m, RgbPWM[m]);
+                    if ((alloc[edge] >> (2 - m)) & 0b00000001) {
+                        Mnge_RGB_Set(m, RgbPWM[edge][m]);
                     }
                 }
             } else {
-                EspInLost = EspInLost + 1; // data lost
+                EspInLost[edge] = EspInLost[edge] + 1; // data lost
                 Coms_ESP_Verbose_Write(coms_2);
             }
         } else {
-            EspIn0End = EspIn0End + 1; // no end byte
+            EspIn0End[edge] = EspIn0End[edge] + 1; // no end byte
         }
-        EspInCase = 0;
+        EspInCase[edge] = 0;
         return true;
         break;
 
@@ -374,7 +375,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
         break;
 
     default:
-        EspInCase = 0;
+        EspInCase[edge] = 0;
         break;
     }
     return false;
