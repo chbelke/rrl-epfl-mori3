@@ -16,32 +16,32 @@ const char *coms_4 = "State4";
 
 /* ******************** COMMAND HANDLER************************************** */
 bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
-    static bool alloc = true;
-    static uint8_t state;
+    static bool alloc[4] = {true, true, true, true};
+    static uint8_t state[4];
     
-    if (alloc)
+    if (alloc[edge])
     {
-        state = byte;
-        alloc = false;
+        state[edge] = byte;
+        alloc[edge] = false;
         return false;
     }
     
-    switch (state) {
+    switch (state[edge]) {
         case 0:
             if(Coms_CMD_Verbose(byte))
-                return Coms_CMD_Reset(&state, &alloc);
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
             
         case 13:
             if(Coms_CMD_Shape(edge, byte))
             {
-                Coms_ESP_Verbose_Write(coms_message);
-                return Coms_CMD_Reset(&state, &alloc);
+//                Coms_ESP_Verbose_Write(coms_message);
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             }
             break;
         
         default:
-            return Coms_CMD_Reset(&state, &alloc);
+            return Coms_CMD_Reset(&state[edge], &alloc[edge]);
     }  
     return false;
 }
