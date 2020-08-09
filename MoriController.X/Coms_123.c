@@ -177,17 +177,17 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 30: // COMMAND ****************************************************
-            Coms_123_reset_intervals(edge);
+//            Coms_123_reset_intervals(edge);
             if (Coms_CMD_Handle(edge, EdgIn)){
                 EdgInCase[edge] = 0;
-                break;
             }
+            break;            
             
         case 40: // RELAY ****************************************************
             if (Coms_REL_Handle(edge, EdgIn)){
                 EdgInCase[edge] = 0;
-                break;
             }
+            break;
             
         default: // DEFAULT ****************************************************
             EdgInCase[edge] = 0;
@@ -245,7 +245,7 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             
         }
         
-        if(!Flg_Uart_Lock[edge])
+        if(Flg_Uart_Lock[edge]==false)
         {
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte

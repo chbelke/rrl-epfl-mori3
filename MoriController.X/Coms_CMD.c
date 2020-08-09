@@ -59,12 +59,10 @@ bool Coms_CMD_Verbose(uint8_t byte)
 {
     if (byte == ESP_End) {
         Flg_Verbose = !Flg_Verbose;
+        return true;
     } else {
-        while(Flg_Uart_Lock[3]);   //wait for uart to unlock
-        Flg_Uart_Lock[3] = true;        
         const char *casetoo = "tooLong";    
         Coms_ESP_Verbose_Write(casetoo);
-        Flg_Uart_Lock[3] = false;
     }
     return true;
 }

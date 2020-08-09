@@ -9,6 +9,7 @@ uint8_t RelBytCnt[4] = {0}; // incoming byte counter
 uint8_t RelBytExp[4] = {0}; // expected number of bytes
 uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
 uint8_t RelBytDta[4][100];// = {0}; // array to store relay data
+uint8_t TmpByteBuffer[100];
 
 /* ******************** RELAY HANDLER *************************************** */
 bool Coms_REL_Handle (uint8_t inEdge, uint8_t byte){
@@ -27,7 +28,7 @@ bool Coms_REL_Handle (uint8_t inEdge, uint8_t byte){
             break;
         case 2:
             RelBytDta[inEdge][RelBytCnt[inEdge]-2] = byte;
-            RelBytCnt[inEdge]++;
+            RelBytCnt[inEdge]++;                
             if (RelBytCnt[inEdge] >= RelBytExp[inEdge]){
                 Coms_ESP_Verbose_Write(message);    
 //                const char *message2 = "hello";    
@@ -63,7 +64,9 @@ void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge){
 
 void Coms_REL_Order(uint8_t edge, uint8_t inEdge)
 {
-    while(Flg_Uart_Lock[edge]);   //wait for uart to unlock
+    while(Flg_Uart_Lock[edge])   //wait for uart to unlock
+    {
+    }
     Flg_Uart_Lock[edge] = true;   //locks s.t. the sequence is uninterrupted
     
     if(((RelBytDta[inEdge][0] >> 5) & 0x07)==7)
@@ -75,8 +78,11 @@ void Coms_REL_Order(uint8_t edge, uint8_t inEdge)
             Coms_Write(edge, RelBytDta[inEdge][count]); //data
         }
     } else {    //If last byte is not a command
-        uint8_t count;
-        for (count = 0; count < RelBytExp[inEdge]-1; count++){
+        uint8_t count;  //count minus 3: relay + len + rel end
+        for (count = 0; count < RelBytExp[inEdge]-3; count++){
+            TmpByteBuffer[count] = RelBytDta[inEdge][count]; //data
+        }           
+        for (count = 0; count < RelBytExp[inEdge]-3; count++){
             Coms_Write(edge, RelBytDta[inEdge][count]); //data
         }        
     }
