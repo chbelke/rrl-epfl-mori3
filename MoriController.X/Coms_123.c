@@ -84,7 +84,7 @@ void Coms_123_Eval(uint8_t edge) {
                     EdgInCase[edge] = 30;
                     break;
                 case 7: // xxx == 111, relay
-                    Coms_REL_Handle(edge, EdgInAloc[edge] & 0x07);
+                    Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111);
                     EdgInCase[edge] = 40;
                     break;
             }

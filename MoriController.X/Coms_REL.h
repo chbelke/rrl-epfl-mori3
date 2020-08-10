@@ -11,6 +11,10 @@
 bool Coms_REL_Handle (uint8_t, uint8_t);
 void Coms_REL_Relay (uint8_t, uint8_t);
 void Coms_Write (uint8_t, uint8_t);
-void Coms_REL_Order(uint8_t, uint8_t);
+void Coms_Rel_Order(uint8_t, uint8_t);
+
+void Coms_Rel_Edge(uint8_t, uint8_t);
+void Coms_Rel_Relay(uint8_t, uint8_t);
+void Coms_Rel_Interpret(uint8_t);
 
 #endif	/* COMS_REL_H */

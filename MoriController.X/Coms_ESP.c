@@ -73,7 +73,7 @@ void Coms_ESP_Eval() {
                     EspInCase = 6;
                     break;
                 case 7: // xxx == 111, relay
-                    Coms_REL_Handle(ESP_URT_NUM, EspIn & 0x07);
+                    Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 7;
                     break;
             }
