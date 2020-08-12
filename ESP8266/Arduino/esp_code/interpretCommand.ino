@@ -6,7 +6,7 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 17;
+  int sw_case = 18;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +14,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 16; i++)
+  for(int i=0; i < 17; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -101,6 +101,10 @@ void commands(byte* payload, unsigned int len)
       led_blue.Blink();
       break;
 
+    case 16:  //wedge
+      setWifiEdge(payload, len);
+      break;
+
     default:
       publish("ERR: Command not understood");
   }
@@ -109,3 +113,28 @@ void commands(byte* payload, unsigned int len)
 }
 
 
+void setWifiEdge(byte* payload, unsigned int len)
+{
+  int byte_count = 0;
+
+  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
+  {
+    byte_count++;
+    if(byte_count > len)
+    {
+      publish("ERR: payload has no space");
+      break;
+    }
+  }
+  byte_count++;
+
+  wifi_edge = payload[byte_count]-48;   //-48 = ascii to int conversion
+
+  char buff[50];
+  sprintf(buff, "INFO: WiFi Edge set to %d", int(wifi_edge));
+  publish(buff);
+
+
+
+  serial_write_two(0b11010111, wifi_edge);
+}

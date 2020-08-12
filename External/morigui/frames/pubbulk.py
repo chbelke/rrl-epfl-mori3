@@ -52,6 +52,10 @@ class PublishBulk():
                 for key in text[esp]:
                     if key.lower() == 'shape':
                         self.InterpretShape(text, key, esp)
+                    elif key.lower() == 'wifiedge':
+                        self.SetEdge(text, key, esp)
+                    elif type(text[esp][key]) is str:
+                        self.mqtthost.publishLocal(text[esp], esp)                     
             elif type(text[esp]) is str:
                 self.mqtthost.publishLocal(text[esp], esp)
 
@@ -59,8 +63,19 @@ class PublishBulk():
         self.pub_cmd.delete("1.0", 'end')
 
 
+    def SetEdge(self, text, key, esp):
+        message = bytearray(str.encode("rel "))
+        alloc = 0b11010111  #CMD Handle + 23
+        edge = text[esp][key]
+        message.append(alloc)
+        message.append(int(edge))
+        message.append(END_BYTE)
+
+        self.mqtthost.publishLocal(message, esp)
+
+
     def InterpretShape (self, text, key, esp):
-        cmds = text[esp][key]      
+        cmds = text[esp][key]
 
         if 'ang' in cmds or 'ext' in cmds:
             follow_bytes = []

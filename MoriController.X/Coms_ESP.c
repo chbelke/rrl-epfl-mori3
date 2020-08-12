@@ -25,7 +25,6 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9 // output speed factor for non-primary wheels
-#define ESP_URT_NUM 3
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
@@ -185,6 +184,7 @@ uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
     return SelfID[byteNum];
 }
 
+
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose() 
 {
@@ -224,6 +224,7 @@ void Coms_ESP_Verbose_Write(const char *message)
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
+
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {
@@ -307,6 +308,7 @@ void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
     WIFI_LED_BLINK_DES[edge] = blink;
 }
 
+
 void Coms_ESP_Interpret() {
     static uint8_t ESP_bnk_frq = 128;
     while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
@@ -319,6 +321,32 @@ void Coms_ESP_Interpret() {
     Flg_Uart_Lock[ESP_URT_NUM] = false;
     ESP_bnk_frq++;
 }
+
+/* ******************** Request Functions *********************************** */
+void Coms_ESP_Requst_WiFi_Edge()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
+    UART4_Write(0b01110111);  // 010 = states, 00000 = WiFi Edge
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
+}
+
+
+void Coms_ESP_Return_WiFi_Edge(uint8_t edge)
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
+    UART4_Write(0b01000001);  // 010 = states, 00001 = Set WiFi Edge
+    UART4_Write(edge);
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
+}
+
 
 /* Com_ESP_Drive - Online calc verification */
 /* https://repl.it/languages/c

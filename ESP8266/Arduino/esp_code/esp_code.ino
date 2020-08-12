@@ -40,7 +40,7 @@ char recieveName[36];
 
 const float softwareVersion = 0.5;
 
-char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "cont", "nocon", "rled", "gled", "bled"};
+char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello", "g_shape", "udp", "noudp", "verb", "noverb", "rel", "cont", "nocon", "rled", "gled", "bled", "wedge"};
 
 char stringIP[16];
 char charMAC[18];
@@ -63,6 +63,10 @@ bool verbose_flag = false;
 bool led_cycle = false;
 
 unsigned long led_sel_time = millis();
+
+byte wifi_edge = 255;
+
+#define END_BYTE 14
 
 #define LED_PIN 4
 Led wifi_ind_led(LED_PIN);

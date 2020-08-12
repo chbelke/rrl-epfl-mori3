@@ -25,6 +25,11 @@ void readSerial()
           serial_case = 3;
           setLEDs(c);
         }
+        else if (state == char(3))
+        {
+          serial_case = 4;
+          stateInfo(c);
+        }
         break;
 
       case 1:
@@ -43,6 +48,12 @@ void readSerial()
 
       case 3:
         if(setLEDs(c))
+        {
+          serial_case = 0;
+        }
+        break;
+      case 4:
+        if(stateInfo(c))
         {
           serial_case = 0;
         }
@@ -76,7 +87,7 @@ bool readVerbose(byte c)
 
     case 2:
       serial_packet[serial_buf_loc+5] = c;
-      if ((c == char(14)) && (serial_buf_loc == serial_len))
+      if ((c == char(END_BYTE)) && (serial_buf_loc == serial_len))
       {
         publish(serial_packet); 
         serial_buf_loc = 0;
@@ -131,31 +142,10 @@ bool setLEDs(byte d)
   }
 
 
-  // for (int kk = 0; kk < 8; kk++)
-  // {
-  //     bool f = c & 0x80;
-
-  //     char buff[10];
-  //     sprintf(buff, "INFO: %c", f);
-  //     publish(buff);        
-      
-  //     c = c << 1;
-  //     // delay(1000);
-  // }
-  // publish("INFO: ByteEND");
-
-  // char nuff[50];
-  // sprintf(nuff, "INFO: char = %d", int(c));
-  // publish(nuff);  
-
-  // char fuff[50];
-  // sprintf(fuff, "INFO: buf = %d, ser = %d", int(byteCount), int(serial_len));
-  // publish(fuff);  
-
   switch(readCase){
     case 0:
-      publish("INFO: Case 0");
-      if ((c == char(14)) && (byteCount == serial_len))
+      publish("INFO: LED Toggle");
+      if ((c == char(END_BYTE)) && (byteCount == serial_len))
       {
         if(LED == 1)
         {
@@ -174,7 +164,7 @@ bool setLEDs(byte d)
       break;
 
     case 1:
-      publish("INFO: Case 1");
+      publish("INFO: LED Off");
       if ((c == 0b0001110) && (byteCount == serial_len))
       {
         if(LED == 1)
@@ -194,8 +184,8 @@ bool setLEDs(byte d)
       break;    
     
     case 2:
-      publish("INFO: Case 2");
-      if ((c == char(14)) && (byteCount == serial_len))
+      publish("INFO: LED On");
+      if ((c == char(END_BYTE)) && (byteCount == serial_len))
       {
         if(LED == 1)
         {
@@ -214,7 +204,7 @@ bool setLEDs(byte d)
       break; 
 
     case 3:
-      if ((c == char(14)) && (byteCount == serial_len))
+      if ((c == char(END_BYTE)) && (byteCount == serial_len))
       {
         if(LED == 1)
         {
@@ -232,7 +222,7 @@ bool setLEDs(byte d)
       }      
     
     case 4:
-      if ((c == char(14)) && (byteCount == serial_len))
+      if ((c == char(END_BYTE)) && (byteCount == serial_len))
       {
         if(LED == 1)
         {
@@ -299,7 +289,7 @@ bool readInterpret(byte c)
     case 2:
       serial_packet[serial_buf_loc] = byte(c);
 
-      if ((c == char(14)) && (serial_buf_loc == serial_len))
+      if ((c == char(END_BYTE)) && (serial_buf_loc == serial_len))
       {
         commands(serial_packet, (unsigned int) serial_len);
         serial_buf_loc = 0;
@@ -326,4 +316,38 @@ bool readInterpret(byte c)
       break;
   }
   return false;
+}
+
+
+
+bool stateInfo(byte c)
+{
+  static byte readCase = 0;
+  static byte state;
+  static byte count;
+  static bool alloc = true;
+  if (alloc)
+  {
+      state = (c & 0b00011111);
+      alloc = false;
+      count = 1;
+      return false;
+  }  
+
+  switch (state) {  //request
+    case 23:
+      if (c == char(END_BYTE))
+      {
+        if(wifi_edge < 3)
+        {
+          serial_write_two(0b11010111, wifi_edge);
+        } else {
+          publish("REQ: WE"); //Request WiFi Edge
+        }
+      }
+      return true;
+      break;
+  }
+  return false;
+
 }

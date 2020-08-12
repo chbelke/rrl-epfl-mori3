@@ -12,6 +12,7 @@ uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
 uint8_t RelBytDta[4][100];// = {0}; // array to store relay data
 uint8_t TmpByteBuffer[100];
 uint8_t alloc[4] = {0, 0, 0, 0};
+uint8_t WIFI_EDGE = 255;
 
 /* ******************** RELAY HANDLER *************************************** */
 bool Coms_REL_Handle (uint8_t inEdge, uint8_t byte){
@@ -60,6 +61,14 @@ void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge){
                 Coms_Rel_Edge(edge, inEdge);
             }
         }
+    } else if (outEdge == 6){ //relay to WiFi hub
+        if(WIFI_EDGE < 3)
+        {
+            Coms_Rel_Edge(WIFI_EDGE, inEdge);
+        } else {
+            Coms_ESP_Requst_WiFi_Edge();
+        }
+        
     } else {
         Coms_Rel_Edge(outEdge, inEdge);
     }
@@ -102,6 +111,18 @@ void Coms_Rel_Order(uint8_t edge, uint8_t inEdge)
     for (count = 0; count < RelBytExp[inEdge]-3; count++){
         Coms_Write(edge, RelBytDta[inEdge][count]); //data
     }
+}
+
+void Coms_Rel_Set_WiFi_Edge(uint8_t edge)
+{
+    const char *message2 = "helloooo";    
+    Coms_ESP_Verbose_Write(message2);    
+    WIFI_EDGE = edge;
+}
+
+uint8_t Coms_Rel_Get_WiFi_Edge(uint8_t edge)
+{
+    return WIFI_EDGE;
 }
 
 void Coms_Rel_Interpret(uint8_t inEdge)

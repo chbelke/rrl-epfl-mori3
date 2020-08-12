@@ -86,7 +86,7 @@ extern volatile bool Flg_Uart_Lock[4];
 #define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
 #define ESP_Relay 0b00000101
-#define ESP
+#define ESP_URT_NUM 3
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte

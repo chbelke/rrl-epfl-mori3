@@ -1,6 +1,7 @@
 #include "Defs.h"
 #include "Coms_CMD.h"
 #include "Coms_ESP.h"
+#include "Coms_REL.h"
 #include "Acts_LIN.h"
 #include "Acts_CPL.h"
 #include "Acts_ROT.h"
@@ -34,10 +35,12 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
             
         case 13:
             if(Coms_CMD_Shape(edge, byte))
-            {
-//                Coms_ESP_Verbose_Write(coms_message);
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
-            }
+            break;
+            
+        case 23:
+            if(Coms_CMD_SetWiFiEdge(edge, byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
         
         default:
@@ -59,12 +62,42 @@ bool Coms_CMD_Verbose(uint8_t byte)
 {
     if (byte == ESP_End) {
         Flg_Verbose = !Flg_Verbose;
-        return true;
     } else {
-        const char *casetoo = "tooLong";    
-        Coms_ESP_Verbose_Write(casetoo);
+        Coms_CMD_OverflowError();
     }
     return true;
+}
+
+
+bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte)
+{
+    static uint8_t tmp_wifi_edge[4] = {255, 255, 255, 255};
+    static bool databyte = true;    //Former count - but only one byte sent
+    if (byte == ESP_End) {
+        if(tmp_wifi_edge[edge]<3)
+        {            
+            Coms_Rel_Set_WiFi_Edge(tmp_wifi_edge[edge]);      
+            if(edge!=ESP_URT_NUM)
+                Coms_ESP_Return_WiFi_Edge(tmp_wifi_edge[edge]);
+        }
+        databyte = true;
+        return true;
+    } else if(databyte) {
+        tmp_wifi_edge[edge] = byte;
+        databyte = false;
+    } else {
+        Coms_CMD_OverflowError();
+        databyte = true;
+        return true;
+    }
+    return false;
+}
+
+
+void Coms_CMD_OverflowError()
+{
+    const char *casetoo = "tooLong";    
+    Coms_ESP_Verbose_Write(casetoo);    
 }
 
 
