@@ -6,6 +6,7 @@
 #include "Acts_CPL.h"
 #include "Acts_ROT.h"
 #include "Mnge_RGB.h"
+#include "mcc_generated_files/reset.h"
 
 //const char *coms_message = "Ctrl";  
 //const char *coms_end = "end";  
@@ -25,7 +26,7 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
         state[edge] = (byte & 0b00011111);
         alloc[edge] = false;
         return false;
-    }
+    }    
     
     switch (state[edge]) {
         case 0:
@@ -40,6 +41,11 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
             
         case 23:
             if(Coms_CMD_SetWiFiEdge(edge, byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+            
+        case 31:   
+            if(Coms_CMD_Restart_PIC(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
         
@@ -100,6 +106,16 @@ void Coms_CMD_OverflowError()
     Coms_ESP_Verbose_Write(casetoo);    
 }
 
+
+bool Coms_CMD_Restart_PIC(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        __asm__ volatile ("reset");
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
 
 /* EspInAloc: 
  * 0bxx000000, where xx = indicator

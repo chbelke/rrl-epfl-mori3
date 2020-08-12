@@ -177,7 +177,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     if(Flg_DelayStart)
     {
         static uint8_t start = 0;
-        if(start > 1)
+        if(start > 5)
         {
             Flg_DelayStart = false;
         }
