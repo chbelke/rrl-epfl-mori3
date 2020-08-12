@@ -79,6 +79,9 @@ volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
 
 volatile bool Flg_EdgeDemo = false;
 
+volatile bool Flg_MotLin_Active = false;
+volatile bool Flg_MotRot_Active = false;
+
 /*
                          Main application
  */

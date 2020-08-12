@@ -16,6 +16,7 @@ bool Stbl_Flag[3] = {false, false, false};
 /* ******************** LINEAR MOTOR OUTPUTS ******************************** */
 void Acts_LIN_Out(uint8_t edge, int16_t duty) {
     if (!STAT_MotLin_Active) duty = 0; // linear motors off
+    if (!Flg_MotLin_Active) duty = 0; 
     switch (edge) {
         case 0:
             if (duty > 0) LIN_DIR_1 = 0; // direction output

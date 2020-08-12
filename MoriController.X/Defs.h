@@ -66,6 +66,9 @@ extern volatile bool Flg_DelayStart;
 extern volatile bool Flg_Verbose;
 extern volatile bool Flg_Uart_Lock[4];
 
+extern volatile bool Flg_MotLin_Active;
+extern volatile bool Flg_MotRot_Active;
+
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
 #define LED_R LATBbits.LATB0        // blue LED - 1 is off

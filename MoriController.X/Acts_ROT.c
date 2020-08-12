@@ -12,6 +12,7 @@ float rPID_D[3] = {0, 0, 0};
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
     if (!STAT_MotRot_Active) duty = 0; // linear motors off
+    if (!Flg_MotRot_Active) duty = 0;
     switch (edge) {
         case 0:
             if (duty > 0) ROT_DIR_1 = 1; // direction output

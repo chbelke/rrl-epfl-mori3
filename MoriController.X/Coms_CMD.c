@@ -43,6 +43,27 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
             if(Coms_CMD_SetWiFiEdge(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
+        
+
+        case 27:
+            if(Coms_CMD_SetMotRotOn(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+
+        case 28:
+            if(Coms_CMD_SetMotRotOff(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+
+        case 29:
+            if(Coms_CMD_SetMotLinOn(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+
+        case 30:
+            if(Coms_CMD_SetMotLinOff(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
             
         case 31:   
             if(Coms_CMD_Restart_PIC(byte))
@@ -71,6 +92,50 @@ bool Coms_CMD_Verbose(uint8_t byte)
     } else {
         Coms_CMD_OverflowError();
     }
+    return true;
+}
+
+
+bool Coms_CMD_SetMotRotOn(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Flg_MotRot_Active = true;
+    } else {
+        Coms_CMD_OverflowError();
+    }    
+    return true;
+}
+
+
+bool Coms_CMD_SetMotRotOff(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Flg_MotRot_Active = false;
+    } else {
+        Coms_CMD_OverflowError();
+    }    
+    return true;
+}
+
+
+bool Coms_CMD_SetMotLinOn(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Flg_MotLin_Active = true;
+    } else {
+        Coms_CMD_OverflowError();
+    }    
+    return true;
+}
+
+
+bool Coms_CMD_SetMotLinOff(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Flg_MotLin_Active = false;
+    } else {
+        Coms_CMD_OverflowError();
+    }    
     return true;
 }
 
