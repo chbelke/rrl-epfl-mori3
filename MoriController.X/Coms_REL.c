@@ -1,9 +1,9 @@
 #include "Coms_123.h"
-#include "Coms_REL.h"
 #include "Coms_ESP.h"
 #include "Coms_CMD.h"
 #include "Defs.h"
 #include "mcc_generated_files/uart4.h"
+#include "Coms_REL.h"
 
 uint8_t RelSwitch[4] = {0}; // switch case variable
 uint8_t RelBytCnt[4] = {0}; // incoming byte counter
@@ -66,7 +66,7 @@ void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge){
         {
             Coms_Rel_Edge(WIFI_EDGE, inEdge);
         } else {
-            Coms_ESP_Requst_WiFi_Edge();
+            Coms_ESP_Request_WiFiEdge();
         }
         
     } else {
@@ -114,13 +114,11 @@ void Coms_Rel_Order(uint8_t edge, uint8_t inEdge)
 }
 
 void Coms_Rel_Set_WiFi_Edge(uint8_t edge)
-{
-    const char *message2 = "helloooo";    
-    Coms_ESP_Verbose_Write(message2);    
+{  
     WIFI_EDGE = edge;
 }
 
-uint8_t Coms_Rel_Get_WiFi_Edge(uint8_t edge)
+uint8_t Coms_Rel_Get_WiFi_Edge()
 {
     return WIFI_EDGE;
 }

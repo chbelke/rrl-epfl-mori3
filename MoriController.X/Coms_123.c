@@ -177,7 +177,7 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 30: // COMMAND ****************************************************
-//            Coms_123_reset_intervals(edge);
+            Coms_123_reset_intervals(edge);
             if (Coms_CMD_Handle(edge, EdgIn)){
                 EdgInCase[edge] = 0;
             }
@@ -233,7 +233,7 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_ESP_LED_State(edge, 1);
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
-            Coms_ESP_LED_Set_Blink_Freq(edge, 50);
+            Coms_ESP_LED_Set_Blink_Freq(edge, 20);
             Coms_ESP_LED_State(edge, 3);
         } else if (Flg_EdgeCon[edge]) {
             byte = COMS_123_Ackn; // send acknowledge and ID
@@ -311,4 +311,9 @@ uint8_t Coms_123_Read(uint8_t edge) {
             break;
     }
     return byte;
+}
+
+
+uint8_t * Coms_123_Get_Neighbour(uint8_t edge) {
+    return &NbrID[edge*6];
 }

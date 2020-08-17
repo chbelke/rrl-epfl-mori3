@@ -1,4 +1,3 @@
-#include "Coms_ESP.h"
 #include "Defs.h"
 #include "Acts_LIN.h"
 #include "Acts_ROT.h"
@@ -11,7 +10,9 @@
 #include "mcc_generated_files/adc1.h"
 #include "Coms_CMD.h"
 #include "Coms_REL.h"
+#include "Coms_123.h"
 #include <string.h>
+#include "Coms_ESP.h"
 
 uint8_t EspInCase = 0; // switch case variable
 uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
@@ -322,14 +323,14 @@ void Coms_ESP_Interpret() {
     ESP_bnk_frq++;
 }
 
-/* ******************** Request Functions *********************************** */
-void Coms_ESP_Requst_WiFi_Edge()
+/* ******************** Wifi Edges *********************************** */
+void Coms_ESP_No_WiFi_Edge()
 {
     while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
     {
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
-    UART4_Write(0b01110111);  // 010 = states, 00000 = WiFi Edge
+    UART4_Write(0b10011001);  // 100 = states, 00000 = WiFi Edge
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
@@ -341,10 +342,91 @@ void Coms_ESP_Return_WiFi_Edge(uint8_t edge)
     {
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
-    UART4_Write(0b01000001);  // 010 = states, 00001 = Set WiFi Edge
+    UART4_Write(0b10011000);  // 100 = states, 11000 = Set WiFi Edge
     UART4_Write(edge);
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;
+}
+
+
+/* ******************** Requests ******************** */
+void Coms_ESP_Request_Edges()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10010100);
+    uint8_t i;
+    for (i = 0; i < 3; i++) {
+        UART4_Write16(ADC1_Return(i));
+    }
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;  
+}
+
+
+void Coms_ESP_Request_Angles()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10010101);
+    uint8_t i;
+    for (i = 0; i < 3; i++) {
+        UART4_Write16(ADC1_Return(i));
+    }
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;      
+}
+
+
+void Coms_ESP_Request_Orient()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10010110);
+    uint8_t i;
+    for (i = 0; i < 3; i++) {    
+        UART4_Write16(Sens_ACC_Get(i));
+    }
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;  
+}
+
+
+void Coms_ESP_Request_Neighbour(uint8_t edge)
+{
+    uint8_t *neighbour;
+    uint8_t i;
+    neighbour = Coms_123_Get_Neighbour(edge);
+    
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10010111);
+    UART4_Write(edge);
+    for(i=0; i<6; i++)
+        UART4_Write(*(neighbour+i));
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;      
+}
+
+
+void Coms_ESP_Request_WiFiEdge()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10011000);
+    UART4_Write(Coms_Rel_Get_WiFi_Edge());
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
 
 

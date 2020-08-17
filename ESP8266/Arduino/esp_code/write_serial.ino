@@ -40,6 +40,39 @@ void relay(byte* payload, unsigned int len)
 }
 
 
+void serial_write_one(byte alloc)
+{  
+  Serial.write(alloc);
+  Serial.write(END_BYTE);
+
+
+  if(verbose_flag)
+  {
+    byte val = alloc;
+    for (int k = 0; k < 8; k++)
+    {
+        bool b = val & 0x80;
+        Serial.print(b);
+        val = val << 1;
+    }
+    Serial.println();
+  }
+
+  if(verbose_flag)
+  {
+    byte val = END_BYTE;
+    for (int k = 0; k < 8; k++)
+    {
+        bool b = val & 0x80;
+        Serial.print(b);
+        val = val << 1;
+    }
+    Serial.println();
+  }  
+
+}
+
+
 void serial_write_two(byte alloc, byte message)
 {  
   Serial.write(alloc);

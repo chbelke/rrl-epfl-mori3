@@ -7,6 +7,20 @@ void readSerial()
     
     byte c = Serial.read();
 
+    byte val = c;
+    int hungry[8];
+    for (int k = 0; k < 8; k++)
+    {
+        hungry[7-k] = val & 0x01;
+        val = val >> 1;
+    }
+    
+
+    // char buff[50];
+    // sprintf(buff, "INFO: byte %d%d%d%d %d%d%d%d", hungry[0], hungry[1], hungry[2], hungry[3], hungry[4], hungry[5], hungry[6], hungry[7]);
+    // publish(buff);    
+
+
     char state = ((c >> 5) & 0b00000111);
     switch(serial_case){
       case 0:
@@ -25,7 +39,7 @@ void readSerial()
           serial_case = 3;
           setLEDs(c);
         }
-        else if (state == char(3))
+        else if (state == char(4))
         {
           serial_case = 4;
           stateInfo(c);
@@ -325,29 +339,153 @@ bool stateInfo(byte c)
   static byte readCase = 0;
   static byte state;
   static byte count;
+  static byte storage[10];
   static bool alloc = true;
+  static char serial_packet[100];
+
   if (alloc)
   {
       state = (c & 0b00011111);
       alloc = false;
       count = 1;
+
+      // char duff[50];
+      // sprintf(duff, "INFO: case= = %d", (int)state);  
+      // publish(duff);      
       return false;
   }  
 
   switch (state) {  //request
-    case 23:
+
+    case 20:  //read edges
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: EL %d %d %d", (storage[0]*256+storage[1]), 
+                      (storage[2]*256+storage[3]), (storage[4]*256+storage[5]));     
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;
+      } else if (count < 8) {
+        storage[count-1]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 20");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+    case 21:  //read angles
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: AN %d %d %d", (storage[0]*256+storage[1]), 
+                      (storage[2]*256+storage[3]), (storage[4]*256+storage[5]));
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;
+      } else if (count < 8) {
+        storage[count-1]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 21");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+    case 22:  //read orientation  
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: OR %d %d %d", (storage[0]*256+storage[1]), 
+                      (storage[2]*256+storage[3]), (storage[4]*256+storage[5]));
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;
+      } else if (count < 8) {
+        storage[count-1]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 22");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+    case 23:  //read neighbour
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: NB %x %x %x %x %x %x %x", storage[0], storage[1], 
+                            storage[2], storage[3], storage[4], storage[5], storage[6]);     
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;
+      } else if (count < 8) {
+        storage[count-1]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 23");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+
+    case 24:  //read WiFIEDGE
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: ED %d", int(storage[0])); 
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;
+      } else if (count == 1) {
+        storage[0]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 24");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+    case 25:   //WiFiEdge
       if (c == char(END_BYTE))
       {
         if(wifi_edge < 3)
         {
-          serial_write_two(0b11010111, wifi_edge);
+          serial_write_two(0b11011010, wifi_edge);
         } else {
           publish("REQ: WE"); //Request WiFi Edge
         }
       }
+      alloc = true;
       return true;
       break;
   }
   return false;
+
+}
+
+void errorMessage()
+{
 
 }

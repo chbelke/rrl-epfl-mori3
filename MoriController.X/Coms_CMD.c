@@ -39,12 +39,41 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte){
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
             
-        case 23:
-            if(Coms_CMD_SetWiFiEdge(edge, byte))
+        case 20:
+            if(Coms_CMD_Request_Edges(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
-        
+            
+        case 21:
+            if(Coms_CMD_Request_Angles(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;   
+            
+        case 22:
+            if(Coms_CMD_Request_Orient(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;   
+            
+        case 23:
+            if(Coms_CMD_Request_Neighbour(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;   
+            
+        case 24:
+            if(Coms_CMD_Request_WiFiEdge(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;           
 
+        case 25:
+            if(Coms_CMD_No_WifiEdge(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;            
+            
+        case 26:
+            if(Coms_CMD_SetWiFiEdge(edge, byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;        
+        
         case 27:
             if(Coms_CMD_SetMotRotOn(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -85,6 +114,15 @@ bool Coms_CMD_Reset(uint8_t* state, bool* alloc)
 }
 
 
+void Coms_CMD_OverflowError()
+{
+    const char *casetoo = "tooLong";    
+    Coms_ESP_Verbose_Write(casetoo);    
+}
+
+
+//------------------------- Misc. -------------------------//
+
 bool Coms_CMD_Verbose(uint8_t byte)
 {
     if (byte == ESP_End) {
@@ -96,6 +134,94 @@ bool Coms_CMD_Verbose(uint8_t byte)
 }
 
 
+bool Coms_CMD_Restart_PIC(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        __asm__ volatile ("reset");
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
+
+
+//------------------------- Requests -------------------------//
+bool Coms_CMD_Request_Edges(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Coms_ESP_Request_Edges();
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
+
+
+bool Coms_CMD_Request_Angles(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Coms_ESP_Request_Angles();
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
+
+
+bool Coms_CMD_Request_Orient(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Coms_ESP_Request_Orient();
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
+
+
+bool Coms_CMD_Request_Neighbour(uint8_t byte)
+{
+    static uint8_t count=0;
+    static uint8_t side;
+    if (count >= 1)
+    {
+        if (byte == ESP_End) {
+            Coms_ESP_Request_Neighbour(side);
+        } else {
+        Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
+    } else {
+        side = byte;
+        count++;
+    }
+    return false;       
+}
+
+bool Coms_CMD_Request_WiFiEdge(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Coms_ESP_Request_WiFiEdge();
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
+
+
+bool Coms_CMD_No_WifiEdge(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        Coms_ESP_Request_WiFiEdge(byte);
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;       
+}
+
+
+//------------------------- Setters -------------------------//
 bool Coms_CMD_SetMotRotOn(uint8_t byte)
 {
     if (byte == ESP_End) {
@@ -145,7 +271,7 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte)
     static uint8_t tmp_wifi_edge[4] = {255, 255, 255, 255};
     static bool databyte = true;    //Former count - but only one byte sent
     if (byte == ESP_End) {
-        if(tmp_wifi_edge[edge]<3)
+        if(tmp_wifi_edge[edge]<4)
         {            
             Coms_Rel_Set_WiFi_Edge(tmp_wifi_edge[edge]);      
             if(edge!=ESP_URT_NUM)
@@ -165,22 +291,7 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte)
 }
 
 
-void Coms_CMD_OverflowError()
-{
-    const char *casetoo = "tooLong";    
-    Coms_ESP_Verbose_Write(casetoo);    
-}
-
-
-bool Coms_CMD_Restart_PIC(uint8_t byte)
-{
-    if (byte == ESP_End) {
-        __asm__ volatile ("reset");
-    } else {
-        Coms_CMD_OverflowError();
-    }
-    return true;       
-}
+//----------- Fukkin massive-ass shape command -----------//
 
 /* EspInAloc: 
  * 0bxx000000, where xx = indicator

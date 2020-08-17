@@ -6,7 +6,7 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 18;
+  int sw_case = 24;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +14,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 17; i++)
+  for(int i=0; i < 23; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -105,6 +105,31 @@ void commands(byte* payload, unsigned int len)
       setWifiEdge(payload, len);
       break;
 
+    case 17:  //rshape
+      requestShape();
+      break;
+
+    case 18:  //redge
+      requestEdge();
+      break;
+
+    case 19:  //rang",
+      requestAngle();
+      break;
+
+    case 20:  //rorient
+      requestOrientation();
+      break;
+
+    case 21:  //rwedge
+      requestWifiEdge();
+      break;      
+
+    case 22:  //rneigh
+      requestNeighbour(payload, len);
+      break;
+
+
     default:
       publish("ERR: Command not understood");
   }
@@ -134,7 +159,61 @@ void setWifiEdge(byte* payload, unsigned int len)
   sprintf(buff, "INFO: WiFi Edge set to %d", int(wifi_edge));
   publish(buff);
 
-
-
-  serial_write_two(0b11010111, wifi_edge);
+  serial_write_two(0b11011010, wifi_edge);
 }
+
+
+void requestShape()
+{
+  serial_write_one(0b11010100);
+}
+
+
+void requestEdge()
+{
+  serial_write_one(0b11010100);
+}
+
+
+void requestAngle()
+{
+  serial_write_one(0b11010101);
+}
+
+
+void requestOrientation()
+{
+  serial_write_one(0b11010110);
+}
+
+
+void requestWifiEdge()
+{
+  serial_write_one(0b11011000);
+}
+
+
+void requestNeighbour(byte* payload, unsigned int len)
+{
+  int byte_count = 0;
+
+  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
+  {
+    byte_count++;
+    if(byte_count > len)
+    {
+      publish("ERR: payload has no space");
+      break;
+    }
+  }
+  byte_count++;
+
+  byte neighbour = payload[byte_count]-48;   //-48 = ascii to int conversion
+
+  // char buff[50];
+  // sprintf(buff, "INFO: Req Neighbour %d", int(neighbour));
+  // publish(buff);
+
+  serial_write_two(0b11010111, neighbour);
+}
+
