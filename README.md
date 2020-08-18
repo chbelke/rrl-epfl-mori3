@@ -26,8 +26,10 @@ Other libraries:
 Implemented in Python 3.6.6
 
 Nonstandard libraries:
-`paho.mqtt.client` (https://pypi.org/project/paho-mqtt/)
+`paho-mqtt` (https://pypi.org/project/paho-mqtt/)
 `termcolor` (https://pypi.org/project/termcolor/)
+`numpy` (https://pypi.org/project/numpy/)
+`tkinter` (https://wiki.python.org/moin/TkInter)
 
  ## Other:
  MQTT broker is handled by a Raspberry Pi B+
@@ -38,9 +40,18 @@ Execute `python3 mainMori.py` located in the External folder
 
 Currently it operates in the Ubuntu subenviroment for Windows (found in the app store). Run download and run XLaunch to view the GUI. (https://sourceforge.net/projects/vcxsrv/)
 
-Uses the following non-standard libraries:
-`termcolor`
-`paho-mqtt`
+Install non-standard libraries:
+`python3 -m pip install termcolor`
+`python3 -m pip install paho-mqtt`
+`python3 -m pip install numpy`
+`sudo apt-get install python3-tk`
+
+Update the .bashrc file with the following command:
+`echo "export DISPLAY=$(grep -m 1 nameserver /etc/resolv.conf | awk '{print $2}'):0.0" >> ~/.bashrc`
+
+Follow the firewall configuration instructions given here:
+`https://github.com/cascadium/wsl-windows-toolbar-launcher`
+
 
 # Publications
 
