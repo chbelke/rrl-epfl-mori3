@@ -32,6 +32,7 @@ class PublishLocal():
 
         self.pub_loc_entry = tk.Entry(self.frame, bd=1)
         self.pub_loc_entry.pack({"side": "right"}, fill=tk.X, padx=5, expand=True)
+        
         self.pub_loc_button = tk.Button(self.frame)
         self.pub_loc_button["text"] = "Publish",
         self.pub_loc_button["command"] = lambda: self.publishLocal()

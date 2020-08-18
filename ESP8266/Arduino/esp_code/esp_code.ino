@@ -188,6 +188,7 @@ void loop()
       normalOp();
       publish("UDP: Stop");
       runState = 3;
+      break;
     case 7:   //Start Controller
       startController();
       flag_control = true;
@@ -243,8 +244,7 @@ void normalOp()
   if (abs(lastMessage - millis()) > 10000)
   {
     char buff[50];
-    String runString = String("INFO: RunState: ") + int(runState);
-    runString.toCharArray(buff, 30);
+    sprintf(buff, "INFO: RunState: %d", runState);
     publish(buff);
 //    client.publish(publishName, "INFO: Just chillin");
     lastMessage = millis();

@@ -50,8 +50,15 @@ def splitMessageUDP(wifi_host, msg, addr):
       else:
          return None, None
    except:
-      print(colored("IN TRACEBACK", 'red'))
-      traceback.print_exc()
+      try:
+         pyld = []
+         pyld.append(msg[0:4].decode('UTF-8'))
+         pyld.append(msg[5:-1])
+         espNum = wifi_host.EPDict.get(addr[0])
+         return pyld, espNum
+      except:
+         print(colored("IN TRACEBACK", 'red'))
+         traceback.print_exc()
 
 
 # The callback for when a PUBLISH message is received from the server.

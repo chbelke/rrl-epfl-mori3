@@ -48,7 +48,7 @@ void commands(byte* payload, unsigned int len)
       break;
 
     case 4:   //hello
-      client.publish(publishName, "INFO: Hello!");
+      publish("INFO: Hello!");
       break;
 
     case 5:   //g_shape (set shape)

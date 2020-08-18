@@ -25,7 +25,6 @@ class PublishGlobal():
         self.pub_cmd.pack(fill=tk.X, expand=True, padx=5) 
 
     def publishGlobal(self):
-        print("here")
         text = self.pub_cmd.get()
         self.mqtthost.publishGlobal(text)
         print("Published \"" + text + "\" to esp/rec")
