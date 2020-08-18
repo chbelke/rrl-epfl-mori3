@@ -95,20 +95,20 @@ bool readVerbose(byte c)
       readCase = 1;
       break;
     case 1:
-      serial_len = c;
+      serial_len = c-1;
       readCase = 2;
       break;
 
     case 2:
-      serial_packet[serial_buf_loc+5] = c;
-      if ((c == char(END_BYTE)) && (serial_buf_loc == serial_len))
+      // serial_packet[serial_buf_loc+5] = c;
+      if ((c == char(END_BYTE)) && (serial_buf_loc-1 == serial_len))
       {
         publish(serial_packet); 
         serial_buf_loc = 0;
         readCase = 0;
         return true;
       }
-      // serial_packet[serial_buf_loc+5] = c;
+      serial_packet[serial_buf_loc+5] = c;
       if (serial_buf_loc > serial_len)
       {
         publish("ERR: buf_loc > serial_len");
