@@ -81,6 +81,12 @@ void serial_write_two(byte alloc, byte message)
 }
 
 
+void serial_write_to_hub(buff)
+{
+  
+}
+
+
 void verbose_print(char* msg)
 {
   if(verbose_flag)

@@ -6,7 +6,7 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 24;
+  int sw_case = 26;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +14,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 23; i++)
+  for(int i=0; i < 25; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -127,6 +127,14 @@ void commands(byte* payload, unsigned int len)
 
     case 22:  //rneigh
       requestNeighbour(payload, len);
+      break;
+
+    case 23:
+      runState = 10;
+      break;
+
+    case 24:
+      runState = 12;
       break;
 
 
