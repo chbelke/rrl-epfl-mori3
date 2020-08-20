@@ -44,6 +44,11 @@ void readSerial()
           serial_case = 4;
           stateInfo(c);
         }
+        else if (state == char(7))  ///relay
+        {
+          serial_case = 7;
+          relayToComputer(c);
+        }
         break;
 
       case 1:
@@ -66,12 +71,20 @@ void readSerial()
           serial_case = 0;
         }
         break;
+      
       case 4:
         if(stateInfo(c))
         {
           serial_case = 0;
         }
         break;
+      
+      case 7:
+        if(relayToComputer(c))
+        {
+          serial_case = 0;
+        }
+        break;        
     }
   }
 }
@@ -482,8 +495,71 @@ bool stateInfo(byte c)
       break;
   }
   return false;
-
 }
+
+
+bool relayToComputer(byte c)
+{
+  static byte readCase = 0;
+  static byte state;
+  static byte count;
+  static byte len;
+  static byte storage[PACKET_SIZE];
+  static bool alloc = true;
+  static char wireless_packet[100];
+
+  if (alloc)
+  {
+      state = (c & 0b00011111);
+      alloc = false;
+      count = 1;
+      return false;
+  } else if (len == 0)
+  {
+    len = c;
+    count = 2;
+    return false;
+  }
+
+  count++;
+
+  // char buff[50];
+  // sprintf(buff, "INFO: len = %d, count = %d", int(len), int(count));
+  // publish(buff);
+
+
+  switch (state) {  //request
+
+    case 6:  //Relay to WiFi Edge
+      if ((c == char(42)) && (count == len))
+      {
+        // publish("INFO: IN LOOP");
+        sprintf(wireless_packet, "REL: ");
+        for(int i=0; i<len-3; i++)  
+        {
+          sprintf(wireless_packet, "%s%c", wireless_packet, storage[i]);
+        }
+        publish(wireless_packet);
+        memset(wireless_packet, 0, sizeof(wireless_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        len = 0;
+        return true;
+      } else if (count < len) {
+        storage[count-2]=c;
+      } else {
+        publish("ERR: Unable to Relay");        
+        count = 0;
+        alloc = true;
+        len = 0;
+        return true;
+      }
+      break;
+  }
+  return false;
+}
+
 
 void errorMessage()
 {

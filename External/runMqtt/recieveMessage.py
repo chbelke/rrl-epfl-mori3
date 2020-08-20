@@ -12,6 +12,7 @@ from termcolor import colored
 import threading
 
 import runMqtt.commands as commands
+import runMqtt.relayHandle as relayHandle
 
 
 def splitMessage(msg):
@@ -65,6 +66,9 @@ def splitMessageUDP(wifi_host, msg, addr):
 def interpretMessage(self, wifi_host, pyld, espNum):
    try:
       cmd = pyld[0]
+      if cmd == "REL:":
+         pyld, espNum = relayHandle.relayHandle(pyld, espNum)
+         cmd = pyld[0]
       commands.commands[cmd](wifi_host, pyld, espNum)
    except:
       traceback.print_exc()

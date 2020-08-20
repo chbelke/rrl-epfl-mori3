@@ -50,7 +50,7 @@ uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 /* ******************** ESP COMMAND EVALUATION ****************************** */
 void Coms_ESP_Eval() {
     static uint8_t EspInCase = 0;
-    uint8_t EspIn = UART4_Read(); // Incoming byte
+     uint8_t EspIn = UART4_Read(); // Incoming byte
 //    const char *message = "hello";
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************

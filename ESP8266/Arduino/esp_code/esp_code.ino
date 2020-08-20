@@ -44,7 +44,8 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "g_shape", "udp", "noudp", "verb", "noverb",
                 "rel", "cont", "nocon", "rled", "gled",
                 "bled", "wedge", "rshape", "redge","rang",
-                "rorient", "rwedge", "rneigh", "nowifi", "wifi"};
+                "rorient", "rwedge", "rneigh", "nowifi", "wifi",
+                "reset"};
 
 char stringIP[16];
 char charMAC[18];
@@ -190,15 +191,15 @@ void publish(char* buff)
   verbose_print("Sent ");
   verbose_print(buff);
   verbose_print(" via ");
-  if(runState != 5)
+  if ((runState == 10) || (runState == 11))
+  {
+    serial_write_to_hub(buff);
+  }
+  else if(runState != 5)
   {
     client.publish(publishName, buff);
     verbose_println("MQTT");
   } 
-  else if ((runState == 10) || (runState == 11))
-  {
-    serial_write_to_hub(buff);
-  }
   else
   {
     writeUDP(buff);

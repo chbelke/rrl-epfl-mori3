@@ -12,7 +12,6 @@ import runMqtt.operations.getUDP as getUDP
 import runMqtt.operations.getVerbose as getVerbose
 import runMqtt.operations.getRequest as getRequest
 
-
 commands = {
    'DST:': getRSSI.getRSSI,
    'MAC:': getMac.getMac,
@@ -26,5 +25,5 @@ commands = {
    'CONTROL:': getControl.getControl,
    'UDP:': getUDP.startUDP,
    'VBS:': getVerbose.getVerbose,
-   'REQ:': getRequest.getRequest
+   'REQ:': getRequest.getRequest,
 }   
