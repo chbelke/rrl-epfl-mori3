@@ -6,7 +6,6 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 27;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +13,8 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 26; i++)
+  int sw_case = 27;
+  for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -141,6 +141,9 @@ void commands(byte* payload, unsigned int len)
       ESP.reset();
       break;
 
+    case 26:  //Restart Pic
+      serial_write_one(0b11011111);
+      break;
 
     default:
       publish("ERR: Command not understood");
