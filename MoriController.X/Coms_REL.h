@@ -14,6 +14,7 @@ void Coms_Write (uint8_t, uint8_t);
 void Coms_Rel_Order(uint8_t, uint8_t);
 
 void Coms_Rel_Edge(uint8_t, uint8_t);
+void Coms_Rel_To_Comp(uint8_t, uint8_t);
 void Coms_Rel_Relay(uint8_t, uint8_t);
 void Coms_Rel_Interpret(uint8_t);
 void Coms_Rel_Set_WiFi_Edge(uint8_t);

@@ -13,7 +13,6 @@ import runMqtt.operations.getVerbose as getVerbose
 import runMqtt.operations.getRequest as getRequest
 import runMqtt.operations.getPing as getPing
 
-
 commands = {
    'DST:': getRSSI.getRSSI,
    'MAC:': getMac.getMac,

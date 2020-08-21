@@ -81,6 +81,53 @@ void serial_write_two(byte alloc, byte message)
 }
 
 
+void serial_write_to_hub(char* buff)
+{
+  // client.publish(publishName, "INFO: WHAT THE HELL");
+  byte len = strlen(buff);
+
+  Serial.write(0b11100110); //Relay to Wifi Edge
+  Serial.write(byte(len+11));
+
+  for (byte i=1; i<8; i++)
+  {
+    Serial.write(clientName[i]);
+  }
+
+  for (byte i=0; i<len; i++)
+  {
+    Serial.write(buff[i]);
+  }
+  Serial.write(END_BYTE);
+  Serial.write(42);
+
+
+
+  // char tmp[50];
+  // tmp[0] = (0b11100110); //Relay to Wifi Edge
+  // tmp[1] = len+8;
+
+  // byte i;
+  // for (i=2; i<8; i++)
+  // {
+  //   tmp[i] = (clientName[i]);
+  // }
+
+  // for (i=i; i<len+8; i++)
+  // {
+  //   tmp[i] = (buff[i]);
+  // }
+
+  // tmp[i] = Serial.write(END_BYTE);
+  // tmp[i+1] = Serial.write(42);
+
+
+  // char fuff[50];
+  // sprintf(fuff, "INFO: Sent: ");
+  // client.publish(publishName, tmp);
+}
+
+
 void verbose_print(char* msg)
 {
   if(verbose_flag)

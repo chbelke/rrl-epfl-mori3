@@ -12,10 +12,10 @@ from termcolor import colored
 import threading
 
 import runMqtt.commands as commands
+import runMqtt.relayHandle as relayHandle
 
 
 def splitMessage(msg):
-   print(msg.payload)
    topic = msg.topic.rsplit('/') #example: split esp/00215A97/pub into [esp, 00215A97, pub]
 
    if(topic[0] !="esp"):
@@ -51,14 +51,24 @@ def splitMessageUDP(wifi_host, msg, addr):
       else:
          return None, None
    except:
-      print(colored("IN TRACEBACK", 'red'))
-      traceback.print_exc()
+      try:
+         pyld = []
+         pyld.append(msg[0:4].decode('UTF-8'))
+         pyld.append(msg[5:])
+         espNum = wifi_host.EPDict.get(addr[0])
+         return pyld, espNum
+      except:
+         print(colored("IN TRACEBACK", 'red'))
+         traceback.print_exc()
 
 
 # The callback for when a PUBLISH message is received from the server.
 def interpretMessage(self, wifi_host, pyld, espNum):
    try:
       cmd = pyld[0]
+      if cmd == "REL:":
+         pyld, espNum = relayHandle.relayHandle(pyld, espNum)
+         cmd = pyld[0]
       commands.commands[cmd](wifi_host, pyld, espNum)
    except:
       traceback.print_exc()

@@ -203,7 +203,7 @@ class WirelessHost(threading.Thread):
         return self.mqttClient.Connected
 
     def setPingDict(self, number, timestamp, data):
-        print("added following keys and values:\n key = {}\n timestamp = {}\n data = {}".format(number, timestamp, data))
+        # print("added following keys and values:\n key = {}\n timestamp = {}\n data = {}".format(number, timestamp, data))
         self.pingDict[number] = {}
         self.pingDict[number]["timestamp"] = timestamp
         self.pingDict[number]["data"] = data

@@ -6,7 +6,6 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 255;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +13,8 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 24; i++)
+  int sw_case = 28;
+  for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -48,7 +48,7 @@ void commands(byte* payload, unsigned int len)
       break;
 
     case 4:   //hello
-      client.publish(publishName, "INFO: Hello!");
+      publish("INFO: Hello!");
       break;
 
     case 5:   //g_shape (set shape)
@@ -128,11 +128,27 @@ void commands(byte* payload, unsigned int len)
     case 22:  //rneigh
       requestNeighbour(payload, len);
       break;
-    case 23: //png
-      publish("INFO: Ping received by ESP, command understood!"); // debugging
-      echoPing(payload, len);
+
+    case 23:
+      runState = 10;
       break;
 
+    case 24:
+      runState = 12;
+      break;
+
+    case 25:
+      ESP.reset();
+      break;
+
+    case 26:  //Restart Pic
+      serial_write_one(0b11011111);
+      break;
+
+    case 27: //png
+      // publish("INFO: Ping received by ESP, command understood!"); // debugging
+      echoPing(payload, len);
+      break;      
 
     default:
       publish("ERR: Command not understood");

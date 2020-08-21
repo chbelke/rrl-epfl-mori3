@@ -83,7 +83,6 @@ class MqttHost(threading.Thread):
         try:
             pyld, espNum = splitMessage(msg)
             interpretMessage(self, self.wifi_host, pyld, espNum)
-            print(pyld)
         except:
             traceback.print_exc()
 

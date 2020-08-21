@@ -34,6 +34,7 @@ class PublishLocal():
 
         self.pub_loc_entry = tk.Entry(self.frame, bd=1)
         self.pub_loc_entry.pack({"side": "right"}, fill=tk.X, padx=5, expand=True)
+        
         self.pub_loc_button = tk.Button(self.frame)
         self.pub_loc_button["text"] = "Publish",
         self.pub_loc_button["command"] = lambda: self.publishLocal()
@@ -54,7 +55,7 @@ class PublishLocal():
             print("No Mori selected")
             return
         if text == "ping":
-            print("pinging {} with 32 bytes of data...".format(number)) # for debugging
+            # print("pinging {} with 32 bytes of data...".format(number)) # for debugging
             data = bytearray()
             for lv in range(32):  # generate 32 bytes of random data
                 data.append(random.randint(0x01,0xFF)) # avoid NULL characters
@@ -62,10 +63,10 @@ class PublishLocal():
             text = bytearray(str.encode("png ")) # build a message with a command for the esp and the random data
             text.extend(data)
 
-            print(text) # for debugging
+            # print(text) # for debugging
             self.mqtthost.setPingDict(number, time.perf_counter(), data) # take note of the time and the randomly generated data
         self.mqtthost.publishLocal(text, number)
-        self.pub_loc_entry.delete(0, 'end')
+        # self.pub_loc_entry.delete(0, 'end')
 
 
     def update_menu(self, list_of_modules):

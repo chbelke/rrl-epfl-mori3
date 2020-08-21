@@ -44,7 +44,8 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "g_shape", "udp", "noudp", "verb", "noverb",
                 "rel", "cont", "nocon", "rled", "gled",
                 "bled", "wedge", "rshape", "redge","rang",
-                "rorient", "rwedge", "rneigh", "png"};
+                "rorient", "rwedge", "rneigh", "nowifi", "wifi",
+                "reset", "preset", "png"};
 
 char stringIP[16];
 char charMAC[18];
@@ -93,57 +94,12 @@ void setup()
 
 
   //--------------------------- Wifi ------------------------------------//
-  WiFi.mode(WIFI_STA);
-  delay(100);
-  WiFi.begin(brn_ssid, brn_password);
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    verbose_println("Connecting to WiFi..");
-    wifi_ind_led.Toggle();
-  }
-  verbose_println("Connected to the WiFi network");
-
-  for(int i = 0; i<=6; i++)
-  {
-    delay(100);
-    wifi_ind_led.Toggle();
-  }
-
-
-  IPAddress IP = WiFi.localIP();
-  sprintf(stringIP, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
-  verbose_print("IP address: ");
-  verbose_println(stringIP);
-
-  for(int i = 0; i < 17; i++)
-    charMAC[i] = (char)WiFi.macAddress()[i];
-  verbose_print("MAC: ");
-  verbose_println(charMAC);  
+  startInternet(); 
 
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
+  startMQTT();
 
-  while (!client.connected()) {
-    verbose_println("Connecting to MQTT...");
-    wifi_ind_led.Toggle();
-    if (client.connect(clientName))
-    {
-      verbose_println("connected");
-    } else {
-      verbose_print("failed with state ");
-      verbose_println(client.state());
-      delay(2000);
-    }
-  }
-  wifi_ind_led.On();
-
-  //--------------------------- MQTT -----------------------------------------//
-
-  client.publish(publishName, "INFO: Hello from ESP8266");
-  client.subscribe(recieveName);
-  client.subscribe("esp/rec");
 
   //----------------------- OAT Handling--------------------------------------//
   handleOTA();
@@ -188,6 +144,7 @@ void loop()
       normalOp();
       publish("UDP: Stop");
       runState = 3;
+      break;
     case 7:   //Start Controller
       startController();
       flag_control = true;
@@ -205,6 +162,24 @@ void loop()
       normalOp();
       publish("INFO: Controller Stopped");
       runState = 3;
+      break;
+    case 10:  //disable wireless
+      wifi_ind_led.Off();
+      stopMQTT();
+      stopUDP();
+      stopInternet();
+      normalOp();
+      runState = 11;
+      break;
+    case 11:  //run without wireless
+      normalOp();
+      break;
+    case 12:  //restart wireless
+      startInternet();
+      startMQTT();
+      normalOp();
+      runState = 3;
+      break;
   }
 
   client.loop();
@@ -216,7 +191,11 @@ void publish(char* buff)
   verbose_print("Sent ");
   verbose_print(buff);
   verbose_print(" via ");
-  if(runState != 5)
+  if ((runState == 10) || (runState == 11))
+  {
+    serial_write_to_hub(buff);
+  }
+  else if(runState != 5)
   {
     client.publish(publishName, buff);
     verbose_println("MQTT");
@@ -243,8 +222,7 @@ void normalOp()
   if (abs(lastMessage - millis()) > 10000)
   {
     char buff[50];
-    String runString = String("INFO: RunState: ") + int(runState);
-    runString.toCharArray(buff, 30);
+    sprintf(buff, "INFO: RunState: %d", runState);
     publish(buff);
 //    client.publish(publishName, "INFO: Just chillin");
     lastMessage = millis();
@@ -282,3 +260,72 @@ void normalOp()
 
 }
 
+
+void startInternet()
+{
+  WiFi.mode(WIFI_STA);
+  delay(100);
+  WiFi.begin(brn_ssid, brn_password);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    verbose_println("Connecting to WiFi..");
+    wifi_ind_led.Toggle();
+  }
+  verbose_println("Connected to the WiFi network");
+
+  for(int i = 0; i<=6; i++)
+  {
+    delay(100);
+    wifi_ind_led.Toggle();
+  }
+
+
+  IPAddress IP = WiFi.localIP();
+  sprintf(stringIP, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
+  verbose_print("IP address: ");
+  verbose_println(stringIP);
+
+  for(int i = 0; i < 17; i++)
+    charMAC[i] = (char)WiFi.macAddress()[i];
+  verbose_print("MAC: ");
+  verbose_println(charMAC); 
+}
+
+
+void startMQTT()
+{
+  while (!client.connected()) {
+    verbose_println("Connecting to MQTT...");
+    wifi_ind_led.Toggle();
+    if (client.connect(clientName))
+    {
+      verbose_println("connected");
+    } else {
+      verbose_print("failed with state ");
+      verbose_println(client.state());
+      delay(2000);
+    }
+  }
+  wifi_ind_led.On();
+
+  //--------------------------- MQTT -----------------------------------------//
+
+  client.publish(publishName, "INFO: Hello from ESP8266");
+  client.subscribe(recieveName);
+  client.subscribe("esp/rec");
+}
+
+
+void stopMQTT()
+{
+  client.disconnect();
+}
+
+
+void stopInternet()
+{
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();  
+}

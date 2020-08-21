@@ -49,17 +49,21 @@ class UDPListener():
         run = True
         while run:
             # print('waiting...')
-            data, addr = self.listen_sock.recvfrom(1024) 
-            # print('received:',data,'from',addr)
+            data, addr = self.listen_sock.recvfrom(64) 
+            print('received', data, 'from', addr)
             if(addr[0] == '127.0.0.1'):
                 # print("Call from home")
                 continue
-            pyld, espNum =splitMessageUDP(self.wifi_host, data, addr)
-            if espNum is not None:
-                interpretMessage(self, self.wifi_host, pyld, espNum)
-            else:
-                self.wifi_host.publishGlobal("mac")
-                # print("getting IP")
+            try:
+                pyld, espNum =splitMessageUDP(self.wifi_host, data, addr)
+                if espNum is not None:
+                    interpretMessage(self, self.wifi_host, pyld, espNum)
+                else:
+                    self.wifi_host.publishGlobal("mac")
+            except:
+                print(colored('received: '+ str(data) + 'from' + str(addr), 'red'))
+                traceback.print_exc() 
+            # time.sleep(0.1)
 
     def exit(self):
         self.listen_sock.close()
