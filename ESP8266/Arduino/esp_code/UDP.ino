@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
-const int PACKET_SIZE = 42; //how many bytes the buffers hold
+const int PACKET_SIZE = 64; //how many bytes the buffers hold
 char* ip_address = "RRLB201957";
 int ip_port = 50001;
 int controller_port = 50002;

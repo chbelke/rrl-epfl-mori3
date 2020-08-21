@@ -15,6 +15,7 @@ import runMqtt.commands as commands
 
 
 def splitMessage(msg):
+   print("Here: ", msg.payload)
    topic = msg.topic.rsplit('/') #example: split esp/00215A97/pub into [esp, 00215A97, pub]
 
    if(topic[0] !="esp"):
@@ -30,7 +31,7 @@ def splitMessage(msg):
    except:
       pyld = []
       pyld.append(msg.payload[0:4].decode('UTF-8'))
-      pyld.append(msg.payload[5:-1])
+      pyld.append(msg.payload[5:])
       # if start == "VBS:":
       #    end = bytearray.fromhex(msg.payload[4:-1]).decode()
       #    print("end: ", end)

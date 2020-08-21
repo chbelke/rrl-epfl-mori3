@@ -11,6 +11,7 @@ import runMqtt.operations.getControl as getControl
 import runMqtt.operations.getUDP as getUDP
 import runMqtt.operations.getVerbose as getVerbose
 import runMqtt.operations.getRequest as getRequest
+import runMqtt.operations.getPing as getPing
 
 
 commands = {
@@ -26,5 +27,6 @@ commands = {
    'CONTROL:': getControl.getControl,
    'UDP:': getUDP.startUDP,
    'VBS:': getVerbose.getVerbose,
-   'REQ:': getRequest.getRequest
+   'REQ:': getRequest.getRequest,
+   'PNG:': getPing.getPing
 }   

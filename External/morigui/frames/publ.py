@@ -1,5 +1,7 @@
 import tkinter as tk
 import base64
+import random
+import time
 from termcolor import colored
 
 
@@ -51,6 +53,19 @@ class PublishLocal():
         if number == 'None':
             print("No Mori selected")
             return
+        if text == "ping":
+            print("pinging {} with 32 bytes of data...".format(number))
+            data = bytearray()
+            for lv in range(32):
+                data.append(random.randint(0,0xFF))
+                #print(message[-1]) # for debugging
+            self.mqtthost.setPingDict(number, time.perf_counter(), data)
+            text = bytearray(str.encode("png "))
+            text.extend(data)
+            print(text)
+            # generate 32 bytes of random data, perhaps include the timestamp for debugging?
+            # build a message with a command for the esp and the random data
+            # take note of the time and the randomly generated data, store it in wifi host as part of dict with setter
         self.mqtthost.publishLocal(text, number)
         self.pub_loc_entry.delete(0, 'end')
 

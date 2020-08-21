@@ -81,8 +81,10 @@ class MqttHost(threading.Thread):
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
         try:
+            print(msg)
             pyld, espNum = splitMessage(msg)
             interpretMessage(self, self.wifi_host, pyld, espNum)
+            print(pyld)
         except:
             traceback.print_exc()
 

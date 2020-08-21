@@ -6,7 +6,7 @@ void commands(byte* payload, unsigned int len)
     verbose_print((char)payload[i]);
   }
   
-  int sw_case = 24;
+  int sw_case = 255;
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -14,7 +14,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  for(int i=0; i < 23; i++)
+  for(int i=0; i < 24; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -128,6 +128,10 @@ void commands(byte* payload, unsigned int len)
     case 22:  //rneigh
       requestNeighbour(payload, len);
       break;
+    case 23: //png
+      publish("INFO: Ping received by ESP, command understood!"); // debugging
+      echoPing(payload, len);
+      break;
 
 
     default:
@@ -215,5 +219,25 @@ void requestNeighbour(byte* payload, unsigned int len)
   // publish(buff);
 
   serial_write_two(0b11010111, neighbour);
+}
+
+void echoPing(byte* payload, unsigned int len)
+{
+  // Echo the message back to the external computer
+  char buff[] = "PNG: 12345678901234567890123456789012";
+  // char buff[] = {a, b, c, d, e, f, g};
+  // const char *tmp = "PING:";
+  // memcpy(&buff, &tmp, 5);
+  char newPayload[len];
+  for (int lv = 0; lv < len; lv++)
+    {
+      newPayload[lv] = payload[lv];
+      //Serial.print((char)payload[lv]);
+      //Serial.print(' ');
+    }
+  Serial.print("Length is: ");
+  Serial.println(len);
+  memcpy(&buff[5], &newPayload[4], len-4);
+  publish(buff);
 }
 

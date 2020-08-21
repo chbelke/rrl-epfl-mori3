@@ -65,6 +65,8 @@ class WirelessHost(threading.Thread):
         self.EPDict = {}
         self.UDPDict = []
 
+        self.pingDict = {}
+
         self.version = 0.50
 
         self.mqttClient = MqttHost(self)
@@ -145,7 +147,7 @@ class WirelessHost(threading.Thread):
     #         self.UDPCom = True
     #     return self.UDPCom
 
-    def setIPDict(self, IPDict, EPDict):
+    def setIPDict(self, IPDict, EPDict): #good example of how we can implement ping with getters and setters
         self.IPDict = IPDict
         self.EPDict = EPDict
 
@@ -175,7 +177,7 @@ class WirelessHost(threading.Thread):
         self.macDict = macDict
 
     def setIdDict(self, idDict):
-        self.idDict = idDict
+        self.idDict = idDict 
 
 
     def getEspOrder(self):
@@ -199,6 +201,18 @@ class WirelessHost(threading.Thread):
 
     def getMqttStatus(self):
         return self.mqttClient.Connected
+
+    def setPingDict(self, number, timestamp, data):
+        print("added following keys and values:\n key = {}\n timestamp = {}\n data = {}".format(number, timestamp, data))
+        self.pingDict[number] = {}
+        self.pingDict[number]["timestamp"] = timestamp
+        self.pingDict[number]["data"] = data
+
+    def getTsPingDict(self, number):
+        return self.pingDict[number]["timestamp"]
+
+    def getDataPingDict(self, number):
+        return self.pingDict[number]["data"]
  
 
     def exit(self):
