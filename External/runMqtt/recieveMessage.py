@@ -15,7 +15,7 @@ import runMqtt.commands as commands
 
 
 def splitMessage(msg):
-   print("Here: ", msg.payload)
+   print(msg.payload)
    topic = msg.topic.rsplit('/') #example: split esp/00215A97/pub into [esp, 00215A97, pub]
 
    if(topic[0] !="esp"):
