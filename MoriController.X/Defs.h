@@ -193,7 +193,9 @@ extern volatile bool Flg_MotRot_Active;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period 200 // SMA on-time (updated in 20 Hz loop) - 100 = 5 sec.
-#define SMA_Duty 100 // 8-bit PWM value
+#define SMA_Period_1 150 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
+#define SMA_Period_2 150
+#define SMA_Duty_1 150 // 8-bit PWM value for first phase
+#define SMA_Duty_2 60 // 8-bit PWM value for second phase
 
 #endif	/* DEFS_H */

@@ -290,7 +290,7 @@ void Coms_ESP_LED_Tgl(uint8_t edge) {
 }
 
 
-void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) {
+void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) { // blink*4 = period;
     uint8_t alloc = 0b01000100;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;

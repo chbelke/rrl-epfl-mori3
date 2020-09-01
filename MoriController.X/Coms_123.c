@@ -8,6 +8,7 @@
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
 #include "Coms_123.h"
+#include "Acts_CPL.h"
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
@@ -241,8 +242,8 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_ESP_LED_State(edge, 3);
         } else {
             byte = COMS_123_Conn; // send connect search
-            Coms_ESP_LED_State(edge, 0); // XXX replace with function to turn esp leds off
-            
+            if (!Acts_CPL_IsOpen(edge))
+                Coms_ESP_LED_State(edge, 0);
         }
         
         if(Flg_Uart_Lock[edge]==false)
