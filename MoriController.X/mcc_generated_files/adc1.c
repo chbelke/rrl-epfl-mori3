@@ -53,6 +53,7 @@
 #include <libpic30.h>
 #include "adc1.h"
 #include "../Defs.h"
+#include "../Defs_Mods.h"
 
 volatile uint16_t ADC1_Values[3] = {512, 512, 512};
 volatile uint16_t ADC1_ValuesA[4] = {512, 512, 512, 512};
@@ -115,7 +116,8 @@ void __attribute__((__interrupt__, auto_psv, weak)) _AD1Interrupt(void) {
 }
 
 void ADC1_Update(void) {
-  
+    uint16_t i;
+
     // update previous values
     ADC1_ValuesA[3] = ADC1_ValuesA[2];
     ADC1_ValuesA[2] = ADC1_ValuesA[1];
@@ -131,21 +133,27 @@ void ADC1_Update(void) {
 
     ADC1_ChannelSelect(AI_A);
     ADC1_SoftwareTriggerEnable();
+    for (i = 0; i < 1000; i++) {
+    }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_A));
     ADC1_ValuesA[0] = ADC1_ConversionResultGet(AI_A);
 
     ADC1_ChannelSelect(AI_B);
     ADC1_SoftwareTriggerEnable();
+    for (i = 0; i < 1000; i++) {
+    }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_B));
-    ADC1_ValuesB[1] = ADC1_ConversionResultGet(AI_B);
+    ADC1_ValuesB[0] = ADC1_ConversionResultGet(AI_B);
 
     ADC1_ChannelSelect(AI_C);
     ADC1_SoftwareTriggerEnable();
+    for (i = 0; i < 1000; i++) {
+    }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_C));
-    ADC1_ValuesC[2] = ADC1_ConversionResultGet(AI_C);
+    ADC1_ValuesC[0] = ADC1_ConversionResultGet(AI_C);
 
     ADC1_Disable();
 
@@ -156,10 +164,10 @@ void ADC1_Update(void) {
             + ADC1_ValuesB[3]) / 4;
     ADC1_Values[2] = (ADC1_ValuesC[0] + ADC1_ValuesC[1] + ADC1_ValuesC[2]
             + ADC1_ValuesC[3]) / 4;
- 
 }
 
 uint16_t ADC1_Return(uint8_t channel) {
+
     return ADC1_Values[channel];
 }
 

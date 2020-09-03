@@ -47,7 +47,7 @@ void Acts_CPL_Off(uint8_t edge) {
 void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
     uint8_t m;
     for (m = 0; m <= 2; m++) {
-        if (CPL_Count_1[m] < SMA_Period_1) {
+        if (CPL_Count_1[m] < SMA_Period_1) { // first pwm phase (high current)
             CPL_Count_1[m]++;
             if (CPL_Count_1[m] >= SMA_Period_1) {
                 Acts_CPL_Set(m, SMA_Duty_2);
@@ -55,7 +55,7 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
                 Coms_ESP_LED_Set_Blink_Freq(m, 10);
                 Coms_ESP_LED_State(m, 3);
             }
-        } else if (CPL_Count_2[m] < SMA_Period_2) {
+        } else if (CPL_Count_2[m] < SMA_Period_2) { // second pwm phase (maintain)
             CPL_Count_2[m]++;
             if (CPL_Count_2[m] >= SMA_Period_2) {
                 Acts_CPL_Off(m);

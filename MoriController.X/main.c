@@ -106,9 +106,9 @@ int main(void)
     Acts_ROT_Limit(1,255);
     Acts_ROT_Limit(2,255);
     
-    Acts_LIN_SetTarget(0,457);
-    Acts_LIN_SetTarget(1,457);
-    Acts_LIN_SetTarget(2,457);
+    Acts_LIN_SetTarget(0,60);
+    Acts_LIN_SetTarget(1,60);
+    Acts_LIN_SetTarget(2,60);
     
     Mnge_RGB_SetAll(0,1,2);
     

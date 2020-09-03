@@ -18,6 +18,10 @@
 #include <libpic30.h>
 
 
+/* ******************** MODULE ********************************************** */
+#define MODULE A // module name by letter
+
+
 /* ******************** NOTES *********************************************** */
 // Timer info
 /* Timer 1: 100 Hz - angle feedback
@@ -129,12 +133,9 @@ extern volatile bool Flg_MotRot_Active;
 #define LIN_DIR_2 LATBbits.LATB12
 #define LIN_DIR_3 LATBbits.LATB14
 
-#define MotLin_MIN_1 108            // min pot value A
-#define MotLin_MAX_1 1022           // max pot value A
-#define MotLin_MIN_2 108            // min pot value B
-#define MotLin_MAX_2 1022           // max pot value B
-#define MotLin_MIN_3 108            // min pot value C
-#define MotLin_MAX_3 1022           // max pot value C
+#define MotLin_MinInput 0           // linear motor controlled with 0.1mm input
+#define MotLin_MaxInput 120         // from 0 to 12 mm -> min: 0, max:120
+
 #define MotLin_SlowRegion 50        // slow region near min and max
 #define MotLin_SlowFactor 2         // linear slow down factor in slow region
 
@@ -143,7 +144,7 @@ extern volatile bool Flg_MotRot_Active;
 #define MotLin_PID_kP 25            // proportional component
 #define MotLin_PID_kI 12            // integral component
 #define MotLin_PID_kD 0             // derivative component
-    
+
 #define MotLin_PID_Imax 15
 #define MotLin_PID_Max 1000
 
@@ -194,7 +195,7 @@ extern volatile bool Flg_MotRot_Active;
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
 #define SMA_Period_1 150 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
-#define SMA_Period_2 150
+#define SMA_Period_2 150 // split into high I opening and low I maintain phases
 #define SMA_Duty_1 150 // 8-bit PWM value for first phase
 #define SMA_Duty_2 60 // 8-bit PWM value for second phase
 

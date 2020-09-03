@@ -181,7 +181,7 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
     Coms_123_ActHandle(); // action synchronisation handle
     
     ADC1_Update(); // read analog potentiometer inputs
-    uint8_t edge;
+    static uint8_t edge;
     for (edge = 0; edge < 3; edge++){
         if (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]) // extension control loops
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));

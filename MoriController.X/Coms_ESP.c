@@ -1,4 +1,5 @@
 #include "Defs.h"
+#include "Defs_Mods.h"
 #include "Acts_LIN.h"
 #include "Acts_ROT.h"
 #include "Acts_CPL.h"
@@ -197,7 +198,8 @@ void Coms_ESP_Verbose()
     UART4_Write(6); // Message length
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(ADC1_Return(i));
+        UART4_Write(0); // XXX to be removed when matched on ESP side
+        UART4_Write(Acts_LIN_GetCurrent(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;
@@ -359,7 +361,8 @@ void Coms_ESP_Request_Edges()
     UART4_Write(0b10010100);
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(ADC1_Return(i));
+        UART4_Write(0); // XXX to be removed when matched on ESP side
+        UART4_Write(Acts_LIN_GetCurrent(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;  
@@ -375,7 +378,8 @@ void Coms_ESP_Request_Angles()
     UART4_Write(0b10010101);
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(ADC1_Return(i));
+        UART4_Write(0); // XXX to be removed when matched on ESP side
+        UART4_Write(Acts_LIN_GetCurrent(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
