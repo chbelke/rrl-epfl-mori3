@@ -231,12 +231,14 @@ bool Coms_CMD_Set_ID(uint8_t byte)
 {
     static uint8_t count=0;
     static uint8_t tmpID[6];
-    if (count >= 7)
+    if (count >= 6)
     {
         if (byte == ESP_End) {
             uint8_t i;
             for(i=0; i<6; i++)
+            {
                 ESP_ID[i] = tmpID[i];
+            }
             Flg_ID_check = true;
         } else {
             Coms_CMD_OverflowError();

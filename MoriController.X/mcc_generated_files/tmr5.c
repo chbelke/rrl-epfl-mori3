@@ -189,7 +189,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     }
     
     static uint8_t last_ID_call = 0;
-    if(!Flg_ID_check)
+    if(!Flg_ID_check && WIFI_EN)
     {
         if(last_ID_call>5)
         {

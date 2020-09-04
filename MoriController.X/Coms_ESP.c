@@ -436,7 +436,7 @@ void Coms_ESP_Request_ID()
     {
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
-    UART4_Write(0b11010011);
+    UART4_Write(0b10010011);
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
