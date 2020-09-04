@@ -29,7 +29,7 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
-uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
+//uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
 uint8_t WIFI_LED_BLINK_ACT[3] = {0, 0, 0};
@@ -182,7 +182,7 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
 
 /* ******************** RETURN ID BY BYTE *********************************** */
 uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
-    return SelfID[byteNum];
+    return ESP_ID[byteNum];
 }
 
 
