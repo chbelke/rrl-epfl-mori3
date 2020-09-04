@@ -82,8 +82,8 @@ class WirelessHost(threading.Thread):
         self.mqttClient.run()
         self.udpClient.usp_rec.run()
 
-        while True:
-            self.checkPing()
+        # while True:
+        #     self.checkPing()
 
         while not self.event.is_set():
             if time.time() - loopTime > 2:

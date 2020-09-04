@@ -32,6 +32,7 @@ void Coms_ESP_LED_Set_Blink_Freq(uint8_t, uint8_t);
 void Coms_ESP_Interpret(void);
 void Coms_ESP_No_WiFi_Edge(void);
 void Coms_ESP_Return_WiFi_Edge(uint8_t);
+void Coms_ESP_Request_ID();
 
 #endif	/* COMS_ESP_H */
 

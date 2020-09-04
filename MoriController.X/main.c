@@ -81,6 +81,9 @@ volatile bool Flg_EdgeDemo = false;
 
 volatile bool Flg_MotLin_Active = false;
 volatile bool Flg_MotRot_Active = false;
+volatile bool Flg_ID_check = false;
+
+volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 
 /*
                          Main application

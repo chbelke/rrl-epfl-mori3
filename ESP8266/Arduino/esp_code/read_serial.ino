@@ -3,87 +3,36 @@ void readSerial()
   
   if(Serial.available())
   {
-    static int serial_case = 0;    
+    static int serial_case = 0;
+    static bool alloc = true;    
     
     byte c = Serial.read();
 
-    byte val = c;
-    int hungry[8];
-    for (int k = 0; k < 8; k++)
+    if (alloc)
     {
-        hungry[7-k] = val & 0x01;
-        val = val >> 1;
-    }
-    
+        serial_case = ((c >> 5) & 0b00000111);
+        alloc = false;
+    }        
 
-    // char buff[50];
-    // sprintf(buff, "INFO: byte %d%d%d%d %d%d%d%d", hungry[0], hungry[1], hungry[2], hungry[3], hungry[4], hungry[5], hungry[6], hungry[7]);
-    // publish(buff);    
-
-
-    char state = ((c >> 5) & 0b00000111);
     switch(serial_case){
       case 0:
-        if (state == char(0))
-        {
-          serial_case = 1;
-          readVerbose(c);
-        } 
-        else if (state == char(1))
-        {
-          serial_case = 2;
-          readInterpret(c);
-        }
-        else if (state == char(2))
-        {
-          serial_case = 3;
-          setLEDs(c);
-        }
-        else if (state == char(4))
-        {
-          serial_case = 4;
-          stateInfo(c);
-        }
-        else if (state == char(7))  ///relay
-        {
-          serial_case = 7;
-          relayToComputer(c);
-        }
+        if(readVerbose(c)) alloc = true;
         break;
 
       case 1:
-        if(readVerbose(c))
-        {
-          serial_case = 0;
-        }
-        break;
-
-      case 2:
-        if(readInterpret(c))
-        {
-          serial_case = 0;
-        }
+        if(readInterpret(c)) alloc = true;
         break;        
 
-      case 3:
-        if(setLEDs(c))
-        {
-          serial_case = 0;
-        }
+      case 2:
+        if(setLEDs(c)) alloc = true;
         break;
       
       case 4:
-        if(stateInfo(c))
-        {
-          serial_case = 0;
-        }
+        if(stateInfo(c)) alloc = true;
         break;
       
       case 7:
-        if(relayToComputer(c))
-        {
-          serial_case = 0;
-        }
+        if(relayToComputer(c)) alloc = true;
         break;        
     }
   }
@@ -369,6 +318,15 @@ bool stateInfo(byte c)
   }  
 
   switch (state) {  //request
+
+    case 19:    //ID
+      if (c == char(END_BYTE))
+      {
+          serial_write_id();
+      }
+      alloc = true;
+      return true;
+      break;
 
     case 20:  //read edges
       if (c == char(END_BYTE))

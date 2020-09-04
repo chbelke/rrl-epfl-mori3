@@ -430,6 +430,18 @@ void Coms_ESP_Request_WiFiEdge()
 }
 
 
+void Coms_ESP_Request_ID()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b11010011);
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;      
+}
+
+
 /* Com_ESP_Drive - Online calc verification */
 /* https://repl.it/languages/c
 

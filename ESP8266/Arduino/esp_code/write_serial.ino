@@ -128,6 +128,15 @@ void serial_write_to_hub(char* buff)
 }
 
 
+void serial_write_id()
+{
+  Serial.write(0b11010011);
+  for(byte i=2; i < 8; i++)
+    Serial.write(clientName[i]);
+  Serial.write(END_BYTE);
+}
+
+
 void verbose_print(char* msg)
 {
   if(verbose_flag)

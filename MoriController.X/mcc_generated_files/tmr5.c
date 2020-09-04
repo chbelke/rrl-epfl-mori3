@@ -186,7 +186,20 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
             start++;
             return;
         }        
-    }   
+    }
+    
+    static uint8_t last_ID_call = 0;
+    if(!Flg_ID_check)
+    {
+        if(last_ID_call>5)
+        {
+            Coms_ESP_Request_ID();
+            last_ID_call = 0;
+        } else
+        {
+            last_ID_call++;
+        }
+    }
     
     // Add your custom callback code here
     if (Flg_Button){ // if button has been pressed, process
