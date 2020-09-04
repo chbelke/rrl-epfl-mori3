@@ -245,6 +245,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             
         }
         
+        //Break if module doesn't know its ID and needs to send ID
+        if(!Flg_ID_check)
+        {
+            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) 
+            {
+                return;                
+            }
+        }
+            
+        
         if(Flg_Uart_Lock[edge]==false)
         {
             Flg_Uart_Lock[edge] = true;
