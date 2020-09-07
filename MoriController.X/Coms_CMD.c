@@ -324,7 +324,6 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte)
     static uint8_t DriveSpd[3];
     static uint8_t DriveCrv[3]; // automatic drive mode speed and curv
     static uint8_t RgbPWM[4][3]; // rgb led values
-//    static uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0}; 
     
     
     switch (EspInCase[edge]) {

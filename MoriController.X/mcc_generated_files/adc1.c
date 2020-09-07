@@ -53,7 +53,7 @@
 #include <libpic30.h>
 #include "adc1.h"
 #include "../Defs.h"
-#include "../Defs_Mods.h"
+#include "../Defs_Mod.h"
 
 volatile uint16_t ADC1_Values[3] = {512, 512, 512};
 volatile uint16_t ADC1_ValuesA[4] = {512, 512, 512, 512};

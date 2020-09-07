@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE A // module name by letter
+#define MODULE 'F' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -40,8 +40,8 @@
 
 /* ******************** MODE SELECTION ************************************** */
 //#define MODE_DEBUG false
-#define MODE_ENC_CON false
-#define MODE_ACC_CON false
+#define MODE_ENC_CON true
+#define MODE_ACC_CON true
 
 #define STAT_MotLin_Active false
 #define STAT_MotRot_Active false
@@ -72,6 +72,10 @@ extern volatile bool Flg_Uart_Lock[4];
 
 extern volatile bool Flg_MotLin_Active;
 extern volatile bool Flg_MotRot_Active;
+
+extern volatile bool Flg_i2c_PWM;
+extern volatile bool Flg_i2c_ACC;
+extern volatile bool Flg_i2c_DAC;
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
@@ -137,7 +141,7 @@ extern volatile bool Flg_MotRot_Active;
 #define MotLin_MaxInput 120         // from 0 to 12 mm -> min: 0, max:120
 
 #define MotLin_SlowRegion 50        // slow region near min and max
-#define MotLin_SlowFactor 2         // linear slow down factor in slow region
+#define MotLin_SlowFactor 1.5         // linear slow down factor in slow region
 
 #define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
@@ -166,8 +170,8 @@ extern volatile bool Flg_MotRot_Active;
 
 
 /* ******************** I2C ************************************************* */
-#define SLAVE_I2C_GENERIC_RETRY_MAX           20
-#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      50
+#define SLAVE_I2C_GENERIC_RETRY_MAX           5
+#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      20
 
 
 /* ******************** ENCODERS AS5048B ************************************ */

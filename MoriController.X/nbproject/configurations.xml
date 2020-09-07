@@ -46,7 +46,7 @@
       <itemPath>Mnge_PWM.h</itemPath>
       <itemPath>Mnge_RGB.h</itemPath>
       <itemPath>Defs.h</itemPath>
-      <itemPath>Defs_Mods.h</itemPath>
+      <itemPath>Defs_Mod.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

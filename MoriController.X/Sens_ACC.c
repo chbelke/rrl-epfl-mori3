@@ -3,7 +3,7 @@
 
 // Accelerometer MMA8452Q
 
-volatile int16_t ACC_Data[3] = {0, 0, 0};
+int16_t ACC_Data[3] = {200, 200, 200};
 
 void Sens_ACC_Setup(void) {
     I2C1_MESSAGE_STATUS status;

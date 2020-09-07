@@ -64,7 +64,8 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
             Acts_CPL_Off(m);
         }
     }
-    Mnge_PWM_Write();
+    Flg_i2c_PWM = true;
+    //Mnge_PWM_Write();
 }
 
 bool Acts_CPL_IsOpen(uint8_t edge){

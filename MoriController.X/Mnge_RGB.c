@@ -16,7 +16,8 @@ void Mnge_RGB_Set(uint8_t RGBcolor, uint8_t duty) {
         default:
             break;
     }
-    Mnge_PWM_Write();
+    Flg_i2c_PWM = true;
+    //Mnge_PWM_Write();
 }
 
 /* ******************** SET ALL RGB LEDS ************************************ */
@@ -24,5 +25,6 @@ void Mnge_RGB_SetAll(uint8_t R, uint8_t G, uint8_t B) {
     Mnge_PWM_SetValues(2, R); // red
     Mnge_PWM_SetValues(1, G);  // green
     Mnge_PWM_SetValues(0, B);  // blue
-    Mnge_PWM_Write();
+    Flg_i2c_PWM = true;
+    //Mnge_PWM_Write();
 }

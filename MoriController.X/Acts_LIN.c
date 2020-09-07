@@ -4,7 +4,7 @@
 #include <libpic30.h>
 #include <stdbool.h>
 #include "Defs.h"
-#include "Defs_Mods.h"
+#include "Defs_Mod.h"
 #include "mcc_generated_files/pwm.h"
 #include "mcc_generated_files/adc1.h"
 
