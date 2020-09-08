@@ -33,7 +33,10 @@ void readSerial()
       
       case 7:
         if(relayToComputer(c)) alloc = true;
-        break;        
+        break;   
+
+      default:
+        if(c == byte(END_BYTE)) alloc = true;
     }
   }
 }
@@ -320,6 +323,7 @@ bool stateInfo(byte c)
   switch (state) {  //request
 
     case 19:    //ID
+      publish("INFO: ID set");
       if (c == char(END_BYTE))
       {
           serial_write_id();
