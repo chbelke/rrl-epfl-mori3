@@ -38,6 +38,9 @@ for esp in pingData.keys(): #redundant?
     ax.hist(pingData[esp]['arr_0'], bins=len(pingData[esp]["arr_0"]), density=True, histtype='step', cumulative=-1)
     
 plt.xticks(rotation='vertical')
+plt.legend(pingData.keys())
 plt.yscale("log")
+plt.xlabel("Latency (ms)")
+plt.ylabel("CCDF")
 
 plt.show()
