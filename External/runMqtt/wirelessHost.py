@@ -21,6 +21,7 @@ import serial, time
 import datetime
 import sys, select, os, traceback
 import numpy as np
+import random
 import copy
 import threading
 import socket
@@ -67,6 +68,9 @@ class WirelessHost(threading.Thread):
 
         self.pingDict = {}
         self.pingCount = {}
+        self.pingBusy = {}
+        self.pingResults = {}
+        self.newBatchFlag = True
 
         self.version = 0.50
 
@@ -153,27 +157,43 @@ class WirelessHost(threading.Thread):
     #     return self.UDPCom
 
     def checkPing(self):
-        for esp in pingCount.keys():
-            if pingCount[esp] <= 0:
-                continue
-            if pingRecieved[esp]:
-                #save ping esp, ts, data
-                #ping again
-                pingRecieved[esp] = False
-                pingCount[esp] -= 1
-            elif getTsPingDict[esp] - time.perf_counter() > 1:
-                print("TIMEOUT", esp)
-                pingRecieved[esp] = False
-                #save timeout
-                pingCount[esp] -= 1
-            if pingCount[esp] == 0:
-                #save data
-                print("hello")
+        try:
+            if self.newBatchFlag:
+                self.dir = "Ping Data/Data/Batch_" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                if not os.path.exists(self.dir):
+                    os.mkdir(self.dir)
+                self.newBatchFlag = False
+                
+            for esp in self.pingCount.keys():
+                if self.pingCount[esp] <= 0:
+                    continue
+
+                if not self.pingBusy.setdefault(esp, False): # If the esp has no entry in the dict default to not busy
+                    self.sendPing(esp)
+                    self.pingBusy[esp] = True
+
+                if self.getTsPingDict(esp) - time.perf_counter() > 1:
+                    print("TIMEOUT", esp)
+                    self.pingBusy[esp] = False
+                    #save timeout TODO ask Kevin
+                    self.pingCount[esp] -= 1
+                if self.pingCount[esp] == 0:
+                    print("\nHERE\n") #debugging
+                    arr1 = np.array(self.pingResults[esp]["time"]) #save data to file
+                    arr2 = np.array(self.pingResults[esp]["integrity"])
+                    dt_string = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                    np.savez(self.dir + "/PD_" + esp + "_" + dt_string, arr1, arr2)
+                    print(colored("Ping data for " + esp + " saved!", "green"))
+                    del self.pingBusy[esp] #remove key
+                    if len(self.pingBusy) == 0: #End of batch
+                        self.newBatchFlag = True
+        except:
+            print(colored("IN TRACEBACK", 'red'))
+            traceback.print_exc()
         return
 
 
-    def setIPDict(self, IPDict, EPDict): #good example of how we can implement ping with getters and setters
-        self.IPDict = IPDict
+    def setIPDict(self, IPDict, EPDict):
         self.EPDict = EPDict
 
 
@@ -233,11 +253,43 @@ class WirelessHost(threading.Thread):
         self.pingDict[number]["timestamp"] = timestamp
         self.pingDict[number]["data"] = data
 
+    def setPingCount(self, number, count):
+        self.pingCount[number] = count
+
+    def resetPingBusy(self, number):
+        self.pingBusy[number] = False
+
     def getTsPingDict(self, number):
         return self.pingDict[number]["timestamp"]
 
     def getDataPingDict(self, number):
         return self.pingDict[number]["data"]
+
+    def addPingResult(self, number, time, dataIntegrity):
+        if not number in self.pingResults: # no entry for the esp, initalize dict
+            self.pingResults[number] = {}
+            self.pingResults[number]["time"] = list()
+            self.pingResults[number]["integrity"] = list()
+
+        self.pingResults[number]["time"].append(time)
+        self.pingResults[number]["integrity"].append(dataIntegrity)
+        return # Ping data can't be saved without return
+
+    def clearPingResults(self, number):
+        self.pingResults[number]["time"].clear()
+        self.pingResults[number]["integrity"].clear()
+
+    def sendPing(self, number):
+        #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
+        data = bytearray()
+        for lv in range(32):  # generate 32 bytes of random data
+            data.append(random.randint(0x01,0xFF)) # avoid NULL characters
+        
+        text = bytearray(str.encode("png ")) # build a message with a command for the esp and the random data
+        text.extend(data)
+        # print(text) # for debugging
+        self.setPingDict(number, time.perf_counter(), data) # take note of the time and the randomly generated data
+        self.publishLocal(text, number)    
  
 
     def exit(self):
