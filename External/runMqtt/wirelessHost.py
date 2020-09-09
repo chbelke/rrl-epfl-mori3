@@ -158,34 +158,41 @@ class WirelessHost(threading.Thread):
 
     def checkPing(self):
         try:
-            if self.newBatchFlag:
-                self.dir = "Ping Data/Data/Batch_" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-                if not os.path.exists(self.dir):
-                    os.makedirs(self.dir)
-                self.newBatchFlag = False
-
             for esp in self.pingCount.keys():
                 if self.pingCount[esp] <= 0:
                     continue
 
-                if not self.pingBusy.setdefault(esp, False): # If the esp has no entry in the dict default to not busy
+                if not esp in self.pingBusy: # if it's the first ping we're sending
                     self.sendPing(esp)
                     self.pingBusy[esp] = True
-
-                if self.getTsPingDict(esp) - time.perf_counter() > 1:
+                elif not self.pingBusy[esp]: # we already sent a ping and we're no longer busy so the ping returned
+                    self.pingCount[esp] -= 1 # decrement
+                    if self.pingCount[esp] > 0:
+                        self.sendPing(esp)
+                        self.pingBusy[esp] = True
+                elif self.getTsPingDict(esp) - time.perf_counter() > 1:
                     print("TIMEOUT", esp)
                     self.pingBusy[esp] = False
                     #save timeout TODO ask Kevin
-                    self.pingCount[esp] -= 1
+                    self.pingCount[esp] -= 1 # decrement
+
                 if self.pingCount[esp] == 0:
                     arr1 = np.array(self.pingResults[esp]["time"]) #save data to file
                     arr2 = np.array(self.pingResults[esp]["integrity"])
-                    dt_string = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-                    np.savez(self.dir + "/PD_" + esp + "_" + dt_string, arr1, arr2)
+                    dtString = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                    if self.newBatchFlag:
+                        self.dir = "Ping Data/Data/Batch_" + dtString
+                        if not os.path.exists(self.dir):
+                            os.makedirs(self.dir)
+                            #print("\nNew batch, Made directory: " + self.dir) #debug
+                        self.newBatchFlag = False
+                        #print("Batch flag set to false\n") #debug
+                    np.savez(self.dir + "/PD_" + esp + "_" + dtString, arr1, arr2)
                     print(colored("Ping data for " + esp + " saved!", "green"))
-                    del self.pingBusy[esp] #remove key
+                    self.pingBusy.pop(esp) #remove key
                     if len(self.pingBusy) == 0: #End of batch
                         self.newBatchFlag = True
+                        #print("\nBatch flag set to true") #debug
         except:
             print(colored("IN TRACEBACK", 'red'))
             traceback.print_exc()
