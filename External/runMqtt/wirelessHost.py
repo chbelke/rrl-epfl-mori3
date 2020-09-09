@@ -161,9 +161,9 @@ class WirelessHost(threading.Thread):
             if self.newBatchFlag:
                 self.dir = "Ping Data/Data/Batch_" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
                 if not os.path.exists(self.dir):
-                    os.mkdir(self.dir)
+                    os.makedirs(self.dir)
                 self.newBatchFlag = False
-                
+
             for esp in self.pingCount.keys():
                 if self.pingCount[esp] <= 0:
                     continue
@@ -178,7 +178,6 @@ class WirelessHost(threading.Thread):
                     #save timeout TODO ask Kevin
                     self.pingCount[esp] -= 1
                 if self.pingCount[esp] == 0:
-                    print("\nHERE\n") #debugging
                     arr1 = np.array(self.pingResults[esp]["time"]) #save data to file
                     arr2 = np.array(self.pingResults[esp]["integrity"])
                     dt_string = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")

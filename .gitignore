@@ -66,3 +66,6 @@ MoriController.X/dist/
 MoriController.X/nbproject/Makefile-*
 MoriController.X/nbproject/Package-*
 MoriController.X/nbproject/private/
+
+# Ignore directory containing Ping Data
+External/Ping Data/Data/
