@@ -60,6 +60,7 @@
 #include "../Mnge_PWM.h"
 #include "../Sens_ACC.h"
 #include "../Mnge_BTN.h"
+#include "../Mnge_DAC.h"
 
 /**
  Section: File specific functions
@@ -192,7 +193,7 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         light = !light;
     }
     
-    if (MODE_ENC_CON){ // XXX add check if connected to neighbour
+    if (MODE_ENC_CON){
         Sens_ENC_Read(0);
         Sens_ENC_Read(1);
         Sens_ENC_Read(2);
@@ -200,15 +201,15 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     // Rotary Motor PID here
     
     
-    // Manage remaining i2c communication
+    // Manage remaining i2c communication (must be tmr1)
     if (Flg_i2c_PWM){
         Mnge_PWM_Write();
         Flg_i2c_PWM = false;
-    }    
-    if (Flg_i2c_ACC){
+    }
+    if (Flg_i2c_ACC && MODE_ACC_CON){
         Sens_ACC_Read();
         Flg_i2c_ACC = false;
-    }    
+    }
     if (Flg_i2c_DAC){
         Mnge_DAC_Ctrl();
         Flg_i2c_DAC = false;

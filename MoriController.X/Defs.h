@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'F' // module name by letter
+#define MODULE 'C' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -40,10 +40,10 @@
 
 /* ******************** MODE SELECTION ************************************** */
 //#define MODE_DEBUG false
-#define MODE_ENC_CON true
+#define MODE_ENC_CON false
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active false
 
 
@@ -61,6 +61,9 @@ extern volatile bool Flg_LiveExt;
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
+extern volatile bool Flg_EdgeRequest_Ang[3];
+extern volatile bool Flg_EdgeRequest_Ext[3];
+extern volatile bool Flg_EdgeRequest_Cpl[3];
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
 
@@ -183,8 +186,12 @@ extern volatile bool Flg_i2c_DAC;
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
 #define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
-#define MMA8452Q_CTRL_REG1 0x01 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_STBY 0x00 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_ACTV 0x01 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG2_ADDR 0x0E //XYZ_DATA_CFG register (range and filter)
+#define MMA8452Q_CTRL_REG2_RNGE 0x00 //2g range and high-pass filter off
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
+
 
 
 /* ******************** LED DRIVER TLC59208 ****************************** */

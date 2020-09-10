@@ -167,7 +167,6 @@ void ADC1_Update(void) {
 }
 
 uint16_t ADC1_Return(uint8_t channel) {
-
     return ADC1_Values[channel];
 }
 

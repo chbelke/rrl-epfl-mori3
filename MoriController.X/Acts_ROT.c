@@ -4,7 +4,10 @@
 #include <libpic30.h>
 #include "Defs.h"
 #include "Mnge_DAC.h"
+#include "Sens_ENC.h"
+#include "Acts_LIN.h"
 
+uint8_t Ang_Desired[3] = {60, 60, 60};
 float rPID_eOld[3] = {0, 0, 0};
 float rPID_I[3] = {0, 0, 0};
 float rPID_D[3] = {0, 0, 0};
@@ -79,7 +82,27 @@ void Acts_ROT_PID(uint8_t edge, float current, float desired) {
     Acts_ROT_Out(edge, (int16_t) outf);
 }
 
-/* ******************** ROTARY MOTOR CURRENT ******************************** */
+
+/* ******************** ROTARY MOTOR CURRENT LIMIT ************************** */
 void Acts_ROT_Limit(uint8_t edge, uint8_t voltagelevel) {
     Mnge_DAC_Write(edge, voltagelevel);
+}
+
+
+/* ******************** GET DESIRED ANGLE *********************************** */
+uint16_t Acts_ROT_GetTarget(uint8_t edge) {
+    return Ang_Desired[edge];
+}
+
+
+/* ******************** SET DESIRED ANGLE *********************************** */
+void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
+    Ang_Desired[edge] = desired;
+    Flg_EdgeRequest_Ang[edge] = true; //  relevant when coupled
+}
+
+/* ******************** RETURN FORMATTED ANGLE ****************************** */
+uint16_t Acts_ROT_GetCurrent(uint8_t edge) {
+    float rawAngle = 10 * Sens_ENC_Get(edge);
+    return (uint16_t) map((int16_t)rawAngle, -1800, 1800, 0, 3600);
 }

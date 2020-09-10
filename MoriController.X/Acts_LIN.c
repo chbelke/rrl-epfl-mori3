@@ -8,7 +8,7 @@
 #include "mcc_generated_files/pwm.h"
 #include "mcc_generated_files/adc1.h"
 
-uint16_t MotLin_Desired[3] = {60, 60, 60};
+uint8_t Ext_Desired[3] = {60, 60, 60};
 float lPID_eOld[3] = {0, 0, 0};
 float lPID_I[3] = {0, 0, 0};
 uint8_t Stbl_Count[3] = {0, 0, 0};
@@ -93,7 +93,10 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     // acceptable error band -> switch off motor
     if ((error > -0.5 * MotLin_PID_de) && (error < 0.5 * MotLin_PID_de)) {
         Stbl_Count[edge]++;
-        if (Stbl_Count[edge] >= 100) Stbl_Flag[edge] = true;
+        if (Stbl_Count[edge] >= 100){
+            Stbl_Flag[edge] = true;
+            Flg_EdgeRequest_Ext[edge] = false;
+        }
     } else {
         Stbl_Count[edge] = 0;
     }
@@ -143,12 +146,13 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
 
 /* ******************** GET DESIRED EXTENSION ******************************* */
 uint8_t Acts_LIN_GetTarget(uint8_t edge) {
-    return (uint8_t)(MotLin_Desired[edge]);
+    return Ext_Desired[edge];
 }
 
 /* ******************** SET DESIRED EXTENSION ******************************* */
 void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
-    MotLin_Desired[edge] = (uint16_t) (desired);
+    Ext_Desired[edge] = desired;
+    Flg_EdgeRequest_Ext[edge] = true; //  relevant when coupled
 }
 
 /* ******************** RETURN FORMATTED EXTENTION ************************** */
@@ -170,5 +174,5 @@ uint8_t Acts_LIN_GetCurrent(uint8_t edge) {
         default:
             break;
     }
-    return (uint8_t) (map(ADC1_Return(edge), IN_min, IN_max, 120, 0));
+    return (uint8_t) map(ADC1_Return(edge), IN_min, IN_max, 120, 0);
 }

@@ -176,14 +176,20 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
 {
     // Add your custom callback code here
 
-    Acts_CPL_Ctrl(); // coupling sma controller
-    
     Coms_123_ActHandle(); // action synchronisation handle
     
+    Acts_CPL_Ctrl(); // coupling sma controller
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++){ // open coupling if requested
+        if (Flg_EdgeRequest_Cpl[edge] &&
+                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
+            Acts_CPL_On(edge);
+    }
+    
     ADC1_Update(); // read analog potentiometer inputs
-    static uint8_t edge;
-    for (edge = 0; edge < 3; edge++){
-        if (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]) // extension control loops
+    for (edge = 0; edge < 3; edge++){ // extension control loops
+        if (Flg_EdgeRequest_Ext[edge] &&
+                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
     }
 }

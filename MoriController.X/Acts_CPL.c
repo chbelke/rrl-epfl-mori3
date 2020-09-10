@@ -25,7 +25,7 @@ void Acts_CPL_Set(uint8_t edge, uint8_t duty) {
 }
 
 /* ******************** OPEN COUPLING *************************************** */
-void Acts_CPL_On(uint8_t edge) {
+void Acts_CPL_On(uint8_t edge) { // called in tmr3 if request flag is set
     Acts_CPL_Open[edge] = true;
     CPL_Count_1[edge] = 0;
     CPL_Count_2[edge] = SMA_Period_2;
@@ -40,6 +40,7 @@ void Acts_CPL_Off(uint8_t edge) {
     CPL_Count_1[edge] = SMA_Period_1;
     CPL_Count_2[edge] = SMA_Period_2;
     Acts_CPL_Set(edge, 0);
+    Flg_EdgeRequest_Cpl[edge] = false;
     Coms_ESP_LED_State(edge, 0);
 }
 
@@ -64,8 +65,7 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
             Acts_CPL_Off(m);
         }
     }
-    Flg_i2c_PWM = true;
-    //Mnge_PWM_Write();
+    Flg_i2c_PWM = true; // Mnge_PWM_Write() called in tmr1
 }
 
 bool Acts_CPL_IsOpen(uint8_t edge){

@@ -9,6 +9,8 @@
 #include "Mnge_RGB.h"
 #include "Coms_123.h"
 #include "Acts_CPL.h"
+#include "Acts_LIN.h"
+#include "Acts_ROT.h"
 
 uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
@@ -24,7 +26,9 @@ uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
 
-uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
+uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
+uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
+bool NbrCmdMatch[3] = {false, false, false};
 
 // Outcoing bytes based on mode (EdgInAloc explanation below)
 #define COMS_123_Conn 0b10010000
@@ -42,8 +46,8 @@ uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
  * - 0b000xxxxx check if xxxxx is 11111, execute upon end byte
  * 001 = not used because of end byte
  * 010 = action sync byte
- * - 0b010xoooo angle command received, follows in two bytes
- * - 0b010oxooo length command received, follows in two bytes
+ * - 0b010xoooo length command received, follows in one byte
+ * - 0b010oxooo angle command received, follows in two bytes
  * - 0b010ooxoo coupling command received
  * - 0b010oooxo confirm match
  * 011 = idle mode
@@ -60,7 +64,7 @@ uint16_t EdgLngCmd[3] = {0, 0, 0}; // edge length command received by neighbour
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) {
-    
+
     uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
@@ -70,7 +74,7 @@ void Coms_123_Eval(uint8_t edge) {
                     if ((EdgInAloc[edge] & 0x1F) == 37)
                         EdgInCase[edge] = 1;
                     break;
-                case 2: // xxx == 010, action sync received
+                case 2: // xxx == 010, action command received
                     EdgInCase[edge] = 2;
                     break;
                 case 3: // xxx == 011, idle mode
@@ -80,7 +84,7 @@ void Coms_123_Eval(uint8_t edge) {
                     EdgInCase[edge] = 20;
                     break;
                 case 6: // xxx == 110, command
-//                    Coms_ESP_Verbose_Write(coms_message);
+                    // Coms_ESP_Verbose_Write(coms_message);
                     Coms_CMD_Handle(edge, EdgInAloc[edge] & 0b00011111);
                     EdgInCase[edge] = 30;
                     break;
@@ -99,45 +103,35 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 2: // ACTION COMMAND RECEIVED *************************************
-            if (EdgInAloc[edge] & 0b00010000) { // angle command
-                // first angle byte
+            if (EdgInAloc[edge] & 0b00010000) { // extension command
+                NbrCmdExt[edge] = EdgIn;
                 EdgInCase[edge] = 3;
                 break;
             }
         case 3:
-            if (EdgInAloc[edge] & 0b00010000) {
-                // second angle byte
+            if (EdgInAloc[edge] & 0b00001000) { // angle command
+                NbrCmdAng[edge] = 0xFF00 & ((uint16_t) (EdgIn) << 8);
                 EdgInCase[edge] = 4;
                 break;
             }
         case 4:
-            if (EdgInAloc[edge] & 0b00001000) { // length command
-                // first length byte
-                EdgInCase[edge] = 5;
-                break;
-            }
-        case 5:
             if (EdgInAloc[edge] & 0b00001000) {
-                // second length byte
-                EdgInCase[edge] = 6;
-                break;
-            }
-        case 6:
-            if (EdgInAloc[edge] & 0b00000100) { // coupling command
-                // open coupling ?
+                NbrCmdAng[edge] = NbrCmdAng[edge] | (uint16_t) EdgIn;
                 EdgInCase[edge] = 7;
                 break;
             }
+
         case 7: // verify action command
-            if (EdgIn == EDG_End) {
-                // check length and verify with own action commands
+            if (EdgIn == EDG_End) { // check length necessary? 
+                // verify with own action commands
+                Coms_123_ActVerify(edge);
             }
             EdgInCase[edge] = 0;
             break;
 
         case 10: // IDLE MODE **************************************************
             if (EdgIn == EDG_End) {
-                Coms_123_reset_intervals(edge);
+                Coms_123_ResetIntervals(edge);
             }
             EdgInCase[edge] = 0;
             break;
@@ -178,26 +172,25 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 30: // COMMAND ****************************************************
-            Coms_123_reset_intervals(edge);
-            if (Coms_CMD_Handle(edge, EdgIn)){
-                EdgInCase[edge] = 0;
-            }
-            break;            
-            
-        case 40: // RELAY ****************************************************
-            if (Coms_REL_Handle(edge, EdgIn)){
+            Coms_123_ResetIntervals(edge);
+            if (Coms_CMD_Handle(edge, EdgIn)) {
                 EdgInCase[edge] = 0;
             }
             break;
-            
+
+        case 40: // RELAY ****************************************************
+            if (Coms_REL_Handle(edge, EdgIn)) {
+                EdgInCase[edge] = 0;
+            }
+            break;
+
         default: // DEFAULT ****************************************************
             EdgInCase[edge] = 0;
             break;
     }
 }
 
-void Coms_123_reset_intervals(uint8_t edge)
-{
+void Coms_123_ResetIntervals(uint8_t edge) {
     EdgIdlCnt[edge] = 0; // reset interval
     EdgConCnt[edge] = 0; // reset interval
     if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge])
@@ -245,15 +238,14 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             if (!Acts_CPL_IsOpen(edge))
                 Coms_ESP_LED_State(edge, 0);
         }
-        
-        if(Flg_Uart_Lock[edge]==false)
-        {
+
+        if (Flg_Uart_Lock[edge] == false) { // no need to wait because busy = confirmed
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte
             Coms_123_Write(edge, byte);
             if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
                 Coms_123_WriteID(edge);
-            Coms_123_Write(edge, EDG_End);            
+            Coms_123_Write(edge, EDG_End);
             Flg_Uart_Lock[edge] = false;
         }
     }
@@ -261,16 +253,76 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
 
 /* ******************** NEIGHBOUR ACTION HANDLE ***************************** */
 void Coms_123_ActHandle() { // called in tmr3 at 20Hz
-    //    uint8_t edge;
-    //    uint8_t byte = 0b01000000;
-    //    for (edge = 0; edge < 3; edge++) {
-    //        if (Flg_ActAng[edge])
-    //            byte = byte | 0b00010000;
-    //        if (Flg_ActExt[edge])
-    //            byte = byte | 0b00001000;
-    //        if (Flg_ActExt[edge])
-    //            byte = byte | 0b00000100;
-    //    }
+    uint8_t edge, byte;
+    for (edge = 0; edge < 3; edge++) {
+        if (Flg_EdgeSyn[edge]) {
+            byte = 0b01000000;
+            if (Flg_EdgeRequest_Ext[edge])
+                byte = byte | 0b00010000;
+            if (Flg_EdgeRequest_Ang[edge])
+                byte = byte | 0b00001000;
+            if (Flg_EdgeRequest_Cpl[edge])
+                byte = byte | 0b00000100;
+            if (NbrCmdMatch[edge])
+                byte = byte | 0b00000010;
+
+            if ((!Flg_Uart_Lock[edge]) && (Flg_EdgeRequest_Ext[edge] || 
+                    Flg_EdgeRequest_Ang[edge] || Flg_EdgeRequest_Cpl[edge])) {
+                Coms_123_Write(edge, byte);
+                if (Flg_EdgeRequest_Ext[edge])
+                    Coms_123_Write(edge, Acts_LIN_GetTarget(edge));
+                if (Flg_EdgeRequest_Ang[edge]) {
+                    uint16_t AngTemp = Acts_ROT_GetTarget(edge);
+                    Coms_123_Write(edge, (uint8_t) ((AngTemp & 0xFF00) >> 8));
+                    Coms_123_Write(edge, (uint8_t) (AngTemp & 0x00FF));
+                }
+                Coms_123_Write(edge, EDG_End);
+            }
+        }
+    }
+}
+
+/* ******************** NEIGHBOUR ACTION VERIFY ***************************** */
+void Coms_123_ActVerify(uint8_t edge) {
+    bool NbrCmdNoGo = false;
+    
+    // extensions command verification
+    if ((EdgInAloc[edge] & 0b00010000) && (Flg_EdgeRequest_Ext[edge])) {
+        if (NbrCmdExt[edge] != Acts_LIN_GetTarget(edge))
+            NbrCmdNoGo = true; // values do not match, NOGO
+    } else if (((EdgInAloc[edge] & 0b00010000) == 0) && (!Flg_EdgeRequest_Ext[edge])){
+        // ok, no commands from either side
+    } else {
+        NbrCmdNoGo = true; // mismatch, NOGO
+    }
+    
+    // angle command verification
+    if ((EdgInAloc[edge] & 0b00001000) && (Flg_EdgeRequest_Ang[edge])) {
+        if (NbrCmdAng[edge] == Acts_ROT_GetTarget(edge)) 
+            NbrCmdNoGo = true; // values do not match, NOGO
+    } else if (((EdgInAloc[edge] & 0b00001000) == 0) && (!Flg_EdgeRequest_Ang[edge])) {
+        // ok, no commands from either side
+    } else {
+        NbrCmdNoGo = true; // mismatch, NOGO
+    }
+    
+    // coupling command verification
+    if ((EdgInAloc[edge] & 0b00000100) && (Flg_EdgeRequest_Cpl[edge])) {
+        NbrCmdNoGo = true;
+    } else if (((EdgInAloc[edge] & 0b00000100) == 0) && (!Flg_EdgeRequest_Cpl[edge])) {
+        // ok, no commands from either side
+    } else {
+        NbrCmdNoGo = true; // mismatch, NOGO
+    }
+    
+    // everything is ok and something received
+    if ((!NbrCmdNoGo) && (EdgInAloc[edge] & 0b00011100)){
+        NbrCmdMatch[edge] = true;
+        if (EdgInAloc[edge] & 0b00000010)
+            Flg_EdgeAct[edge] = true;
+    } else {
+        NbrCmdMatch[edge] = false;
+    }
 }
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */
@@ -314,7 +366,6 @@ uint8_t Coms_123_Read(uint8_t edge) {
     return byte;
 }
 
-
-uint8_t * Coms_123_Get_Neighbour(uint8_t edge) {
-    return &NbrID[edge*6];
+uint8_t * Coms_123_GetNeighbour(uint8_t edge) {
+    return &NbrID[edge * 6];
 }

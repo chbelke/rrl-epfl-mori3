@@ -195,13 +195,13 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     Battery_Check();
     
     if (MODE_ACC_CON)
-        Flg_i2c_ACC = true; // read accelerometer
+        Flg_i2c_ACC = true; // read accelerometer, called in tmr1
     
     if (MODE_LED_ANGLE) {
         int16_t RGB[3] = {0, 0, 0};
-        RGB[0] = Sens_ACC_Get(0) / 16 + 64;
-        RGB[1] = Sens_ACC_Get(1) / 16 + 64;
-        RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
+//        RGB[0] = Sens_ACC_Get(0) / 16 + 64;
+//        RGB[1] = Sens_ACC_Get(1) / 16 + 64;
+//        RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
         uint8_t m;
         for (m = 0; m <= 2; m++) {
             if (RGB[m] < 0) {

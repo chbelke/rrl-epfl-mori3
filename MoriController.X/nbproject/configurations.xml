@@ -31,6 +31,10 @@
         <itemPath>mcc_generated_files/tmr5.h</itemPath>
         <itemPath>mcc_generated_files/system.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="mcc_generated_files"
+                     displayName="mcc_generated_files"
+                     projectFiles="true">
+      </logicalFolder>
       <itemPath>Coms_123.h</itemPath>
       <itemPath>Coms_ESP.h</itemPath>
       <itemPath>Coms_REL.h</itemPath>
