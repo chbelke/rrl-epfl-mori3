@@ -322,6 +322,27 @@ bool stateInfo(byte c)
 
   switch (state) {  //request
 
+    case 18:    //Neighbour Disconnected
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: NO %d", int(storage[0])); 
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;
+      } else if (count == 1) {
+        storage[0]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 18");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
     case 19:    //ID
       publish("INFO: ID set");
       if (c == char(END_BYTE))

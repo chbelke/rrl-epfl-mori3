@@ -23,6 +23,7 @@ void Coms_ESP_Request_Angles();
 void Coms_ESP_Request_Orient();
 void Coms_ESP_Request_Neighbour(uint8_t);
 void Coms_ESP_Request_WiFiEdge();
+void Coms_ESP_Neighbour_Disconnected(uint8_t);
 
 void Coms_ESP_LED_State(uint8_t, uint8_t);
 void Coms_ESP_LED_On(uint8_t, bool);
