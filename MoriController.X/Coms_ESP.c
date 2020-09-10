@@ -236,10 +236,12 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
     switch(state){
         case 0: //off
             Coms_ESP_LED_On(edge, WIFI_LED_OFF);
+            Coms_ESP_Neighbour_Disconnected(edge);
             break;
 
         case 1: //on
             Coms_ESP_LED_On(edge, WIFI_LED_ON);
+            Coms_ESP_Request_Neighbour(edge);
             break;
 
         case 2: //toggle
@@ -247,6 +249,7 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
             break;
 
         case 3: //blink
+            Coms_ESP_Neighbour_Disconnected(edge);
             if(WIFI_LED_BLINK_DES[edge] != WIFI_LED_BLINK_ACT[edge])
             {
                 Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);

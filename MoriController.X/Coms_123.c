@@ -228,7 +228,6 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         // determine byte to be sent depending on con state flags
         if (Flg_EdgeSyn[edge]) {
             byte = COMS_123_Idle; // send idle command
-            Coms_ESP_Request_Neighbour(edge);
             Coms_ESP_LED_State(edge, 1);
         } else if (Flg_EdgeCon[edge] && Flg_IDRcvd[edge]) {
             byte = COMS_123_IDOk;
@@ -324,7 +323,6 @@ uint8_t Coms_123_Read(uint8_t edge) {
 
 
 void Coms_123_Disconnected(uint8_t edge) {
-    Coms_ESP_Neighbour_Disconnected(edge);
     Flg_EdgeCon[edge] = false;
     Flg_EdgeSyn[edge] = false;
     Flg_IDCnfd[edge] = false;
