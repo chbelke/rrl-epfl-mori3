@@ -3,15 +3,17 @@
 #include <WiFiUdp.h>
 
 const int PACKET_SIZE = 64; //how many bytes the buffers hold
-char* ip_address = "RRLB201957";
+IPAddress ip_address;
 int ip_port = 50001;
 int controller_port = 50002;
+bool ip_flag = false;
 
 WiFiUDP UDP;
 
 byte udpInBuff[PACKET_SIZE];
 byte udpOutBuff[PACKET_SIZE];
 
+unsigned long lastIpCall = millis();
 
 void startUDP()
 {
@@ -32,6 +34,12 @@ void readUDP()
   if(UDP.parsePacket() == 0) // If there's no response (yet)
     return;
   verbose_println("Received UDP");
+
+  if(!ip_flag)
+  {
+    ip_address = UDP.remoteIP();
+    ip_flag = true;
+  }  
   
   UDP.read(udpInBuff, PACKET_SIZE);
   unsigned int len = int(udpInBuff[0]);
@@ -42,6 +50,21 @@ void readUDP()
   }
 
   commands(udp_packet, len);
+}
+
+
+void getCompIP()
+{
+  if(ip_flag)
+  {
+    return;  
+  }
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastIpCall > 1000)
+  {
+    publish("UDP: Start");
+    lastIpCall = currentMillis;
+  } 
 }
 
 void startController()
