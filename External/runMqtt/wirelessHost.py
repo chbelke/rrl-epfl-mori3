@@ -173,7 +173,7 @@ class WirelessHost(threading.Thread):
                 elif self.getTsPingDict(esp) - time.perf_counter() > 1:
                     print("TIMEOUT", esp)
                     self.pingBusy[esp] = False
-                    #save timeout TODO ask Kevin
+                    self.addPingResult(esp, np.inf, False)
                     self.pingCount[esp] -= 1 # decrement
 
                 if self.pingCount[esp] == 0:
