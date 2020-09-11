@@ -3,88 +3,44 @@ void readSerial()
   
   if(Serial.available())
   {
-    static int serial_case = 0;    
+    static int serial_case = 0;
+    static bool alloc = true;    
     
     byte c = Serial.read();
 
-    byte val = c;
-    int hungry[8];
-    for (int k = 0; k < 8; k++)
+    if (alloc)
     {
-        hungry[7-k] = val & 0x01;
-        val = val >> 1;
-    }
-    
+      if(c == END_BYTE)
+      {
+        return;
+      }
+      serial_case = ((c >> 5) & 0b00000111);
+      alloc = false;
+    }        
 
-    // char buff[50];
-    // sprintf(buff, "INFO: byte %d%d%d%d %d%d%d%d", hungry[0], hungry[1], hungry[2], hungry[3], hungry[4], hungry[5], hungry[6], hungry[7]);
-    // publish(buff);    
-
-
-    char state = ((c >> 5) & 0b00000111);
     switch(serial_case){
       case 0:
-        if (state == char(0))
-        {
-          serial_case = 1;
-          readVerbose(c);
-        } 
-        else if (state == char(1))
-        {
-          serial_case = 2;
-          readInterpret(c);
-        }
-        else if (state == char(2))
-        {
-          serial_case = 3;
-          setLEDs(c);
-        }
-        else if (state == char(4))
-        {
-          serial_case = 4;
-          stateInfo(c);
-        }
-        else if (state == char(7))  ///relay
-        {
-          serial_case = 7;
-          relayToComputer(c);
-        }
+        if(readVerbose(c)) alloc = true;
         break;
 
       case 1:
-        if(readVerbose(c))
-        {
-          serial_case = 0;
-        }
-        break;
-
-      case 2:
-        if(readInterpret(c))
-        {
-          serial_case = 0;
-        }
+        if(readInterpret(c)) alloc = true;
         break;        
 
-      case 3:
-        if(setLEDs(c))
-        {
-          serial_case = 0;
-        }
+      case 2:
+        if(setLEDs(c)) alloc = true;
         break;
       
       case 4:
-        if(stateInfo(c))
-        {
-          serial_case = 0;
-        }
+        if(stateInfo(c)) alloc = true;
         break;
       
       case 7:
-        if(relayToComputer(c))
-        {
-          serial_case = 0;
-        }
-        break;        
+        if(relayToComputer(c)) alloc = true;
+        break;   
+
+      default:
+        if(c == byte(END_BYTE)) alloc = true;
     }
   }
 }
@@ -99,7 +55,14 @@ bool readVerbose(byte c)
 
   // char nuff[50];
   // sprintf(nuff, "INFO: char = %d", int(c));
-  // publish(nuff);    
+  // publish(nuff);
+  if(serial_buf_loc  > 16)
+  {
+    purgeSerial();
+    serial_buf_loc = 0;
+    readCase = 0;
+    return true;
+  }
   
   switch(readCase){
     case 0: 
@@ -124,19 +87,21 @@ bool readVerbose(byte c)
       serial_packet[serial_buf_loc+5] = c;
       if (serial_buf_loc > serial_len)
       {
-        publish("ERR: buf_loc > serial_len");
-        
-        char buff[50];
-        sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
-        publish(buff);
+        if(serialErrorHandle(c))
+        {
+          publish("ERR: buf_loc > serial_len, vbs");
+    
+          char buff[50];
+          sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
+          publish(buff);
 
-        char duff[50];
-        sprintf(duff, "INFO: packet = %s", serial_packet);  
-        publish(duff);
-
-        serial_buf_loc = 0;
-        readCase = 0;
-        return true;      
+          char duff[50];
+          sprintf(duff, "INFO: packet = %s", serial_packet);  
+          publish(duff);
+          serial_buf_loc = 0;
+          readCase = 0;
+          return true;
+        }
       }
       serial_buf_loc++;
       break;
@@ -279,15 +244,18 @@ bool setLEDs(byte d)
 
   if (byteCount > serial_len)
   {
-    publish("ERR: buf_loc > serial_len, LED");
-    
-    char buff[50];
-    sprintf(buff, "INFO: buf = %d, ser = %d", int(byteCount), int(serial_len));
-    publish(buff);
+    if(serialErrorHandle(c))
+    {    
+      publish("ERR: buf_loc > serial_len, LED");
+      
+      char buff[50];
+      sprintf(buff, "INFO: buf = %d, ser = %d", int(byteCount), int(serial_len));
+      publish(buff);
 
-    byteCount = 0;
-    readCase = 0;
-    return true;      
+      byteCount = 0;
+      readCase = 0;
+      return true;      
+    }
   }
 
   byteCount++;
@@ -325,19 +293,22 @@ bool readInterpret(byte c)
       }
       if (serial_buf_loc > serial_len)
       {
-        publish("ERR: buf_loc > serial_len");
-        
-        char buff[50];
-        sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
-        publish(buff);
+        if(serialErrorHandle(c))
+        {
+          publish("ERR: buf_loc > serial_len, readInterpret");
+          
+          char buff[50];
+          sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
+          publish(buff);
 
-        char duff[50];
-        sprintf(duff, "INFO: packet = %s", serial_packet);  
-        publish(duff);
+          char duff[50];
+          sprintf(duff, "INFO: packet = %s", serial_packet);  
+          publish(duff);
 
-        serial_buf_loc = 0;
-        readCase = 0;
-        return true;      
+          serial_buf_loc = 0;
+          readCase = 0;
+          return true;      
+        }
       }
       serial_buf_loc++;
       break;
@@ -369,6 +340,37 @@ bool stateInfo(byte c)
   }  
 
   switch (state) {  //request
+
+    case 18:    //Neighbour Disconnected
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: NO %d", int(storage[0])); 
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;          
+      } else if (count == 1) {
+        storage[0]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 18");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+    case 19:    //ID
+      publish("INFO: ID set");
+      if (c == char(END_BYTE))
+      {
+          serial_write_id();
+      }
+      alloc = true;
+      return true;
+      break;
 
     case 20:  //read edges
       if (c == char(END_BYTE))
@@ -493,6 +495,16 @@ bool stateInfo(byte c)
       alloc = true;
       return true;
       break;
+    
+    default:
+      if(serialErrorHandle(c))
+      {
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));        
+        alloc = true;
+        count = 0;        
+        return true;
+      }
   }
   return false;
 }
@@ -561,7 +573,17 @@ bool relayToComputer(byte c)
 }
 
 
-void errorMessage()
+void purgeSerial()
 {
+  while(Serial.read() >= 0);
+}
 
+
+bool serialErrorHandle(byte c)
+{
+  if(c == END_BYTE)
+  {
+    return true;
+  }
+  return false;
 }

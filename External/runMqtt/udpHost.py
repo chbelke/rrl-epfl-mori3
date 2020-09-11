@@ -50,7 +50,7 @@ class UDPListener():
         while run:
             # print('waiting...')
             data, addr = self.listen_sock.recvfrom(64) 
-            print('received', data, 'from', addr)
+            # print('received', data, 'from', addr)
             if(addr[0] == '127.0.0.1'):
                 # print("Call from home")
                 continue
@@ -82,9 +82,9 @@ class UDPHost():
         
 
     def write(self, message, addr):
-        print(message, addr)
-        print(len(message))
-        print(self.wifi_host.IPDict[addr])
+        # print(message, addr)
+        # print(len(message))
+        # print(self.wifi_host.IPDict[addr])
         ip_addr = (self.wifi_host.IPDict[addr], self.udp_port)
         msg = bytearray(len(message).to_bytes(1, byteorder='big'))
         if isinstance(message, bytearray):

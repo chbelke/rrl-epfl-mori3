@@ -29,7 +29,9 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
-uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
+bool Flg_Booted_Up = false;
+
+//uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
 uint8_t WIFI_LED_BLINK_ACT[3] = {0, 0, 0};
@@ -49,6 +51,11 @@ uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 
 /* ******************** ESP COMMAND EVALUATION ****************************** */
 void Coms_ESP_Eval() {
+    if(!Flg_Booted_Up){
+        Coms_ESP_Boot();
+        return;
+    }
+    
     static uint8_t EspInCase = 0;
      uint8_t EspIn = UART4_Read(); // Incoming byte
 //    const char *message = "hello";
@@ -90,6 +97,13 @@ void Coms_ESP_Eval() {
             break;
     }
             
+}
+
+void Coms_ESP_Boot(void)
+{
+    if(UART4_Read() == ESP_End){ //Purges all in queue until first end byte
+        Flg_Booted_Up = true;
+    } 
 }
 
 /* ******************** ESP COMMAND TO DRIVE ******************************** */
@@ -182,7 +196,7 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
 
 /* ******************** RETURN ID BY BYTE *********************************** */
 uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
-    return SelfID[byteNum];
+    return ESP_ID[byteNum];
 }
 
 
@@ -236,10 +250,12 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
     switch(state){
         case 0: //off
             Coms_ESP_LED_On(edge, WIFI_LED_OFF);
+            Coms_ESP_Neighbour_Disconnected(edge);
             break;
 
         case 1: //on
             Coms_ESP_LED_On(edge, WIFI_LED_ON);
+            Coms_ESP_Request_Neighbour(edge);
             break;
 
         case 2: //toggle
@@ -247,6 +263,7 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
             break;
 
         case 3: //blink
+//            Coms_ESP_Neighbour_Disconnected(edge);
             if(WIFI_LED_BLINK_DES[edge] != WIFI_LED_BLINK_ACT[edge])
             {
                 Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);
@@ -290,7 +307,7 @@ void Coms_ESP_LED_Tgl(uint8_t edge) {
 }
 
 
-void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) {
+void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) { // blink*4 = period;
     uint8_t alloc = 0b01000100;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
@@ -404,13 +421,19 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
     uint8_t i;
     neighbour = Coms_123_Get_Neighbour(edge);
     
+    if(*(neighbour+edge*6)==0)
+    {
+        Coms_ESP_Neighbour_Disconnected(edge);
+        return;
+    }
+    
     while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
     {
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010111);
     UART4_Write(edge);
-    for(i=0; i<6; i++)
+    for(i=edge*6; i<6+edge*6; i++)
         UART4_Write(*(neighbour+i));
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
@@ -425,6 +448,30 @@ void Coms_ESP_Request_WiFiEdge()
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10011000);
     UART4_Write(Coms_Rel_Get_WiFi_Edge());
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;      
+}
+
+void Coms_ESP_Neighbour_Disconnected(uint8_t edge)
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10010010);
+    UART4_Write(edge);
+    UART4_Write(ESP_End);
+    Flg_Uart_Lock[ESP_URT_NUM] = false;      
+}
+
+
+void Coms_ESP_Request_ID()
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+    UART4_Write(0b10010011);
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }

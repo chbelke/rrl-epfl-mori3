@@ -3,7 +3,9 @@ import traceback
 
 def readNeighbour(self, pyld, espNum):
     print(colored(espNum + ": Neighbour edge "+ pyld[2] + ':', 'green'), end=' ')
-    for i in range(2,8):
-        print(colored(pyld[i], 'green'), end='')
-    print()
+    tmp = [None] * 6
+    for i in range(0,6):
+        tmp[i] = bytearray.fromhex(pyld[i+3]).decode()
+    neighbour = ''.join(tmp)
+    print(colored(str(neighbour) + " connected", 'green'))
     return
