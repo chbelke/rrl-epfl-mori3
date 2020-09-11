@@ -458,7 +458,7 @@ void Coms_ESP_Neighbour_Disconnected(uint8_t edge)
     {
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
-    UART4_Write(0b10010011);
+    UART4_Write(0b10010010);
     UART4_Write(edge);
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      

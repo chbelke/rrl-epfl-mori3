@@ -10,8 +10,12 @@ void readSerial()
 
     if (alloc)
     {
-        serial_case = ((c >> 5) & 0b00000111);
-        alloc = false;
+      if(c == END_BYTE)
+      {
+        return;
+      }
+      serial_case = ((c >> 5) & 0b00000111);
+      alloc = false;
     }        
 
     switch(serial_case){
@@ -491,6 +495,16 @@ bool stateInfo(byte c)
       alloc = true;
       return true;
       break;
+    
+    default:
+      if(serialErrorHandle(c))
+      {
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));        
+        alloc = true;
+        count = 0;        
+        return true;
+      }
   }
   return false;
 }
