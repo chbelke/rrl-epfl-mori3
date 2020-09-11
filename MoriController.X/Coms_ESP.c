@@ -29,6 +29,8 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
+bool Flg_Booted_Up = false;
+
 //uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
@@ -49,6 +51,11 @@ uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 
 /* ******************** ESP COMMAND EVALUATION ****************************** */
 void Coms_ESP_Eval() {
+    if(!Flg_Booted_Up){
+        Coms_ESP_Boot();
+        return;
+    }
+    
     static uint8_t EspInCase = 0;
      uint8_t EspIn = UART4_Read(); // Incoming byte
 //    const char *message = "hello";
@@ -90,6 +97,13 @@ void Coms_ESP_Eval() {
             break;
     }
             
+}
+
+void Coms_ESP_Boot(void)
+{
+    if(UART4_Read() == ESP_End){ //Purges all in queue until first end byte
+        Flg_Booted_Up = true;
+    } 
 }
 
 /* ******************** ESP COMMAND TO DRIVE ******************************** */

@@ -34,6 +34,7 @@ void commands(byte* payload, unsigned int len)
       runState = 3;
       pubMac("MAC: ");
       pubIP();
+      purgeSerial();
       verbose_println("Version Excellent");
       break;
 

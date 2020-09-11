@@ -11,6 +11,7 @@
 #include "mcc_generated_files/mcc.h"
 
 void Coms_ESP_Eval (void);
+void Coms_ESP_Boot (void);
 void Coms_ESP_Drive (uint8_t, int8_t, uint8_t, uint8_t);
 uint8_t Coms_ESP_ReturnID (uint8_t);
 void Coms_ESP_Verbose (void);

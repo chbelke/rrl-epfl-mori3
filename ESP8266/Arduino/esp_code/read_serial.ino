@@ -51,7 +51,14 @@ bool readVerbose(byte c)
 
   // char nuff[50];
   // sprintf(nuff, "INFO: char = %d", int(c));
-  // publish(nuff);    
+  // publish(nuff);
+  if(serial_buf_loc  > 16)
+  {
+    purgeSerial();
+    serial_buf_loc = 0;
+    readCase = 0;
+    return true;
+  }
   
   switch(readCase){
     case 0: 
@@ -76,19 +83,21 @@ bool readVerbose(byte c)
       serial_packet[serial_buf_loc+5] = c;
       if (serial_buf_loc > serial_len)
       {
-        publish("ERR: buf_loc > serial_len");
-        
-        char buff[50];
-        sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
-        publish(buff);
+        if(serialErrorHandle(c))
+        {
+          publish("ERR: buf_loc > serial_len, vbs");
+    
+          char buff[50];
+          sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
+          publish(buff);
 
-        char duff[50];
-        sprintf(duff, "INFO: packet = %s", serial_packet);  
-        publish(duff);
-
-        serial_buf_loc = 0;
-        readCase = 0;
-        return true;      
+          char duff[50];
+          sprintf(duff, "INFO: packet = %s", serial_packet);  
+          publish(duff);
+          serial_buf_loc = 0;
+          readCase = 0;
+          return true;
+        }
       }
       serial_buf_loc++;
       break;
@@ -231,15 +240,18 @@ bool setLEDs(byte d)
 
   if (byteCount > serial_len)
   {
-    publish("ERR: buf_loc > serial_len, LED");
-    
-    char buff[50];
-    sprintf(buff, "INFO: buf = %d, ser = %d", int(byteCount), int(serial_len));
-    publish(buff);
+    if(serialErrorHandle(c))
+    {    
+      publish("ERR: buf_loc > serial_len, LED");
+      
+      char buff[50];
+      sprintf(buff, "INFO: buf = %d, ser = %d", int(byteCount), int(serial_len));
+      publish(buff);
 
-    byteCount = 0;
-    readCase = 0;
-    return true;      
+      byteCount = 0;
+      readCase = 0;
+      return true;      
+    }
   }
 
   byteCount++;
@@ -277,19 +289,22 @@ bool readInterpret(byte c)
       }
       if (serial_buf_loc > serial_len)
       {
-        publish("ERR: buf_loc > serial_len");
-        
-        char buff[50];
-        sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
-        publish(buff);
+        if(serialErrorHandle(c))
+        {
+          publish("ERR: buf_loc > serial_len, readInterpret");
+          
+          char buff[50];
+          sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
+          publish(buff);
 
-        char duff[50];
-        sprintf(duff, "INFO: packet = %s", serial_packet);  
-        publish(duff);
+          char duff[50];
+          sprintf(duff, "INFO: packet = %s", serial_packet);  
+          publish(duff);
 
-        serial_buf_loc = 0;
-        readCase = 0;
-        return true;      
+          serial_buf_loc = 0;
+          readCase = 0;
+          return true;      
+        }
       }
       serial_buf_loc++;
       break;
@@ -323,18 +338,15 @@ bool stateInfo(byte c)
   switch (state) {  //request
 
     case 18:    //Neighbour Disconnected
-      if (count > 1)
-        {
-        if (c == char(END_BYTE))
-        {
-          sprintf(serial_packet, "REQ: NO %d", int(storage[0])); 
-          publish(serial_packet);
-          memset(serial_packet, 0, sizeof(serial_packet));
-          memset(storage, 0, sizeof(storage));
-          count = 0;
-          alloc = true;
-          return true;          
-        }
+      if (c == char(END_BYTE))
+      {
+        sprintf(serial_packet, "REQ: NO %d", int(storage[0])); 
+        publish(serial_packet);
+        memset(serial_packet, 0, sizeof(serial_packet));
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;          
       } else if (count == 1) {
         storage[0]=c;
         count++;
@@ -547,7 +559,17 @@ bool relayToComputer(byte c)
 }
 
 
-void errorMessage()
+void purgeSerial()
 {
+  while(Serial.read() >= 0);
+}
 
+
+bool serialErrorHandle(byte c)
+{
+  if(c == END_BYTE)
+  {
+    return true;
+  }
+  return false;
 }
