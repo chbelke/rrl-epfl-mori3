@@ -7,6 +7,7 @@ def startUDP(self, pyld, espNum):
             print(colored("UDP enabled for: " + espNum, 'green'))
             self.UDPDict.append(espNum)
             self.setUDPDict(self.UDPDict)
+        self.publishLocal("hello", espNum)
 
     elif pyld[1] == "Stop":
         if espNum in self.UDPDict:

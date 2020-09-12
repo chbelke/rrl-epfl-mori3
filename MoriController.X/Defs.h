@@ -75,6 +75,10 @@ extern volatile bool Flg_Uart_Lock[4];
 
 extern volatile bool Flg_MotLin_Active;
 extern volatile bool Flg_MotRot_Active;
+extern volatile bool Flg_ID_check;
+
+/* ******************** STATE INFO ****************************************** */
+extern volatile uint8_t ESP_ID[6];
 
 extern volatile bool Flg_i2c_PWM;
 extern volatile bool Flg_i2c_ACC;

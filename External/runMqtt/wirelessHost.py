@@ -66,11 +66,13 @@ class WirelessHost(threading.Thread):
         self.UDPDict = []
 
         self.pingDict = {}
+        self.pingCount = {}
 
         self.version = 0.50
 
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
+
 
     def run(self):
         print("Wireless Host: ", threading.get_ident())
@@ -80,6 +82,9 @@ class WirelessHost(threading.Thread):
         self.mqttClient.run()
         self.udpClient.usp_rec.run()
 
+        # while True:
+        #     self.checkPing()
+
         while not self.event.is_set():
             if time.time() - loopTime > 2:
                 print("\nTime Elapsed: {:.2f}".format(loopTime-startTime))
@@ -87,7 +92,7 @@ class WirelessHost(threading.Thread):
                 print(self.macDict, end="\n\n")
                 loopTime = time.time()
 
-            self.event.wait(0.5)        
+            self.event.wait(0.1)        
 
 
 # #--------------------------------------------------------------#
@@ -146,6 +151,26 @@ class WirelessHost(threading.Thread):
     #     else:
     #         self.UDPCom = True
     #     return self.UDPCom
+
+    def checkPing(self):
+        for esp in pingCount.keys():
+            if pingCount[esp] <= 0:
+                continue
+            if pingRecieved[esp]:
+                #save ping esp, ts, data
+                #ping again
+                pingRecieved[esp] = False
+                pingCount[esp] -= 1
+            elif getTsPingDict[esp] - time.perf_counter() > 1:
+                print("TIMEOUT", esp)
+                pingRecieved[esp] = False
+                #save timeout
+                pingCount[esp] -= 1
+            if pingCount[esp] == 0:
+                #save data
+                print("hello")
+        return
+
 
     def setIPDict(self, IPDict, EPDict): #good example of how we can implement ping with getters and setters
         self.IPDict = IPDict

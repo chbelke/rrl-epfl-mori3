@@ -40,6 +40,11 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
+        case 19:
+            if(Coms_CMD_Set_ID(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+
         case 20:
             if (Coms_CMD_Request_Edges(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -205,7 +210,35 @@ bool Coms_CMD_No_WifiEdge(uint8_t byte) {
 
 
 //------------------------- Setters -------------------------//
-bool Coms_CMD_SetMotRotOn(uint8_t byte) {
+bool Coms_CMD_Set_ID(uint8_t byte)
+{
+    static uint8_t count=0;
+    static uint8_t tmpID[6];
+    if (count >= 6)
+    {
+        if (byte == ESP_End) {
+            uint8_t i;
+            for(i=0; i<6; i++)
+            {
+                ESP_ID[i] = tmpID[i];
+            }
+            Flg_ID_check = true;
+        } else {
+            Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
+    } else {
+        tmpID[count] = byte;
+        count++;
+    }
+    return false;       
+}
+
+
+
+bool Coms_CMD_SetMotRotOn(uint8_t byte)
+{
     if (byte == ESP_End) {
         Flg_MotRot_Active = true;
     } else {

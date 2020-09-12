@@ -179,7 +179,8 @@ void Coms_123_Eval(uint8_t edge) {
             break;
 
         case 40: // RELAY ****************************************************
-            if (Coms_REL_Handle(edge, EdgIn)) {
+            Coms_123_ResetIntervals(edge);
+            if (Coms_REL_Handle(edge, EdgIn)){
                 EdgInCase[edge] = 0;
             }
             break;
@@ -204,10 +205,7 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         // check if idle byte received in EDG_IdlIntrvl when synced
         if (((EdgIdlCnt[edge] >= EDG_IdlIntrvl) && Flg_EdgeSyn[edge]) || // lost
                 ((EdgConCnt[edge] >= EDG_ConIntrvl) && Flg_EdgeCon[edge])) {
-            Flg_EdgeCon[edge] = false;
-            Flg_EdgeSyn[edge] = false;
-            Flg_IDCnfd[edge] = false;
-            Flg_IDRcvd[edge] = false;
+            Coms_123_Disconnected(edge);
         } else {
             if (EdgIdlCnt[edge] < EDG_IdlIntrvl)
                 EdgIdlCnt[edge]++;
@@ -238,8 +236,18 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             if (!Acts_CPL_IsOpen(edge))
                 Coms_ESP_LED_State(edge, 0);
         }
-
-        if (Flg_Uart_Lock[edge] == false) { // no need to wait because busy = confirmed
+       
+        //Break if module doesn't know its ID and needs to send ID
+        if(!Flg_ID_check)
+        {
+            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) 
+            {
+                return;                
+            }
+        }
+                    
+        if(Flg_Uart_Lock[edge]==false)
+        {
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte
             Coms_123_Write(edge, byte);
@@ -366,6 +374,13 @@ uint8_t Coms_123_Read(uint8_t edge) {
     return byte;
 }
 
+void Coms_123_Disconnected(uint8_t edge) {
+    Flg_EdgeCon[edge] = false;
+    Flg_EdgeSyn[edge] = false;
+    Flg_IDCnfd[edge] = false;
+    Flg_IDRcvd[edge] = false;    
+}
+
 uint8_t * Coms_123_GetNeighbour(uint8_t edge) {
-    return &NbrID[edge * 6];
+    return NbrID;
 }
