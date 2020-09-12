@@ -18,6 +18,10 @@
 #include <libpic30.h>
 
 
+/* ******************** MODULE ********************************************** */
+#define MODULE 'C' // module name by letter
+
+
 /* ******************** NOTES *********************************************** */
 // Timer info
 /* Timer 1: 100 Hz - angle feedback
@@ -37,9 +41,9 @@
 /* ******************** MODE SELECTION ************************************** */
 //#define MODE_DEBUG false
 #define MODE_ENC_CON false
-#define MODE_ACC_CON false
+#define MODE_ACC_CON true
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active false
 
 
@@ -57,6 +61,9 @@ extern volatile bool Flg_LiveExt;
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
+extern volatile bool Flg_EdgeRequest_Ang[3];
+extern volatile bool Flg_EdgeRequest_Ext[3];
+extern volatile bool Flg_EdgeRequest_Cpl[3];
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
 
@@ -72,6 +79,10 @@ extern volatile bool Flg_ID_check;
 
 /* ******************** STATE INFO ****************************************** */
 extern volatile uint8_t ESP_ID[6];
+
+extern volatile bool Flg_i2c_PWM;
+extern volatile bool Flg_i2c_ACC;
+extern volatile bool Flg_i2c_DAC;
 
 /* ******************** PERIPHERALS ***************************************** */
 // Output latches for LEDs
@@ -133,21 +144,18 @@ extern volatile uint8_t ESP_ID[6];
 #define LIN_DIR_2 LATBbits.LATB12
 #define LIN_DIR_3 LATBbits.LATB14
 
-#define MotLin_MIN_1 108            // min pot value A
-#define MotLin_MAX_1 1022           // max pot value A
-#define MotLin_MIN_2 108            // min pot value B
-#define MotLin_MAX_2 1022           // max pot value B
-#define MotLin_MIN_3 108            // min pot value C
-#define MotLin_MAX_3 1022           // max pot value C
+#define MotLin_MinInput 0           // linear motor controlled with 0.1mm input
+#define MotLin_MaxInput 120         // from 0 to 12 mm -> min: 0, max:120
+
 #define MotLin_SlowRegion 50        // slow region near min and max
-#define MotLin_SlowFactor 2         // linear slow down factor in slow region
+#define MotLin_SlowFactor 1.5         // linear slow down factor in slow region
 
 #define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
 #define MotLin_PID_dt 50            // timer period
 #define MotLin_PID_kP 25            // proportional component
 #define MotLin_PID_kI 12            // integral component
 #define MotLin_PID_kD 0             // derivative component
-    
+
 #define MotLin_PID_Imax 15
 #define MotLin_PID_Max 1000
 
@@ -169,8 +177,8 @@ extern volatile uint8_t ESP_ID[6];
 
 
 /* ******************** I2C ************************************************* */
-#define SLAVE_I2C_GENERIC_RETRY_MAX           20
-#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      50
+#define SLAVE_I2C_GENERIC_RETRY_MAX           5
+#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      20
 
 
 /* ******************** ENCODERS AS5048B ************************************ */
@@ -182,8 +190,12 @@ extern volatile uint8_t ESP_ID[6];
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
 #define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
-#define MMA8452Q_CTRL_REG1 0x01 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_STBY 0x00 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_ACTV 0x01 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG2_ADDR 0x0E //XYZ_DATA_CFG register (range and filter)
+#define MMA8452Q_CTRL_REG2_RNGE 0x00 //2g range and high-pass filter off
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
+
 
 
 /* ******************** LED DRIVER TLC59208 ****************************** */
@@ -198,7 +210,7 @@ extern volatile uint8_t ESP_ID[6];
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
 #define SMA_Period_1 150 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
-#define SMA_Period_2 150
+#define SMA_Period_2 150 // split into high I opening and low I maintain phases
 #define SMA_Duty_1 150 // 8-bit PWM value for first phase
 #define SMA_Duty_2 60 // 8-bit PWM value for second phase
 

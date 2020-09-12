@@ -174,15 +174,11 @@ uint16_t TMR5_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
-    if(Flg_DelayStart)
-    {
+    if(Flg_DelayStart){
         static uint8_t start = 0;
-        if(start > 5)
-        {
+        if(start > 5){
             Flg_DelayStart = false;
-        }
-        else
-        {
+        } else {
             start++;
             return;
         }        
@@ -210,13 +206,15 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     Coms_123_ConHandle(); // inter-module connection handler
     
     Battery_Check();
-
-    if (MODE_LED_ANGLE && MODE_ACC_CON) {
-        Sens_ACC_Read();
+    
+    if (MODE_ACC_CON)
+        Flg_i2c_ACC = true; // read accelerometer, called in tmr1
+    
+    if (MODE_LED_ANGLE) {
         int16_t RGB[3] = {0, 0, 0};
-        RGB[0] = Sens_ACC_Get(0) / 16 + 64;
-        RGB[1] = Sens_ACC_Get(1) / 16 + 64;
-        RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
+//        RGB[0] = Sens_ACC_Get(0) / 16 + 64;
+//        RGB[1] = Sens_ACC_Get(1) / 16 + 64;
+//        RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
         uint8_t m;
         for (m = 0; m <= 2; m++) {
             if (RGB[m] < 0) {

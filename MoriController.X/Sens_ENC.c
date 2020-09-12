@@ -2,9 +2,10 @@
 #include "Sens_ENC.h"
 #include "mcc_generated_files/i2c1.h"
 
-// Encoder AS5048B
+float ENC_Data[3] = {1, 2, 3};
 
-float Sens_ENC_Read(uint8_t encoder) {
+// Encoder AS5048B
+void Sens_ENC_Read(uint8_t edge) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
     static uint8_t writeBuffer, readBuffer[2], *pWrite, *pRead;
@@ -20,8 +21,8 @@ float Sens_ENC_Read(uint8_t encoder) {
     pRead = readBuffer;
         
     // build TRB for writing and reading
-    I2C1_MasterWriteTRBBuild(&TRB[0], pWrite, 1, AS5048B_Address | encoder);
-    I2C1_MasterReadTRBBuild(&TRB[1], pRead, 2, AS5048B_Address | encoder);
+    I2C1_MasterWriteTRBBuild(&TRB[0], pWrite, 1, AS5048B_Address | edge);
+    I2C1_MasterReadTRBBuild(&TRB[1], pRead, 2, AS5048B_Address | edge);
 
     timeOut = 0;
     slaveTimeOut = 0;
@@ -49,8 +50,6 @@ float Sens_ENC_Read(uint8_t encoder) {
             break;//return (0);
         else
             timeOut++;
-        
-        __delay_us(10);
     }
     
     // combine 14 bit result
@@ -59,12 +58,12 @@ float Sens_ENC_Read(uint8_t encoder) {
     
     // convert to float
     angleFLT = (float)(0b11111111111111 - angleINT);
-    angleFLT = (angleFLT / AS5048B_Res) * 360.0;
+    angleFLT = (angleFLT / AS5048B_Res) * 360.0 - 180;
 
     // output
-    if (angleFLT > 180) {
-        return angleFLT - 360;
-    } else {
-        return angleFLT;
-    }
+    ENC_Data[edge] = angleFLT;
+}
+
+float Sens_ENC_Get(uint8_t edge) {
+    return ENC_Data[edge];
 }

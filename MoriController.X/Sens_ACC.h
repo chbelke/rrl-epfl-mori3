@@ -8,7 +8,8 @@
 
 void Sens_ACC_Setup(void);
 void Sens_ACC_Read(void);
-int16_t Sens_ACC_Get(uint8_t);
+uint16_t Sens_ACC_GetRaw(uint8_t);
+uint16_t Sens_ACC_GetAngle(uint8_t);
 
 #endif	/* Sens_ACC_H */
 

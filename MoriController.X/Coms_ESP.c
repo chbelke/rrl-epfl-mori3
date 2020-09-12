@@ -1,4 +1,5 @@
 #include "Defs.h"
+#include "Defs_Mod.h"
 #include "Acts_LIN.h"
 #include "Acts_ROT.h"
 #include "Acts_CPL.h"
@@ -13,6 +14,10 @@
 #include "Coms_123.h"
 #include <string.h>
 #include "Coms_ESP.h"
+#include "Sens_ENC.h"
+
+#define WHEEL 68.15f // wheel distance from vertex
+#define SxOUT 0.9 // output speed factor for non-primary wheels
 
 uint8_t EspInCase = 0; // switch case variable
 uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
@@ -24,14 +29,10 @@ uint16_t EspIn0End = 0; // counting instances of no end byte since start
 int8_t DrivePWM[3] = {0, 0, 0}; // manual drive mode PWM values by edge
 uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
-#define WHEEL 68.15f // wheel distance from vertex
-#define SxOUT 0.9 // output speed factor for non-primary wheels
-
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
+uint8_t WIFI_ID[6] = {ID1, ID2, ID3, ID4, ID5, ID6}; // XXX ESP_ID
 bool Flg_Booted_Up = false;
-
-//uint8_t SelfID[6] = {0, 0, 0, 0, 0, 0};
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
 uint8_t WIFI_LED_BLINK_ACT[3] = {0, 0, 0};
@@ -211,7 +212,7 @@ void Coms_ESP_Verbose()
     UART4_Write(6); // Message length
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(ADC1_Return(i));
+        UART4_Write(Acts_LIN_GetCurrent(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;
@@ -376,7 +377,7 @@ void Coms_ESP_Request_Edges()
     UART4_Write(0b10010100);
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(ADC1_Return(i));
+        UART4_Write(Acts_LIN_GetCurrent(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;  
@@ -392,7 +393,7 @@ void Coms_ESP_Request_Angles()
     UART4_Write(0b10010101);
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(ADC1_Return(i));
+        UART4_Write16(Acts_ROT_GetCurrent(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
@@ -408,7 +409,7 @@ void Coms_ESP_Request_Orient()
     UART4_Write(0b10010110);
     uint8_t i;
     for (i = 0; i < 3; i++) {    
-        UART4_Write16(Sens_ACC_Get(i));
+        UART4_Write16(Sens_ACC_GetAngle(i));
     }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;  
@@ -419,7 +420,7 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
 {
     uint8_t *neighbour;
     uint8_t i;
-    neighbour = Coms_123_Get_Neighbour(edge);
+    neighbour = Coms_123_GetNeighbour(edge);
     
     if(*(neighbour+edge*6)==0)
     {

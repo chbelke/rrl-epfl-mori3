@@ -63,14 +63,20 @@
 volatile bool MODE_LED_ANGLE = false;
 volatile bool MODE_LED_EDGES = false;
 volatile bool MODE_LED_RNBOW = false;
+
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAng = false;
 volatile bool Flg_LiveExt = false;
+volatile bool Flg_BatLow = false;
+volatile bool Flg_Button = false;
+
+// edge state handles
 volatile bool Flg_EdgeCon[3] = {false, false, false}; // connection detected
 volatile bool Flg_EdgeSyn[3] = {false, false, false}; // connection acknowledged
 volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action
-volatile bool Flg_BatLow = false;
-volatile bool Flg_Button = false;
+volatile bool Flg_EdgeRequest_Ang[3] = {false, false, false};
+volatile bool Flg_EdgeRequest_Ext[3] = {false, false, false};
+volatile bool Flg_EdgeRequest_Cpl[3] = {false, false, false};
 
 volatile bool Flg_DelayStart = true;
 volatile bool Flg_Verbose = false;
@@ -85,11 +91,16 @@ volatile bool Flg_ID_check = false;
 
 volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 
+volatile bool Flg_i2c_PWM = false;
+volatile bool Flg_i2c_ACC = false;
+volatile bool Flg_i2c_DAC = false;
+
 /*
                          Main application
  */
 int main(void)
-{      
+{   
+    __delay_ms(1000);
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = LED_Off;
@@ -109,11 +120,12 @@ int main(void)
     Acts_ROT_Limit(1,255);
     Acts_ROT_Limit(2,255);
     
-    Acts_LIN_SetTarget(0,457);
-    Acts_LIN_SetTarget(1,457);
-    Acts_LIN_SetTarget(2,457);
+//    Acts_LIN_SetTarget(0,120);
+//    Acts_LIN_SetTarget(1,120);
+//    Acts_LIN_SetTarget(2,120);
+    Flg_MotLin_Active = true;
     
-    Mnge_RGB_SetAll(0,1,2);
+//    Mnge_RGB_SetAll(0,1,2);
     
     while (1)
     {

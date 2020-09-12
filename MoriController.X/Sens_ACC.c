@@ -1,31 +1,56 @@
 #include "Sens_ACC.h"
+#include <xc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <libpic30.h>
 #include "Defs.h"
+#include "Mnge_RGB.h"
+#include "math.h"
+#include "dsp.h"
 
 // Accelerometer MMA8452Q
 
-volatile int16_t ACC_Data[3] = {0, 0, 0};
+int16_t ACC_Data[3] = {0, 0, 0};
+uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
+uint8_t MMAinitReg2[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_ACTV};
+uint8_t MMAinitReg3[2] = {MMA8452Q_CTRL_REG2_ADDR, MMA8452Q_CTRL_REG2_RNGE};
 
 void Sens_ACC_Setup(void) {
     I2C1_MESSAGE_STATUS status;
-    I2C1_TRANSACTION_REQUEST_BLOCK TRB;
-    uint8_t *pWrite, writeBuffer[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1};
+    I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
+    uint8_t *pWrite, writeBuffer[2], nCount, iCount;
     uint16_t timeOut, slaveTimeOut;
 
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
 
-    // declare buffer pointer
-    pWrite = writeBuffer;
+    // fill write buffer with first set of instructions
+    nCount = 2;
+    pWrite = MMAinitReg1;
+    for (iCount = 0; iCount < nCount; iCount++) writeBuffer[iCount] = *pWrite++;
+    // build first TRB for writing
+    I2C1_MasterWriteTRBBuild(&TRB[0], pWrite, nCount, MMA8452Q_Address);
 
-    // build TRB for writing
-    I2C1_MasterWriteTRBBuild(&TRB, pWrite, 2, MMA8452Q_Address);
+    // fill write buffer with second set of instructions
+    nCount = 2;
+    pWrite = MMAinitReg2;
+    for (iCount = 0; iCount < nCount; iCount++) writeBuffer[iCount] = *pWrite++;
+    // build second TRB for writing
+    I2C1_MasterWriteTRBBuild(&TRB[1], pWrite, nCount, MMA8452Q_Address);
+
+    // fill write buffer with second set of instructions
+    nCount = 2;
+    pWrite = MMAinitReg3;
+    for (iCount = 0; iCount < nCount; iCount++) writeBuffer[iCount] = *pWrite++;
+    // build second TRB for writing
+    I2C1_MasterWriteTRBBuild(&TRB[2], pWrite, nCount, MMA8452Q_Address);
 
     timeOut = 0;
     slaveTimeOut = 0;
 
     while (status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
-        I2C1_MasterTRBInsert(1, &TRB, &status);
+        I2C1_MasterTRBInsert(3, TRB, &status);
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
@@ -100,16 +125,41 @@ void Sens_ACC_Read(void) {
         __delay_us(10);
     }
 
+//    uint8_t i;
+//    for (i = 0; i < 5; i += 2) {
+//        ACC_Data[i / 2] = ((readBuffer[i] << 8) | readBuffer[i + 1]) >> 4;
+//        if (readBuffer[i] > 0x80){
+//            ACC_Data[i / 2] = (ACC_Data[i / 2] & 0x7FF) - 0x7FF;
+//        }
+//    }
     uint8_t i;
     for (i = 0; i < 5; i += 2) {
-        ACC_Data[i / 2] = ((readBuffer[i] << 8) | readBuffer[i + 1]) >> 4;
-        if (readBuffer[i] > 0x80){
-            ACC_Data[i / 2] = (ACC_Data[i / 2] & 0x7FF) - 0x7FF;
-        }
+        ACC_Data[i / 2] = ((readBuffer[i] * 256) + readBuffer[i + 1]) / 16 ;
+//        if (readBuffer[i] > 0x80){
+//            ACC_Data[i / 2] = (ACC_Data[i / 2] & 0x7FF) - 0x7FF;
+//        }
     }
+    
 }
 
-// acceleration values between -2047 and 2047
-int16_t Sens_ACC_Get(uint8_t axis) { //axis 0 corresponds to x, 1 to y, 2 to z
-    return ACC_Data[axis];
+// acceleration values between -2047 and 2047 (2g)
+uint16_t Sens_ACC_GetRaw(uint8_t axis) { //axis 0 corresponds to x, 1 to y, 2 to z
+    return (uint16_t)(ACC_Data[axis] + 2047);
+}
+
+uint16_t Sens_ACC_GetAngle(uint8_t angle){ 
+    float accX = ACC_Data[0];
+    float accY = ACC_Data[1];
+    float accZ = ACC_Data[2];
+    
+    // 0 = alpha (about x), 1 = beta (about y), 2 = gamma (about z); right hand rule
+    if (angle == 0){
+        return (uint16_t)10*((atan2(accY, sqrt(accX*accX + accZ*accZ))*180.0)/PI + 180);
+    } else if (angle == 1) {
+        return (uint16_t)10*(-(atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/PI + 180);
+    } else if (angle == 2) {
+        return (uint16_t)10*(-(atan2(-accY, accZ)*180.0)/PI + 180);
+    } else {
+        return 999;
+    }
 }

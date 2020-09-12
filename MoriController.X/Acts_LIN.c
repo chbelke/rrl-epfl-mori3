@@ -4,14 +4,22 @@
 #include <libpic30.h>
 #include <stdbool.h>
 #include "Defs.h"
+#include "Defs_Mod.h"
 #include "mcc_generated_files/pwm.h"
+#include "mcc_generated_files/adc1.h"
 
-uint16_t MotLin_Desired[3] = {457, 457, 457};
+uint8_t Ext_Desired[3] = {60, 60, 60};
+uint8_t Ext_DesiredOld[3] = {60, 60, 60};
 float lPID_eOld[3] = {0, 0, 0};
 float lPID_I[3] = {0, 0, 0};
 uint8_t Stbl_Count[3] = {0, 0, 0};
 int16_t Stbl_dOld[3] = {0, 0, 0};
 bool Stbl_Flag[3] = {false, false, false};
+
+/* ******************** ARDUINO MAP FUNCTION ******************************** */
+long map(long x, long in_min, long in_max, long out_min, long out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 /* ******************** LINEAR MOTOR OUTPUTS ******************************** */
 void Acts_LIN_Out(uint8_t edge, int16_t duty) {
@@ -51,27 +59,30 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
 }
 
 /* ******************** LINEAR MOTOR PID ************************************ */
-void Acts_LIN_PID(uint8_t edge, uint16_t current, uint16_t desired) {
+void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     // avoid bad control inputs
+    if (target < MotLin_MinInput) target = MotLin_MinInput;
+    else if (target > MotLin_MaxInput) target = MotLin_MaxInput;
+    
+    // map input to max and min of potentiometer
+    int16_t OUT_min, OUT_max;
     switch (edge) {
         case 0:
-            if (desired < MotLin_MIN_1) desired = MotLin_MIN_1;
-            else if (desired > MotLin_MAX_1) desired = MotLin_MAX_1;
+            OUT_min = MotLin_MIN_1;
+            OUT_max = MotLin_MAX_1;
             break;
-
         case 1:
-            if (desired < MotLin_MIN_2) desired = MotLin_MIN_2;
-            else if (desired > MotLin_MAX_2) desired = MotLin_MAX_2;
+            OUT_min = MotLin_MIN_2;
+            OUT_max = MotLin_MAX_2;
             break;
-
         case 2:
-            if (desired < MotLin_MIN_3) desired = MotLin_MIN_3;
-            else if (desired > MotLin_MAX_3) desired = MotLin_MAX_3;
+            OUT_min = MotLin_MIN_3;
+            OUT_max = MotLin_MAX_3;
             break;
-
         default:
             break;
     }
+    uint16_t desired = (uint16_t) map(target, 0, 120, OUT_max, OUT_min);
 
     // calculate error
     float error = (float) (desired) - (float) (current);
@@ -83,7 +94,10 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint16_t desired) {
     // acceptable error band -> switch off motor
     if ((error > -0.5 * MotLin_PID_de) && (error < 0.5 * MotLin_PID_de)) {
         Stbl_Count[edge]++;
-        if (Stbl_Count[edge] >= 100) Stbl_Flag[edge] = true;
+        if (Stbl_Count[edge] >= 100){
+            Stbl_Flag[edge] = true;
+            Flg_EdgeRequest_Ext[edge] = false;
+        }
     } else {
         Stbl_Count[edge] = 0;
     }
@@ -132,11 +146,38 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint16_t desired) {
 }
 
 /* ******************** GET DESIRED EXTENSION ******************************* */
-uint16_t Acts_LIN_GetTarget(uint8_t edge) {
-    return MotLin_Desired[edge];
+uint8_t Acts_LIN_GetTarget(uint8_t edge) {
+    return Ext_Desired[edge];
 }
 
 /* ******************** SET DESIRED EXTENSION ******************************* */
-void Acts_LIN_SetTarget(uint8_t edge, uint16_t desired) {
-    MotLin_Desired[edge] = desired;
+void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
+    Ext_DesiredOld[edge] = Ext_Desired[edge];
+    Ext_Desired[edge] = desired;
+    Flg_EdgeRequest_Ext[edge] = true; //  relevant when coupled
+    
+    if (Ext_Desired[edge] != Ext_DesiredOld[edge]) //  no action when con and new
+        Flg_EdgeAct[edge] = false;
+}
+
+/* ******************** RETURN FORMATTED EXTENTION ************************** */
+uint8_t Acts_LIN_GetCurrent(uint8_t edge) {
+    int16_t IN_min, IN_max;
+    switch (edge) {
+        case 0:
+            IN_min = MotLin_MIN_1;
+            IN_max = MotLin_MAX_1;
+            break;
+        case 1:
+            IN_min = MotLin_MIN_2;
+            IN_max = MotLin_MAX_2;
+            break;
+        case 2:
+            IN_min = MotLin_MIN_3;
+            IN_max = MotLin_MAX_3;
+            break;
+        default:
+            break;
+    }
+    return (uint8_t) map(ADC1_Return(edge), IN_min, IN_max, 120, 0);
 }

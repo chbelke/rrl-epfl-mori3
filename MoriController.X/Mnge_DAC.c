@@ -1,5 +1,8 @@
 #include "Mnge_DAC.h"
 
+bool DAC_Flag[3] = {false, false, false};
+uint8_t DAC_Value[3] = {0, 0, 0};
+
 void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB;
@@ -47,4 +50,20 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
         
         __delay_us(10);
     }
+}
+
+void Mnge_DAC_Ctrl(void) {
+    uint8_t i;
+    for (i=0; i<3; i++){
+        if (DAC_Flag[i]){
+            Mnge_DAC_Write(i,DAC_Value[i]);
+            DAC_Flag[i] = false;
+        }
+    }
+}
+
+void Mnge_DAC_Set(uint8_t edge, uint8_t value){
+    DAC_Value[edge] = value;
+    DAC_Flag[edge] = true;
+    Flg_i2c_DAC = true;
 }

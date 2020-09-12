@@ -60,6 +60,7 @@
 #include "../Mnge_PWM.h"
 #include "../Sens_ACC.h"
 #include "../Mnge_BTN.h"
+#include "../Mnge_DAC.h"
 
 /**
  Section: File specific functions
@@ -193,18 +194,26 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     }
     
     if (MODE_ENC_CON){
-        static uint16_t angle[3];
-        angle[0] = Sens_ENC_Read(0);
-        angle[1] = Sens_ENC_Read(1);
-        angle[2] = Sens_ENC_Read(2);
+        Sens_ENC_Read(0);
+        Sens_ENC_Read(1);
+        Sens_ENC_Read(2);
     }
-    
-//    UART4_Write(0x0F);
-//    UART4_Write16(angle[2]);
-    
     // Rotary Motor PID here
-//    MotRot_PID(0, angle, ((float)ADC1_Return(1))*360/1024-180);
-//    UART4_Write((int8_t)((int16_t)(angle)>>6));
+    
+    
+    // Manage remaining i2c communication (must be tmr1)
+    if (Flg_i2c_PWM){
+        Mnge_PWM_Write();
+        Flg_i2c_PWM = false;
+    }
+    if (Flg_i2c_ACC && MODE_ACC_CON){
+        Sens_ACC_Read();
+        Flg_i2c_ACC = false;
+    }
+    if (Flg_i2c_DAC){
+        Mnge_DAC_Ctrl();
+        Flg_i2c_DAC = false;
+    }
 }
 
 void  TMR1_SetInterruptHandler(void (* InterruptHandler)(void))

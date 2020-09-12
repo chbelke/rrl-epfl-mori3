@@ -64,10 +64,11 @@
 #include "../Mnge_PWM.h"
 #include "../Sens_ACC.h"
 #include "../Coms_123.h"
+#include "../Mnge_RGB.h"
 
 /**
  Section: File specific functions
-*/
+ */
 void (*TMR3_InterruptHandler)(void) = NULL;
 void TMR3_CallBack(void);
 
@@ -88,12 +89,11 @@ void TMR3_CallBack(void);
     None.
  */
 
-typedef struct _TMR_OBJ_STRUCT
-{
+typedef struct _TMR_OBJ_STRUCT {
     /* Timer Elapsed */
-    volatile bool           timerElapsed;
+    volatile bool timerElapsed;
     /*Software Counter value*/
-    volatile uint8_t        count;
+    volatile uint8_t count;
 
 } TMR_OBJ;
 
@@ -103,8 +103,7 @@ static TMR_OBJ tmr3_obj;
   Section: Driver Interface
  */
 
-void TMR3_Initialize (void)
-{
+void TMR3_Initialize(void) {
     //TMR3 0; 
     TMR3 = 0x00;
     //Period = 0.05 s; Frequency = 3686400 Hz; PR3 2880; 
@@ -112,8 +111,7 @@ void TMR3_Initialize (void)
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
     T3CON = 0x8020;
 
-    if(TMR3_InterruptHandler == NULL)
-    {
+    if (TMR3_InterruptHandler == NULL) {
         TMR3_SetInterruptHandler(&TMR3_CallBack);
     }
 
@@ -124,18 +122,15 @@ void TMR3_Initialize (void)
 
 }
 
-
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
-{
+void __attribute__((interrupt, no_auto_psv)) _T3Interrupt() {
     /* Check if the Timer Interrupt/Status is set */
 
     //***User Area Begin
 
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes
-    if(TMR3_InterruptHandler) 
-    { 
-           TMR3_InterruptHandler(); 
+    if (TMR3_InterruptHandler) {
+        TMR3_InterruptHandler();
     }
 
     //***User Area End
@@ -145,58 +140,58 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
     IFS0bits.T3IF = false;
 }
 
-void TMR3_Period16BitSet( uint16_t value )
-{
+void TMR3_Period16BitSet(uint16_t value) {
     /* Update the counter values */
     PR3 = value;
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Period16BitGet( void )
-{
-    return( PR3 );
+uint16_t TMR3_Period16BitGet(void) {
+    return ( PR3);
 }
 
-void TMR3_Counter16BitSet ( uint16_t value )
-{
+void TMR3_Counter16BitSet(uint16_t value) {
     /* Update the counter values */
     TMR3 = value;
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR3_Counter16BitGet( void )
-{
-    return( TMR3 );
+uint16_t TMR3_Counter16BitGet(void) {
+    return ( TMR3);
 }
 
-
-void __attribute__ ((weak)) TMR3_CallBack(void)
-{
+void __attribute__((weak)) TMR3_CallBack(void) {
     // Add your custom callback code here
 
-    Acts_CPL_Ctrl(); // coupling sma controller
-    
     Coms_123_ActHandle(); // action synchronisation handle
-    
-    ADC1_Update(); // read analog potentiometer inputs
+
     uint8_t edge;
-    for (edge = 0; edge < 3; edge++){
-        if (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]) // extension control loops
+    for (edge = 0; edge < 3; edge++) { // open coupling if requested
+        if ((Flg_EdgeRequest_Cpl[edge]) &&
+                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge])) {
+            Acts_CPL_On(edge);
+            Flg_EdgeRequest_Cpl[edge] = false;
+        }
+    }
+    Acts_CPL_Ctrl(); // coupling sma controller
+
+    ADC1_Update(); // read analog potentiometer inputs
+    for (edge = 0; edge < 3; edge++) { // extension control loops
+        if (Flg_EdgeRequest_Ext[edge] &&
+                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
     }
 }
 
-void  TMR3_SetInterruptHandler(void (* InterruptHandler)(void))
-{ 
+void TMR3_SetInterruptHandler(void (* InterruptHandler)(void)) {
     IEC0bits.T3IE = false;
-    TMR3_InterruptHandler = InterruptHandler; 
+    TMR3_InterruptHandler = InterruptHandler;
     IEC0bits.T3IE = true;
 }
 
-void TMR3_Start( void )
-{
+void TMR3_Start(void) {
     /* Reset the status information */
     tmr3_obj.timerElapsed = false;
 
@@ -207,8 +202,7 @@ void TMR3_Start( void )
     T3CONbits.TON = 1;
 }
 
-void TMR3_Stop( void )
-{
+void TMR3_Stop(void) {
     /* Stop the Timer */
     T3CONbits.TON = false;
 
@@ -216,26 +210,22 @@ void TMR3_Stop( void )
     IEC0bits.T3IE = false;
 }
 
-bool TMR3_GetElapsedThenClear(void)
-{
+bool TMR3_GetElapsedThenClear(void) {
     bool status;
 
     status = tmr3_obj.timerElapsed;
 
-    if(status == true)
-    {
+    if (status == true) {
         tmr3_obj.timerElapsed = false;
     }
     return status;
 }
 
-int TMR3_SoftwareCounterGet(void)
-{
+int TMR3_SoftwareCounterGet(void) {
     return tmr3_obj.count;
 }
 
-void TMR3_SoftwareCounterClear(void)
-{
+void TMR3_SoftwareCounterClear(void) {
     tmr3_obj.count = 0;
 }
 

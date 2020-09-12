@@ -25,13 +25,12 @@ void Acts_CPL_Set(uint8_t edge, uint8_t duty) {
 }
 
 /* ******************** OPEN COUPLING *************************************** */
-void Acts_CPL_On(uint8_t edge) {
+void Acts_CPL_On(uint8_t edge) { // called in tmr3 if request flag is set
     Acts_CPL_Open[edge] = true;
     CPL_Count_1[edge] = 0;
     CPL_Count_2[edge] = SMA_Period_2;
     Acts_CPL_Set(edge, SMA_Duty_1);
     Coms_ESP_LED_Set_Blink_Freq(edge, 5);
-    Coms_ESP_LED_State(edge, 3);
 }
 
 /* ******************** CLOSE COUPLING ************************************** */
@@ -40,22 +39,20 @@ void Acts_CPL_Off(uint8_t edge) {
     CPL_Count_1[edge] = SMA_Period_1;
     CPL_Count_2[edge] = SMA_Period_2;
     Acts_CPL_Set(edge, 0);
-    Coms_ESP_LED_State(edge, 0);
 }
 
 /* ******************** COUPLING SMA CONTROLLER ***************************** */
 void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
     uint8_t m;
     for (m = 0; m <= 2; m++) {
-        if (CPL_Count_1[m] < SMA_Period_1) {
+        if (CPL_Count_1[m] < SMA_Period_1) { // first pwm phase (high current)
             CPL_Count_1[m]++;
             if (CPL_Count_1[m] >= SMA_Period_1) {
                 Acts_CPL_Set(m, SMA_Duty_2);
                 CPL_Count_2[m] = 0;
                 Coms_ESP_LED_Set_Blink_Freq(m, 10);
-                Coms_ESP_LED_State(m, 3);
             }
-        } else if (CPL_Count_2[m] < SMA_Period_2) {
+        } else if (CPL_Count_2[m] < SMA_Period_2) { // second pwm phase (maintain)
             CPL_Count_2[m]++;
             if (CPL_Count_2[m] >= SMA_Period_2) {
                 Acts_CPL_Off(m);
@@ -64,7 +61,7 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
             Acts_CPL_Off(m);
         }
     }
-    Mnge_PWM_Write();
+    Flg_i2c_PWM = true; // Mnge_PWM_Write() called in tmr1
 }
 
 bool Acts_CPL_IsOpen(uint8_t edge){

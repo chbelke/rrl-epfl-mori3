@@ -9,5 +9,7 @@
 
 // void DAC5574_Setup(void);
 void Mnge_DAC_Write(uint8_t, uint8_t);
+void Mnge_DAC_Ctrl(void);
+void Mnge_DAC_Set(uint8_t, uint8_t);
 
 #endif	/* MNGE_DAC_H */
