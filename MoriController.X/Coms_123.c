@@ -238,11 +238,9 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         }
        
         //Break if module doesn't know its ID and needs to send ID
-        if(!Flg_ID_check)
-        {
-            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) 
-            {
-                return;                
+        if(!Flg_ID_check) {
+            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) {
+                return;
             }
         }
                     
@@ -286,6 +284,8 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
                 }
                 Coms_123_Write(edge, EDG_End);
             }
+        } else {
+            Flg_EdgeAct[edge] = false;
         }
     }
 }
@@ -328,8 +328,11 @@ void Coms_123_ActVerify(uint8_t edge) {
         NbrCmdMatch[edge] = true;
         if (EdgInAloc[edge] & 0b00000010)
             Flg_EdgeAct[edge] = true;
+        else 
+            Flg_EdgeAct[edge] = false;
     } else {
         NbrCmdMatch[edge] = false;
+        Flg_EdgeAct[edge] = false;
     }
 }
 

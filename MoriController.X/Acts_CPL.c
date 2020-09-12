@@ -31,7 +31,6 @@ void Acts_CPL_On(uint8_t edge) { // called in tmr3 if request flag is set
     CPL_Count_2[edge] = SMA_Period_2;
     Acts_CPL_Set(edge, SMA_Duty_1);
     Coms_ESP_LED_Set_Blink_Freq(edge, 5);
-    Coms_ESP_LED_State(edge, 3);
 }
 
 /* ******************** CLOSE COUPLING ************************************** */
@@ -40,7 +39,6 @@ void Acts_CPL_Off(uint8_t edge) {
     CPL_Count_1[edge] = SMA_Period_1;
     CPL_Count_2[edge] = SMA_Period_2;
     Acts_CPL_Set(edge, 0);
-    Coms_ESP_LED_State(edge, 0);
 }
 
 /* ******************** COUPLING SMA CONTROLLER ***************************** */
@@ -53,7 +51,6 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
                 Acts_CPL_Set(m, SMA_Duty_2);
                 CPL_Count_2[m] = 0;
                 Coms_ESP_LED_Set_Blink_Freq(m, 10);
-                Coms_ESP_LED_State(m, 3);
             }
         } else if (CPL_Count_2[m] < SMA_Period_2) { // second pwm phase (maintain)
             CPL_Count_2[m]++;

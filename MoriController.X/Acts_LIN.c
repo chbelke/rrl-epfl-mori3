@@ -9,6 +9,7 @@
 #include "mcc_generated_files/adc1.h"
 
 uint8_t Ext_Desired[3] = {60, 60, 60};
+uint8_t Ext_DesiredOld[3] = {60, 60, 60};
 float lPID_eOld[3] = {0, 0, 0};
 float lPID_I[3] = {0, 0, 0};
 uint8_t Stbl_Count[3] = {0, 0, 0};
@@ -151,8 +152,12 @@ uint8_t Acts_LIN_GetTarget(uint8_t edge) {
 
 /* ******************** SET DESIRED EXTENSION ******************************* */
 void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
+    Ext_DesiredOld[edge] = Ext_Desired[edge];
     Ext_Desired[edge] = desired;
     Flg_EdgeRequest_Ext[edge] = true; //  relevant when coupled
+    
+    if (Ext_Desired[edge] != Ext_DesiredOld[edge]) //  no action when con and new
+        Flg_EdgeAct[edge] = false;
 }
 
 /* ******************** RETURN FORMATTED EXTENTION ************************** */
