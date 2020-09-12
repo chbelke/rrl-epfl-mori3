@@ -56,7 +56,7 @@ class PublishBinary():
 
     def publishBinary(self):
         text = self.pub_bin_entry.get()
-        if(text is ""):
+        if(text == ""):
             print("Please write a command")
             return
         number = self.binMoriVar.get()

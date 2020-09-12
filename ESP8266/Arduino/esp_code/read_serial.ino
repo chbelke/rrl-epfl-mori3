@@ -375,15 +375,14 @@ bool stateInfo(byte c)
     case 20:  //read edges
       if (c == char(END_BYTE))
       {
-        sprintf(serial_packet, "REQ: EL %d %d %d", (storage[0]*256+storage[1]), 
-                      (storage[2]*256+storage[3]), (storage[4]*256+storage[5]));     
+        sprintf(serial_packet, "REQ: EL %d %d %d", storage[0], storage[1], storage[2]);     
         publish(serial_packet);
         memset(serial_packet, 0, sizeof(serial_packet));
         memset(storage, 0, sizeof(storage));
         count = 0;
         alloc = true;
         return true;
-      } else if (count < 8) {
+      } else if (count < 5) {
         storage[count-1]=c;
         count++;
       } else {
