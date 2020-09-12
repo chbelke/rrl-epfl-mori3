@@ -147,15 +147,18 @@ uint16_t Sens_ACC_GetRaw(uint8_t axis) { //axis 0 corresponds to x, 1 to y, 2 to
     return (uint16_t)(ACC_Data[axis] + 2047);
 }
 
-uint16_t Sens_ACC_GetAngle(uint8_t angle){
+uint16_t Sens_ACC_GetAngle(uint8_t angle){ 
     float accX = ACC_Data[0];
     float accY = ACC_Data[1];
     float accZ = ACC_Data[2];
-    //Roll & Pitch Equations
+    
+    // 0 = alpha (about x), 1 = beta (about y), 2 = gamma (about z); right hand rule
     if (angle == 0){
-        return (uint16_t)10*((atan2(-accY, accZ)*180.0)/PI + 180);
+        return (uint16_t)10*((atan2(accY, sqrt(accX*accX + accZ*accZ))*180.0)/PI + 180);
     } else if (angle == 1) {
-        return (uint16_t)10*((atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/PI + 180);
+        return (uint16_t)10*(-(atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/PI + 180);
+    } else if (angle == 2) {
+        return (uint16_t)10*(-(atan2(-accY, accZ)*180.0)/PI + 180);
     } else {
         return 999;
     }

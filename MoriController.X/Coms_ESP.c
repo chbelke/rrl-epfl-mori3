@@ -390,13 +390,10 @@ void Coms_ESP_Request_Orient()
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010110);
-//    uint8_t i;
-//    for (i = 0; i < 3; i++) {    
-//        UART4_Write16(Sens_ACC_Get(i));
-//    }
-    UART4_Write16(Sens_ACC_GetAngle(0));
-    UART4_Write16(Sens_ACC_GetAngle(1));
-    UART4_Write16(0);
+    uint8_t i;
+    for (i = 0; i < 3; i++) {    
+        UART4_Write16(Sens_ACC_GetAngle(i));
+    }
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;  
 }
