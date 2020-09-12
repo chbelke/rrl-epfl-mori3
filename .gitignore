@@ -66,3 +66,7 @@ MoriController.X/dist/
 MoriController.X/nbproject/Makefile-*
 MoriController.X/nbproject/Package-*
 MoriController.X/nbproject/private/
+
+
+# Ping Data files
+External/Ping\ Data/Data/
