@@ -40,7 +40,6 @@ void Acts_CPL_Off(uint8_t edge) {
     CPL_Count_1[edge] = SMA_Period_1;
     CPL_Count_2[edge] = SMA_Period_2;
     Acts_CPL_Set(edge, 0);
-    Flg_EdgeRequest_Cpl[edge] = false;
     Coms_ESP_LED_State(edge, 0);
 }
 

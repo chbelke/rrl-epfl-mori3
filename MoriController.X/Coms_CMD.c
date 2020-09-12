@@ -346,7 +346,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             EspInByts[edge] = EspInByts[edge] + 1;
             break;
 
-        case 2: // LINEAR MOTOR INPUTS *****************************************
+        case 2: // EXTENSION INPUTS ********************************************
             /* cases 2 to 6, one byte per motor input */
             if (alloc[edge] & 0b00100000) {
                 CmdExtTemp[edge][0] = byte;
@@ -369,7 +369,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                 break;
             }
 
-        case 8: // ROTARY MOTOR INPUTS *****************************************
+        case 8: // ANGLE INPUTS ************************************************
             /* cases 8 to 13, two bytes per motor input */
             if (alloc[edge] & 0b00000100) {
                 CmdAngTemp[edge][0] = ((uint16_t) (byte) << 8) & 0xFF00;
@@ -414,7 +414,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             }
 
         case 14: // verify motor inputs
-            if (alloc[edge] == ESP_End) {
+            if (byte == ESP_End) {
                 if (EspInByts[edge] == (2 + EspInBits[edge] + EspInBits2[edge])) {
                     Coms_CMD_SetEdge(edge, alloc[edge]); // implement command
                 } else {
@@ -449,7 +449,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                 break;
             }
         case 18: // verify drive inputs
-            if (alloc[edge] == ESP_End) {
+            if (byte == ESP_End) {
                 if (EspInByts[edge] == (2 + EspInBits[edge])) {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
@@ -480,7 +480,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             break;
 
         case 21: // verify drive inputs
-            if (alloc[edge] == ESP_End) {
+            if (byte == ESP_End) {
                 if (EspInByts[edge] == 4) {
                     Coms_ESP_Drive(DriveSpd[edge], DriveCrv[edge],
                             ((alloc[edge] & 0x18) >> 3), ((alloc[edge] & 0x04) >> 2));
