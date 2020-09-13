@@ -5,7 +5,7 @@
 #include <libpic30.h>
 #include "Defs.h"
 
-volatile uint8_t PWM_Values[8] = {1, 1, 1, 0, 0, 0, 0, 0};
+volatile uint8_t PWM_Values[8] = {0, 5, 0, 0, 0, 0, 0, 0};
 uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
 uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
 uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};

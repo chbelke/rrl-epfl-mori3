@@ -31,7 +31,7 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
-uint8_t WIFI_ID_Expected[6] = {ID1, ID2, ID3, ID4, ID5, ID6};
+uint8_t ESP_IDexpected[6] = {ID1, ID2, ID3, ID4, ID5, ID6};
 bool Flg_Booted_Up = false;
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
@@ -480,7 +480,7 @@ bool Coms_ESP_VerifyID() {
     bool ID_Ok = true;
     uint8_t i;
     for (i = 0; i < 6; i++){
-        if ((uint8_t)ESP_ID[i] == (uint8_t)WIFI_ID_Expected[i]);
+        if ((uint8_t)ESP_ID[i] == (uint8_t)ESP_IDexpected[i]);
         else ID_Ok = false;
     }
     return ID_Ok;

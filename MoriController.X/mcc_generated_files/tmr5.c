@@ -208,32 +208,16 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         Flg_i2c_ACC = true; // read accelerometer, called in tmr1
     
     if (MODE_LED_ANGLE) {
-        int16_t RGB[3] = {0, 0, 0};
-//        RGB[0] = Sens_ACC_Get(0) / 16 + 64;
-//        RGB[1] = Sens_ACC_Get(1) / 16 + 64;
-//        RGB[2] = 64 - (RGB[0] + RGB[1]) / 2;
-        uint8_t m;
-        for (m = 0; m <= 2; m++) {
-            if (RGB[m] < 0) {
-                RGB[m] = 0;
-            } else if (RGB[m] > 255) {
-                RGB[m] = 255;
-            }
-        }
-        Mnge_RGB_SetAll(RGB[0] / 2, RGB[1] / 2, RGB[2]);
+        uint8_t RGB[3] = {0, 0, 0};
+        RGB[0] = (uint8_t) map(Sens_ACC_GetAngle(0)/10,90,270,0,50);
+        RGB[1] = (uint8_t) map(Sens_ACC_GetAngle(1)/10,90,270,0,50);
+        RGB[2] = (uint8_t) map(Sens_ACC_GetAngle(2)/10,0,360,0,50);
+        Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
     } else if (MODE_LED_EDGES) {
-        uint16_t RGB[3];
-        RGB[0] = (1024 - (ADC1_Return(0))) / 60;
-        RGB[1] = (1024 - (ADC1_Return(1))) / 60;
-        RGB[2] = (1024 - (ADC1_Return(2))) / 60;
-        uint8_t m;
-        for (m = 0; m <= 2; m++) {
-            if (RGB[m] < 0) {
-                RGB[m] = 0;
-            } else if (RGB[m] > 255) {
-                RGB[m] = 255;
-            }
-        }
+        uint8_t RGB[3] = {0, 0, 0};
+        RGB[0] = (uint8_t) map(Acts_LIN_GetCurrent(0),0,120,0,50);
+        RGB[1] = (uint8_t) map(Acts_LIN_GetCurrent(1),0,120,0,50);
+        RGB[2] = (uint8_t) map(Acts_LIN_GetCurrent(2),0,120,0,50);
         Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
     } else if (MODE_LED_RNBOW) {
         static uint8_t RGBow[3] = {0, 80, 160};
@@ -243,12 +227,9 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
     }
 
-    if (Flg_Verbose && WIFI_EN)
-    {
+    if (Flg_Verbose && WIFI_EN) {
         static int k = 0;
-        if(!(k % 5)){
-            Coms_ESP_Verbose();
-        }
+        if(!(k % 5)) Coms_ESP_Verbose();
         k++;
     }
 }

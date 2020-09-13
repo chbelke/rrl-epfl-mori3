@@ -92,7 +92,8 @@ volatile bool Flg_ID_check = false;
 
 volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 
-volatile bool Flg_i2c_PWM = false; // make sure pwm values are written 
+// i2c flags set anywhere, checked and executed in tmr1
+volatile bool Flg_i2c_PWM = false;
 volatile bool Flg_i2c_ACC = false;
 volatile bool Flg_i2c_DAC = false;
 
@@ -126,10 +127,6 @@ int main(void) {
     Acts_ROT_Limit(0, 255);
     Acts_ROT_Limit(1, 255);
     Acts_ROT_Limit(2, 255);
-
-    //    Acts_LIN_SetTarget(0,120);
-    //    Acts_LIN_SetTarget(1,120);
-    //    Acts_LIN_SetTarget(2,120);
 
     while (1);
     return 1;
