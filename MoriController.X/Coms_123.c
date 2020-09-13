@@ -16,6 +16,7 @@ uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
 uint8_t EdgIdlCnt[3] = {0, 0, 0}; // no idle byte received counter
 uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
+uint8_t EdgActCnt[3] = {0, 0, 0}; // no idle byte received counter
 
 bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
@@ -123,16 +124,15 @@ void Coms_123_Eval(uint8_t edge) {
 
         case 7: // verify action command
             if (EdgIn == EDG_End) { // check length necessary? 
-                // verify with own action commands
-                Coms_123_ActVerify(edge);
+                Coms_123_ResetIntervals(edge);
+                EdgActCnt[edge] = 0;
+                Coms_123_ActVerify(edge); // verify with own action commands
             }
             EdgInCase[edge] = 0;
             break;
 
         case 10: // IDLE MODE **************************************************
-            if (EdgIn == EDG_End) {
-                Coms_123_ResetIntervals(edge);
-            }
+            if (EdgIn == EDG_End) Coms_123_ResetIntervals(edge);
             EdgInCase[edge] = 0;
             break;
 
@@ -239,13 +239,12 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
        
         //Break if module doesn't know its ID and needs to send ID
         if(!Flg_ID_check) {
-            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) {
+            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) { // XXX why?
                 return;
             }
         }
                     
-        if(Flg_Uart_Lock[edge]==false)
-        {
+        if(Flg_Uart_Lock[edge]==false) {
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte
             Coms_123_Write(edge, byte);
@@ -262,6 +261,15 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
     uint8_t edge, byte;
     for (edge = 0; edge < 3; edge++) {
         if (Flg_EdgeSyn[edge]) {
+            if (Flg_EdgeAct[edge]){
+                if (EdgActCnt[edge] >= EDG_ActIntrvl){
+                    Flg_EdgeAct[edge] = false;
+                    NbrCmdMatch[edge] = false;
+                } else {
+                    EdgActCnt[edge]++;
+                }
+            }
+            
             byte = 0b01000000;
             if (Flg_EdgeRequest_Ext[edge])
                 byte = byte | 0b00010000;
@@ -326,10 +334,11 @@ void Coms_123_ActVerify(uint8_t edge) {
     // everything is ok and something received
     if ((!NbrCmdNoGo) && (EdgInAloc[edge] & 0b00011100)){
         NbrCmdMatch[edge] = true;
-        if (EdgInAloc[edge] & 0b00000010)
+        if (EdgInAloc[edge] & 0b00000010){
             Flg_EdgeAct[edge] = true;
-        else 
+        } else {
             Flg_EdgeAct[edge] = false;
+        }
     } else {
         NbrCmdMatch[edge] = false;
         Flg_EdgeAct[edge] = false;
@@ -380,8 +389,14 @@ uint8_t Coms_123_Read(uint8_t edge) {
 void Coms_123_Disconnected(uint8_t edge) {
     Flg_EdgeCon[edge] = false;
     Flg_EdgeSyn[edge] = false;
+    Flg_EdgeAct[edge] = false;
     Flg_IDCnfd[edge] = false;
     Flg_IDRcvd[edge] = false;    
+    
+    // reset requests to ensure it doesnt move because it's no longer connected
+    Flg_EdgeRequest_Ext[edge] = false;
+    Flg_EdgeRequest_Ang[edge] = false;
+    Flg_EdgeRequest_Cpl[edge] = false;
 }
 
 uint8_t * Coms_123_GetNeighbour(uint8_t edge) {

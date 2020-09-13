@@ -185,14 +185,11 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     }
     
     static uint8_t last_ID_call = 0;
-    if(!Flg_ID_check && WIFI_EN)
-    {
-        if(last_ID_call>5)
-        {
+    if(!Flg_ID_check && WIFI_EN) {
+        if(last_ID_call>5) {
             Coms_ESP_Request_ID();
             last_ID_call = 0;
-        } else
-        {
+        } else {
             last_ID_call++;
         }
     }
@@ -246,8 +243,6 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
     }
 
-
-    
     if (Flg_Verbose && WIFI_EN)
     {
         static int k = 0;
@@ -255,10 +250,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
             Coms_ESP_Verbose();
         }
         k++;
-//        Coms_ESP_Interpret();
     }
-        
-    
 }
 
 void  TMR5_SetInterruptHandler(void (* InterruptHandler)(void))

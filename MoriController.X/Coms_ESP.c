@@ -31,7 +31,7 @@ uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
-uint8_t WIFI_ID[6] = {ID1, ID2, ID3, ID4, ID5, ID6}; // XXX ESP_ID
+uint8_t WIFI_ID_Expected[6] = {ID1, ID2, ID3, ID4, ID5, ID6};
 bool Flg_Booted_Up = false;
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
@@ -245,9 +245,8 @@ void Coms_ESP_Verbose_Write(const char *message)
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {
     if((WIFI_LED_STATE[edge] - state) == 0)
-    {
         return;
-    }
+
     switch(state){
         case 0: //off
             Coms_ESP_LED_On(edge, WIFI_LED_OFF);
@@ -477,6 +476,15 @@ void Coms_ESP_Request_ID()
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
 
+bool Coms_ESP_VerifyID() {
+    bool ID_Ok = true;
+    uint8_t i;
+    for (i = 0; i < 6; i++){
+        if ((uint8_t)ESP_ID[i] == (uint8_t)WIFI_ID_Expected[i]);
+        else ID_Ok = false;
+    }
+    return ID_Ok;
+}
 
 /* Com_ESP_Drive - Online calc verification */
 /* https://repl.it/languages/c

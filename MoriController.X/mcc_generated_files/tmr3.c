@@ -182,6 +182,8 @@ void __attribute__((weak)) TMR3_CallBack(void) {
         if (Flg_EdgeRequest_Ext[edge] &&
                 (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
+        else 
+            Acts_LIN_Out(edge, 0);// make sure motors are off
     }
 }
 

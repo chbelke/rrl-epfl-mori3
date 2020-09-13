@@ -235,8 +235,6 @@ bool Coms_CMD_Set_ID(uint8_t byte)
     return false;       
 }
 
-
-
 bool Coms_CMD_SetMotRotOn(uint8_t byte)
 {
     if (byte == ESP_End) {
