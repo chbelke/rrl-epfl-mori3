@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
 from termcolor import colored
@@ -39,15 +40,15 @@ for esp in pingData.keys(): #redundant?
         if not pingData[esp]['arr_1'][lv]:
             faultCount += 1
             faultList.append(True)
-            if pingData[esp]['arr_0'][lv] == np.inf: # Check if timeout occured
+            if math.isinf(pingData[esp]['arr_0'][lv]): # Check if timeout occured
                 timeoutCount += 1
         else:
             faultList.append(False)
     if faultCount == 0:
-        print(colored(esp + ": No ping packets had faults", "green"))
+        print(colored(esp + ": " + str(arrayLength) + " ping packets read without faults", "green"))
     else:
-        print(colored(esp + ": " + str(faultCount) + " ping packets had faults, (" + str(100.0*float(faultCount)/float(arrayLength)) + " %) of which "\
-        + str(timeoutCount) + " were timeouts", "red")) # timedout counts as corrupted
+        print(colored(esp + ": " + str(faultCount) + " out of " + str(arrayLength) + " ping packets had faults, ("\
+        + str(100.0*float(faultCount)/float(arrayLength)) + " %) of which " + str(timeoutCount) + " were timeouts", "red")) # timedout counts as corrupted
 
     pingDataTime = np.delete(pingData[esp]['arr_0'], faultList) # Remove faulty data
     
@@ -60,4 +61,6 @@ plt.yscale("log")
 plt.xlabel("Latency (ms)")
 plt.ylabel("CCDF")
 
+figName = input("Please enter a file name for the saved figure:")
+plt.savefig("Data/"+ dir + "/" + figName + ".png") #Save plot as image 
 plt.show()
