@@ -304,17 +304,43 @@ void setPicLED(byte* payload, unsigned int len)
 
 void openPicCouplings(byte* payload, unsigned int len)
 {
+  char tmp_payload[5];
+  byte alloc = 0b10000000;
+  
+  byte byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len) {
+    byte_count = len;
+  }
+  byte_count++;
+  tmp_payload[0] = payload[byte_count];
+  tmp_payload[1] = '\0';
+  
+  byte value = byte(atoi(tmp_payload))-1;
 
+  if(value >3) {
+    publish("ERR: Can\'t open coupling > 3");
+  }
+
+  alloc = alloc | (0b00100000 >> value);
+
+  char buff[50];
+  sprintf(buff, "INFO: Opening coupling %d", value+1);
+  publish(buff);  
+
+  Serial.write(0b11001101); //205
+  Serial.write(alloc);
+  Serial.write(END_BYTE);
   return;
 }
+
 void setPicEdges(byte* payload, unsigned int len)
 {
   byte num_following = 0;
-  byte alloc = 0b10000000;
-  byte alloc_mask = 0b00000100;
-  byte LED[3];
+  byte alloc = 0b00000000;
+  byte alloc_mask = 0b00100000;
+  byte extensions[3];
   
-  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, LED)) {
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, extensions)) {
     return;
   }
 
@@ -322,11 +348,13 @@ void setPicEdges(byte* payload, unsigned int len)
   Serial.write(alloc);
   for(byte i=0; i< num_following; i++)
   {
-    Serial.write(LED[i]);
+    Serial.write(extensions[i]);
   }
   Serial.write(END_BYTE);
   return;
 }
+
+
 void setPicAngles(byte* payload, unsigned int len)
 {
 
@@ -334,7 +362,7 @@ void setPicAngles(byte* payload, unsigned int len)
 }
 
 
-bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, byte *alloc, byte *num_following, byte *LED)
+bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, byte *alloc, byte *num_following, byte *values)
 {
   // if((alloc == NULL) || (num_following == NULL) || (LED == NULL)) {
   //   return false; //some pointers pointing to NULL
@@ -372,8 +400,8 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, byt
     }
 
     tmp_payload[j] = '\0';
-    LED[*num_following] = byte(atoi(tmp_payload));
-    if(LED[*num_following] > 255) {
+    values[*num_following] = byte(atoi(tmp_payload));
+    if(values[*num_following] > 255) {
       byte_count++;
       continue;
     }
