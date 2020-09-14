@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 28;
+  int sw_case = 32;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -149,7 +149,23 @@ void commands(byte* payload, unsigned int len)
     case 27: //png
       // publish("INFO: Ping received by ESP, command understood!"); // debugging
       echoPing(payload, len);
+      break;
+
+    case 28: //LED
+      setPicLED(payload, len);
       break;      
+
+    case 29: //Couplings
+      openPicCouplings(payload, len);
+      break;      
+
+    case 30: //Edges
+      setPicEdges(payload, len);
+      break;      
+
+    case 31: //Angles
+      setPicAngles(payload, len);
+      break;                                    
 
     default:
       publish("ERR: Command not understood");
@@ -163,14 +179,10 @@ void setWifiEdge(byte* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
-  {
-    byte_count++;
-    if(byte_count > len)
-    {
-      publish("ERR: payload has no space");
-      break;
-    }
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len){
+    publish("ERR: payload has no space");
+    return;
   }
   byte_count++;
 
@@ -218,14 +230,10 @@ void requestNeighbour(byte* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
-  {
-    byte_count++;
-    if(byte_count > len)
-    {
-      publish("ERR: payload has no space");
-      break;
-    }
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len){
+    publish("ERR: payload has no space");
+    return;
   }
   byte_count++;
 
@@ -258,3 +266,134 @@ void echoPing(byte* payload, unsigned int len)
   publish(buff);
 }
 
+
+void setPicLED(byte* payload, unsigned int len)
+{
+  byte num_following = 0;
+  byte alloc = 0b10000000;
+  byte alloc_mask = 0b00000100;
+  byte LED[3];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, LED)) {
+    return;
+  }
+
+  Serial.write(0b11001101); //205
+  Serial.write(alloc);
+  for(byte i=0; i< num_following; i++)
+  {
+    Serial.write(LED[i]);
+  }
+  Serial.write(END_BYTE);
+  return;
+  // char buff[50];
+  // sprintf(buff, "INFO: Set LEDS:");
+  // byte j = 0;
+  // for(byte i=0; i < 3; i++){
+  //   if(alloc & (alloc_mask >> i)) {
+  //     sprintf(buff, "%s %d", buff, LED[j]);  
+  //     j++;
+  //   } else {
+  //     sprintf(buff, "%s -", buff);  
+  //   }
+  // }
+  // sprintf(buff, "%s : %d %d %d, %d", buff, LED[0], LED[1], LED[2], num_following);
+  // publish(buff);  
+}
+
+
+void openPicCouplings(byte* payload, unsigned int len)
+{
+
+  return;
+}
+void setPicEdges(byte* payload, unsigned int len)
+{
+  byte num_following = 0;
+  byte alloc = 0b10000000;
+  byte alloc_mask = 0b00000100;
+  byte LED[3];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, LED)) {
+    return;
+  }
+
+  Serial.write(0b11001101); //205
+  Serial.write(alloc);
+  for(byte i=0; i< num_following; i++)
+  {
+    Serial.write(LED[i]);
+  }
+  Serial.write(END_BYTE);
+  return;
+}
+void setPicAngles(byte* payload, unsigned int len)
+{
+
+  return;
+}
+
+
+bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, byte *alloc, byte *num_following, byte *LED)
+{
+  // if((alloc == NULL) || (num_following == NULL) || (LED == NULL)) {
+  //   return false; //some pointers pointing to NULL
+  // }
+
+  byte byte_count = 0;
+  byte pre_count = 0;
+  char tmp_payload[5];
+
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count++;
+  for(byte i=0; i<3; i++){ //For the 3 LEDs
+    bool jumpFlag = false;
+    pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
+    
+    byte_count = detectSpaceChar(payload, byte_count, len);
+    if(byte_count > len) {
+      byte_count = len;
+    }
+    if(byte_count > pre_count + 3) {
+      publish("ERR: Shape value > 3 chars");
+      return false;
+    }
+
+    byte j;
+    for(j=0; j<byte_count-pre_count; j++) {
+      if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
+        jumpFlag = true;
+      }
+      tmp_payload[j] = char(payload[pre_count+j]);
+    }
+    if(jumpFlag) {
+      byte_count++;
+      continue;
+    }
+
+    tmp_payload[j] = '\0';
+    LED[*num_following] = byte(atoi(tmp_payload));
+    if(LED[*num_following] > 255) {
+      byte_count++;
+      continue;
+    }
+    *num_following = *num_following + 1;
+
+    *alloc = *alloc | (alloc_mask  >> i);
+    byte_count++;
+  }
+  return true;
+}
+
+
+byte detectSpaceChar(byte* payload, int byte_count, unsigned int max_len)
+{
+  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
+  {
+    byte_count++;
+    if(byte_count > max_len) {
+      break;
+    }
+  }
+  return byte_count;
+}
