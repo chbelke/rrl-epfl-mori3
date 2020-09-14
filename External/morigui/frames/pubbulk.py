@@ -86,8 +86,8 @@ class PublishBulk():
                 for i, ext in enumerate(extensions):
                     if ext.isdigit():
                         alloc = alloc | (0b00100000 >> i)
-                        ext = EXT_MOTOR_MIN + EXT_MOTOR_SLOPE*(float(ext))
                         follow_bytes.append(int(ext))
+                        numbytes = 1
 
             if 'ang' in cmds:
                 angles = tuple(cmds['ang'].split(', '))
@@ -96,14 +96,15 @@ class PublishBulk():
                         alloc = alloc | (0b00000100 >> i)
                         ang = ROT_MOTOR_MIN + ROT_MOTOR_SLOPE*(float(ang))
                         follow_bytes.append(int(ang))
-
+                        numbytes = 2
 
             message = bytearray(str.encode("rel "))
             message.append(INPUT)
             message.append(alloc)
             for cmd_bytes in follow_bytes:
-                message.extend(cmd_bytes.to_bytes(2, byteorder='big'))
+                message.extend(cmd_bytes.to_bytes(numbytes, byteorder='big'))
             message.append(END_BYTE)
+            print(message)
             self.mqtthost.publishLocal(message, esp)
 
 
