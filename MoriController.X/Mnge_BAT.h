@@ -8,7 +8,7 @@
 #ifndef MNGE_BAT_H
 #define	MNGE_BAT_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 void Battery_Check(void);
 

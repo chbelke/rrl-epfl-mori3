@@ -19,7 +19,6 @@
         <itemPath>mcc_generated_files/reset_types.h</itemPath>
         <itemPath>mcc_generated_files/adc1.h</itemPath>
         <itemPath>mcc_generated_files/adc_module_features.h</itemPath>
-        <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/pwm_module_features.h</itemPath>
         <itemPath>mcc_generated_files/watchdog.h</itemPath>
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
@@ -63,7 +62,6 @@
                      displayName="MCC Generated Files"
                      projectFiles="true">
         <itemPath>mcc_generated_files/i2c1.c</itemPath>
-        <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/traps.c</itemPath>
@@ -121,8 +119,10 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.0.19"/>
+        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.2.58"/>
       </packs>
+      <ScriptingSettings>
+      </ScriptingSettings>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -209,6 +209,9 @@
         <property key="relax" value="false"/>
         <property key="warning-level" value="emit-warnings"/>
       </C30-AS>
+      <C30-CO>
+        <property key="coverage-enable" value=""/>
+      </C30-CO>
       <C30-LD>
         <property key="additional-options-use-response-files" value="false"/>
         <property key="boot-eeprom" value="no_eeprom"/>

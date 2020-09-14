@@ -1,7 +1,7 @@
 #ifndef Sens_ACC_H
 #define	Sens_ACC_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 #include "Defs.h"
 
 // Accelerometer MMA8452Q

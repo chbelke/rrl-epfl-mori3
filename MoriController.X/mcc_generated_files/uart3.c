@@ -13,11 +13,11 @@
   @Description
     This source file provides APIs for driver for UART3. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
  */
 
 /*
@@ -101,7 +101,8 @@ void (*UART3_RxDefaultInterruptHandler)(void);
   Section: Driver Interface
  */
 
-void UART3_Initialize(void) {
+void UART3_Initialize(void)
+{
     IEC5bits.U3TXIE = 0;
     IEC5bits.U3RXIE = 0;
 
@@ -135,69 +136,91 @@ void UART3_Initialize(void) {
     Maintains the driver's transmitter state machine and implements its ISR
  */
 
-void UART3_SetTxInterruptHandler(void* handler) {
-    if (handler == NULL) {
+void UART3_SetTxInterruptHandler(void (* interruptHandler)(void))
+{
+    if(interruptHandler == NULL)
+    {
         UART3_TxDefaultInterruptHandler = &UART3_Transmit_CallBack;
-    } else {
-        UART3_TxDefaultInterruptHandler = handler;
     }
+    else
+    {
+        UART3_TxDefaultInterruptHandler = interruptHandler;
 }
+} 
 
-void __attribute__((interrupt, no_auto_psv)) _U3TXInterrupt(void) {
-    if (UART3_TxDefaultInterruptHandler) {
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _U3TXInterrupt ( void )
+{
+    if(UART3_TxDefaultInterruptHandler)
+    {
         UART3_TxDefaultInterruptHandler();
     }
 
-    if (txHead == txTail) {
+    if(txHead == txTail)
+    {
         IEC5bits.U3TXIE = 0;
-    } else {
+    }
+    else
+    {
         IFS5bits.U3TXIF = 0;
 
-        while (!(U3STAbits.UTXBF == 1)) {
+        while(!(U3STAbits.UTXBF == 1))
+        {
             U3TXREG = *txHead++;
 
-            if (txHead == (txQueue + UART3_CONFIG_TX_BYTEQ_LENGTH)) {
+            if(txHead == (txQueue + UART3_CONFIG_TX_BYTEQ_LENGTH))
+            {
                 txHead = txQueue;
             }
 
             // Are we empty?
-            if (txHead == txTail) {
+            if(txHead == txTail)
+            {
                 break;
             }
         }
     }
 }
 
-void __attribute__((weak)) UART3_Transmit_CallBack(void) {
+void __attribute__ ((weak)) UART3_Transmit_CallBack ( void )
+{ 
 
 }
 
-void UART3_SetRxInterruptHandler(void* handler) {
-    if (handler == NULL) {
+void UART3_SetRxInterruptHandler(void (* interruptHandler)(void))
+{
+    if(interruptHandler == NULL)
+    {
         UART3_RxDefaultInterruptHandler = &UART3_Receive_CallBack;
-    } else {
-        UART3_RxDefaultInterruptHandler = handler;
     }
+    else
+    {
+        UART3_RxDefaultInterruptHandler = interruptHandler;
+}
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U3RXInterrupt(void) {
-    if (UART3_RxDefaultInterruptHandler) {
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _U3RXInterrupt( void )
+{
+    if(UART3_RxDefaultInterruptHandler)
+    {
         UART3_RxDefaultInterruptHandler();
     }
 
     IFS5bits.U3RXIF = 0;
 
-    while ((U3STAbits.URXDA == 1)) {
+    while((U3STAbits.URXDA == 1))
+    {
         *rxTail = U3RXREG;
 
         // Will the increment not result in a wrap and not result in a pure collision?
         // This is most often condition so check first
-        if ((rxTail != (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH - 1)) &&
-                ((rxTail + 1) != rxHead)) {
+        if ( ( rxTail    != (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH-1)) &&
+             ((rxTail+1) != rxHead) )
+        {
             rxTail++;
         }
-        else if ((rxTail == (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH - 1)) &&
-                (rxHead != rxQueue)) {
+        else if ( (rxTail == (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH-1)) &&
+                  (rxHead !=  rxQueue) )
+        {
             // Pure wrap no collision
             rxTail = rxQueue;
         }
@@ -210,12 +233,15 @@ void __attribute__((interrupt, no_auto_psv)) _U3RXInterrupt(void) {
     }
 }
 
-void __attribute__((weak)) UART3_Receive_CallBack(void) {
+void __attribute__ ((weak)) UART3_Receive_CallBack(void)
+{
 
 }
 
-void __attribute__((interrupt, no_auto_psv)) _U3ErrInterrupt(void) {
-    if ((U3STAbits.OERR == 1)) {
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _U3ErrInterrupt( void )
+{
+    if ((U3STAbits.OERR == 1))
+    {
         U3STAbits.OERR = 0;
     }
 
@@ -226,61 +252,75 @@ void __attribute__((interrupt, no_auto_psv)) _U3ErrInterrupt(void) {
   Section: UART Driver Client Routines
  */
 
-uint8_t UART3_Read(void) {
+uint8_t UART3_Read( void)
+{
     uint8_t data = 0;
 
-    while (rxHead == rxTail) {
+    while (rxHead == rxTail )
+    {
     }
 
     data = *rxHead;
 
     rxHead++;
 
-    if (rxHead == (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH)) {
+    if (rxHead == (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH))
+    {
         rxHead = rxQueue;
     }
     return data;
 }
 
-void UART3_Write(uint8_t byte) {
-    while (UART3_IsTxReady() == 0) {
+void UART3_Write( uint8_t byte)
+{
+    while(UART3_IsTxReady() == 0)
+    {
     }
 
     *txTail = byte;
 
     txTail++;
 
-    if (txTail == (txQueue + UART3_CONFIG_TX_BYTEQ_LENGTH)) {
+    if (txTail == (txQueue + UART3_CONFIG_TX_BYTEQ_LENGTH))
+    {
         txTail = txQueue;
     }
 
     IEC5bits.U3TXIE = 1;
 }
 
-bool UART3_IsRxReady(void) {
+bool UART3_IsRxReady(void)
+{    
     return !(rxHead == rxTail);
 }
 
-bool UART3_IsTxReady(void) {
+bool UART3_IsTxReady(void)
+{
     uint16_t size;
-    uint8_t *snapshot_txHead = (uint8_t*) txHead;
+    uint8_t *snapshot_txHead = (uint8_t*)txHead;
 
-    if (txTail < snapshot_txHead) {
+    if (txTail < snapshot_txHead)
+    {
         size = (snapshot_txHead - txTail - 1);
-    } else {
-        size = (UART3_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
+    }
+    else
+    {
+        size = ( UART3_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1 );
     }
 
     return (size != 0);
 }
 
-bool UART3_IsTxDone(void) {
-    if (txTail == txHead) {
-        return (bool) U3STAbits.TRMT;
+bool UART3_IsTxDone(void)
+{
+    if(txTail == txHead)
+    {
+        return (bool)U3STAbits.TRMT;
     }
 
     return false;
 }
+
 
 /*******************************************************************************
 
@@ -289,76 +329,94 @@ bool UART3_IsTxDone(void) {
 
  *******************************************************************************/
 
-static uint8_t UART3_RxDataAvailable(void) {
+static uint8_t UART3_RxDataAvailable(void)
+{
     uint16_t size;
-    uint8_t *snapshot_rxTail = (uint8_t*) rxTail;
+    uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
 
-    if (snapshot_rxTail < rxHead) {
-        size = (UART3_CONFIG_RX_BYTEQ_LENGTH - (rxHead - snapshot_rxTail));
-    } else {
-        size = ((snapshot_rxTail - rxHead));
+    if (snapshot_rxTail < rxHead) 
+    {
+        size = ( UART3_CONFIG_RX_BYTEQ_LENGTH - (rxHead-snapshot_rxTail));
+    }
+    else
+    {
+        size = ( (snapshot_rxTail - rxHead));
     }
 
-    if (size > 0xFF) {
+    if(size > 0xFF)
+    {
         return 0xFF;
     }
 
     return size;
 }
 
-static uint8_t UART3_TxDataAvailable(void) {
+static uint8_t UART3_TxDataAvailable(void)
+{
     uint16_t size;
-    uint8_t *snapshot_txHead = (uint8_t*) txHead;
+    uint8_t *snapshot_txHead = (uint8_t*)txHead;
 
-    if (txTail < snapshot_txHead) {
+    if (txTail < snapshot_txHead)
+    {
         size = (snapshot_txHead - txTail - 1);
-    } else {
-        size = (UART3_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
+    }
+    else
+    {
+        size = ( UART3_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1 );
     }
 
-    if (size > 0xFF) {
+    if(size > 0xFF)
+    {
         return 0xFF;
     }
 
     return size;
 }
 
-unsigned int __attribute__((deprecated)) UART3_ReadBuffer(uint8_t *buffer, unsigned int numbytes) {
+unsigned int __attribute__((deprecated)) UART3_ReadBuffer( uint8_t *buffer ,  unsigned int numbytes)
+{
     unsigned int rx_count = UART3_RxDataAvailable();
     unsigned int i;
 
-    if (numbytes < rx_count) {
+    if(numbytes < rx_count)
+    {
         rx_count = numbytes;
     }
 
-    for (i = 0; i < rx_count; i++) {
+    for(i=0; i<rx_count; i++)
+    {
         *buffer++ = UART3_Read();
     }
 
     return rx_count;
 }
 
-unsigned int __attribute__((deprecated)) UART3_WriteBuffer(uint8_t *buffer, unsigned int numbytes) {
+unsigned int __attribute__((deprecated)) UART3_WriteBuffer( uint8_t *buffer , unsigned int numbytes )
+{
     unsigned int tx_count = UART3_TxDataAvailable();
     unsigned int i;
 
-    if (numbytes < tx_count) {
+    if(numbytes < tx_count)
+    {
         tx_count = numbytes;
     }
 
-    for (i = 0; i < tx_count; i++) {
+    for(i=0; i<tx_count; i++)
+    {
         UART3_Write(*buffer++);
     }
 
     return tx_count;
 }
 
-UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet(void) {
+UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet (void )
+{
     UART3_TRANSFER_STATUS status = 0;
     uint8_t rx_count = UART3_RxDataAvailable();
     uint8_t tx_count = UART3_TxDataAvailable();
 
-    switch (rx_count) {
+    switch(rx_count)
+    {
         case 0:
             status |= UART3_TRANSFER_STATUS_RX_EMPTY;
             break;
@@ -370,7 +428,8 @@ UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet(void) 
             break;
     }
 
-    switch (tx_count) {
+    switch(tx_count)
+    {
         case 0:
             status |= UART3_TRANSFER_STATUS_TX_FULL;
             break;
@@ -384,56 +443,73 @@ UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet(void) 
     return status;
 }
 
-uint8_t __attribute__((deprecated)) UART3_Peek(uint16_t offset) {
+uint8_t __attribute__((deprecated)) UART3_Peek(uint16_t offset)
+{
     uint8_t *peek = rxHead + offset;
 
-    while (peek > (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH)) {
+    while(peek > (rxQueue + UART3_CONFIG_RX_BYTEQ_LENGTH))
+    {
         peek -= UART3_CONFIG_RX_BYTEQ_LENGTH;
     }
 
     return *peek;
 }
 
-bool __attribute__((deprecated)) UART3_ReceiveBufferIsEmpty(void) {
+bool __attribute__((deprecated)) UART3_ReceiveBufferIsEmpty (void)
+{
     return (UART3_RxDataAvailable() == 0);
 }
 
-bool __attribute__((deprecated)) UART3_TransmitBufferIsFull(void) {
+bool __attribute__((deprecated)) UART3_TransmitBufferIsFull(void)
+{
     return (UART3_TxDataAvailable() == 0);
 }
 
-uint16_t __attribute__((deprecated)) UART3_StatusGet(void) {
+uint16_t __attribute__((deprecated)) UART3_StatusGet (void)
+{
     return U3STA;
 }
 
-unsigned int __attribute__((deprecated)) UART3_TransmitBufferSizeGet(void) {
-    if (UART3_TxDataAvailable() != 0) {
-        if (txHead > txTail) {
-            return ((txHead - txTail) - 1);
-        } else {
-            return ((UART3_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead)) - 1);
+unsigned int __attribute__((deprecated)) UART3_TransmitBufferSizeGet(void)
+{
+    if(UART3_TxDataAvailable() != 0)
+    { 
+        if(txHead > txTail)
+        {
+            return((txHead - txTail) - 1);
         }
+        else
+        {
+            return((UART3_CONFIG_TX_BYTEQ_LENGTH - (txTail - txHead)) - 1);
+    }
     }
     return 0;
 }
 
-unsigned int __attribute__((deprecated)) UART3_ReceiveBufferSizeGet(void) {
-    if (UART3_RxDataAvailable() != 0) {
-        if (rxHead > rxTail) {
-            return ((rxHead - rxTail) - 1);
-        } else {
-            return ((UART3_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead)) - 1);
+unsigned int __attribute__((deprecated)) UART3_ReceiveBufferSizeGet(void)
+{
+    if(UART3_RxDataAvailable() != 0)
+    {
+        if(rxHead > rxTail)
+        {
+            return((rxHead - rxTail) - 1);
         }
+        else
+        {
+            return((UART3_CONFIG_RX_BYTEQ_LENGTH - (rxTail - rxHead)) - 1);
+    }
     }
     return 0;
 }
 
-void __attribute__((deprecated)) UART3_Enable(void) {
+void __attribute__((deprecated)) UART3_Enable(void)
+{
     U3MODEbits.UARTEN = 1;
     U3STAbits.UTXEN = 1;
 }
 
-void __attribute__((deprecated)) UART3_Disable(void) {
+void __attribute__((deprecated)) UART3_Disable(void)
+{
     U3MODEbits.UARTEN = 0;
     U3STAbits.UTXEN = 0;
 }

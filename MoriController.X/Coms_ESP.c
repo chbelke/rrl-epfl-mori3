@@ -197,7 +197,7 @@ void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
 
 /* ******************** RETURN ID BY BYTE *********************************** */
 uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
-    return ESP_ID[byteNum];
+    return ESP_IDexpected[byteNum];
 }
 
 
@@ -244,8 +244,11 @@ void Coms_ESP_Verbose_Write(const char *message)
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {
-    if((WIFI_LED_STATE[edge] - state) == 0)
+    static uint8_t interval[3] = {0, 0, 0}; // only update if state change or 3s passed
+    interval[edge]++;
+    if (((WIFI_LED_STATE[edge] - state) == 0) && (interval[edge] <= 15))
         return;
+    interval[edge] = 0;
 
     switch(state){
         case 0: //off

@@ -8,7 +8,7 @@
 #ifndef COMS_ESP_H
 #define	COMS_ESP_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 void Coms_ESP_Eval (void);
 void Coms_ESP_Boot (void);

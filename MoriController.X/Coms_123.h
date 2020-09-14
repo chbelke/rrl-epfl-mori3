@@ -8,7 +8,7 @@
 #ifndef COMS_123_H
 #define	COMS_123_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 void Coms_123_Eval (uint8_t);
 void Coms_123_IdleEval (uint8_t);

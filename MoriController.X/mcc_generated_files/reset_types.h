@@ -13,11 +13,11 @@
   @Description
     This header file provides implementations for driver APIs for RESET.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
 */
 
 /*
@@ -51,25 +51,25 @@
     
 /** 
  * RCON error type enumerator. Supported types:
- * ERR_RCON_TRAPR
- * ERR_RCON_IOPUWR
- * ERR_RCON_CM 
- * ERR_RCON_WDTO_ISR
+ * RESET_ERROR_RCON_TRAPR
+ * RESET_ERROR_RCON_IOPUWR
+ * RESET_ERROR_RCON_CM 
+ * RESET_ERROR_RCON_WDTO_ISR
  */
 typedef enum tagERROR_TYPE
 {
-    ERR_RCON_TRAPR      = 1, /** A Trap Conflict Reset has occurred **/
-    ERR_RCON_IOPUWR     = 2, /** An illegal opcode detection, an illegal address mode or Uninitialized W register used as an
+    RESET_ERROR_RCON_TRAPR      = 1, /** A Trap Conflict Reset has occurred **/
+    RESET_ERROR_RCON_IOPUWR     = 2, /** An illegal opcode detection, an illegal address mode or Uninitialized W register used as an
                              *   Address Pointer caused a Reset **/
-    ERR_RCON_CM         = 3, /** A Configuration Mismatch Reset has occurred **/
-    ERR_RCON_WDTO_ISR   = 4  /** WDT time-out has occurred **/
+    RESET_ERROR_RCON_CM         = 3, /** A Configuration Mismatch Reset has occurred **/
+    RESET_ERROR_RCON_WDTO_ISR   = 4  /** WDT time-out has occurred **/
 }RESET_TYPES;
 
 /** 
  * RESET CAUSE Masks. Supported masks:
  * RESET_MASK_WDTO
  * RESET_MASK_SWR
- * REST_MASK_EXTR
+ * RESET_MASK_EXTR
  * RESET_MASK_CM
  * RESET_MASK_IOPUWR
  * RESET_MASK_TRAPR
@@ -85,6 +85,20 @@ typedef enum tagRESET_MASKS
 } RESET_MASKS;
 
 #endif	/* RESET_TYPES_H */
+
+
+/*******************************************************************************
+
+  !!! Deprecated Definitions and APIs !!!
+  !!! These will not be supported in future releases !!!
+
+*******************************************************************************/
+
+#define ERR_RCON_TRAPR      RESET_ERROR_RCON_TRAPR
+#define ERR_RCON_IOPUWR     RESET_ERROR_RCON_IOPUWR 
+#define ERR_RCON_CM         RESET_ERROR_RCON_CM
+#define ERR_RCON_WDTO_ISR   RESET_ERROR_RCON_WDTO_ISR
+
 /**
  End of File
 */

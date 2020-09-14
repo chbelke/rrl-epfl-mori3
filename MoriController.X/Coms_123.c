@@ -28,6 +28,7 @@ uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
 
 uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
+uint8_t NbrCurExt[3] = {0, 0, 0}; // current extension received by neighbour
 uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
 bool NbrCmdMatch[3] = {false, false, false};
 
@@ -110,12 +111,18 @@ void Coms_123_Eval(uint8_t edge) {
                 break;
             }
         case 3:
-            if (EdgInAloc[edge] & 0b00001000) { // angle command
-                NbrCmdAng[edge] = 0xFF00 & ((uint16_t) (EdgIn) << 8);
+            if (EdgInAloc[edge] & 0b00010000) { // current extension
+                NbrCurExt[edge] = EdgIn;
                 EdgInCase[edge] = 4;
                 break;
             }
         case 4:
+            if (EdgInAloc[edge] & 0b00001000) { // angle command
+                NbrCmdAng[edge] = 0xFF00 & ((uint16_t) (EdgIn) << 8);
+                EdgInCase[edge] = 5;
+                break;
+            }
+        case 5:
             if (EdgInAloc[edge] & 0b00001000) {
                 NbrCmdAng[edge] = NbrCmdAng[edge] | (uint16_t) EdgIn;
                 EdgInCase[edge] = 7;
@@ -236,14 +243,7 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             if (!Acts_CPL_IsOpen(edge))
                 Coms_ESP_LED_State(edge, 0);
         }
-       
-        //Break if module doesn't know its ID and needs to send ID
-        if(!Flg_ID_check) {
-            if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk)) { // XXX why?
-                return;
-            }
-        }
-                    
+        
         if(Flg_Uart_Lock[edge]==false) {
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte
@@ -282,15 +282,19 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
 
             if ((!Flg_Uart_Lock[edge]) && (Flg_EdgeRequest_Ext[edge] || 
                     Flg_EdgeRequest_Ang[edge] || Flg_EdgeRequest_Cpl[edge])) {
+                Flg_Uart_Lock[edge] = true;
                 Coms_123_Write(edge, byte);
-                if (Flg_EdgeRequest_Ext[edge])
+                if (Flg_EdgeRequest_Ext[edge]){
                     Coms_123_Write(edge, Acts_LIN_GetTarget(edge));
+                    Coms_123_Write(edge, Acts_LIN_GetCurrent(edge));
+                }
                 if (Flg_EdgeRequest_Ang[edge]) {
                     uint16_t AngTemp = Acts_ROT_GetTarget(edge);
                     Coms_123_Write(edge, (uint8_t) ((AngTemp & 0xFF00) >> 8));
                     Coms_123_Write(edge, (uint8_t) (AngTemp & 0x00FF));
                 }
                 Coms_123_Write(edge, EDG_End);
+                Flg_Uart_Lock[edge] = false;
             }
         } else {
             Flg_EdgeAct[edge] = false;
@@ -306,6 +310,10 @@ void Coms_123_ActVerify(uint8_t edge) {
     if ((EdgInAloc[edge] & 0b00010000) && (Flg_EdgeRequest_Ext[edge])) {
         if (NbrCmdExt[edge] != Acts_LIN_GetTarget(edge))
             NbrCmdNoGo = true; // values do not match, NOGO
+        // check if neighbour current extension is in range of own
+        if ((NbrCurExt[edge] < Acts_LIN_GetCurrent(edge) - EDG_ExtCurRng) ||
+                (NbrCurExt[edge] > Acts_LIN_GetCurrent(edge) + EDG_ExtCurRng))
+            NbrCmdNoGo = true; // values not in range, NOGO
     } else if (((EdgInAloc[edge] & 0b00010000) == 0) && (!Flg_EdgeRequest_Ext[edge])){
         // ok, no commands from either side
     } else {
@@ -362,10 +370,9 @@ void Coms_123_Write(uint8_t edge, uint8_t byte) {
 
 /* ******************** WRITE ID TO EDGE ************************************ */
 void Coms_123_WriteID(uint8_t edge) { // called in Coms_123_ConHandle
-    uint8_t i, byte;
+    uint8_t i;
     for (i = 0; i < 6; i++) { // loop through 6 ID bytes
-        byte = Coms_ESP_ReturnID(i); // get byte from ESP Coms
-        Coms_123_Write(edge, byte); // write to edge
+        Coms_123_Write(edge, Coms_ESP_ReturnID(i)); // write to edge
     }
 }
 
