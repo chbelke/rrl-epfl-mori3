@@ -113,7 +113,7 @@ int main(void) {
         LED_R = LED_On;
         __delay_ms(1000); // wait to set RGB LEDs
         INTERRUPT_GlobalDisable();
-        while(1);
+        while (1);
     }
     
     Flg_MotLin_Active = true;

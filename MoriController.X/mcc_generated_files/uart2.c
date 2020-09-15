@@ -51,6 +51,7 @@
 #include "xc.h"
 #include "uart2.h"
 #include "../Coms_123.h"
+#include "../Mnge_RGB.h"
 
 /**
   Section: Data Type Definitions
@@ -227,6 +228,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2RXInterrupt( void )
         else // must be collision
         {
             rxOverflowed = true;
+            Mnge_RGB_Set(0,50);
         }
         
         Coms_123_Eval(1);

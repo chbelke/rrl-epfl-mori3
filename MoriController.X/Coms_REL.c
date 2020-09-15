@@ -34,9 +34,6 @@ bool Coms_REL_Handle (uint8_t inEdge, uint8_t byte){
             RelBytDta[inEdge][RelBytCnt[inEdge]-2] = byte;
             RelBytCnt[inEdge]++;                
             if (RelBytCnt[inEdge] >= RelBytExp[inEdge]){
-//                Coms_ESP_Verbose_Write(message);    
-//                const char *message2 = "hello";    
-//                Coms_ESP_Verbose_Write(message2);    
                 out = true;
                 RelSwitch[inEdge] = 0;
                 if (byte == EDG_End)

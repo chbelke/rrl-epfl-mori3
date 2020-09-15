@@ -204,8 +204,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     
     Battery_Check();
     
-    if (MODE_ACC_CON)
-        Flg_i2c_ACC = true; // read accelerometer, called in tmr1
+    if (MODE_ACC_CON) Flg_i2c_ACC = true; // read accelerometer, called in tmr1
     
     if (MODE_LED_ANGLE) {
         uint8_t RGB[3] = {0, 0, 0};
