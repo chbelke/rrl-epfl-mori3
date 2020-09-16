@@ -2,6 +2,7 @@
 #include "Coms_REL.h"
 #include "Coms_CMD.h"
 #include "Defs.h"
+#include "string.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
@@ -26,6 +27,9 @@ uint8_t EdgByteCount[3] = {0, 0, 0};
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
+
+char buffy[48];
+uint8_t thevampireslayer = 0;
 
 uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrCurExt[3] = {0, 0, 0}; // current extension received by neighbour
@@ -66,7 +70,13 @@ volatile bool NbrCmdMatch[3] = {false, false, false};
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) {
     static uint8_t brightness = 0;
+    
+    if(!Coms_123_Ready(edge)) return;
     uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
+    
+    buffy[thevampireslayer] = (char)EdgIn;
+    thevampireslayer++;
+    
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             EdgInAloc[edge] = EdgIn;
@@ -268,6 +278,16 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             //            if (!Acts_CPL_IsOpen(edge))
             //                Coms_ESP_LED_State(edge, 0);
         }
+        
+//        char message1 = (char)byte;
+        Coms_ESP_Verbose_Write(buffy);
+        memset(buffy, 0, sizeof(buffy));
+        thevampireslayer = 0;
+        
+        //Break if module doesn't know its ID and needs to send ID
+        if(!Flg_ID_check) {
+            byte = COMS_123_Conn;
+        }        
 
         if (Flg_Uart_Lock[edge] == false) {
             Flg_Uart_Lock[edge] = true;
@@ -279,6 +299,9 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Flg_Uart_Lock[edge] = false;
         }
     }
+    
+    
+   
 }
 
 /* ******************** NEIGHBOUR ACTION HANDLE ***************************** */
@@ -417,6 +440,19 @@ uint8_t Coms_123_Read(uint8_t edge) {
     }
     return byte;
 }
+
+bool Coms_123_Ready(uint8_t edge) {
+    switch (edge) {
+        case 0:
+            return UART1_IsRxReady();
+        case 1:
+            return UART2_IsRxReady();
+        case 2:
+            return UART3_IsRxReady();
+    }
+    return false;
+}
+
 
 void Coms_123_Disconnected(uint8_t edge) {
     Flg_EdgeCon[edge] = false;
