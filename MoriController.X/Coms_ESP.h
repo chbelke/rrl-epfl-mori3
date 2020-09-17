@@ -18,6 +18,7 @@ void Coms_ESP_Verbose (void);
 
 void Coms_ESP_SetLEDs (uint8_t, uint8_t);
 void Coms_ESP_Verbose_Write(const char*);
+void Coms_ESP_Verbose_One_Byte(uint8_t);
 
 void Coms_ESP_Request_Edges();
 void Coms_ESP_Request_Angles();

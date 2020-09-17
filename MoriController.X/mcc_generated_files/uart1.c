@@ -52,6 +52,7 @@
 #include "uart1.h"
 #include "../Coms_123.h"
 #include "../Mnge_RGB.h"
+//#include "Coms_ESP.h"
 
 /**
   Section: Data Type Definitions
@@ -227,11 +228,11 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
         }
         else // must be collision
         {
+            LED_R = LED_On;
             rxOverflowed = true;
             Mnge_RGB_Set(0,50);
         }
         
-        Coms_123_Eval(0);
     }
 }
 
@@ -242,11 +243,12 @@ void __attribute__ ((weak)) UART1_Receive_CallBack(void)
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt( void )
 {
+//    char message = "error";
     if ((U1STAbits.OERR == 1))
     {
         U1STAbits.OERR = 0;
     }
-
+    LED_R = LED_Off;
     IFS4bits.U1EIF = 0;
 }
 

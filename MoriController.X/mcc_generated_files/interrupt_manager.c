@@ -54,7 +54,7 @@ void INTERRUPT_Initialize (void)
 {
     //    UERI: UART2 Error
     //    Priority: 1
-        IPC16bits.U2EIP = 1;
+        IPC16bits.U2EIP = 7;
     //    UTXI: UART2 Transmitter
     //    Priority: 3
         IPC7bits.U2TXIP = 3;
@@ -63,7 +63,7 @@ void INTERRUPT_Initialize (void)
         IPC7bits.U2RXIP = 3;
     //    UERI: UART3 Error
     //    Priority: 1
-        IPC20bits.U3EIP = 1;
+        IPC20bits.U3EIP = 7;
     //    UTXI: UART3 Transmitter
     //    Priority: 3
         IPC20bits.U3TXIP = 3;
@@ -72,19 +72,19 @@ void INTERRUPT_Initialize (void)
         IPC20bits.U3RXIP = 3;
     //    UERI: UART4 Error
     //    Priority: 1
-        IPC21bits.U4EIP = 1;
+        IPC21bits.U4EIP = 7;
     //    UTXI: UART4 Transmitter
     //    Priority: 4
-        IPC22bits.U4TXIP = 4;
+        IPC22bits.U4TXIP = 3;
     //    URXI: UART4 Receiver
     //    Priority: 4
-        IPC22bits.U4RXIP = 4;
+        IPC22bits.U4RXIP = 3;
     //    ADI: ADC1 Convert Done
     //    Priority: 1
         IPC3bits.AD1IP = 1;
     //    UERI: UART1 Error
     //    Priority: 1
-        IPC16bits.U1EIP = 1;
+        IPC16bits.U1EIP = 7;
     //    UTXI: UART1 Transmitter
     //    Priority: 3
         IPC3bits.U1TXIP = 3;

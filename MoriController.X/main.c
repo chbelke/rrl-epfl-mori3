@@ -57,6 +57,7 @@
 #include "Acts_CPL.h"
 #include "Sens_ENC.h"
 #include "Coms_ESP.h"
+#include "Coms_123.h"
 #include "mcc_generated_files/system.h"
 
 /* GLOBAL MODES */
@@ -107,7 +108,15 @@ int main(void) {
     WIFI_EN = WIFI_On;
 
     // verify own id with esp
-    while (!Flg_ID_check) LED_Y = LED_Off;
+    while (!Flg_ID_check) {
+        LED_Y = LED_Off;
+        Coms_123_purge_uart(0);
+        __delay_us(10);
+        Coms_123_purge_uart(1);
+        __delay_us(10);
+        Coms_123_purge_uart(2);
+        __delay_us(10);
+    }
     if (!Coms_ESP_VerifyID()) { // if bad id
         Mnge_RGB_Set(0,50); // set everything to red
         LED_R = LED_On;
@@ -115,8 +124,12 @@ int main(void) {
         INTERRUPT_GlobalDisable();
         while (1);
     }
-    
+    Mnge_RGB_Set(0,0); // set everything to red
     Flg_MotLin_Active = true;
+    
+    Coms_123_purge_uart(0);
+    Coms_123_purge_uart(1);
+    Coms_123_purge_uart(2);
     
 
     // - Set rotary motor current limits -
@@ -127,7 +140,11 @@ int main(void) {
     Acts_ROT_Limit(1, 255);
     Acts_ROT_Limit(2, 255);
 
-    while (1);
+    while (1){
+        Coms_123_Eval(0);
+        Coms_123_Eval(1);
+        Coms_123_Eval(2);
+    }
     return 1;
 }
 /**

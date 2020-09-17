@@ -241,6 +241,22 @@ void Coms_ESP_Verbose_Write(const char *message)
     Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
+/* ******************** VERBOSE OUTPUT ************************************** */
+void Coms_ESP_Verbose_One_Byte(uint8_t byte) 
+{
+    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+    {
+    }
+    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted        
+    
+    UART4_Write(0);
+    UART4_Write(1); // Message length
+    UART4_Write(byte);
+    UART4_Write(ESP_End);
+    
+    Flg_Uart_Lock[ESP_URT_NUM] = false;
+}
+
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {

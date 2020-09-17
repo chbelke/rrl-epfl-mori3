@@ -164,9 +164,9 @@ void Coms_Rel_Interpret(uint8_t inEdge)
 
 /* ******************** GENERIC UART WRITE ********************************** */
 void Coms_Write(uint8_t edge, uint8_t byte){
-    if (edge < 3){
-        Coms_123_Write(edge, byte);
-    } else if (edge == 3){
-        UART4_Write(byte);
-    }
+//    if (edge < 3){
+//        Coms_123_Write(edge, byte);
+//    } else if (edge == 3){
+//        UART4_Write(byte);
+//    }
 }
