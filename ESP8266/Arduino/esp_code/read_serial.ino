@@ -136,7 +136,7 @@ bool setLEDs(byte d)
 
   switch(readCase){
     case 0:
-      publish("INFO: LED Toggle");
+      // publish("INFO: LED Toggle");
       if ((c == char(END_BYTE)) && (byteCount == serial_len))
       {
         if(LED == 1)
@@ -156,7 +156,7 @@ bool setLEDs(byte d)
       break;
 
     case 1:
-      publish("INFO: LED Off");
+      // publish("INFO: LED Off");
       if ((c == 0b0001110) && (byteCount == serial_len))
       {
         if(LED == 1)
@@ -176,7 +176,7 @@ bool setLEDs(byte d)
       break;    
     
     case 2:
-      publish("INFO: LED On");
+      // publish("INFO: LED On");
       if ((c == char(END_BYTE)) && (byteCount == serial_len))
       {
         if(LED == 1)
