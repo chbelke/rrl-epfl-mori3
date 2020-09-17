@@ -70,6 +70,8 @@ class WirelessHost(threading.Thread):
 
         self.version = 0.50
 
+        self.connMatrx = []
+
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
 
@@ -92,7 +94,10 @@ class WirelessHost(threading.Thread):
                 print(self.macDict, end="\n\n")
                 loopTime = time.time()
 
-            self.event.wait(0.1)        
+                for i in range(len(self.connMatrx)):
+                    print(self.connMatrx[i])
+                print()
+            self.event.wait(0.25)        
 
 
 # #--------------------------------------------------------------#
@@ -238,6 +243,18 @@ class WirelessHost(threading.Thread):
 
     def getDataPingDict(self, number):
         return self.pingDict[number]["data"]
+
+    def addConnection(self, espNum):
+        self.connMatrx.append([espNum, 0, 0, 0])
+
+    def updateConnection(self, espNum, edge, neighbour):
+        if int(edge)+1 > len(self.connMatrx):
+            return
+        for i, connId in enumerate(self.connMatrx):
+            if connId[0] == espNum:
+                row = int(i)
+                break
+        self.connMatrx[row][int(edge)+1] = neighbour
  
 
     def exit(self):

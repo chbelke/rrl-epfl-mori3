@@ -16,6 +16,7 @@ def getMac(self, pyld, espNum):
         self.setMacDict(self.macDict)
         self.setIdDict(self.idDict)
         self.setMacOrder(self.macOrder)
+        self.addConnection(espNum)
 
     if self.moriShapeDict.get(espNum) is None: #Check if the ESP shape has already been asked once to initialize the shape array
         self.moriShapeDict[espNum] = [200, 200, 200, 0, 0, 0]
