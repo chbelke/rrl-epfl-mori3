@@ -248,13 +248,17 @@ class WirelessHost(threading.Thread):
         self.connMatrx.append([espNum, 0, 0, 0])
 
     def updateConnection(self, espNum, edge, neighbour):
-        if int(edge)+1 > len(self.connMatrx):
+        if int(edge)+1 > 3:
             return
         for i, connId in enumerate(self.connMatrx):
             if connId[0] == espNum:
                 row = int(i)
                 break
-        self.connMatrx[row][int(edge)+1] = neighbour
+        if 'row' in locals():
+            self.connMatrx[row][int(edge)+1] = neighbour
+
+    def getConnMatrix(self):
+        return self.connMatrx
  
 
     def exit(self):

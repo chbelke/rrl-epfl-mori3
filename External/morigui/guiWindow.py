@@ -6,6 +6,9 @@ from termcolor import colored
 # from runMqtt.wifi_host import wifi_host
 from runMqtt.wirelessHost import WirelessHost
 
+from morigui.GraphHost import GraphHost
+from morigui.GraphHost import GraphFrame
+
 from morigui.frames.party import PartyFrame
 from morigui.frames.pubg import PublishGlobal
 from morigui.frames.publ import PublishLocal
@@ -29,6 +32,11 @@ class MoriGui(tk.Frame):
            
         self.createWidgets()
         self.pack()    
+
+        # self.new_window = tk.Toplevel(self.master)
+        self.graph = GraphHost(self.master)
+        self.graph_frame = GraphFrame(self.graph, self)
+        self.graph_frame.updateConnected()        
 
               
     def createWidgets(self):

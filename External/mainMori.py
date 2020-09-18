@@ -25,6 +25,7 @@ from termcolor import colored
 import tkinter as tk
 import threading
 
+# from morigui.GraphHost import GraphHost
 from morigui.guiWindow import MoriGui
 
 
@@ -52,6 +53,7 @@ class mainGui(threading.Thread):
         # label = tk.Label(self.root, text="Hello World")
         # label.pack()
         self.gui.updateConnected()
+        # self.graph.updateConnected()
         
         self.gui.mainloop()
         
