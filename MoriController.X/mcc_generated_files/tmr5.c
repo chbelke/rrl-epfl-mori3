@@ -174,15 +174,7 @@ uint16_t TMR5_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
-    if(Flg_DelayStart){
-        static uint8_t start = 0;
-        if(start > 5){
-            Flg_DelayStart = false;
-        } else {
-            start++;
-            return;
-        }        
-    }
+    Coms_123_ConHandle(); // inter-module connection handler
     
     static uint8_t last_ID_call = 0;
     if(!Flg_ID_check && WIFI_EN) {
@@ -194,37 +186,35 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         }
     }
     
-    // Add your custom callback code here
-    if (Flg_Button){ // if button has been pressed, process
-        Button_Eval();
-        Flg_Button = false;
-    }
-    
-    Coms_123_ConHandle(); // inter-module connection handler
-    
-    Battery_Check();
-    
-    if (MODE_ACC_CON) Flg_i2c_ACC = true; // read accelerometer, called in tmr1
-    
-    if (MODE_LED_ANGLE) {
-        uint8_t RGB[3] = {0, 0, 0};
-        RGB[0] = (uint8_t) map(Sens_ACC_GetAngle(0)/10,90,270,0,50);
-        RGB[1] = (uint8_t) map(Sens_ACC_GetAngle(1)/10,90,270,0,50);
-        RGB[2] = (uint8_t) map(Sens_ACC_GetAngle(2)/10,0,360,0,50);
-        Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
-    } else if (MODE_LED_EDGES) {
-        uint8_t RGB[3] = {0, 0, 0};
-        RGB[0] = (uint8_t) map(Acts_LIN_GetCurrent(0),0,120,0,50);
-        RGB[1] = (uint8_t) map(Acts_LIN_GetCurrent(1),0,120,0,50);
-        RGB[2] = (uint8_t) map(Acts_LIN_GetCurrent(2),0,120,0,50);
-        Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
-    } else if (MODE_LED_RNBOW) {
-        static uint8_t RGBow[3] = {0, 80, 160};
-        RGBow[0] += 20;
-        RGBow[1] += 20;
-        RGBow[2] += 20;
-        Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
-    }
+//    // Add your custom callback code here
+//    if (Flg_Button){ // if button has been pressed, process
+//        Button_Eval();
+//        Flg_Button = false;
+//    }
+//    
+//    Battery_Check();
+//    
+//    if (MODE_ACC_CON) Flg_i2c_ACC = true; // read accelerometer, called in tmr1
+//    
+//    if (MODE_LED_ANGLE) {
+//        uint8_t RGB[3] = {0, 0, 0};
+//        RGB[0] = (uint8_t) map(Sens_ACC_GetAngle(0)/10,90,270,0,50);
+//        RGB[1] = (uint8_t) map(Sens_ACC_GetAngle(1)/10,90,270,0,50);
+//        RGB[2] = (uint8_t) map(Sens_ACC_GetAngle(2)/10,0,360,0,50);
+//        Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
+//    } else if (MODE_LED_EDGES) {
+//        uint8_t RGB[3] = {0, 0, 0};
+//        RGB[0] = (uint8_t) map(Acts_LIN_GetCurrent(0),0,120,0,50);
+//        RGB[1] = (uint8_t) map(Acts_LIN_GetCurrent(1),0,120,0,50);
+//        RGB[2] = (uint8_t) map(Acts_LIN_GetCurrent(2),0,120,0,50);
+//        Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
+//    } else if (MODE_LED_RNBOW) {
+//        static uint8_t RGBow[3] = {0, 80, 160};
+//        RGBow[0] += 20;
+//        RGBow[1] += 20;
+//        RGBow[2] += 20;
+//        Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
+//    }
 
     if (Flg_Verbose && WIFI_EN) {
         static int k = 0;

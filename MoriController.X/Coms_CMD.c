@@ -11,13 +11,6 @@
 static uint8_t CmdExtTemp[4][3]; // incoming extension value (temporary)
 static uint16_t CmdAngTemp[4][3]; // incoming angle value (temporary)
 
-//const char *coms_message = "Ctrl";  
-//const char *coms_end = "end";  
-//const char *coms_1 = "State1";  
-//const char *coms_2 = "State2";  
-//const char *coms_3 = "State3";  
-//const char *coms_4 = "State4";  
-
 /* ******************** COMMAND HANDLER************************************** */
 bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
     static bool alloc[4] = {true, true, true, true};

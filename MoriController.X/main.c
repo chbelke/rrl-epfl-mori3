@@ -103,6 +103,9 @@ volatile bool Flg_i2c_DAC = false;
 int main(void) {
     __delay_ms(1000);
     SYSTEM_Initialize(); // initialize the device
+//    Coms_123_purge_uart(0);
+//    Coms_123_purge_uart(1);
+//    Coms_123_purge_uart(2);
 
     LED_R = LED_Off;
     WIFI_EN = WIFI_On;
@@ -110,12 +113,9 @@ int main(void) {
     // verify own id with esp
     while (!Flg_ID_check) {
         LED_Y = LED_Off;
-        Coms_123_purge_uart(0);
-        __delay_us(10);
-        Coms_123_purge_uart(1);
-        __delay_us(10);
-        Coms_123_purge_uart(2);
-        __delay_us(10);
+        Coms_123_Eval(0);
+        Coms_123_Eval(1);
+        Coms_123_Eval(2);
     }
     if (!Coms_ESP_VerifyID()) { // if bad id
         Mnge_RGB_Set(0,50); // set everything to red
@@ -124,12 +124,12 @@ int main(void) {
         INTERRUPT_GlobalDisable();
         while (1);
     }
-    Mnge_RGB_Set(0,0); // set everything to red
+
     Flg_MotLin_Active = true;
     
-    Coms_123_purge_uart(0);
-    Coms_123_purge_uart(1);
-    Coms_123_purge_uart(2);
+//    Coms_123_purge_uart(0);
+//    Coms_123_purge_uart(1);
+//    Coms_123_purge_uart(2);
     
 
     // - Set rotary motor current limits -
@@ -144,6 +144,7 @@ int main(void) {
         Coms_123_Eval(0);
         Coms_123_Eval(1);
         Coms_123_Eval(2);
+        Coms_ESP_Eval();
     }
     return 1;
 }

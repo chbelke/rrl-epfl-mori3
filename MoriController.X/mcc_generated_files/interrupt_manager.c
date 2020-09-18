@@ -53,47 +53,47 @@
 void INTERRUPT_Initialize (void)
 {
     //    UERI: UART2 Error
-    //    Priority: 1
+    //    Priority: 7
         IPC16bits.U2EIP = 7;
     //    UTXI: UART2 Transmitter
-    //    Priority: 3
-        IPC7bits.U2TXIP = 3;
+    //    Priority: 5
+        IPC7bits.U2TXIP = 5;
     //    URXI: UART2 Receiver
-    //    Priority: 3
-        IPC7bits.U2RXIP = 3;
+    //    Priority: 5
+        IPC7bits.U2RXIP = 5;
     //    UERI: UART3 Error
-    //    Priority: 1
+    //    Priority: 7
         IPC20bits.U3EIP = 7;
     //    UTXI: UART3 Transmitter
-    //    Priority: 3
-        IPC20bits.U3TXIP = 3;
+    //    Priority: 5
+        IPC20bits.U3TXIP = 5;
     //    URXI: UART3 Receiver
-    //    Priority: 3
-        IPC20bits.U3RXIP = 3;
+    //    Priority: 5
+        IPC20bits.U3RXIP = 5;
     //    UERI: UART4 Error
-    //    Priority: 1
+    //    Priority: 7
         IPC21bits.U4EIP = 7;
     //    UTXI: UART4 Transmitter
-    //    Priority: 4
-        IPC22bits.U4TXIP = 3;
+    //    Priority: 5
+        IPC22bits.U4TXIP = 5;
     //    URXI: UART4 Receiver
-    //    Priority: 4
-        IPC22bits.U4RXIP = 3;
+    //    Priority: 5
+        IPC22bits.U4RXIP = 5;
+    //    UERI: UART1 Error
+    //    Priority: 7
+        IPC16bits.U1EIP = 7;
+    //    UTXI: UART1 Transmitter
+    //    Priority: 5
+        IPC3bits.U1TXIP = 5;
+    //    URXI: UART1 Receiver
+    //    Priority: 5
+        IPC2bits.U1RXIP = 5;
     //    ADI: ADC1 Convert Done
     //    Priority: 1
         IPC3bits.AD1IP = 1;
-    //    UERI: UART1 Error
-    //    Priority: 1
-        IPC16bits.U1EIP = 7;
-    //    UTXI: UART1 Transmitter
-    //    Priority: 3
-        IPC3bits.U1TXIP = 3;
-    //    URXI: UART1 Receiver
-    //    Priority: 3
-        IPC2bits.U1RXIP = 3;
     //    INT1I: External Interrupt 1
-    //    Priority: 2
-        IPC5bits.INT1IP = 2;
+    //    Priority: 1
+        IPC5bits.INT1IP = 1;
     //    MICI: I2C1 Master Events
     //    Priority: 4
         IPC4bits.MI2C1IP = 4;
