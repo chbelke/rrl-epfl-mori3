@@ -1,7 +1,7 @@
 #ifndef MNGE_DAC_H
 #define	MNGE_DAC_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 // Digital to analog converter DAC5574
 

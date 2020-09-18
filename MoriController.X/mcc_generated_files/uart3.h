@@ -13,11 +13,11 @@
   @Description
     This header file provides APIs for driver for UART3. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
 */
 
 /*
@@ -186,7 +186,7 @@ bool UART3_IsTxDone(void);
         UART3_SetTxInterruptHandler(&UART3_Transmit_CallBack);
     </code>
 */
-void UART3_SetTxInterruptHandler(void* handler);
+void UART3_SetTxInterruptHandler(void (* interruptHandler)(void));
 
 /**
   @Summary
@@ -226,7 +226,7 @@ void UART3_Transmit_CallBack(void);
         UART3_SetRxInterruptHandler(&UART3_Receive_CallBack);
     </code>
 */
-void UART3_SetRxInterruptHandler(void* handler);
+void UART3_SetRxInterruptHandler(void (* interruptHandler)(void));
 
 /**
   @Summary

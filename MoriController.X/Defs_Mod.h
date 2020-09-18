@@ -78,7 +78,7 @@
     #define MotLin_MIN_3 79
     #define MotLin_MAX_3 995
 #elif  MODULE == 'C' // MINs verified
-    #define MotLin_MIN_1 80
+    #define MotLin_MIN_1 72
     #define MotLin_MAX_1 988
     #define MotLin_MIN_2 79
     #define MotLin_MAX_2 996

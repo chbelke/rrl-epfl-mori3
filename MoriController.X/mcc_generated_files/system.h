@@ -13,11 +13,11 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
 */
 
 /*
@@ -42,9 +42,32 @@
     TERMS.
 */
 
-#include "xc.h"
-#include "stdint.h"
+#ifndef _XTAL_FREQ
+#define _XTAL_FREQ  7372800UL
+#endif
+
+#include <xc.h>
+#include "reset.h"
 #include "system_types.h"
+#include "clock.h"
+#include "pin_manager.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "ext_int.h"
+#include "i2c1.h"
+#include "reset.h"
+#include "interrupt_manager.h"
+#include "traps.h"
+#include "tmr3.h"
+#include "tmr1.h"
+#include "watchdog.h"
+#include "uart4.h"
+#include "uart3.h"
+#include "adc1.h"
+#include "tmr5.h"
+#include "uart2.h"
+#include "pwm.h"
+#include "uart1.h"
 
 #ifndef SYSTEM_H
 #define	SYSTEM_H

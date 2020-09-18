@@ -40,7 +40,7 @@
 
 /* ******************** MODE SELECTION ************************************** */
 //#define MODE_DEBUG false
-#define MODE_ENC_CON false
+#define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
 #define STAT_MotLin_Active true
@@ -109,7 +109,9 @@ extern volatile bool Flg_i2c_DAC;
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte
 #define EDG_IdlIntrvl 3             // idle check at 5Hz, 5 = 1 sec = con lost
-#define EDG_ConIntrvl 10            // con check at 5Hz, 5 = 2 sec = con lost
+#define EDG_ConIntrvl 10            // con check at 5Hz, 10 = 2 sec = con lost
+#define EDG_ActIntrvl 3             // act check at 20Hz, 3 = 
+#define EDG_ExtCurRng 3             // current neighbour ext. must be (own +-)
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register

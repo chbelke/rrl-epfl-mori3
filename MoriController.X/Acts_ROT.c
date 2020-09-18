@@ -85,7 +85,7 @@ void Acts_ROT_PID(uint8_t edge, float current, float desired) {
 
 /* ******************** ROTARY MOTOR CURRENT LIMIT ************************** */
 void Acts_ROT_Limit(uint8_t edge, uint8_t voltagelevel) {
-    Mnge_DAC_Write(edge, voltagelevel);
+    Mnge_DAC_Set(edge, voltagelevel);
 }
 
 

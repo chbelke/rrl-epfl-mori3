@@ -28,4 +28,4 @@ class PublishGlobal():
         text = self.pub_cmd.get()
         self.mqtthost.publishGlobal(text)
         print("Published \"" + text + "\" to esp/rec")
-        self.pub_cmd.delete(0, 'end')
+#        self.pub_cmd.delete(0, 'end')

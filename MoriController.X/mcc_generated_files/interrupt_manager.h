@@ -14,11 +14,11 @@
   @Description:
     This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
 */
 /*
     (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -136,5 +136,32 @@ inline static void INTERRUPT_GlobalDisable(void)
     __builtin_disable_interrupts();
 }
 
+/**
+  @Summary
+    Returns the interrupt vector number of the interrupt which is pending.
+
+  @Description
+    This routine returns the interrupt vector number of the interrupt which is pending.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+        uint16_t ivrNum;
+        ivrNum = INTERRUPT_VectorNumberGet();
+    </code>
+
+*/
+inline static uint16_t INTERRUPT_VectorNumberGet(void)
+{
+    return _VECNUM; 
+}
 
 #endif

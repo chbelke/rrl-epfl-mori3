@@ -13,11 +13,11 @@
   @Description
     This source file provides APIs for driver for UART2. 
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
 */
 
 /*
@@ -51,6 +51,7 @@
 #include "xc.h"
 #include "uart2.h"
 #include "../Coms_123.h"
+#include "../Mnge_RGB.h"
 
 /**
   Section: Data Type Definitions
@@ -136,15 +137,15 @@ void UART2_Initialize(void)
     Maintains the driver's transmitter state machine and implements its ISR
 */
 
-void UART2_SetTxInterruptHandler(void* handler)
+void UART2_SetTxInterruptHandler(void (* interruptHandler)(void))
 {
-    if(handler == NULL)
+    if(interruptHandler == NULL)
     {
         UART2_TxDefaultInterruptHandler = &UART2_Transmit_CallBack;
     }
     else
     {
-        UART2_TxDefaultInterruptHandler = handler;
+        UART2_TxDefaultInterruptHandler = interruptHandler;
     }
 } 
 
@@ -186,15 +187,15 @@ void __attribute__ ((weak)) UART2_Transmit_CallBack ( void )
 
 }
 
-void UART2_SetRxInterruptHandler(void* handler)
+void UART2_SetRxInterruptHandler(void (* interruptHandler)(void))
 {
-    if(handler == NULL)
+    if(interruptHandler == NULL)
     {
         UART2_RxDefaultInterruptHandler = &UART2_Receive_CallBack;
     }
     else
     {
-        UART2_RxDefaultInterruptHandler = handler;
+        UART2_RxDefaultInterruptHandler = interruptHandler;
     }
 }
 
@@ -228,8 +229,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2RXInterrupt( void )
         {
             rxOverflowed = true;
         }
-        
-        Coms_123_Eval(1);
     }
 }
 
@@ -243,8 +242,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2ErrInterrupt( void )
     if ((U2STAbits.OERR == 1))
     {
         U2STAbits.OERR = 0;
-    }
-    
+    }   
     IFS4bits.U2EIF = 0;
 }
 

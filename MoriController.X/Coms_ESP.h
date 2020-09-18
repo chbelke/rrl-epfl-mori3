@@ -8,7 +8,7 @@
 #ifndef COMS_ESP_H
 #define	COMS_ESP_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 void Coms_ESP_Eval (void);
 void Coms_ESP_Boot (void);
@@ -18,6 +18,7 @@ void Coms_ESP_Verbose (void);
 
 void Coms_ESP_SetLEDs (uint8_t, uint8_t);
 void Coms_ESP_Verbose_Write(const char*);
+void Coms_ESP_Verbose_One_Byte(uint8_t);
 
 void Coms_ESP_Request_Edges();
 void Coms_ESP_Request_Angles();
@@ -34,7 +35,8 @@ void Coms_ESP_LED_Set_Blink_Freq(uint8_t, uint8_t);
 void Coms_ESP_Interpret(void);
 void Coms_ESP_No_WiFi_Edge(void);
 void Coms_ESP_Return_WiFi_Edge(uint8_t);
-void Coms_ESP_Request_ID();
+void Coms_ESP_Request_ID(void);
+bool Coms_ESP_VerifyID(void);
 
 #endif	/* COMS_ESP_H */
 
