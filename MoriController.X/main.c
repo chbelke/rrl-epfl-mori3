@@ -101,11 +101,8 @@ volatile bool Flg_i2c_DAC = false;
                          Main application
  */
 int main(void) {
-    __delay_ms(1000);
+    __delay_ms(200); // start-up delay
     SYSTEM_Initialize(); // initialize the device
-//    Coms_123_purge_uart(0);
-//    Coms_123_purge_uart(1);
-//    Coms_123_purge_uart(2);
 
     LED_R = LED_Off;
     WIFI_EN = WIFI_On;
@@ -116,6 +113,7 @@ int main(void) {
         Coms_123_Eval(0);
         Coms_123_Eval(1);
         Coms_123_Eval(2);
+        Coms_ESP_Eval();
     }
     if (!Coms_ESP_VerifyID()) { // if bad id
         Mnge_RGB_Set(0,50); // set everything to red
@@ -127,11 +125,6 @@ int main(void) {
 
     Flg_MotLin_Active = true;
     
-//    Coms_123_purge_uart(0);
-//    Coms_123_purge_uart(1);
-//    Coms_123_purge_uart(2);
-    
-
     // - Set rotary motor current limits -
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 

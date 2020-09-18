@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'F' // module name by letter
+#define MODULE 'C' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -43,7 +43,7 @@
 #define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active false
 
 

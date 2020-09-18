@@ -228,8 +228,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U4RXInterrupt( void )
         {
             rxOverflowed = true;
         }
-        
-        Coms_ESP_Eval();
     }
 }
 

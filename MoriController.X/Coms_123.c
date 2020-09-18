@@ -68,11 +68,11 @@ volatile bool NbrCmdMatch[3] = {false, false, false};
  */
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
-void Coms_123_Eval(uint8_t edge) {
+void Coms_123_Eval(uint8_t edge) { // called in main
     if(!Coms_123_Ready(edge)) return; // check if byte received
     uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
       
-    Coms_ESP_Verbose_One_Byte(EdgIn);
+//    Coms_ESP_Verbose_One_Byte(EdgIn);
     
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
@@ -109,7 +109,7 @@ void Coms_123_Eval(uint8_t edge) {
             if (EdgIn == EDG_End) {
                 char message1 = (char)EdgInAloc[edge];
                 Coms_ESP_Verbose_Write(&message1);                    
-//                Flg_EdgeSyn[edge] = false;
+                Flg_EdgeSyn[edge] = false;
                 Flg_EdgeAct[edge] = false;
                 EdgInCase[edge] = 0;
             } else {
@@ -146,7 +146,7 @@ void Coms_123_Eval(uint8_t edge) {
             if (EdgIn == EDG_End) { // check length necessary? 
                 Coms_123_ResetIntervals(edge);
                 EdgActCnt[edge] = 0;
-//                Coms_123_ActVerify(edge); // verify with own action commands
+                Coms_123_ActVerify(edge); // verify with own action commands
                 EdgInCase[edge] = 0;
             } else {
                 EdgInCase[edge] = 50;
@@ -170,7 +170,7 @@ void Coms_123_Eval(uint8_t edge) {
             if ((EdgInAloc[edge] & 0b00010000)) { // con detected
                 if (EdgIn == EDG_End) {
                     Flg_EdgeCon[edge] = true;
-//                    Flg_EdgeSyn[edge] = false;
+                    Flg_EdgeSyn[edge] = false;
                     Flg_IDCnfd[edge] = false;
                     Flg_IDRcvd[edge] = false;
                     EdgConCnt[edge] = 0;
@@ -197,7 +197,7 @@ void Coms_123_Eval(uint8_t edge) {
                         }
                         Flg_IDRcvd[edge] = true; // ID received, tell neighbour
                         Flg_EdgeCon[edge] = true; // make sure flag is set
-//                        Flg_EdgeSyn[edge] = false; // reset synced
+                        Flg_EdgeSyn[edge] = false; // reset synced
                         EdgConCnt[edge] = 0;
                         if (EdgInAloc[edge] & 0b00000100)
                             Flg_IDCnfd[edge] = true; // ID confirmed
@@ -250,7 +250,6 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         if (((EdgIdlCnt[edge] >= EDG_IdlIntrvl) && Flg_EdgeSyn[edge]) || // lost
                 ((EdgConCnt[edge] >= EDG_ConIntrvl) && Flg_EdgeCon[edge])) {
             Coms_123_Disconnected(edge);
-//            LED_R = LED_Off;
         } else {
             if (EdgIdlCnt[edge] < EDG_IdlIntrvl)
                 EdgIdlCnt[edge]++;
@@ -262,7 +261,6 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge] && Flg_IDCnfd[edge]) {
             Flg_EdgeSyn[edge] = true;
             EdgIdlCnt[edge] = 0;
-//            Coms_123_purge_uart(edge);
         }
 
         // determine byte to be sent depending on con state flags
@@ -283,19 +281,8 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
                 Coms_ESP_LED_State(edge, 0);
         }
         
-//        char message1 = (char)byte;
-
-
-//        memset(buffy, 0, sizeof(buffy));
-//        thevampireslayer = 0;
-        
-        //Break if module doesn't know its ID and needs to send ID
-        if(!Flg_ID_check) {
-            byte = COMS_123_Conn;
-        }        
-        
-//        char message1 = (char)byte;
-//        Coms_ESP_Verbose_Write(&message1);        
+        // if module ID not verified, send out conn search
+        if(!Flg_ID_check) byte = COMS_123_Conn;
 
         if (Flg_Uart_Lock[edge] == false) {
             Flg_Uart_Lock[edge] = true;

@@ -51,8 +51,8 @@ uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
  */
 
 /* ******************** ESP COMMAND EVALUATION ****************************** */
-void Coms_ESP_Eval() {
-    if (!UART4_IsRxReady()) return;
+void Coms_ESP_Eval() { // called in main
+    if (!UART4_IsRxReady()) return; // check if byte received
     
     if(!Flg_Booted_Up){
         Coms_ESP_Boot();

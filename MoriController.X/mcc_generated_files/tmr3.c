@@ -165,7 +165,7 @@ uint16_t TMR3_Counter16BitGet(void) {
 void __attribute__((weak)) TMR3_CallBack(void) {
     // Add your custom callback code here
 
-//    Coms_123_ActHandle(); // action synchronisation handle
+    Coms_123_ActHandle(); // action synchronisation handle
 
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // open coupling if requested

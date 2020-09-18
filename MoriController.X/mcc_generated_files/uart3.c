@@ -227,11 +227,8 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U3RXInterrupt( void )
         }
         else // must be collision
         {
-//            LED_R = LED_On;
             rxOverflowed = true;
-//            Mnge_RGB_Set(0,50);
         }
-        
     }
 }
 
@@ -246,7 +243,6 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U3ErrInterrupt( void )
     {
         U3STAbits.OERR = 0;
     }
-//    LED_R = LED_Off;
     IFS5bits.U3EIF = 0;
 }
 
