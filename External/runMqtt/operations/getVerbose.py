@@ -21,7 +21,7 @@ def getVerbose(self, pyld, espNum):
             except:
                 print(colored(espNum + "-", 'yellow'), end="")
                 for i in range(len(pyld[1])-1):
-                    if i % 2 is 1:
+                    if i % 2 == 1:
                         continue
                     print(pyld[1][i]*256 + pyld[1][i+1], end=" ")
                 print();
