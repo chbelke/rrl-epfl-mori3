@@ -13,11 +13,11 @@
   @Description
     This source file provides main entry point for system initialization and application code development.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB 	          :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB 	          :  MPLAB X v5.40
  */
 
 /*
@@ -44,7 +44,7 @@
 
 /**
   Section: Included Files
-*/
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include "Defs.h"
@@ -56,8 +56,9 @@
 #include "Acts_LIN.h"
 #include "Acts_CPL.h"
 #include "Sens_ENC.h"
+#include "Coms_ESP.h"
+#include "Coms_123.h"
 #include "mcc_generated_files/system.h"
-#include "mcc_generated_files/mcc.h"
 
 /* GLOBAL MODES */
 volatile bool MODE_LED_ANGLE = false;
@@ -91,6 +92,7 @@ volatile bool Flg_ID_check = false;
 
 volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 
+// i2c flags set anywhere, checked and executed in tmr1
 volatile bool Flg_i2c_PWM = false;
 volatile bool Flg_i2c_ACC = false;
 volatile bool Flg_i2c_DAC = false;
@@ -98,40 +100,46 @@ volatile bool Flg_i2c_DAC = false;
 /*
                          Main application
  */
-int main(void)
-{   
-    __delay_ms(1000);
+int main(void) {
+    __delay_ms(200); // start-up delay
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = LED_Off;
     WIFI_EN = WIFI_On;
 
-    while(Flg_DelayStart);
-    
-    Acts_CPL_Off(0);
-    Acts_CPL_Off(1);
-    Acts_CPL_Off(2);
+    // verify own id with esp
+    while (!Flg_ID_check) {
+        LED_Y = LED_Off;
+        Coms_123_Eval(0);
+        Coms_123_Eval(1);
+        Coms_123_Eval(2);
+        Coms_ESP_Eval();
+    }
+    if (!Coms_ESP_VerifyID()) { // if bad id
+        Mnge_RGB_Set(0,50); // set everything to red
+        LED_R = LED_On;
+        __delay_ms(1000); // wait to set RGB LEDs
+        INTERRUPT_GlobalDisable();
+        while (1);
+    }
+
+    Flg_MotLin_Active = true;
     
     // - Set rotary motor current limits -
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    Acts_ROT_Limit(0,255);
-    Acts_ROT_Limit(1,255);
-    Acts_ROT_Limit(2,255);
-    
-//    Acts_LIN_SetTarget(0,120);
-//    Acts_LIN_SetTarget(1,120);
-//    Acts_LIN_SetTarget(2,120);
-    Flg_MotLin_Active = true;
-    
-//    Mnge_RGB_SetAll(0,1,2);
-    
-    while (1)
-    {
-        // Add your application code
+    Acts_ROT_Limit(0, 255);
+    Acts_ROT_Limit(1, 255);
+    Acts_ROT_Limit(2, 255);
+
+    while (1){
+        Coms_123_Eval(0);
+        Coms_123_Eval(1);
+        Coms_123_Eval(2);
+        Coms_ESP_Eval();
     }
-    return 1; 
+    return 1;
 }
 /**
  End of File

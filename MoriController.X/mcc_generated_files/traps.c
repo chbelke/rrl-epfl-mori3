@@ -14,11 +14,11 @@
   @Description:
     This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs traps.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.166.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.169.0
         Device            :  dsPIC33EP512GM604
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.41
-        MPLAB             :  MPLAB X v5.30
+        Compiler          :  XC16 v1.50
+        MPLAB             :  MPLAB X v5.40
 */
 /*
     (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -49,7 +49,6 @@
 #include "traps.h"
 
 #define ERROR_HANDLER __attribute__((interrupt, no_auto_psv, keep, section("error_handler")))
-#define ERROR_HANDLER_NORETURN ERROR_HANDLER __attribute__((noreturn))
 #define FAILSAFE_STACK_GUARDSIZE 8
 
 /**
@@ -62,7 +61,7 @@ static uint16_t TRAPS_error_code = -1;
  * 
  * @param code error code
  */
-void __attribute__((naked, noreturn, weak)) TRAPS_halt_on_error(uint16_t code)
+void __attribute__((weak)) TRAPS_halt_on_error(uint16_t code)
 {
     TRAPS_error_code = code;
 #ifdef __DEBUG    
@@ -94,13 +93,13 @@ inline static void use_failsafe_stack(void)
 
 
 /** Oscillator Fail Trap vector**/
-void ERROR_HANDLER_NORETURN _OscillatorFail(void)
+void ERROR_HANDLER _OscillatorFail(void)
 {
     INTCON1bits.OSCFAIL = 0;  //Clear the trap flag
     TRAPS_halt_on_error(TRAPS_OSC_FAIL);
 }
 /** Stack Error Trap Vector**/
-void ERROR_HANDLER_NORETURN _StackError(void)
+void ERROR_HANDLER _StackError(void)
 {
     /* We use a failsafe stack: the presence of a stack-pointer error
      * means that we cannot trust the stack to operate correctly unless
@@ -111,31 +110,31 @@ void ERROR_HANDLER_NORETURN _StackError(void)
     TRAPS_halt_on_error(TRAPS_STACK_ERR);
 }
 /** Address error Trap vector**/
-void ERROR_HANDLER_NORETURN _AddressError(void)
+void ERROR_HANDLER _AddressError(void)
 {
     INTCON1bits.ADDRERR = 0;  //Clear the trap flag
     TRAPS_halt_on_error(TRAPS_ADDRESS_ERR);
 }
 /** Math Error Trap vector**/
-void ERROR_HANDLER_NORETURN _MathError(void)
+void ERROR_HANDLER _MathError(void)
 {
     INTCON1bits.MATHERR = 0;  //Clear the trap flag
     TRAPS_halt_on_error(TRAPS_MATH_ERR);
 }
 /** DMAC Error Trap vector**/
-void ERROR_HANDLER_NORETURN _DMACError(void)
+void ERROR_HANDLER _DMACError(void)
 {
     INTCON1bits.DMACERR = 0;  //Clear the trap flag
     TRAPS_halt_on_error(TRAPS_DMAC_ERR);
 }
 /** Generic Hard Trap vector**/
-void ERROR_HANDLER_NORETURN _HardTrapError(void)
+void ERROR_HANDLER _HardTrapError(void)
 {
     INTCON4bits.SGHT = 0;  //Clear the trap flag
     TRAPS_halt_on_error(TRAPS_HARD_ERR);
 }
 /** Generic Soft Trap vector**/
-void ERROR_HANDLER_NORETURN _SoftTrapError(void)
+void ERROR_HANDLER _SoftTrapError(void)
 {
     if(INTCON3bits.DAE)
     {

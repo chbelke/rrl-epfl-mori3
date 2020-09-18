@@ -3,8 +3,8 @@
 #include "Acts_CPL.h"
 #include "Coms_ESP.h"
 
-volatile uint8_t CPL_Count_1[3] = {0, 0, 0};
-volatile uint8_t CPL_Count_2[3] = {0, 0, 0};
+volatile uint8_t CPL_Count_1[3] = {SMA_Period_1, SMA_Period_1, SMA_Period_1};
+volatile uint8_t CPL_Count_2[3] = {SMA_Period_2, SMA_Period_2, SMA_Period_2};
 volatile bool Acts_CPL_Open[3] = {false, false, false};
 
 /* ******************** SET COUPLING PWM VALUE ****************************** */
@@ -22,6 +22,7 @@ void Acts_CPL_Set(uint8_t edge, uint8_t duty) {
         default:
             break;
     }
+    Flg_i2c_PWM = true;
 }
 
 /* ******************** OPEN COUPLING *************************************** */

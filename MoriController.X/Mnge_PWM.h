@@ -1,7 +1,7 @@
 #ifndef MNGE_PWM_H
 #define	MNGE_PWM_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 void Mnge_PWM_Setup (void);
 void Mnge_PWM_Write (void);

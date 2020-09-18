@@ -84,7 +84,8 @@ bool readVerbose(byte c)
         readCase = 0;
         return true;
       }
-      serial_packet[serial_buf_loc+5] = c;
+      // serial_packet[serial_buf_loc+5] = c;
+      sprintf(serial_packet, "%s %x", serial_packet, c); 
       if (serial_buf_loc > serial_len)
       {
         if(serialErrorHandle(c))

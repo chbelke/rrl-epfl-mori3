@@ -3,7 +3,14 @@ from termcolor import colored
 import codecs
 
 def getVerbose(self, pyld, espNum):
-    
+    print(colored(espNum + "-", 'yellow'), end="")
+    for i in pyld:
+        print(colored(i, 'yellow'), end=" ")    
+    print()
+    # print(colored(espNum + "-" + (pyld[2]) + ", " + int(hex(pyld[2])), 'yellow'))    
+    # print(pyld[1])
+
+    return
     try:
         if isinstance(pyld[1],str):
             print(colored(espNum + "-" + (pyld[1]), 'yellow'))

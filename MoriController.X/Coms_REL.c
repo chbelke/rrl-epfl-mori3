@@ -34,9 +34,6 @@ bool Coms_REL_Handle (uint8_t inEdge, uint8_t byte){
             RelBytDta[inEdge][RelBytCnt[inEdge]-2] = byte;
             RelBytCnt[inEdge]++;                
             if (RelBytCnt[inEdge] >= RelBytExp[inEdge]){
-//                Coms_ESP_Verbose_Write(message);    
-//                const char *message2 = "hello";    
-//                Coms_ESP_Verbose_Write(message2);    
                 out = true;
                 RelSwitch[inEdge] = 0;
                 if (byte == EDG_End)
@@ -167,9 +164,9 @@ void Coms_Rel_Interpret(uint8_t inEdge)
 
 /* ******************** GENERIC UART WRITE ********************************** */
 void Coms_Write(uint8_t edge, uint8_t byte){
-    if (edge < 3){
-        Coms_123_Write(edge, byte);
-    } else if (edge == 3){
-        UART4_Write(byte);
-    }
+//    if (edge < 3){
+//        Coms_123_Write(edge, byte);
+//    } else if (edge == 3){
+//        UART4_Write(byte);
+//    }
 }

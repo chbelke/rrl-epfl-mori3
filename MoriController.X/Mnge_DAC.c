@@ -62,8 +62,8 @@ void Mnge_DAC_Ctrl(void) {
     }
 }
 
-void Mnge_DAC_Set(uint8_t edge, uint8_t value){
-    DAC_Value[edge] = value;
+void Mnge_DAC_Set(uint8_t edge, uint8_t voltagelevel){
+    DAC_Value[edge] = voltagelevel;
     DAC_Flag[edge] = true;
     Flg_i2c_DAC = true;
 }

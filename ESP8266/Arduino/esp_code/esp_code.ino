@@ -270,6 +270,7 @@ void startInternet()
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
+    purgeSerial();
     verbose_println("Connecting to WiFi..");
     wifi_ind_led.Toggle();
   }
@@ -303,6 +304,7 @@ void startMQTT()
     {
       verbose_println("connected");
     } else {
+      purgeSerial();
       verbose_print("failed with state ");
       verbose_println(client.state());
       delay(2000);

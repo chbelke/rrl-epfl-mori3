@@ -8,7 +8,7 @@
 #ifndef MNGE_BTN_H
 #define	MNGE_BTN_H
 
-#include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/system.h"
 
 void Button_Eval(void);
 

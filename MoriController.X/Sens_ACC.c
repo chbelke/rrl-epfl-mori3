@@ -125,21 +125,10 @@ void Sens_ACC_Read(void) {
         __delay_us(10);
     }
 
-//    uint8_t i;
-//    for (i = 0; i < 5; i += 2) {
-//        ACC_Data[i / 2] = ((readBuffer[i] << 8) | readBuffer[i + 1]) >> 4;
-//        if (readBuffer[i] > 0x80){
-//            ACC_Data[i / 2] = (ACC_Data[i / 2] & 0x7FF) - 0x7FF;
-//        }
-//    }
     uint8_t i;
     for (i = 0; i < 5; i += 2) {
-        ACC_Data[i / 2] = ((readBuffer[i] * 256) + readBuffer[i + 1]) / 16 ;
-//        if (readBuffer[i] > 0x80){
-//            ACC_Data[i / 2] = (ACC_Data[i / 2] & 0x7FF) - 0x7FF;
-//        }
+        ACC_Data[i / 2] = ((readBuffer[i] * 256) + readBuffer[i + 1]) / 16;
     }
-    
 }
 
 // acceleration values between -2047 and 2047 (2g)
