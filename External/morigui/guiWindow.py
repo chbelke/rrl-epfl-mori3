@@ -51,7 +51,7 @@ class MoriGui(tk.Frame):
         frame5 = tk.Frame(self)
         frame6 = tk.Frame(self)
 
-        self.frame_party = PartyFrame(frame1)
+        self.frame_party = PartyFrame(frame1, self.wifi_host)
         self.frame_start = StartStop(frame1, self.wifi_host)
         self.frame_pubg = PublishGlobal(frame2, self.wifi_host)
         self.frame_publ = PublishLocal(frame3, self, self.wifi_host)

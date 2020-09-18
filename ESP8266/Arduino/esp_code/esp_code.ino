@@ -46,7 +46,7 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "bled", "wedge", "rshape", "redge","rang",
                 "rorient", "rwedge", "rneigh", "nowifi", "wifi",
                 "reset", "preset", "png", "led", "coup", 
-                "extension", "angle"};
+                "extension", "angle", "party"};
 
 char stringIP[16];
 char charMAC[18];

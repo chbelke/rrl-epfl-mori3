@@ -15,6 +15,7 @@ bool Coms_CMD_Request_Orient(uint8_t);
 bool Coms_CMD_Request_Neighbour(uint8_t);
 bool Coms_CMD_Request_WiFiEdge(uint8_t);
 bool Coms_CMD_No_WifiEdge(uint8_t);
+bool Coms_CMD_Set_PARTYMODE(uint8_t);
 
 bool Coms_CMD_Set_ID(uint8_t);
 bool Coms_CMD_SetMotRotOn(uint8_t);

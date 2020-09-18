@@ -7,8 +7,9 @@ from morigui.localSettings import *
 
 class PartyFrame():
 
-    def __init__(self, frame):
+    def __init__(self, frame, mqtthost):
         self.frame = frame
+        self.mqtthost = mqtthost
         self.paaarty = self.partyOn()
         self.load()
 
@@ -22,4 +23,5 @@ class PartyFrame():
         return base64.b64decode(party).decode('UTF-8')
 
     def say_hi(self):
+        self.mqtthost.publishGlobal("party")
         print(colored(self.paaarty,'green'))

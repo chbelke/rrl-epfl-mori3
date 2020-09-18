@@ -205,10 +205,17 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         RGB[2] = (uint8_t) map(Acts_LIN_GetCurrent(2),0,120,0,50);
         Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
     } else if (MODE_LED_RNBOW) {
-        static uint8_t RGBow[3] = {0, 80, 160};
-        RGBow[0] += 20;
-        RGBow[1] += 20;
-        RGBow[2] += 20;
+        static uint8_t RGBow[3] = {0, 0, 0};
+        uint8_t colors;
+        for (colors=0; colors<3; colors++)
+        {
+            if(RGBow[colors] == 0)
+            {
+                RGBow[colors] = (uint8_t)rand();
+            } else {
+                RGBow[colors] += 20;
+            }
+        }
         Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
     }
 

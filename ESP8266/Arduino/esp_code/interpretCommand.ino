@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 32;
+  int sw_case = 33;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -166,6 +166,10 @@ void commands(byte* payload, unsigned int len)
     case 31: //Angles
       setPicAngles(payload, len);
       break;                                    
+
+    case 32: //Party
+      PARTYMODE();
+      break;                                   
 
     default:
       publish("ERR: Command not understood");
@@ -424,4 +428,19 @@ byte detectSpaceChar(byte* payload, int byte_count, unsigned int max_len)
     }
   }
   return byte_count;
+}
+
+
+void PARTYMODE()
+{
+  led_red.setBlinkFreq(random(10, 255));
+  if(!led_red.getBlinkFlag())
+    led_red.Blink();
+  led_blue.setBlinkFreq(random(10, 255));
+  if(!led_blue.getBlinkFlag())  
+    led_blue.Blink();
+  led_green.setBlinkFreq(random(10, 255));
+  if(!led_green.getBlinkFlag())  
+    led_green.Blink();
+  serial_write_one(0b11010010);
 }
