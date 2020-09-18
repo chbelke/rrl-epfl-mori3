@@ -35,7 +35,6 @@ uint8_t ESP_IDexpected[6] = {ID1, ID2, ID3, ID4, ID5, ID6};
 bool Flg_Booted_Up = false;
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
-uint8_t WIFI_LED_BLINK_ACT[3] = {0, 0, 0};
 uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
@@ -264,7 +263,7 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {
     static uint8_t interval[3] = {0, 0, 0}; // only update if state change or 3s passed
     interval[edge]++;
-    if (((WIFI_LED_STATE[edge] - state) == 0) && (interval[edge] <= 15))
+    if (((WIFI_LED_STATE[edge] - state) == 0) && (interval[edge] <= 20))
         return;
     interval[edge] = 0;
 
@@ -284,12 +283,7 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
             break;
 
         case 3: //blink
-//            Coms_ESP_Neighbour_Disconnected(edge);
-            if(WIFI_LED_BLINK_DES[edge] != WIFI_LED_BLINK_ACT[edge])
-            {
-                Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);
-                WIFI_LED_BLINK_ACT[edge] = WIFI_LED_BLINK_DES[edge];
-            }
+            Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);
             break;
         default:
             break;

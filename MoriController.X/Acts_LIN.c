@@ -29,28 +29,19 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
         case 0:
             if (duty > 0) LIN_DIR_1 = 0; // direction output
             else LIN_DIR_1 = 1;
-            // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
-                PWM_Set(LIN_PWM_1, abs(duty)); // pwm output
-            }
+            PWM_Set(LIN_PWM_1, abs(duty)); // pwm output
             break;
 
         case 1:
             if (duty > 0) LIN_DIR_2 = 0; // direction output
             else LIN_DIR_2 = 1;
-            // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
-                PWM_Set(LIN_PWM_2, abs(duty)); // pwm output
-            }
+            PWM_Set(LIN_PWM_2, abs(duty)); // pwm output
             break;
 
         case 2:
             if (duty > 0) LIN_DIR_3 = 0; // direction output
             else LIN_DIR_3 = 1;
-            // if (not connected) or (connected and synchronised)
-            if ((!Flg_EdgeCon[edge]) || Flg_EdgeSyn[edge]) {
-                PWM_Set(LIN_PWM_3, abs(duty)); // pwm output
-            }
+            PWM_Set(LIN_PWM_3, abs(duty)); // pwm output
             break;
 
         default:

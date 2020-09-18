@@ -43,8 +43,8 @@
 #define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active true
-#define STAT_MotRot_Active false
+#define STAT_MotLin_Active false
+#define STAT_MotRot_Active true
 
 
 /* ******************** BATTERY ********************************************* */
@@ -110,7 +110,7 @@ extern volatile bool Flg_i2c_DAC;
 #define EDG_End 42                  // end byte
 #define EDG_IdlIntrvl 3             // idle check at 5Hz, 5 = 1 sec = con lost
 #define EDG_ConIntrvl 10            // con check at 5Hz, 10 = 2 sec = con lost
-#define EDG_ActIntrvl 3             // act check at 20Hz, 3 = 
+#define EDG_ActIntrvl 2             // act check at 20Hz, 3 = 
 #define EDG_ExtCurRng 3             // current neighbour ext. must be (own +-)
 
 /* ******************** PWM GENERATOR *************************************** */
@@ -167,15 +167,15 @@ extern volatile bool Flg_i2c_DAC;
 #define ROT_DIR_2 LATCbits.LATC7
 #define ROT_DIR_3 LATAbits.LATA10
 
-#define MotRot_AngleRange 180       // overall range (in degrees)
+#define MotRot_AngleRange 180 //240        // overall range (in degrees)
 
 #define MotRot_PID_dt 0.1           // timer period (currently not used)
-#define MotRot_PID_kP 150           // proportional component
-#define MotRot_PID_kI 10            // integral component
+#define MotRot_PID_kP 10           // proportional component
+#define MotRot_PID_kI 1            // integral component
 #define MotRot_PID_kD 0             // derivative component
 
-#define MotRot_PID_Imax 20
-#define MotRot_PID_Max 1000
+#define MotRot_PID_Imax 5
+#define MotRot_PID_Max 500
 
 
 /* ******************** I2C ************************************************* */
