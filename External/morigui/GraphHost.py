@@ -40,7 +40,6 @@ class GraphFrame(tk.Frame):
         self.connMatrix = []
         self.nodes = []
         self.edges = []
-        self.updatePositionsFlag = True
            
         self.createWidgets()
         # animate = matplotlib.animation.FuncAnimation(self.fig, self.plotFigure, interval=1000)
@@ -72,10 +71,6 @@ class GraphFrame(tk.Frame):
         # print("ASDJFKlA")
         # print(self.wifi_host.getConnMatrix())
         if tmp != self.wifi_host.getConnMatrix():
-            if len(tmp) <= len(self.wifi_host.getConnMatrix()):
-                self.updatePositionsFlag = True
-            else:
-                self.updatePositionsFlag = False
             self.newConnectionMatrix()
             self.plotFigure()
 
@@ -113,11 +108,12 @@ class GraphFrame(tk.Frame):
         G.add_nodes_from(self.nodes)
         G.add_edges_from(self.edges)
         tmp_pos = nx.spring_layout(G)
-        if self.updatePositionsFlag == False:
-            for label in self.pos:
-                print(label)
-                tmp_pos[label] = self.pos[label]
-        else:
+        try:
+            for label in tmp_pos:
+                if label in self.pos:
+                    tmp_pos[label] = self.pos[label]
+            self.pos = tmp_pos
+        except AttributeError:
             self.pos = tmp_pos
         nx.draw(G, self.pos, with_labels=True)
         return
