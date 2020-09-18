@@ -40,6 +40,9 @@ class GraphFrame(tk.Frame):
         self.connMatrix = []
         self.nodes = []
         self.edges = []
+        self.mori_status = {}
+        self.colourDict = {'WiFi': 'blue', 'UDP': 'green', 'Lost': 'red'}        
+        self.G=nx.DiGraph()
            
         self.createWidgets()
         # animate = matplotlib.animation.FuncAnimation(self.fig, self.plotFigure, interval=1000)
@@ -65,17 +68,22 @@ class GraphFrame(tk.Frame):
     def updateConnected(self): #Updates the number of connected ESPs and the lists
         self.after(500, self.updateConnected)
         
+        update_flag=False
         tmp = copy.deepcopy(self.connMatrix)
-        # print("HERE")
-        # print(tmp)
-        # print("ASDJFKlA")
-        # print(self.wifi_host.getConnMatrix())
+        
         if tmp != self.wifi_host.getConnMatrix():
             self.newConnectionMatrix()
+            update_flag=True
+
+        if self.mori_status != self.wifi_host.getEspIds():
+            self.tmpEspIds = copy.deepcopy(self.wifi_host.getEspIds())
+            self.updateColors()
+            update_flag=True
+        
+        if update_flag:
             self.plotFigure()
 
-        # print(self.nodes)
-        # print(self.edges)
+
 
     def newConnectionMatrix(self):
         self.connMatrix = copy.deepcopy(self.wifi_host.getConnMatrix())
@@ -101,13 +109,14 @@ class GraphFrame(tk.Frame):
         # self.ax.plot(random.sample(range(1, 10), 8), random.sample(range(1, 10), 8))
         self.plotGraph()
 
+        nx.draw(self.G, self.pos, node_color=self.color_map, with_labels=True)
         self.canvas.draw()
 
     def plotGraph(self):
-        G=nx.DiGraph()
-        G.add_nodes_from(self.nodes)
-        G.add_edges_from(self.edges)
-        tmp_pos = nx.spring_layout(G)
+        self.G=nx.DiGraph()
+        self.G.add_nodes_from(self.nodes)
+        self.G.add_edges_from(self.edges)
+        tmp_pos = nx.spring_layout(self.G)
         try:
             for label in tmp_pos:
                 if label in self.pos:
@@ -115,6 +124,12 @@ class GraphFrame(tk.Frame):
             self.pos = tmp_pos
         except AttributeError:
             self.pos = tmp_pos
-        nx.draw(G, self.pos, with_labels=True)
         return
 
+
+    def updateColors(self):
+        self.color_map = []
+        for node in self.G:
+            espIds = self.wifi_host.getIdDict()
+            self.color_map.append(self.colourDict[self.tmpEspIds[espIds[node]][0]])
+        return

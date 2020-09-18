@@ -126,7 +126,7 @@ class WirelessHost(threading.Thread):
             self.mqttClient.publishLocal(msg, addr)
 
 
-    def getNumberConnected(self):
+    def updateConnected(self):
         # self.numberModules = len(self.macOrder)
         # return self.numberModules
         # print("IPDICT: ", self.IPDict)
@@ -137,14 +137,20 @@ class WirelessHost(threading.Thread):
             return 0
 
         for i in range(len(self.macOrder)-1, -1, -1): #Go through the array  from top to bottom to avoid out ouf range errors
+            if(self.macDict[self.macOrder[i]][0] == "Lost"):
+                continue
             tmpTime = self.coTimeDict.get(self.macOrder[i])
             if not tmpTime:
                 return 0
             if time.time() - tmpTime > 4: #Consider ESP disonnected if no message has been received in the last 4 seconds
                 print(colored("ESP " + self.macOrder[i] + " lost", "red"))
-                del self.macOrder[i]
+                self.macDict[self.macOrder[i]][0] = "Lost"
         self.numberModules = len(self.macOrder)
+
+
+    def getNumberConnected(self):
         return self.numberModules
+
 
 
     # def toggleUDP(self):
@@ -208,6 +214,9 @@ class WirelessHost(threading.Thread):
 
     def setIdDict(self, idDict):
         self.idDict = idDict 
+
+    def getIdDict(self):
+        return self.idDict 
 
 
     def getEspOrder(self):

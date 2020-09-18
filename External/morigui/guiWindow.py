@@ -2,6 +2,7 @@ import tkinter as tk
 from threading import Thread
 import threading
 from termcolor import colored
+import copy
 
 # from runMqtt.wifi_host import wifi_host
 from runMqtt.wirelessHost import WirelessHost
@@ -28,10 +29,12 @@ class MoriGui(tk.Frame):
         self.wifi_host.start()
 
         self.numberConnected = tk.IntVar()
-        self.numberConnected.set(self.wifi_host.getNumberConnected())
+        self.numberConnected.set(0)
            
         self.createWidgets()
         self.pack()    
+
+        self.tmpEspIds = {}
 
         # self.new_window = tk.Toplevel(self.master)
         self.graph = GraphHost(self.master)
@@ -67,17 +70,20 @@ class MoriGui(tk.Frame):
     def updateConnected(self): #Updates the number of connected ESPs and the lists
         self.after(500, self.updateConnected)
         
-        tmp = self.numberConnected.get()
-        if tmp != self.wifi_host.getNumberConnected():
-            self.numberConnected.set(self.wifi_host.getNumberConnected())
+        self.wifi_host.updateConnected()
+        # print("DJFSKLDEF ", self.wifi_host.getNumberConnected())
+        # tmp = self.numberConnected.get()
+        self.numberConnected.set(self.wifi_host.getNumberConnected())
+
+        if self.tmpEspIds != self.wifi_host.getEspIds():
             espOrder = self.wifi_host.getEspOrder()
-            esp = self.wifi_host.getEspIds()
+            self.tmpEspIds = copy.deepcopy(self.wifi_host.getEspIds())
             self.moriNumber = []
             print("")
             print(colored("Online ESPs: ", "blue") + colored(espOrder, "blue"))
             print("")
             for i in range(len(espOrder)):
-                self.moriNumber.append(esp[espOrder[i]])
+                self.moriNumber.append(self.tmpEspIds[espOrder[i]])
 
             self.frame_publ.update_menu(self.moriNumber)
             self.frame_binary.update_menu(self.moriNumber)
