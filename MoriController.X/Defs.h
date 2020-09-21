@@ -43,7 +43,7 @@
 #define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active true
 
 
@@ -159,7 +159,7 @@ extern volatile bool Flg_i2c_DAC;
 #define MotLin_PID_kD 0             // derivative component
 
 #define MotLin_PID_Imax 15
-#define MotLin_PID_Max 1000
+#define MotLin_PID_Max 512
 
 
 /* ******************** ROTARY MOTORS *************************************** */
@@ -167,15 +167,16 @@ extern volatile bool Flg_i2c_DAC;
 #define ROT_DIR_2 LATCbits.LATC7
 #define ROT_DIR_3 LATAbits.LATA10
 
-#define MotRot_AngleRange 180 //240        // overall range (in degrees)
+#define MotRot_AngleRange 240 //240        // overall range (in degrees)
 
-#define MotRot_PID_dt 0.1           // timer period (currently not used)
-#define MotRot_PID_kP 10           // proportional component
-#define MotRot_PID_kI 1            // integral component
-#define MotRot_PID_kD 0             // derivative component
+#define MotRot_PID_dt 0.01f           // timer period (currently not used)
+#define MotRot_PID_kP 153.0f           // proportional component
+#define MotRot_PID_kI 53.9f             // integral component
+#define MotRot_PID_kD 3.4f             // derivative component
 
-#define MotRot_PID_Imax 5
-#define MotRot_PID_Max 500
+#define MotRot_PID_Dmax 1024
+#define MotRot_PID_Imax 1024
+#define MotRot_PID_Max 1024
 
 
 /* ******************** I2C ************************************************* */

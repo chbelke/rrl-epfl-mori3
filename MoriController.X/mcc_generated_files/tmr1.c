@@ -194,9 +194,8 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     
     for (edge = 0; edge < 3; edge++) { // angle control loops
         if (MODE_ENC_CON) Sens_ENC_Read(edge); // update encoder reading
-        if (Flg_EdgeRequest_Ang[edge] && Flg_EdgeAct[edge]){
+        if (Flg_EdgeRequest_Ang[edge] && Flg_EdgeAct[edge])
             Acts_ROT_PID(edge, Sens_ENC_Get(edge), Acts_ROT_GetTarget(edge));
-        }
         else 
             Acts_ROT_Out(edge, 0);// make sure motors are off
     }

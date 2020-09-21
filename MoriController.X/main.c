@@ -130,9 +130,9 @@ int main(void) {
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    Acts_ROT_Limit(0, 100);
-    Acts_ROT_Limit(1, 100);
-    Acts_ROT_Limit(2, 100);
+    Acts_ROT_Limit(0, 85);
+    Acts_ROT_Limit(1, 85);
+    Acts_ROT_Limit(2, 85);
 
     while (1){
         Coms_123_Eval(0);

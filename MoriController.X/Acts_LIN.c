@@ -146,9 +146,6 @@ void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
     Ext_DesiredOld[edge] = Ext_Desired[edge];
     Ext_Desired[edge] = desired;
     Flg_EdgeRequest_Ext[edge] = true; //  relevant when coupled
-    
-    if (Ext_Desired[edge] != Ext_DesiredOld[edge]) //  no action when con and new
-        Flg_EdgeAct[edge] = false;
 }
 
 /* ******************** RETURN FORMATTED EXTENTION ************************** */
