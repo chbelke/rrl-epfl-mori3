@@ -41,8 +41,13 @@ class GraphFrame(tk.Frame):
         self.nodes = []
         self.edges = []
         self.mori_status = {}
-        self.colourDict = {'WiFi': 'blue', 'UDP': 'green', 'Lost': 'red'}        
+
+
         self.G=nx.DiGraph()
+        self.color_map = []
+        self.node_size = 100
+        self.font_size = 18
+        self.colourDict = {'WiFi': 'xkcd:blue', 'UDP': 'xkcd:green', 'Lost': 'xkcd:red', 'Hub': 'xkcd:gold', 'NoWifi': 'xkcd:grey'}        
            
         self.createWidgets()
         # animate = matplotlib.animation.FuncAnimation(self.fig, self.plotFigure, interval=1000)
@@ -51,6 +56,7 @@ class GraphFrame(tk.Frame):
               
     def createWidgets(self):
         self.fig = plt.figure(figsize=(5,5), dpi=100)
+        # self.fig.tight_layout(pad=2)
         self.ax = self.fig.add_subplot(111)
         
 
@@ -68,20 +74,20 @@ class GraphFrame(tk.Frame):
     def updateConnected(self): #Updates the number of connected ESPs and the lists
         self.after(500, self.updateConnected)
         
-        update_flag=False
+        if self.wifi_host.getNumberConnected() <= 0:
+            return
+
         tmp = copy.deepcopy(self.connMatrix)
-        
         if tmp != self.wifi_host.getConnMatrix():
             self.newConnectionMatrix()
-            update_flag=True
 
         if self.mori_status != self.wifi_host.getEspIds():
-            self.tmpEspIds = copy.deepcopy(self.wifi_host.getEspIds())
-            self.updateColors()
-            update_flag=True
+            self.mori_status = copy.deepcopy(self.wifi_host.getEspIds())
         
-        if update_flag:
-            self.plotFigure()
+        self.updateColors()
+        
+        # if update_flag:
+        self.plotFigure()
 
 
 
@@ -106,10 +112,43 @@ class GraphFrame(tk.Frame):
     def plotFigure(self):
         self.ax=plt.gca()
         self.ax.clear()
+        self.ax.set_xlim(-1,1)
+        self.ax.set_ylim(-1,1)        
         # self.ax.plot(random.sample(range(1, 10), 8), random.sample(range(1, 10), 8))
         self.plotGraph()
+        
 
-        nx.draw(self.G, self.pos, node_color=self.color_map, with_labels=True)
+        # nx.draw(self.G, self.pos, node_color=self.color_map, node_size=self.node_size,
+        #     font_size=self.font_size)
+
+        # pos_comp = {}
+        # comp = 0.8  # offset on the y axis
+        # for k, v in self.pos.items():
+        #     pos_comp[k] = (v[0]*comp, v[1]*comp)
+
+        x_values, y_values = zip(*self.pos.values())
+        x_max = max(x_values)
+        x_min = min(x_values)
+        if x_max > x_min:
+            x_margin = (x_max - x_min) * 0.25
+            plt.xlim(min(-1,x_min - x_margin), max(1,x_max + x_margin))
+
+        y_max = max(y_values)
+        y_min = min(y_values)
+        if y_max > y_min:
+            y_margin = (y_max - y_min) * 0.10
+            plt.ylim(mins(-1,y_min - y_margin), max(1,y_max + y_margin))        
+
+        pos_higher = {}
+        y_off = 0.01  # offset on the y axis
+        for k, v in self.pos.items():
+            pos_higher[k] = (v[0], v[1]+y_off)
+
+        nx.draw_networkx_nodes(self.G, self.pos, node_color=self.color_map, node_size=self.node_size, linewidths=None)
+        nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=20)
+        nx.draw_networkx_labels(self.G, pos_higher, verticalalignment='bottom')
+        plt.box(on=False)
+
         self.canvas.draw()
 
     def plotGraph(self):
@@ -131,5 +170,5 @@ class GraphFrame(tk.Frame):
         self.color_map = []
         for node in self.G:
             espIds = self.wifi_host.getIdDict()
-            self.color_map.append(self.colourDict[self.tmpEspIds[espIds[node]][0]])
+            self.color_map.append(self.colourDict[self.mori_status[espIds[node]][0]])
         return
