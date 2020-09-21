@@ -464,7 +464,7 @@ bool stateInfo(byte c)
     case 24:  //read WiFIEDGE
       if (c == char(END_BYTE))
       {
-        sprintf(serial_packet, "REQ: ED %d", int(storage[0])); 
+        sprintf(serial_packet, "REQ: ED %d", int(storage[0])+1); 
         publish(serial_packet);
         memset(serial_packet, 0, sizeof(serial_packet));
         memset(storage, 0, sizeof(storage));

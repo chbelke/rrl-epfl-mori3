@@ -64,6 +64,8 @@ class WirelessHost(threading.Thread):
         self.IPDict = {}
         self.EPDict = {}
         self.UDPDict = []
+        self.HubDict = []
+        self.noWifiDict = []
 
         self.pingDict = {}
         self.pingCount = {}
@@ -100,18 +102,6 @@ class WirelessHost(threading.Thread):
             self.event.wait(0.25)        
 
 
-# #--------------------------------------------------------------#
-# #---------------------------- UDP -----------------------------#
-# #--------------------------------------------------------------#
-#     def intializeUDPMulticast(self):
-#         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-#         self.udp_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-#         self.udp_sock.bind(('', self.udp_port))
-#         mreq = struct.pack("=4sl", socket.inet_aton("224.51.105.104"), socket.INADDR_ANY)
-
-#         self.udp_sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)        
-
-
 
     def publishGlobal(self, msg):
         self.mqttClient.publishGlobal(msg)
@@ -127,9 +117,6 @@ class WirelessHost(threading.Thread):
 
 
     def updateConnected(self):
-        # self.numberModules = len(self.macOrder)
-        # return self.numberModules
-        # print("IPDICT: ", self.IPDict)
         if self.macOrder is None:
             return 0
 
@@ -151,17 +138,6 @@ class WirelessHost(threading.Thread):
     def getNumberConnected(self):
         return self.numberModules
 
-
-
-    # def toggleUDP(self):
-    #     if self.UDPCom:
-    #         self.UDPCom = False
-    #         #Stop the UDP connections
-    #         for i in range(len(self.controllerDict)):
-    #             self.publishLocal(list(self.controllerDict)[i],"stopudp")
-    #     else:
-    #         self.UDPCom = True
-    #     return self.UDPCom
 
     def checkPing(self):
         for esp in pingCount.keys():
@@ -191,9 +167,20 @@ class WirelessHost(threading.Thread):
     def setUDPDict(self, UDPDict):
         self.UDPDict = UDPDict
 
-    def getUDPDict(self):
-        return self.UDPDict
+    def getHubDict(self):
+        return self.HubDict
 
+    def setHubDict(self, HubDict):
+        self.HubDict = HubDict
+
+    def getNoWifiDict(self):
+        return self.noWifiDict
+
+    def setNoWifiDict(self, noWifiDict):
+        self.noWifiDict = noWifiDict
+
+    def getUDPDict(self):
+        return self.UDPDict        
 
     def setCoTimeDict(self, coTimeDict):
         self.coTimeDict = coTimeDict
@@ -268,7 +255,7 @@ class WirelessHost(threading.Thread):
 
     def getConnMatrix(self):
         return self.connMatrx
- 
+
 
     def exit(self):
         self.mqttClient.exit()

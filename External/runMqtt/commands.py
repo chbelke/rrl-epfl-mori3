@@ -12,6 +12,8 @@ import runMqtt.operations.getUDP as getUDP
 import runMqtt.operations.getVerbose as getVerbose
 import runMqtt.operations.getRequest as getRequest
 import runMqtt.operations.getPing as getPing
+import runMqtt.operations.getHub as getHub
+import runMqtt.operations.getWifi as getWifi
 
 commands = {
    'DST:': getRSSI.getRSSI,
@@ -27,5 +29,7 @@ commands = {
    'UDP:': getUDP.startUDP,
    'VBS:': getVerbose.getVerbose,
    'REQ:': getRequest.getRequest,
-   'PNG:': getPing.getPing
+   'PNG:': getPing.getPing,
+   'HUB:': getHub.getHub,
+   'WIFI:': getWifi.getWifi
 }   

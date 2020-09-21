@@ -137,12 +137,15 @@ class GraphFrame(tk.Frame):
         y_min = min(y_values)
         if y_max > y_min:
             y_margin = (y_max - y_min) * 0.10
-            plt.ylim(mins(-1,y_min - y_margin), max(1,y_max + y_margin))        
+            plt.ylim(min(-1,y_min - y_margin), max(1,y_max + y_margin))        
 
         pos_higher = {}
         y_off = 0.01  # offset on the y axis
         for k, v in self.pos.items():
             pos_higher[k] = (v[0], v[1]+y_off)
+
+        if len(self.color_map) < len(self.pos):
+            return
 
         nx.draw_networkx_nodes(self.G, self.pos, node_color=self.color_map, node_size=self.node_size, linewidths=None)
         nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=20)
@@ -168,7 +171,18 @@ class GraphFrame(tk.Frame):
 
     def updateColors(self):
         self.color_map = []
+        espIds = self.wifi_host.getIdDict()
         for node in self.G:
-            espIds = self.wifi_host.getIdDict()
-            self.color_map.append(self.colourDict[self.mori_status[espIds[node]][0]])
+            state = self.mori_status[espIds[node]][0]
+            if state == "Lost":
+                self.color_map.append(self.colourDict[state])
+                continue
+            elif node in self.wifi_host.getHubDict():
+                self.color_map.append(self.colourDict["Hub"])
+                continue
+            elif node in self.wifi_host.getNoWifiDict():
+                self.color_map.append(self.colourDict["NoWifi"])
+                continue
+            self.color_map.append(self.colourDict[state])
+
         return

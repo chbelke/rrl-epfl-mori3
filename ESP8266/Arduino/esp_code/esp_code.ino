@@ -46,7 +46,7 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "bled", "wedge", "rshape", "redge","rang",
                 "rorient", "rwedge", "rneigh", "nowifi", "wifi",
                 "reset", "preset", "png", "led", "coup", 
-                "extension", "angle", "party"};
+                "extension", "angle", "party", "hub", "nohub"};
 
 char stringIP[16];
 char charMAC[18];
@@ -70,7 +70,7 @@ bool led_cycle = false;
 
 unsigned long led_sel_time = millis();
 
-byte wifi_edge = 255;
+byte wifi_edge = 255; //Stored as 0-2, but publishes as 1-3
 
 #define END_BYTE 0b00001110
 
@@ -129,7 +129,7 @@ void loop()
     case 3:   //everything is good
       normalOp();
       break;
-    case 4:   //WiFi hub
+    case 4:   //Set to UDP
       startUDP();
       flag_udp = true;
       normalOp();
@@ -179,6 +179,7 @@ void loop()
       startInternet();
       startMQTT();
       normalOp();
+      publish("WIFI: On");
       runState = 3;
       break;
   }

@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 33;
+  int sw_case = 35;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -131,7 +131,8 @@ void commands(byte* payload, unsigned int len)
       break;
 
     case 23:
-      runState = 10;
+      disableWifi();
+      
       break;
 
     case 24:
@@ -169,7 +170,15 @@ void commands(byte* payload, unsigned int len)
 
     case 32: //Party
       PARTYMODE();
-      break;                                   
+      break;          
+
+    case 33: //Set Hub
+      setAsHub();
+      break;
+
+    case 34: //Disable Hub
+      stopHub();
+      break;                
 
     default:
       publish("ERR: Command not understood");
@@ -190,10 +199,24 @@ void setWifiEdge(byte* payload, unsigned int len)
   }
   byte_count++;
 
-  wifi_edge = payload[byte_count]-48;   //-48 = ascii to int conversion
+  byte tmp_wifi_edge = payload[byte_count]-48-1;   //-48 = ascii to int conversion
+
+  if (tmp_wifi_edge > 3) {
+    publish("ERR: Wifi edge > 4");
+    return;
+  }
+  if (tmp_wifi_edge == 3){
+    setAsHub();
+    return;
+  }
+  else if (wifi_edge == 3){ //tmp_hub <= 2
+    stopHub();
+  }
+
+  wifi_edge = tmp_wifi_edge;
 
   char buff[50];
-  sprintf(buff, "INFO: WiFi Edge set to %d", int(wifi_edge));
+  sprintf(buff, "INFO: WiFi Edge set to %d", int(wifi_edge)+1);
   publish(buff);
 
   serial_write_two(0b11011010, wifi_edge);
@@ -249,6 +272,20 @@ void requestNeighbour(byte* payload, unsigned int len)
 
   serial_write_two(0b11010111, neighbour);
 }
+
+
+void disableWifi()
+{
+  if(wifi_edge < 3)
+  {
+    publish("WIFI: Off");
+    runState = 10;
+  } else {
+    publish("ERR: WiFi edge not set");
+  }
+  
+}
+
 
 void echoPing(byte* payload, unsigned int len)
 {
@@ -443,4 +480,20 @@ void PARTYMODE()
   if(!led_green.getBlinkFlag())  
     led_green.Blink();
   serial_write_one(0b11010010);
+}
+
+void setAsHub()
+{
+  wifi_edge = 3;
+  serial_write_two(0b11011010, wifi_edge);
+  publish("HUB: On");
+  if((runState != 3) && (runState != 5)){
+    runState = 4;
+    flag_control = false;
+  }
+}
+
+void stopHub()
+{
+  publish("HUB: Off");
 }
