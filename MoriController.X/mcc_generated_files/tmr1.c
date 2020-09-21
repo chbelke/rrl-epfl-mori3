@@ -172,9 +172,8 @@ uint16_t TMR1_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
-    static int k = 0;
+    static uint8_t k = 0, m = 0, edge = 0;
     static bool light = false;
-    static int m = 0;
     k++;
     if (k >= 10){
         k = 0;
@@ -193,13 +192,13 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         light = !light;
     }
     
-    if (MODE_ENC_CON){
-        Sens_ENC_Read(0);
-        Sens_ENC_Read(1);
-        Sens_ENC_Read(2);
+    for (edge = 0; edge < 3; edge++) { // angle control loops
+        if (MODE_ENC_CON) Sens_ENC_Read(edge); // update encoder reading
+        if (Flg_EdgeRequest_Ang[edge] && Flg_EdgeAct[edge])
+            Acts_ROT_PID(edge, Sens_ENC_Get(edge), Acts_ROT_GetTarget(edge));
+        else 
+            Acts_ROT_Out(edge, 0);// make sure motors are off
     }
-    // Rotary Motor PID here
-    
     
     // Manage remaining i2c communication (must be tmr1)
     if (Flg_i2c_PWM){

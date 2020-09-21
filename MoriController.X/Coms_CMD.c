@@ -8,8 +8,8 @@
 #include "Mnge_RGB.h"
 #include "mcc_generated_files/reset.h"
 
-static uint8_t CmdExtTemp[4][3]; // incoming extension value (temporary)
-static uint16_t CmdAngTemp[4][3]; // incoming angle value (temporary)
+uint8_t CmdExtTemp[4][3]; // incoming extension value (temporary)
+uint16_t CmdAngTemp[4][3]; // incoming angle value (temporary)
 
 /* ******************** COMMAND HANDLER************************************** */
 bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
@@ -412,7 +412,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
         case 8: // ANGLE INPUTS ************************************************
             /* cases 8 to 13, two bytes per motor input */
             if (alloc[edge] & 0b00000100) {
-                CmdAngTemp[edge][0] = ((uint16_t) (byte) << 8) & 0xFF00;
+                CmdAngTemp[edge][0] =  0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 9;
                 break;
@@ -426,7 +426,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             }
         case 10:
             if (alloc[edge] & 0b00000010) {
-                CmdAngTemp[edge][1] = ((uint16_t) (byte) << 8) & 0xFF00;
+                CmdAngTemp[edge][1] =  0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 11;
                 break;
@@ -440,7 +440,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             }
         case 12:
             if (alloc[edge] & 0b00000001) {
-                CmdAngTemp[edge][2] = ((uint16_t) (byte) << 8) & 0xFF00;
+                CmdAngTemp[edge][2] =  0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 13;
                 break;
