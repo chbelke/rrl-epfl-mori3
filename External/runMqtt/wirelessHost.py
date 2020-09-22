@@ -32,6 +32,7 @@ from termcolor import colored
 from runMqtt.recieveMessage import *
 from runMqtt.mqttHost import MqttHost
 from runMqtt.udpHost import UDPHost
+from runMqtt.Utils import *
 
 
 #udp/w/p100/i192.168.0.53/m01 00111111 0900090009000000-1200120 150
@@ -45,9 +46,9 @@ class WirelessHost(threading.Thread):
         
 
         self.numberModules = 0
-        self.macDict = {}
-        self.idDict = {}
-        self.macOrder = []
+        self.macDict = {}           # {'mac': ['Role', 'ID']}
+        self.idDict = {}            # {'ID': 'mac'}
+        self.macOrder = []          # ['mac', 'mac', mac]
         self.coTimeDict = {}
         self.data = []
         self.macCallTime = time.time()
@@ -72,7 +73,7 @@ class WirelessHost(threading.Thread):
 
         self.version = 0.50
 
-        self.connMatrx = []
+        self.connMatrix = {}
 
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
@@ -94,11 +95,16 @@ class WirelessHost(threading.Thread):
                 print("\nTime Elapsed: {:.2f}".format(loopTime-startTime))
                 print(colored("Referenced ESPs : ","yellow"), end=' ')
                 print(self.macDict, end="\n\n")
-                loopTime = time.time()
 
-                for i in range(len(self.connMatrx)):
-                    print(self.connMatrx[i])
+                print("------- Connections -------")
+                for node in self.connMatrix:
+                    print(node, self.connMatrix[node])
+
                 print()
+                for node in self.connMatrix:
+                    self.shortestPath(node)
+                
+                loopTime = time.time()
             self.event.wait(0.25)        
 
 
@@ -130,8 +136,7 @@ class WirelessHost(threading.Thread):
             if not tmpTime:
                 return 0
             if time.time() - tmpTime > 4: #Consider ESP disonnected if no message has been received in the last 4 seconds
-                print(colored("ESP " + self.macOrder[i] + " lost", "red"))
-                self.macDict[self.macOrder[i]][0] = "Lost"
+                self.espLost(self.macDict[self.macOrder[i]][1])
         self.numberModules = len(self.macOrder)
 
 
@@ -241,20 +246,55 @@ class WirelessHost(threading.Thread):
         return self.pingDict[number]["data"]
 
     def addConnection(self, espNum):
-        self.connMatrx.append([espNum, 0, 0, 0])
+        self.connMatrix[espNum] = [0, 0, 0]
 
     def updateConnection(self, espNum, edge, neighbour):
-        if int(edge)+1 > 3:
+        if int(edge) > 3:
             return
-        for i, connId in enumerate(self.connMatrx):
-            if connId[0] == espNum:
-                row = int(i)
-                break
-        if 'row' in locals():
-            self.connMatrx[row][int(edge)+1] = neighbour
+        try:
+            self.connMatrix[espNum][int(edge)] = neighbour
+        except KeyError:
+            return
 
     def getConnMatrix(self):
-        return self.connMatrx
+        return self.connMatrix
+
+
+    def shortestPath(self, target):
+        path = []
+        for hub in self.HubDict:
+            tmp = BFS(self, hub, target, self.connMatrix)
+            if len(path) == 0:
+                path = tmp
+            elif len(tmp) < len(path):
+                path = tmp
+        if path != False:
+            edge_path = []
+            for i in range(len(path)-1):
+                edge = self.connMatrix[path[i]].index(path[i+1])
+                edge_path.append(edge)
+        return path
+
+
+    def espUDP(self, espNum):
+        print(colored("UDP enabled for: " + espNum, 'green'))
+        self.macDict.get(self.idDict[espNum])[0] = "UDP"
+
+    def espLost(self, espNum):
+        print(colored("ESP " + espNum + " lost", "red"))
+        self.macDict.get(self.idDict[espNum])[0] = "Lost"
+
+    def espMQTT(self, espNum):
+        self.macDict.get(self.idDict[espNum])[0] = "WiFi"
+
+    def espLostCheck(self, espNum):
+        try:
+            if self.macDict.get(self.idDict[espNum])[0] == "Lost":
+                return True
+            return False
+        except KeyError:
+            return False
+
 
 
     def exit(self):

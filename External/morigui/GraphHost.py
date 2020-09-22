@@ -73,7 +73,7 @@ class GraphFrame(tk.Frame):
             
     def updateConnected(self): #Updates the number of connected ESPs and the lists
         self.after(500, self.updateConnected)
-        
+       
         if self.wifi_host.getNumberConnected() <= 0:
             return
 
@@ -99,14 +99,14 @@ class GraphFrame(tk.Frame):
     def getNodes(self):
         self.nodes = []
         for connId in self.connMatrix:
-            self.nodes.append(connId[0])
+            self.nodes.append(connId)
 
     def getEdges(self):
         self.edges = []
         for connId in self.connMatrix:
-            for i in range(1,4):
-                if connId[i] != 0:
-                    self.edges.append((connId[0],connId[i]))
+            for i in range(0,3):
+                if self.connMatrix[connId][i] != 0:
+                    self.edges.append((connId,self.connMatrix[connId][i]))
 
 
     def plotFigure(self):
