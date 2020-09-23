@@ -66,7 +66,7 @@ class WirelessHost(threading.Thread):
         self.EPDict = {}
         self.UDPDict = []
         self.HubDict = []
-        self.noWifiDict = []
+        self.noWifiDict = {}
 
         self.pingDict = {}
         self.pingCount = {}
@@ -101,8 +101,8 @@ class WirelessHost(threading.Thread):
                     print(node, self.connMatrix[node])
 
                 print()
-                for node in self.connMatrix:
-                    self.shortestPath(node)
+                print(self.noWifiDict)
+                
                 
                 loopTime = time.time()
             self.event.wait(0.25)        
@@ -116,11 +116,24 @@ class WirelessHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
+        if addr in self.noWifiDict:
+            self.publishThroughHub(msg, addr)
         if addr in self.UDPDict:
             self.udpClient.write(msg, addr)        
         else:
             self.mqttClient.publishLocal(msg, addr)
 
+
+    def publishThroughHub(self, msg, addr):
+        if addr not in self.noWifiDict:
+            self.updateNoWifiDict(addr)
+        if self.noWifiDict[addr][2] == False:
+            print(colored("ERROR: no path to hub for " + addr, 'red'))
+            return
+        msg = self.buildRelayMessage(addr, msg)
+        host = self.noWifiDict[addr][0]
+
+        self.publishLocal(msg, host)
 
     def updateConnected(self):
         if self.macOrder is None:
@@ -268,12 +281,43 @@ class WirelessHost(threading.Thread):
                 path = tmp
             elif len(tmp) < len(path):
                 path = tmp
+        edge_path = []
         if path != False:
-            edge_path = []
             for i in range(len(path)-1):
                 edge = self.connMatrix[path[i]].index(path[i+1])
                 edge_path.append(edge)
-        return path
+        return path, edge_path
+
+
+    def buildRelayMessage(self, espNum, msg):
+        msg = bytearray(str.encode(msg))
+        msg_len = len(msg)
+        # msg_len += 4    #rel
+        msg_len += len(self.noWifiDict[espNum][2])    #rel
+        msg_len += 3    #rel
+
+        message = bytearray(str.encode("rel "))
+        for i, edge in enumerate(self.noWifiDict[espNum][1]):
+            alloc = int(0b11100000)
+            print(i, edge)
+            print(int(edge))
+            alloc = alloc | int(edge)
+            message.append(alloc)
+            if i ==0:
+                message.append(int(msg_len))
+
+        message.append(0b11100100)      #last part to relay to ESP
+        message.extend(msg)
+        message.append(0b00001110)      #14 (esp end)
+        message.append(0b00101010)      #42 (coupling end)
+            
+        print(msg_len)
+        print(message)
+        for i in message:
+            print(hex(i), end=' ')
+        print()
+
+        return message
 
 
     def espUDP(self, espNum):
@@ -286,6 +330,12 @@ class WirelessHost(threading.Thread):
 
     def espMQTT(self, espNum):
         self.macDict.get(self.idDict[espNum])[0] = "WiFi"
+
+
+    def updateNoWifiDict(self, espNum):
+        path, edge_path = self.shortestPath(espNum)
+        target_hub = path[0]
+        self.noWifiDict[espNum] = [target_hub, edge_path, path]
 
     def espLostCheck(self, espNum):
         try:
