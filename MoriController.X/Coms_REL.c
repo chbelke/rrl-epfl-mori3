@@ -37,8 +37,17 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
                 RelSwitch[inEdge] = 0;
                 if (byte == EDG_End)
                     Coms_REL_Relay(inEdge, RelOutEdg[inEdge]);
+                else {
+                    RelSwitch[inEdge] = 50;
+                }
             }
             break;
+            
+        case 50: // END BYTE NOT RECEIVED **************************************
+            if (byte == EDG_End) // wait for next end byte
+                out = true;
+            break;    
+            
         default:
             RelSwitch[inEdge] = 0;
             break;
@@ -50,13 +59,13 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
 void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge) {
     uint8_t edge;
     if (outEdge == 5) { // relay to all
-        for (edge = 0; edge < 4; edge++) {
+        for (edge = 0; edge < 3; edge++) {
             if (edge != inEdge) { // ignore self
                 Coms_REL_ToEdge(edge, inEdge);
             }
         }
     } else if (outEdge == 6) { //relay to WiFi hub
-        if (WIFI_EDGE < 3) {
+        if (WIFI_EDGE <= 3) {
             Coms_REL_ToHub(WIFI_EDGE, inEdge);
         } else {
             Coms_ESP_Request_WiFiEdge();

@@ -164,27 +164,7 @@ uint16_t TMR3_Counter16BitGet(void) {
 
 void __attribute__((weak)) TMR3_CallBack(void) {
     // Add your custom callback code here
-
-    Coms_123_ActHandle(); // action synchronisation handle
-
-    uint8_t edge;
-    for (edge = 0; edge < 3; edge++) { // open coupling if requested
-        if ((Flg_EdgeRequest_Cpl[edge]) &&
-                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge])) {
-            Acts_CPL_On(edge);
-            Flg_EdgeRequest_Cpl[edge] = false;
-        }
-    }
-    Acts_CPL_Ctrl(); // coupling sma controller
-
-    ADC1_Update(); // read analog potentiometer inputs
-    for (edge = 0; edge < 3; edge++) { // extension control loops
-        if (Flg_EdgeRequest_Ext[edge] &&
-                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
-            Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
-        else 
-            Acts_LIN_Out(edge, 0);// make sure motors are off
-    }
+    flg_tmr3_elapsed = true;
 }
 
 void TMR3_SetInterruptHandler(void (* InterruptHandler)(void)) {

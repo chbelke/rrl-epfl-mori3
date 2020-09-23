@@ -214,7 +214,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
             if (Coms_CMD_Handle(edge, EdgIn)) {
                 EdgInCase[edge] = 0;
             }
-            EdgInCase[edge] = 50;
+//            EdgInCase[edge] = 50;
             break;
 
         case 40: // RELAY ******************************************************
@@ -222,7 +222,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
             if (Coms_REL_Handle(edge, EdgIn)) {
                 EdgInCase[edge] = 0;
             }
-            EdgInCase[edge] = 50;
+//            EdgInCase[edge] = 50;
             break;
 
         case 50: // END BYTE NOT RECEIVED **************************************

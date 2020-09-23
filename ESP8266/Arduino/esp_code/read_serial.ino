@@ -276,9 +276,9 @@ bool readInterpret(byte c)
     case 0: 
       memset(serial_packet, 0, sizeof(serial_packet));
       readCase = 1;
-      break;
+      // break;
     case 1:
-      serial_len = c;
+      serial_len = c & 0b00011111;
       readCase = 2;
       break;
 
@@ -288,6 +288,13 @@ bool readInterpret(byte c)
       if ((c == char(END_BYTE)) && (serial_buf_loc == serial_len))
       {
         commands(serial_packet, (unsigned int) serial_len);
+        // char buff[50];
+        // sprintf(buff, "INFO: %s", buff);
+        // for(int i = 0; i<serial_len; i++)
+        // {
+        //   sprintf(buff, "%s %x", buff, serial_packet[i]);
+        // }
+        // publish(buff);
         serial_buf_loc = 0;
         readCase = 0;
         return true;

@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'D' // module name by letter
+#define MODULE 'F' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -44,7 +44,7 @@
 #define MODE_ACC_CON true
 
 #define STAT_MotLin_Active false
-#define STAT_MotRot_Active true
+#define STAT_MotRot_Active false
 
 
 /* ******************** BATTERY ********************************************* */
@@ -77,6 +77,9 @@ extern volatile bool Flg_Uart_Lock[4];
 extern volatile bool Flg_MotLin_Active;
 extern volatile bool Flg_MotRot_Active;
 extern volatile bool Flg_ID_check;
+
+extern volatile bool flg_tmr3_elapsed;
+extern volatile bool flg_tmr5_elapsed;
 
 /* ******************** STATE INFO ****************************************** */
 extern volatile uint8_t ESP_ID[6];
