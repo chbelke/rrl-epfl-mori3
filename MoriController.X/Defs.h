@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'C' // module name by letter
+#define MODULE 'D' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -43,7 +43,7 @@
 #define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active true
+#define STAT_MotLin_Active false
 #define STAT_MotRot_Active true
 
 
@@ -54,6 +54,7 @@
 extern volatile bool MODE_LED_ANGLE;
 extern volatile bool MODE_LED_EDGES;
 extern volatile bool MODE_LED_RNBOW;
+extern volatile bool MODE_LED_PARTY;
 
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAng;

@@ -266,27 +266,29 @@ void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
     if (((WIFI_LED_STATE[edge] - state) == 0) && (interval[edge] <= 20))
         return;
     interval[edge] = 0;
+    
+    if (!MODE_LED_PARTY){
+        switch(state){
+            case 0: //off
+                Coms_ESP_LED_On(edge, WIFI_LED_OFF);
+                Coms_ESP_Neighbour_Disconnected(edge);
+                break;
 
-    switch(state){
-        case 0: //off
-            Coms_ESP_LED_On(edge, WIFI_LED_OFF);
-            Coms_ESP_Neighbour_Disconnected(edge);
-            break;
+            case 1: //on
+                Coms_ESP_LED_On(edge, WIFI_LED_ON);
+                Coms_ESP_Request_Neighbour(edge);
+                break;
 
-        case 1: //on
-            Coms_ESP_LED_On(edge, WIFI_LED_ON);
-            Coms_ESP_Request_Neighbour(edge);
-            break;
+            case 2: //toggle
+                Coms_ESP_LED_Tgl(edge);
+                break;
 
-        case 2: //toggle
-            Coms_ESP_LED_Tgl(edge);
-            break;
-
-        case 3: //blink
-            Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);
-            break;
-        default:
-            break;
+            case 3: //blink
+                Coms_ESP_LED_Blk(edge, WIFI_LED_BLINK_DES[edge]);
+                break;
+            default:
+                break;
+        }
     }
     WIFI_LED_STATE[edge] = state;
 }         
@@ -462,7 +464,7 @@ void Coms_ESP_Request_WiFiEdge()
     }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10011000);
-    UART4_Write(Coms_Rel_Get_WiFi_Edge());
+    UART4_Write(Coms_REL_GetWiFiEdge());
     UART4_Write(ESP_End);
     Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }

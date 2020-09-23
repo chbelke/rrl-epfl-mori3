@@ -64,6 +64,7 @@
 volatile bool MODE_LED_ANGLE = false;
 volatile bool MODE_LED_EDGES = false;
 volatile bool MODE_LED_RNBOW = false;
+volatile bool MODE_LED_PARTY = false;
 
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAng = false;

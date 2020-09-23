@@ -197,7 +197,7 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         if (Flg_EdgeRequest_Ang[edge] && Flg_EdgeAct[edge])
             Acts_ROT_PID(edge, Sens_ENC_Get(edge), Acts_ROT_GetTarget(edge));
         else 
-            Acts_ROT_Out(edge, 0);// make sure motors are off
+            if (!MODE_LED_PARTY) Acts_ROT_Out(edge, 0);// make sure motors are off
     }
     
     // Manage remaining i2c communication (must be tmr1)

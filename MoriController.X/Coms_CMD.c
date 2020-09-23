@@ -210,7 +210,7 @@ bool Coms_CMD_No_WifiEdge(uint8_t byte) {
 bool Coms_CMD_Set_PARTYMODE(uint8_t byte)
 {
     if (byte == ESP_End) {
-        MODE_LED_RNBOW = true;
+        MODE_LED_PARTY = true; // XXX to be replaced by separate off routine
     } else {
         Coms_CMD_OverflowError();
     }
@@ -286,7 +286,7 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
     static bool databyte = true; //Former count - but only one byte sent
     if (byte == ESP_End) {
         if (tmp_wifi_edge[edge] < 4) {
-            Coms_Rel_Set_WiFi_Edge(tmp_wifi_edge[edge]);
+            Coms_REL_SetWiFiEdge(tmp_wifi_edge[edge]);
             if (edge != ESP_URT_NUM)
                 Coms_ESP_Return_WiFi_Edge(tmp_wifi_edge[edge]);
         }
