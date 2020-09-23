@@ -10,14 +10,13 @@
 
 bool Coms_REL_Handle (uint8_t, uint8_t);
 void Coms_REL_Relay (uint8_t, uint8_t);
-void Coms_Write (uint8_t, uint8_t);
-void Coms_Rel_Order(uint8_t, uint8_t);
-
-void Coms_Rel_Edge(uint8_t, uint8_t);
-void Coms_Rel_To_Comp(uint8_t, uint8_t);
-void Coms_Rel_Relay(uint8_t, uint8_t);
-void Coms_Rel_Interpret(uint8_t);
-void Coms_Rel_Set_WiFi_Edge(uint8_t);
-uint8_t Coms_Rel_Get_WiFi_Edge();
+void Coms_REL_ToEdge(uint8_t, uint8_t);
+void Coms_REL_ToHub(uint8_t, uint8_t);
+void Coms_REL_RelayStandard(uint8_t, uint8_t);
+void Coms_REL_RelayCommand(uint8_t, uint8_t);
+void Coms_REL_SetWiFiEdge(uint8_t);
+uint8_t Coms_REL_GetWiFiEdge();
+void Coms_REL_Interpret(uint8_t);
+void Coms_REL_Write (uint8_t, uint8_t);
 
 #endif	/* COMS_REL_H */

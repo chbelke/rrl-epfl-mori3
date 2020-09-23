@@ -64,6 +64,7 @@
 volatile bool MODE_LED_ANGLE = false;
 volatile bool MODE_LED_EDGES = false;
 volatile bool MODE_LED_RNBOW = false;
+volatile bool MODE_LED_PARTY = false;
 
 /* GLOBAL FLAGS */
 volatile bool Flg_LiveAng = false;
@@ -101,7 +102,7 @@ volatile bool Flg_i2c_DAC = false;
                          Main application
  */
 int main(void) {
-    __delay_ms(200); // start-up delay
+    __delay_ms(1000); // start-up delay
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = LED_Off;
@@ -116,7 +117,7 @@ int main(void) {
         Coms_ESP_Eval();
     }
     if (!Coms_ESP_VerifyID()) { // if bad id
-        Mnge_RGB_Set(0,50); // set everything to red
+        Mnge_RGB_SetAll(50,0,0); // set everything to red
         LED_R = LED_On;
         __delay_ms(1000); // wait to set RGB LEDs
         INTERRUPT_GlobalDisable();
@@ -124,14 +125,15 @@ int main(void) {
     }
 
     Flg_MotLin_Active = true;
+    Flg_MotRot_Active = true;
     
     // - Set rotary motor current limits -
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    Acts_ROT_Limit(0, 255);
-    Acts_ROT_Limit(1, 255);
-    Acts_ROT_Limit(2, 255);
+    Acts_ROT_Limit(0, 85);
+    Acts_ROT_Limit(1, 85);
+    Acts_ROT_Limit(2, 85);
 
     while (1){
         Coms_123_Eval(0);

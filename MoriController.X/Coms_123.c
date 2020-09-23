@@ -158,7 +158,6 @@ void Coms_123_Eval(uint8_t edge) { // called in main
             if (EdgIn == EDG_End) {
                 if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge]){
                     Flg_EdgeSyn[edge] = true;
-//                    Coms_123_purge_uart(edge);
                 }
                 EdgInCase[edge] = 0;
             } else {
@@ -211,18 +210,18 @@ void Coms_123_Eval(uint8_t edge) { // called in main
             break;
 
         case 30: // COMMAND ****************************************************
-            //            Coms_123_ResetIntervals(edge);
-            //            if (Coms_CMD_Handle(edge, EdgIn)) {
-            //                EdgInCase[edge] = 0;
-            //            }
+            Coms_123_ResetIntervals(edge);
+            if (Coms_CMD_Handle(edge, EdgIn)) {
+                EdgInCase[edge] = 0;
+            }
             EdgInCase[edge] = 50;
             break;
 
         case 40: // RELAY ******************************************************
-            //            Coms_123_ResetIntervals(edge);
-            //            if (Coms_REL_Handle(edge, EdgIn)) {
-            //                EdgInCase[edge] = 0;
-            //            }
+            Coms_123_ResetIntervals(edge);
+            if (Coms_REL_Handle(edge, EdgIn)) {
+                EdgInCase[edge] = 0;
+            }
             EdgInCase[edge] = 50;
             break;
 
@@ -365,7 +364,7 @@ void Coms_123_ActVerify(uint8_t edge) {
 
     // angle command verification
     if ((EdgInAloc[edge] & 0b00001000) && (Flg_EdgeRequest_Ang[edge])) {
-        if (NbrCmdAng[edge] == Acts_ROT_GetTarget(edge))
+        if (NbrCmdAng[edge] != Acts_ROT_GetTarget(edge))
             NbrCmdNoGo = true; // values do not match, NOGO
     } else if (((EdgInAloc[edge] & 0b00001000) == 0) && (!Flg_EdgeRequest_Ang[edge])) {
         // ok, no commands from either side
@@ -375,7 +374,7 @@ void Coms_123_ActVerify(uint8_t edge) {
 
     // coupling command verification
     if ((EdgInAloc[edge] & 0b00000100) && (Flg_EdgeRequest_Cpl[edge])) {
-        NbrCmdNoGo = true;
+        ; // open coupling?           NbrCmdNoGo = true;
     } else if (((EdgInAloc[edge] & 0b00000100) == 0) && (!Flg_EdgeRequest_Cpl[edge])) {
         // ok, no commands from either side
     } else {
@@ -398,19 +397,14 @@ void Coms_123_ActVerify(uint8_t edge) {
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */
 void Coms_123_Write(uint8_t edge, uint8_t byte) {
-//    char message1 = (char)byte;
-//    Coms_ESP_Verbose_Write(&message1);        
     switch (edge) { // send byte to specific UART based on edge
         case 0:
-//            while(!UART1_IsTxReady()){} // Already done in UART write
             UART1_Write(byte);
             break;
         case 1:
-//            while(!UART2_IsTxReady()){}
             UART2_Write(byte);
             break;
         case 2:
-//            while(!UART3_IsTxReady()){}
             UART3_Write(byte);
             break;
     }

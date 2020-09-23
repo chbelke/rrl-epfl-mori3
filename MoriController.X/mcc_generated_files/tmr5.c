@@ -57,6 +57,7 @@
 #include "adc1.h"
 #include "../Defs.h"
 #include "../Acts_LIN.h"
+#include "../Acts_ROT.h"
 #include "../Mnge_PWM.h"
 #include "../Sens_ACC.h"
 #include "../Mnge_BAT.h"
@@ -174,9 +175,14 @@ uint16_t TMR5_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
+    static uint16_t seed = 0;
+    static bool seedflag = true;
+    static bool DrvFlg = true, DrvRvs = false, ColFlg[3] = {true, true, true};
+    static uint8_t DrvRst, DrvCnt, ColRst[3], ColCnt[3], ColVal[3];
+    static uint8_t i = 0, j = 0, l = 0;
+    
     Coms_123_ConHandle(); // inter-module connection handler
     
-    static uint8_t i = 0;
     if(!Flg_ID_check && WIFI_EN) { // check correct name and ESP 
         if(!(i % 3)) Coms_ESP_Request_ID(); // every 600ms
         i++;
@@ -217,6 +223,43 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
             }
         }
         Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
+    } else if (MODE_LED_PARTY){ // ***** PARROT PARTY PARTY PARROT *************
+        if (seedflag) srand(seed);
+        for (j = 0; j < 3; j++){
+            if (ColFlg[j]){
+                ColRst[j] = rand() % 5;
+                ColVal[j] = 10 + rand() % 245;
+                ColFlg[j] = false;
+            } else {
+                ColCnt[j]++;
+                if (ColCnt[j] > ColRst[j]){
+                    Mnge_RGB_Set(j, 0);
+                    ColFlg[j] = true;
+                    ColCnt[j] = 0;
+                } else if (ColCnt[j] <= ColRst[j]){
+                    Mnge_RGB_Set(j, ColVal[j]);
+                }
+            }
+        }
+        if (DrvFlg){
+            DrvRst = 1 + rand() % 10;
+            DrvFlg = false;
+            DrvCnt = 0;
+        }
+        DrvCnt++;
+        if (DrvCnt > DrvRst){
+            if (!DrvRvs){
+                if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2])
+                    for (l = 0; l < 3; l++) Acts_ROT_Out(l,1024);
+                DrvRvs = true;
+                DrvFlg = true;
+            } else {
+                if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2])
+                    for (l = 0; l < 3; l++) Acts_ROT_Out(l,-1024);
+                DrvRvs = false;
+                DrvFlg = true; 
+            }
+        }
     }
 
     if (Flg_Verbose && WIFI_EN) {
@@ -224,6 +267,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
         if(!(k % 5)) Coms_ESP_Verbose();
         k++;
     }
+    if (Flg_ID_check) seed++;
 }
 
 void  TMR5_SetInterruptHandler(void (* InterruptHandler)(void))
