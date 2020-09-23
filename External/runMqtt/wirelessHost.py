@@ -292,8 +292,8 @@ class WirelessHost(threading.Thread):
     def buildRelayMessage(self, espNum, msg):
         msg = bytearray(str.encode(msg))
         msg_len = len(msg)
-        esp_alloc = 0b00100000 | (msg_len)
-        msg_len += 1   #esp_alloc
+        # esp_alloc = 0b00100000 | (msg_len)
+        # msg_len += 1   #esp_alloc
         msg_len += len(self.noWifiDict[espNum][2])    #rel
         msg_len += 3    #rel
 
@@ -308,16 +308,16 @@ class WirelessHost(threading.Thread):
                 message.append(int(msg_len))
 
         message.append(0b11100011)      #Relay to ESP
-        message.append(esp_alloc)      #ESP command to interpret + length
+        # message.append(esp_alloc)      #ESP command to interpret + length
         message.extend(msg)
         message.append(0b00001110)      #14 (esp end)
         message.append(0b00101010)      #42 (coupling end)
             
-        print(msg_len)
-        print(message)
-        for i in message:
-            print(hex(i), end=' ')
-        print()
+        # print(msg_len)
+        # print(message)
+        # for i in message:
+        #     print(hex(i), end=' ')
+        # print()
 
         return message
 

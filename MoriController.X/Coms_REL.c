@@ -116,6 +116,10 @@ void Coms_REL_RelayStandard(uint8_t edge, uint8_t inEdge) {
 
 /* ******************** RELAY COMMAND FOR NEIGHBOUR ************************* */
 void Coms_REL_RelayCommand(uint8_t edge, uint8_t inEdge) {
+    if (edge == 3) {    //An alloc to let the ESP know to interpret the command
+        Coms_REL_Write(edge, 0b00100000);
+        Coms_REL_Write(edge, RelBytExp[inEdge]-4);  
+    }
     uint8_t count; //count minus 3: relay + len + rel end
     for (count = 0; count < RelBytExp[inEdge] - 3; count++) {
         Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data
