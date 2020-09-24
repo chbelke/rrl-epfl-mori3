@@ -57,7 +57,7 @@ class PublishLocal():
             splitText = text.split("ping",1)
             if (splitText[1].strip().isnumeric()):
                 num = int(splitText[1])
-            self.wirelesshost.setPingCount(number, num)
+            self.wirelesshost.pingHandler.setPingCount(number, num)
             return
         self.wirelesshost.publishLocal(text, number)
         # self.pub_loc_entry.delete(0, 'end')

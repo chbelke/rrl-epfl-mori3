@@ -33,6 +33,7 @@ from termcolor import colored
 from runMqtt.recieveMessage import *
 from runMqtt.mqttHost import MqttHost
 from runMqtt.udpHost import UDPHost
+from runMqtt.pingHandler import PingHandler
 from runMqtt.Utils import *
 
 
@@ -62,18 +63,11 @@ class WirelessHost(threading.Thread):
         self.controllerDict = {}
         self.controllerOrder = []
 
-
         self.IPDict = {}
         self.EPDict = {}
         self.UDPDict = []
         self.HubDict = []
         self.noWifiDict = {}
-
-        self.pingDict = {}
-        self.pingCount = {}
-        self.pingBusy = {}
-        self.pingResults = {}
-        self.newBatchFlag = True
 
         self.version = 0.50
 
@@ -81,6 +75,7 @@ class WirelessHost(threading.Thread):
 
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
+        self.pingHandler = PingHandler(self)
 
 
     def run(self):
@@ -90,6 +85,7 @@ class WirelessHost(threading.Thread):
 
         self.mqttClient.run()
         self.udpClient.usp_rec.run()
+        self.pingHandler.run()
 
         while not self.event.is_set():
             if time.time() - loopTime > 2:
@@ -106,8 +102,7 @@ class WirelessHost(threading.Thread):
                 
                 
                 loopTime = time.time()
-            self.event.wait(0.25)        
-
+            self.event.wait(0.25)    
 
 
     def publishGlobal(self, msg):
@@ -117,9 +112,10 @@ class WirelessHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
+        print(msg)
         if addr in self.noWifiDict:
             self.publishThroughHub(msg, addr)
-        if addr in self.UDPDict:
+        elif addr in self.UDPDict:
             self.udpClient.write(msg, addr)        
         else:
             self.mqttClient.publishLocal(msg, addr)
@@ -156,49 +152,6 @@ class WirelessHost(threading.Thread):
 
     def getNumberConnected(self):
         return self.numberModules
-
-
-    def checkPing(self):
-        try:
-            for esp in self.pingCount.keys():
-                if self.pingCount[esp] <= 0:
-                    continue
-
-                if not esp in self.pingBusy: # if it's the first ping we're sending
-                    self.sendPing(esp)
-                    self.pingBusy[esp] = True
-                elif not self.pingBusy[esp]: # we already sent a ping and we're no longer busy so the ping returned
-                    self.pingCount[esp] -= 1 # decrement
-                    if self.pingCount[esp] > 0:
-                        self.sendPing(esp)
-                        self.pingBusy[esp] = True
-                elif self.getTsPingDict(esp) - time.perf_counter() > 1:
-                    print("TIMEOUT", esp)
-                    self.pingBusy[esp] = False
-                    self.addPingResult(esp, np.inf, False)
-                    self.pingCount[esp] -= 1 # decrement
-
-                if self.pingCount[esp] == 0:
-                    arr1 = np.array(self.pingResults[esp]["time"]) #save data to file
-                    arr2 = np.array(self.pingResults[esp]["integrity"])
-                    dtString = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-                    if self.newBatchFlag:
-                        self.dir = "Ping Data/Data/Batch_" + dtString
-                        if not os.path.exists(self.dir):
-                            os.makedirs(self.dir)
-                            #print("\nNew batch, Made directory: " + self.dir) #debug
-                        self.newBatchFlag = False
-                        #print("Batch flag set to false\n") #debug
-                    np.savez(self.dir + "/PD_" + esp + "_" + dtString, arr1, arr2)
-                    print(colored("Ping data for " + esp + " saved!", "green"))
-                    self.pingBusy.pop(esp) #remove key
-                    if len(self.pingBusy) == 0: #End of batch
-                        self.newBatchFlag = True
-                        #print("\nBatch flag set to true") #debug
-        except:
-            print(colored("IN TRACEBACK", 'red'))
-            traceback.print_exc()
-        return
 
 
     def setIPDict(self, IPDict, EPDict):
@@ -269,24 +222,6 @@ class WirelessHost(threading.Thread):
     def getMqttStatus(self):
         return self.mqttClient.Connected
 
-    def setPingDict(self, number, timestamp, data):
-        # print("added following keys and values:\n key = {}\n timestamp = {}\n data = {}".format(number, timestamp, data))
-        self.pingDict[number] = {}
-        self.pingDict[number]["timestamp"] = timestamp
-        self.pingDict[number]["data"] = data
-
-    def setPingCount(self, number, count):
-        self.pingCount[number] = count
-
-    def resetPingBusy(self, number):
-        self.pingBusy[number] = False
-
-    def getTsPingDict(self, number):
-        return self.pingDict[number]["timestamp"]
-
-    def getDataPingDict(self, number):
-        return self.pingDict[number]["data"]
-
     def addConnection(self, espNum):
         self.connMatrix[espNum] = [0, 0, 0]
 
@@ -319,7 +254,8 @@ class WirelessHost(threading.Thread):
 
 
     def buildRelayMessage(self, espNum, msg):
-        msg = bytearray(str.encode(msg))
+        if type(msg) is str:
+            msg = bytearray(str.encode(msg))
         msg_len = len(msg)
         # esp_alloc = 0b00100000 | (msg_len)
         # msg_len += 1   #esp_alloc
@@ -376,33 +312,6 @@ class WirelessHost(threading.Thread):
         except KeyError:
             return False
 
-
-    def addPingResult(self, number, time, dataIntegrity):
-        if not number in self.pingResults: # no entry for the esp, initalize dict
-            self.pingResults[number] = {}
-            self.pingResults[number]["time"] = list()
-            self.pingResults[number]["integrity"] = list()
-
-        self.pingResults[number]["time"].append(time)
-        self.pingResults[number]["integrity"].append(dataIntegrity)
-        return # Ping data can't be saved without return
-
-    def clearPingResults(self, number):
-        self.pingResults[number]["time"].clear()
-        self.pingResults[number]["integrity"].clear()
-
-    def sendPing(self, number):
-        #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
-        data = bytearray()
-        for lv in range(32):  # generate 32 bytes of random data
-            data.append(random.randint(0x01,0xFF)) # avoid NULL characters
-        
-        text = bytearray(str.encode("png ")) # build a message with a command for the esp and the random data
-        text.extend(data)
-        # print(text) # for debugging
-        self.setPingDict(number, time.perf_counter(), data) # take note of the time and the randomly generated data
-        self.publishLocal(text, number)    
- 
 
     def exit(self):
         self.mqttClient.exit()

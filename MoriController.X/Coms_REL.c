@@ -97,9 +97,9 @@ void Coms_REL_ToEdge(uint8_t edge, uint8_t inEdge) {
 /* ******************** RELAY TO WIFI HUB *********************************** */
 void Coms_REL_ToHub(uint8_t edge, uint8_t inEdge) {
     Coms_REL_Write(edge, 0b11100110); // Necessary (Relay + wifi edge))
-    Coms_REL_Write(edge, RelBytExp[inEdge] - 1); // write length -1
+    Coms_REL_Write(edge, RelBytExp[inEdge]); // write length -1
     uint8_t count;
-    for (count = 1; count < RelBytExp[inEdge] - 2; count++) {
+    for (count = 0; count < RelBytExp[inEdge] - 2; count++) {
         Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data
     }
 }
