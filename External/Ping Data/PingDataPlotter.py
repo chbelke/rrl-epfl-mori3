@@ -53,7 +53,7 @@ for esp in pingData.keys(): #redundant?
     pingDataTime = np.delete(pingData[esp]['arr_0'], faultList) # Remove faulty data
     
     # We can set the number of bins with the `bins` kwarg
-    ax.hist(pingDataTime, bins=len(pingDataTime), density=True, histtype='step', cumulative=-1)
+    ax.hist(pingDataTime[1:], bins=len(pingDataTime[1:]), density=True, histtype='step', cumulative=-1)
     
 plt.xticks(rotation='vertical')
 plt.legend(pingData.keys())
