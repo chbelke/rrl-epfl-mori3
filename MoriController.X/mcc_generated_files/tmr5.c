@@ -175,99 +175,95 @@ uint16_t TMR5_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
-    static uint16_t seed = 0;
-    static bool seedflag = true;
-    static bool DrvFlg = true, DrvRvs = false, ColFlg[3] = {true, true, true};
-    static uint8_t DrvRst, DrvCnt, ColRst[3], ColCnt[3], ColVal[3];
-    static uint8_t i = 0, j = 0, l = 0;
+    static uint16_t seed = 0; // rand() seed 
+    static bool seedflag = false; // rand() seed flag
+    static uint8_t edge;
     
     Coms_123_ConHandle(); // inter-module connection handler
     
+    Battery_Check(); // check if LBO has been trigger for interval
+    
+    if (Flg_Button) Button_Eval(); // if button has been pressed, process
+    
+    if (MODE_ACC_CON) Flg_i2c_ACC = true; // read accelerometer, called in tmr1
+    
     if(!Flg_ID_check && WIFI_EN) { // check correct name and ESP 
+        static uint8_t i = 0;
         if(!(i % 3)) Coms_ESP_Request_ID(); // every 600ms
         i++;
     }
     
-    // Add your custom callback code here
-    if (Flg_Button){ // if button has been pressed, process
-        Button_Eval();
-        Flg_Button = false;
+    if (Flg_Verbose && WIFI_EN) {
+        static uint8_t j = 0;
+        if(!(j % 5)) Coms_ESP_Verbose();
+        j++;
     }
     
-    Battery_Check();
-    
-    if (MODE_ACC_CON) Flg_i2c_ACC = true; // read accelerometer, called in tmr1
-    
+    // RGB LED and party mode handles
     if (MODE_LED_ANGLE) {
         uint8_t RGB[3] = {0, 0, 0};
         RGB[0] = (uint8_t) map(Sens_ACC_GetAngle(0)/10,90,270,0,50);
         RGB[1] = (uint8_t) map(Sens_ACC_GetAngle(1)/10,90,270,0,50);
         RGB[2] = (uint8_t) map(Sens_ACC_GetAngle(2)/10,0,360,0,50);
         Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
+        
     } else if (MODE_LED_EDGES) {
         uint8_t RGB[3] = {0, 0, 0};
-        RGB[0] = (uint8_t) map(Acts_LIN_GetCurrent(0),0,120,0,50);
-        RGB[1] = (uint8_t) map(Acts_LIN_GetCurrent(1),0,120,0,50);
-        RGB[2] = (uint8_t) map(Acts_LIN_GetCurrent(2),0,120,0,50);
+        for (edge = 0; edge < 3; edge++)
+            RGB[edge] = (uint8_t) map(Acts_LIN_GetCurrent(edge),0,120,0,50);
         Mnge_RGB_SetAll(RGB[0], RGB[1], RGB[2]);
+        
     } else if (MODE_LED_RNBOW) {
-        static uint8_t RGBow[3] = {0, 0, 0};
-        uint8_t colors;
-        for (colors=0; colors<3; colors++)
-        {
-            if(RGBow[colors] == 0)
-            {
-                RGBow[colors] = (uint8_t)rand();
-            } else {
-                RGBow[colors] += 20;
-            }
-        }
+        static uint8_t RGBow[3] = {0, 80, 160};
+        for (edge = 0; edge < 3; edge++) RGBow[edge] += 20;
         Mnge_RGB_SetAll(RGBow[0]/8, RGBow[1]/8, RGBow[2]/8);
+        
     } else if (MODE_LED_PARTY){ // ***** PARROT PARTY PARTY PARROT *************
-        if (seedflag) srand(seed);
-        for (j = 0; j < 3; j++){
-            if (ColFlg[j]){
-                ColRst[j] = rand() % 5;
-                ColVal[j] = 10 + rand() % 245;
-                ColFlg[j] = false;
+        static bool DrvFlg = true, DrvRvs = false, ColFlg[3] = {true, true, true};
+        static uint8_t DrvRst, DrvCnt, ColRst[3], ColCnt[3], ColVal[3];
+        if (!seedflag){ // set rand() seed
+            srand(seed);
+            seedflag = true;
+        }
+        
+         // RGB LED blinking
+        for (edge = 0; edge < 3; edge++){
+            if (ColFlg[edge]){
+                ColRst[edge] = rand() % 5;
+                ColVal[edge] = 10 + rand() % 245;
+                ColFlg[edge] = false;
             } else {
-                ColCnt[j]++;
-                if (ColCnt[j] > ColRst[j]){
-                    Mnge_RGB_Set(j, 0);
-                    ColFlg[j] = true;
-                    ColCnt[j] = 0;
-                } else if (ColCnt[j] <= ColRst[j]){
-                    Mnge_RGB_Set(j, ColVal[j]);
+                ColCnt[edge]++;
+                if (ColCnt[edge] > ColRst[edge]){
+                    Mnge_RGB_Set(edge, 0);
+                    ColFlg[edge] = true;
+                    ColCnt[edge] = 0;
+                } else if (ColCnt[edge] <= ColRst[edge]){
+                    Mnge_RGB_Set(edge, ColVal[edge]);
                 }
             }
         }
+        
+        // MotRot dance
         if (DrvFlg){
-            DrvRst = 1 + rand() % 10;
+            DrvRst = 2 + rand() % 15;
             DrvFlg = false;
-            DrvCnt = 0;
         }
         DrvCnt++;
         if (DrvCnt > DrvRst){
-            if (!DrvRvs){
-                if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2])
-                    for (l = 0; l < 3; l++) Acts_ROT_Out(l,1024);
-                DrvRvs = true;
-                DrvFlg = true;
-            } else {
-                if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2])
-                    for (l = 0; l < 3; l++) Acts_ROT_Out(l,-1024);
-                DrvRvs = false;
-                DrvFlg = true; 
-            }
+            static int16_t partymotorout;
+            if (DrvRvs) partymotorout = -1024;
+            else partymotorout = 1024;
+            DrvRvs = !DrvRvs;            
+            if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2])
+                for (edge = 0; edge < 3; edge++) Acts_ROT_Out(edge,1024);
+            DrvFlg = true; 
+            DrvCnt = 0;
         }
     }
 
-    if (Flg_Verbose && WIFI_EN) {
-        static uint8_t k = 0;
-        if(!(k % 5)) Coms_ESP_Verbose();
-        k++;
-    }
-    if (Flg_ID_check) seed++;
+    // varying ID check time between modules ensures varying rand() seed
+    if (Flg_ID_check && !seedflag) seed++;
 }
 
 void  TMR5_SetInterruptHandler(void (* InterruptHandler)(void))
