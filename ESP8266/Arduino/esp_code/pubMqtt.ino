@@ -14,6 +14,12 @@ void pubMac(char* header)
 }
 
 
+void pubOn()
+{
+  publish("ON: ");
+}
+
+
 void pubIP()
 {
   char buff[40] = "IP: ";

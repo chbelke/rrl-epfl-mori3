@@ -41,7 +41,7 @@ class MqttHost(threading.Thread):
         threading.Thread.__init__(self)
         self.wifi_host = wifi_host
         
-        self.clientName = "boss"
+        self.clientName = "bossy"
         # self.mqttServer = "RRLB201957";
         # self.mqttServer = "MQTT-HOST";
         self.mqttServer = "192.168.1.2";

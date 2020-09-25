@@ -217,7 +217,7 @@ void normalOp()
   long unsigned currentTime = millis();
   if(currentTime - lastMacPub > 2000)
   {
-    pubMac("ON: "); //Publish connexion message
+    pubOn(); //Publish connection message
     lastMacPub = millis();
   }
   

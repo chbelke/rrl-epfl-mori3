@@ -51,13 +51,13 @@ uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 
 /* ******************** ESP COMMAND EVALUATION ****************************** */
 void Coms_ESP_Eval() { // called in main
-    if (!UART4_IsRxReady()) return; // check if byte received
+    if (!UART4_IsRxReady()) return; // check if byte received    
     
     if(!Flg_Booted_Up){
         Coms_ESP_Boot();
         return;
     }
-    
+       
     static uint8_t EspInCase = 0;
      uint8_t EspIn = UART4_Read(); // Incoming byte
 //    const char *message = "hello";
@@ -205,9 +205,9 @@ uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose() 
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0);
     UART4_Write(6); // Message length
@@ -223,9 +223,9 @@ void Coms_ESP_Verbose()
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose_Write(const char *message) 
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted        
     
     UART4_Write(0);
@@ -245,9 +245,9 @@ void Coms_ESP_Verbose_Write(const char *message)
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose_One_Byte(uint8_t byte) 
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted        
     
     UART4_Write(0);
@@ -261,9 +261,9 @@ void Coms_ESP_Verbose_One_Byte(uint8_t byte)
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {
-    static uint8_t interval[3] = {0, 0, 0}; // only update if state change or 3s passed
-    interval[edge]++;
-    if (((WIFI_LED_STATE[edge] - state) == 0) && (interval[edge] <= 20))
+    static uint8_t interval[3] = {0, 7, 14}; // only update if state change or 3s passed
+    interval[edge]++;           // 0 7 and 14 to avoid sending all edges at the same time
+    if (((WIFI_LED_STATE[edge] - state) == 0) && (interval[edge] <= 21))
         return;
     interval[edge] = 0;
     
@@ -346,9 +346,9 @@ void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
 
 void Coms_ESP_Interpret() {
     static uint8_t ESP_bnk_frq = 128;
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(0b01001100);  // LED R, Set Blink Freq
     UART4_Write(ESP_bnk_frq);
@@ -360,9 +360,9 @@ void Coms_ESP_Interpret() {
 /* ******************** Wifi Edges *********************************** */
 void Coms_ESP_No_WiFi_Edge()
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(0b10011001);  // 100 = states, 00000 = WiFi Edge
     UART4_Write(ESP_End);
@@ -372,9 +372,9 @@ void Coms_ESP_No_WiFi_Edge()
 
 void Coms_ESP_Return_WiFi_Edge(uint8_t edge)
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(0b10011000);  // 100 = states, 11000 = Set WiFi Edge
     UART4_Write(edge);
@@ -386,9 +386,9 @@ void Coms_ESP_Return_WiFi_Edge(uint8_t edge)
 /* ******************** Requests ******************** */
 void Coms_ESP_Request_Edges()
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010100);
     uint8_t i;
@@ -402,9 +402,9 @@ void Coms_ESP_Request_Edges()
 
 void Coms_ESP_Request_Angles()
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010101);
     uint8_t i;
@@ -418,9 +418,9 @@ void Coms_ESP_Request_Angles()
 
 void Coms_ESP_Request_Orient()
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010110);
     uint8_t i;
@@ -444,9 +444,9 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
         return;
     }
     
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010111);
     UART4_Write(edge);
@@ -459,9 +459,9 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
 
 void Coms_ESP_Request_WiFiEdge()
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10011000);
     UART4_Write(Coms_REL_GetWiFiEdge());

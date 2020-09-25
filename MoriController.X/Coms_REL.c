@@ -6,7 +6,8 @@
 #include "Coms_REL.h"
 
 uint8_t RelBytExp[4] = {0}; // expected number of bytes
-uint8_t RelBytDta[4][100]; // array to store relay data
+uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
+uint8_t RelBytDta[4][255]; // = {0}; // array to store relay data
 uint8_t alloc[4] = {0, 0, 0, 0};
 uint8_t WIFI_EDGE = 255;
 
@@ -18,6 +19,8 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
     bool out = false;
     switch (RelSwitch[inEdge]) {
         case 0:
+            if(byte == EDG_End)
+                break;
             alloc[inEdge] = byte;
             RelOutEdg[inEdge] = (alloc[inEdge] & 0b00000111);
             RelBytCnt[inEdge] = 1;
@@ -32,12 +35,23 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
             RelBytDta[inEdge][RelBytCnt[inEdge] - 2] = byte;
             RelBytCnt[inEdge]++;
             if (RelBytCnt[inEdge] >= RelBytExp[inEdge]) {
-                out = true;
                 RelSwitch[inEdge] = 0;
-                if (byte == EDG_End)
+                if (byte == EDG_End) {
+                    out = true;
                     Coms_REL_Relay(inEdge, RelOutEdg[inEdge]);
+                } else {
+//                    Coms_ESP_Verbose_Write("hello");
+                    RelSwitch[inEdge] = 50;
+                }
             }
             break;
+            
+        case 50: // END BYTE NOT RECEIVED **************************************
+            if (byte == EDG_End) // wait for next end byte
+                RelSwitch[inEdge] = 0;
+                out = true;
+            break;    
+            
         default:
             RelSwitch[inEdge] = 0;
             break;
@@ -49,13 +63,13 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
 void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge) {
     uint8_t edge;
     if (outEdge == 5) { // relay to all
-        for (edge = 0; edge < 4; edge++) {
+        for (edge = 0; edge < 3; edge++) {
             if (edge != inEdge) { // ignore self
                 Coms_REL_ToEdge(edge, inEdge);
             }
         }
     } else if (outEdge == 6) { //relay to WiFi hub
-        if (WIFI_EDGE < 3) {
+        if (WIFI_EDGE <= 3) {
             Coms_REL_ToHub(WIFI_EDGE, inEdge);
         } else {
             Coms_ESP_Request_WiFiEdge();
@@ -87,9 +101,9 @@ void Coms_REL_ToEdge(uint8_t edge, uint8_t inEdge) {
 /* ******************** RELAY TO WIFI HUB *********************************** */
 void Coms_REL_ToHub(uint8_t edge, uint8_t inEdge) {
     Coms_REL_Write(edge, 0b11100110); // Necessary (Relay + wifi edge))
-    Coms_REL_Write(edge, RelBytExp[inEdge] - 1); // write length -1
+    Coms_REL_Write(edge, RelBytExp[inEdge]); // write length -1
     uint8_t count;
-    for (count = 1; count < RelBytExp[inEdge] - 2; count++) {
+    for (count = 0; count < RelBytExp[inEdge] - 2; count++) {
         Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data
     }
 }
@@ -106,6 +120,10 @@ void Coms_REL_RelayStandard(uint8_t edge, uint8_t inEdge) {
 
 /* ******************** RELAY COMMAND FOR NEIGHBOUR ************************* */
 void Coms_REL_RelayCommand(uint8_t edge, uint8_t inEdge) {
+    if (edge == 3) {    //An alloc to let the ESP know to interpret the command
+        Coms_REL_Write(edge, 0b00100000);
+        Coms_REL_Write(edge, RelBytExp[inEdge]-4);  
+    }
     uint8_t count; //count minus 3: relay + len + rel end
     for (count = 0; count < RelBytExp[inEdge] - 3; count++) {
         Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data

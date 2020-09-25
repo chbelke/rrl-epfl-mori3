@@ -1,16 +1,14 @@
 import tkinter as tk
 import base64
-import random
-import time
 from termcolor import colored
 
 
 class PublishLocal():
 
-    def __init__(self, frame, parent, mqtthost):
+    def __init__(self, frame, parent, wirelesshost):
         self.frame = frame
 
-        self.mqtthost = mqtthost
+        self.wirelesshost = wirelesshost
         self.numberConnected = parent.numberConnected
 
         self.moriNumber = [None]
@@ -54,18 +52,14 @@ class PublishLocal():
         if number == 'None':
             print("No Mori selected")
             return
-        if text == "ping":
-            # print("pinging {} with 32 bytes of data...".format(number)) # for debugging
-            data = bytearray()
-            for lv in range(32):  # generate 32 bytes of random data
-                data.append(random.randint(0x01,0xFF)) # avoid NULL characters
-
-            text = bytearray(str.encode("png ")) # build a message with a command for the esp and the random data
-            text.extend(data)
-
-            # print(text) # for debugging
-            self.mqtthost.setPingDict(number, time.perf_counter(), data) # take note of the time and the randomly generated data
-        self.mqtthost.publishLocal(text, number)
+        if text.startswith("ping"):
+            num = 1
+            splitText = text.split("ping",1)
+            if (splitText[1].strip().isnumeric()):
+                num = int(splitText[1])
+            self.wirelesshost.pingHandler.setPingCount(number, num)
+            return
+        self.wirelesshost.publishLocal(text, number)
         # self.pub_loc_entry.delete(0, 'end')
 
 
@@ -82,4 +76,4 @@ class PublishLocal():
         self.list_of_modules = list_of_modules
         for mori_individ in self.moriNumber:
             menu.add_command(label=mori_individ, 
-                         command=lambda value=mori_individ[1]: self.listMoriVar.set(value))                    
+                         command=lambda value=mori_individ[1]: self.listMoriVar.set(value))              

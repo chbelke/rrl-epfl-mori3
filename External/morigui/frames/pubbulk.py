@@ -57,6 +57,13 @@ class PublishBulk():
                     elif type(text[esp][key]) is str:
                         self.mqtthost.publishLocal(text[esp], esp)                     
             elif type(text[esp]) is str:
+                if text[esp].startswith("ping"):
+                    num = 1
+                    splitText = text[esp].split("ping",1)
+                    if (splitText[1].strip().isnumeric()):
+                        num = int(splitText[1])
+                    self.mqtthost.pingHandler.setPingCount(esp, num)
+                    continue
                 self.mqtthost.publishLocal(text[esp], esp)
 
     def ClearBulk(self):

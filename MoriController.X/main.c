@@ -58,6 +58,7 @@
 #include "Sens_ENC.h"
 #include "Coms_ESP.h"
 #include "Coms_123.h"
+#include "Tmrs_CBK.h"
 #include "mcc_generated_files/system.h"
 
 /* GLOBAL MODES */
@@ -100,6 +101,10 @@ volatile bool Flg_i2c_PWM = false;
 volatile bool Flg_i2c_ACC = false;
 volatile bool Flg_i2c_DAC = false;
 
+// Flags declaring that the timer interrupt has triggered
+volatile bool flg_tmr3_elapsed = true;
+volatile bool flg_tmr5_elapsed = true;
+
 /*
                          Main application
  */
@@ -114,8 +119,18 @@ int main(void) {
     // verify own id with esp
     while (!Flg_ID_check) {
         LED_Y = LED_Off;
-        for (edge = 0; edge < 3; edge++) Coms_123_Eval(edge);
-        Coms_ESP_Eval();
+        if(flg_tmr3_elapsed) {
+            Tmrs_CBK_Timer3_Handle();
+            flg_tmr3_elapsed = false;
+        }
+        if(flg_tmr5_elapsed) {
+            Tmrs_CBK_Timer5_Handle();
+            flg_tmr5_elapsed = false;
+        }            
+        Coms_123_Eval(0);
+        Coms_123_Eval(1);
+        Coms_123_Eval(2);
+        Coms_ESP_Eval();        
     }
     if (!Coms_ESP_VerifyID()) { // if bad id
         Mnge_RGB_SetAll(50,0,0); // set everything to red
@@ -135,8 +150,18 @@ int main(void) {
     for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
 
     while (1){
-        for (edge = 0; edge < 3; edge++) Coms_123_Eval(edge);
-        Coms_ESP_Eval();
+        if(flg_tmr3_elapsed) {
+            Tmrs_CBK_Timer3_Handle();
+            flg_tmr3_elapsed = false;
+        }
+        if(flg_tmr5_elapsed) {
+            Tmrs_CBK_Timer5_Handle();
+            flg_tmr5_elapsed = false;
+        }                
+        Coms_123_Eval(0);
+        Coms_123_Eval(1);
+        Coms_123_Eval(2);
+        Coms_ESP_Eval();        
     }
     return 1;
 }

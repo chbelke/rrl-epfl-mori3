@@ -283,7 +283,7 @@ bool readInterpret(byte c)
       break;
 
     case 2:
-      serial_packet[serial_buf_loc] = byte(c);
+      serial_packet[serial_buf_loc] = byte(c);   
 
       if ((c == char(END_BYTE)) && (serial_buf_loc == serial_len))
       {
@@ -561,11 +561,17 @@ bool relayToComputer(byte c)
       } else if (count < len) {
         storage[count-2]=c;
       } else {
-        publish("ERR: Unable to Relay");        
-        count = 0;
-        alloc = true;
-        len = 0;
-        return true;
+        if(serialErrorHandle(c))
+        {
+          publish("ERR: Unable to Relay");
+          memset(wireless_packet, 0, sizeof(wireless_packet));
+          memset(storage, 0, sizeof(storage));               
+          count = 0;
+          alloc = true;
+          len = 0;
+          return true;
+        }        
+        break;
       }
       break;
   }
