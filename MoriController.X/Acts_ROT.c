@@ -10,9 +10,7 @@
 #include "Coms_ESP.h"
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
-float rPID_eOld[3] = {0, 0, 0};
-float rPID_I[3] = {0, 0, 0};
-float rPID_D[3] = {0, 0, 0};
+uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
@@ -44,6 +42,10 @@ void Acts_ROT_Out(uint8_t edge, int16_t duty) {
 
 /* ******************** ROTARY MOTOR PID ************************************ */
 void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
+    static float rPID_eOld[3] = {0, 0, 0};
+    static float rPID_I[3] = {0, 0, 0};
+    static float rPID_D[3] = {0, 0, 0};
+    
     float desired = ((float)target) / 10 - 180;
     
     // avoid bad control inputs
@@ -82,12 +84,40 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     Acts_ROT_Out(edge, (int16_t) outf);
 }
 
-
-/* ******************** ROTARY MOTOR CURRENT LIMIT ************************** */
-void Acts_ROT_Limit(uint8_t edge, uint8_t voltagelevel) {
-    Mnge_DAC_Set(edge, voltagelevel);
+/* ******************** EXECUTE WIGGLE ************************************** */
+void Acts_ROT_Wiggle(uint8_t edge){
+    static uint16_t Wgl_Count[3] = {0, 0, 0};
+    Wgl_Count[edge]++;
+    if (Wgl_Count[edge] <= (MotRot_WiggleTime * 100)){
+        if (Wgl_Count[edge] <= MotRot_WiggleTime * 67){
+            Acts_ROT_Out(edge, 1024);
+            if (Flg_EdgeSyn[edge]) Wgl_Count[edge] = 67;
+        }
+        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 85)
+            Acts_ROT_Out(edge, -1024);
+        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 94)
+            Acts_ROT_Out(edge, 1024);
+        else 
+            Acts_ROT_Out(edge, -1024);
+    } else {
+        Acts_ROT_Out(edge, 0);
+        Mnge_DAC_Set(edge, Trq_Limit[edge]);
+        Flg_EdgeWig[edge] = false;
+        Wgl_Count[edge] = 0;
+    }
 }
 
+/* ******************** ACTIVATE WIGGLE ************************************* */
+void Acts_ROT_SetWiggle(uint8_t edge){
+    Flg_EdgeWig[edge] = true;
+    Mnge_DAC_Set(edge, MotRot_WiggleTroque);
+}
+
+/* ******************** ROTARY MOTOR CURRENT LIMIT ************************** */
+void Acts_ROT_Limit(uint8_t edge, uint8_t limit) {
+    Trq_Limit[edge] = limit; // save limit so wiggle remembers
+    Mnge_DAC_Set(edge, limit);
+}
 
 /* ******************** GET DESIRED ANGLE *********************************** */
 uint16_t Acts_ROT_GetTarget(uint8_t edge) {

@@ -9,13 +9,13 @@
 #include "dsp.h"
 
 // Accelerometer MMA8452Q
-
 int16_t ACC_Data[3] = {0, 0, 0};
-uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
-uint8_t MMAinitReg2[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_ACTV};
-uint8_t MMAinitReg3[2] = {MMA8452Q_CTRL_REG2_ADDR, MMA8452Q_CTRL_REG2_RNGE};
 
 void Sens_ACC_Setup(void) {
+    static uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
+    static uint8_t MMAinitReg2[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_ACTV};
+    static uint8_t MMAinitReg3[2] = {MMA8452Q_CTRL_REG2_ADDR, MMA8452Q_CTRL_REG2_RNGE};
+    
     I2C1_MESSAGE_STATUS status;
     I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
     uint8_t *pWrite, writeBuffer[2], nCount, iCount;

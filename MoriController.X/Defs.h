@@ -19,7 +19,8 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'F' // module name by letter
+#define MODULE 'E' // module name by letter
+
 
 
 /* ******************** NOTES *********************************************** */
@@ -62,6 +63,7 @@ extern volatile bool Flg_LiveExt;
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
+extern volatile bool Flg_EdgeWig[3];
 extern volatile bool Flg_EdgeRequest_Ang[3];
 extern volatile bool Flg_EdgeRequest_Ext[3];
 extern volatile bool Flg_EdgeRequest_Cpl[3];
@@ -171,17 +173,20 @@ extern volatile bool Flg_i2c_DAC;
 #define ROT_DIR_2 LATCbits.LATC7
 #define ROT_DIR_3 LATAbits.LATA10
 
-#define MotRot_AngleRange 240 //240        // overall range (in degrees)
+#define MotRot_AngleRange 240       // overall range (in degrees)
 
-#define MotRot_PID_dt 0.01f           // timer period (currently not used)
-#define MotRot_PID_kP 153.0f           // proportional component
-#define MotRot_PID_kI 53.9f             // integral component
-#define MotRot_PID_kD 3.4f             // derivative component
+#define MotRot_PID_dt 0.01f         // timer period (currently not used)
+#define MotRot_PID_kP 153.0f        // proportional component
+#define MotRot_PID_kI 53.9f         // integral component
+#define MotRot_PID_kD 3.4f          // derivative component
 
 #define MotRot_PID_Dmax 1024
 #define MotRot_PID_Imax 1024
 #define MotRot_PID_Max 1024
 
+#define MotRot_TorqueLimit 100      // torque limit /255
+#define MotRot_WiggleTime 6         // seconds
+#define MotRot_WiggleTroque 50      // wiggle torque limit /255
 
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           5

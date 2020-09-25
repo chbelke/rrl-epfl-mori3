@@ -6,11 +6,12 @@
 #include "Defs.h"
 
 volatile uint8_t PWM_Values[8] = {10, 0, 0, 0, 0, 0, 0, 0};
-uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
-uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
-uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};
 
 void Mnge_PWM_Setup(void) {
+    uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
+    uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
+    uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};
+    
     I2C1_MESSAGE_STATUS status;
     I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
     uint8_t *pWrite, writeBuffer[2], nCount, iCount;

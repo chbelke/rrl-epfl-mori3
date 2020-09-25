@@ -403,6 +403,7 @@ inline static uint16_t ADC1_ConversionResultGet( ADC1_CHANNEL channel )
                 result = ADC1BUF0;
                 break;
         default:
+                result = 0;
                 break;
     }
 

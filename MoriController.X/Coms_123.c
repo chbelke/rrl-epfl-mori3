@@ -13,12 +13,10 @@
 #include "Acts_LIN.h"
 #include "Acts_ROT.h"
 
-uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
 volatile uint8_t EdgIdlCnt[3] = {0, 0, 0}; // no idle byte received counter
 volatile uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
 volatile uint8_t EdgActCnt[3] = {0, 0, 0}; // no idle byte received counter
-
 volatile bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 volatile bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 
@@ -27,10 +25,6 @@ uint8_t EdgByteCount[3] = {0, 0, 0};
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
-
-char buffy[48];
-uint8_t thevampireslayer = 0;
-
 uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrCurExt[3] = {0, 0, 0}; // current extension received by neighbour
 uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
@@ -69,11 +63,11 @@ volatile bool NbrCmdMatch[3] = {false, false, false};
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) { // called in main
+    static uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
+
     if(!Coms_123_Ready(edge)) return; // check if byte received
     uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
       
-//    Coms_ESP_Verbose_One_Byte(EdgIn);
-    
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             EdgInAloc[edge] = EdgIn;
@@ -430,6 +424,9 @@ uint8_t Coms_123_Read(uint8_t edge) {
             break;
         case 2:
             byte = UART3_Read();
+            break;
+        default:
+            byte = 0;
             break;
     }
     return byte;

@@ -8,6 +8,7 @@
 
 volatile int k = 0;
 void Button_Eval() {
+    Flg_Button = false;
 //    k = k + 1;
 //    switch (k) {
 //        case 1:

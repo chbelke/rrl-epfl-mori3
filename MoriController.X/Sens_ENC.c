@@ -6,11 +6,11 @@ float ENC_Data[3] = {1, 2, 3};
 
 // Encoder AS5048B
 void Sens_ENC_Read(uint8_t edge) {
-    static I2C1_MESSAGE_STATUS status;
-    static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
-    static uint8_t writeBuffer, readBuffer[2], *pWrite, *pRead;
-    static uint16_t timeOut, slaveTimeOut, angleINT = 0;
-    static float angleFLT = 0;
+    I2C1_MESSAGE_STATUS status;
+    I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
+    uint8_t writeBuffer, readBuffer[2], *pWrite, *pRead;
+    uint16_t timeOut, slaveTimeOut, angleINT = 0;
+    float angleFLT = 0;
     
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;

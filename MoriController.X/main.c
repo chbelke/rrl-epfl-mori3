@@ -77,9 +77,11 @@ volatile bool Flg_Button = false;
 volatile bool Flg_EdgeCon[3] = {false, false, false}; // connection detected
 volatile bool Flg_EdgeSyn[3] = {false, false, false}; // connection acknowledged
 volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action
+volatile bool Flg_EdgeWig[3] = {false, false, false}; // wiggle flag
 volatile bool Flg_EdgeRequest_Ang[3] = {false, false, false};
 volatile bool Flg_EdgeRequest_Ext[3] = {false, false, false};
 volatile bool Flg_EdgeRequest_Cpl[3] = {false, false, false};
+
 
 volatile bool Flg_DelayStart = true;
 volatile bool Flg_Verbose = false;
@@ -107,6 +109,7 @@ volatile bool flg_tmr5_elapsed = true;
                          Main application
  */
 int main(void) {
+    uint8_t edge;
     __delay_ms(1000); // start-up delay
     SYSTEM_Initialize(); // initialize the device
 
@@ -144,9 +147,7 @@ int main(void) {
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    Acts_ROT_Limit(0, 85);
-    Acts_ROT_Limit(1, 85);
-    Acts_ROT_Limit(2, 85);
+    for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
 
     while (1){
         if(flg_tmr3_elapsed) {
