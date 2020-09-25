@@ -165,6 +165,7 @@ uint16_t TMR3_Counter16BitGet(void) {
 void __attribute__((weak)) TMR3_CallBack(void) {
     // Add your custom callback code here
     flg_tmr3_elapsed = true;
+//    Tmrs_CBK_Timer3_Handle();
 }
 
 void TMR3_SetInterruptHandler(void (* InterruptHandler)(void)) {

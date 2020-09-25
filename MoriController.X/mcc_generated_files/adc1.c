@@ -133,24 +133,24 @@ void ADC1_Update(void) {
 
     ADC1_ChannelSelect(AI_A);
     ADC1_SoftwareTriggerEnable();
-    for (i = 0; i < 1000; i++) {
-    }
+//    for (i = 0; i < 1000; i++) {
+//    }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_A));
     ADC1_ValuesA[0] = ADC1_ConversionResultGet(AI_A);
 
     ADC1_ChannelSelect(AI_B);
     ADC1_SoftwareTriggerEnable();
-    for (i = 0; i < 1000; i++) {
-    }
+//    for (i = 0; i < 1000; i++) {
+//    }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_B));
     ADC1_ValuesB[0] = ADC1_ConversionResultGet(AI_B);
 
     ADC1_ChannelSelect(AI_C);
     ADC1_SoftwareTriggerEnable();
-    for (i = 0; i < 1000; i++) {
-    }
+//    for (i = 0; i < 1000; i++) {
+//    }
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_C));
     ADC1_ValuesC[0] = ADC1_ConversionResultGet(AI_C);

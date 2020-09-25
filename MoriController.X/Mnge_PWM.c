@@ -5,17 +5,18 @@
 #include <libpic30.h>
 #include "Defs.h"
 
-volatile uint8_t PWM_Values[8] = {10, 0, 0, 0, 0, 0, 0, 0};
+volatile uint8_t PWM_Values[8] = {0, 10, 10, 0, 0, 0, 0, 0};
 
 void Mnge_PWM_Setup(void) {
     uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};
     uint8_t initReg2[2] = {TLC59208_LEDOUT0Add, TLC59208_LEDOUT0};
     uint8_t initReg3[2] = {TLC59208_LEDOUT1Add, TLC59208_LEDOUT1};
     
-    I2C1_MESSAGE_STATUS status;
-    I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
-    uint8_t *pWrite, writeBuffer[2], nCount, iCount;
-    uint16_t timeOut, slaveTimeOut;
+    // does not work wihout static
+    static I2C1_MESSAGE_STATUS status;
+    static I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
+    static uint8_t *pWrite, writeBuffer[2], nCount, iCount;
+    static uint16_t timeOut, slaveTimeOut;
 
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;

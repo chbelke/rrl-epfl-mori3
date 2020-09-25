@@ -118,19 +118,20 @@ int main(void) {
 
     // verify own id with esp
     while (!Flg_ID_check) {
-        LED_Y = LED_Off;
-        if(flg_tmr3_elapsed) {
-            Tmrs_CBK_Timer3_Handle();
-            flg_tmr3_elapsed = false;
+        LED_Y = LED_Off;    
+        for (edge = 0; edge < 3; edge++)
+        {
+            if(flg_tmr3_elapsed) {
+                Tmrs_CBK_Timer3_Handle();
+                flg_tmr3_elapsed = false;
+            }
+            if(flg_tmr5_elapsed) {
+                Tmrs_CBK_Timer5_Handle();
+                flg_tmr5_elapsed = false;
+            }        
+            Coms_123_Eval(edge);
         }
-        if(flg_tmr5_elapsed) {
-            Tmrs_CBK_Timer5_Handle();
-            flg_tmr5_elapsed = false;
-        }            
-        Coms_123_Eval(0);
-        Coms_123_Eval(1);
-        Coms_123_Eval(2);
-        Coms_ESP_Eval();        
+        Coms_ESP_Eval();
     }
     if (!Coms_ESP_VerifyID()) { // if bad id
         Mnge_RGB_SetAll(50,0,0); // set everything to red
@@ -150,18 +151,19 @@ int main(void) {
     for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
 
     while (1){
-        if(flg_tmr3_elapsed) {
-            Tmrs_CBK_Timer3_Handle();
-            flg_tmr3_elapsed = false;
+        for (edge = 0; edge < 3; edge++)
+        {
+            if(flg_tmr3_elapsed) {
+                Tmrs_CBK_Timer3_Handle();
+                flg_tmr3_elapsed = false;
+            }
+            if(flg_tmr5_elapsed) {
+                Tmrs_CBK_Timer5_Handle();
+                flg_tmr5_elapsed = false;
+            }        
+            Coms_123_Eval(edge);
         }
-        if(flg_tmr5_elapsed) {
-            Tmrs_CBK_Timer5_Handle();
-            flg_tmr5_elapsed = false;
-        }                
-        Coms_123_Eval(0);
-        Coms_123_Eval(1);
-        Coms_123_Eval(2);
-        Coms_ESP_Eval();        
+        Coms_ESP_Eval();      
     }
     return 1;
 }
