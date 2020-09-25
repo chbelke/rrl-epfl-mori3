@@ -9,7 +9,7 @@ uint8_t RelSwitch[4] = {0}; // switch case variable
 uint8_t RelBytCnt[4] = {0}; // incoming byte counter
 uint8_t RelBytExp[4] = {0}; // expected number of bytes
 uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
-uint8_t RelBytDta[4][100]; // = {0}; // array to store relay data
+uint8_t RelBytDta[4][255]; // = {0}; // array to store relay data
 uint8_t TmpByteBuffer[100];
 uint8_t alloc[4] = {0, 0, 0, 0};
 uint8_t WIFI_EDGE = 255;
@@ -19,6 +19,8 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
     bool out = false;
     switch (RelSwitch[inEdge]) {
         case 0:
+            if(byte == EDG_End)
+                break;
             alloc[inEdge] = byte;
             RelOutEdg[inEdge] = (alloc[inEdge] & 0b00000111);
             RelBytCnt[inEdge] = 1;
@@ -33,11 +35,12 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
             RelBytDta[inEdge][RelBytCnt[inEdge] - 2] = byte;
             RelBytCnt[inEdge]++;
             if (RelBytCnt[inEdge] >= RelBytExp[inEdge]) {
-                out = true;
                 RelSwitch[inEdge] = 0;
-                if (byte == EDG_End)
+                if (byte == EDG_End) {
+                    out = true;
                     Coms_REL_Relay(inEdge, RelOutEdg[inEdge]);
-                else {
+                } else {
+//                    Coms_ESP_Verbose_Write("hello");
                     RelSwitch[inEdge] = 50;
                 }
             }
@@ -45,6 +48,7 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
             
         case 50: // END BYTE NOT RECEIVED **************************************
             if (byte == EDG_End) // wait for next end byte
+                RelSwitch[inEdge] = 0;
                 out = true;
             break;    
             

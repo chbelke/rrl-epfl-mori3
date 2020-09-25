@@ -205,9 +205,9 @@ uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose() 
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0);
     UART4_Write(6); // Message length
@@ -372,9 +372,9 @@ void Coms_ESP_No_WiFi_Edge()
 
 void Coms_ESP_Return_WiFi_Edge(uint8_t edge)
 {
-    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-    {
-    }
+//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
+//    {
+//    }
     Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(0b10011000);  // 100 = states, 11000 = Set WiFi Edge
     UART4_Write(edge);
