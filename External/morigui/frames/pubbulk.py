@@ -30,7 +30,7 @@ class PublishBulk():
         self.pub_label = tk.Label(self.frame, text="Publish Bulk Message")
         self.pub_label.pack({"side": "top"})
 
-        self.pub_cmd = tk.Text(self.frame, width=40, height=15, bd=1)
+        self.pub_cmd = tk.Text(self.frame, width=25, height=15, bd=1)
         self.pub_cmd.pack(fill=tk.X, expand=True, padx=5) 
      
         self.Mqtt_pub = tk.Button(self.frame)

@@ -35,7 +35,8 @@ class GraphFrame(tk.Frame):
     def __init__(self, master=None, guiHost=None, *args, **kwargs):
         Thread(tk.Frame.__init__(self, master))
         self.master = master
-        self.wifi_host = guiHost.wifi_host
+        # self.wifi_host = guiHost.wifi_host
+        self.wifi_host = guiHost
 
         self.connMatrix = []
         self.nodes = []
@@ -45,8 +46,9 @@ class GraphFrame(tk.Frame):
 
         self.G=nx.DiGraph()
         self.color_map = []
-        self.node_size = 100
-        self.font_size = 18
+        self.node_size = 70
+        # self.font_size = 18
+        self.font_size = 10
         self.colourDict = {'WiFi': 'xkcd:blue', 'UDP': 'xkcd:green', 'Lost': 'xkcd:red', 'Hub': 'xkcd:gold', 'NoWifi': 'xkcd:grey'}        
            
         self.createWidgets()
@@ -55,7 +57,8 @@ class GraphFrame(tk.Frame):
 
               
     def createWidgets(self):
-        self.fig = plt.figure(figsize=(5,5), dpi=100)
+        # self.fig = plt.figure(figsize=(5,5), dpi=100)
+        self.fig = plt.figure(figsize=(3,3), dpi=100)
         # self.fig.tight_layout(pad=2)
         self.ax = self.fig.add_subplot(111)
         
@@ -64,9 +67,9 @@ class GraphFrame(tk.Frame):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        toolbar = NavigationToolbar2Tk(self.canvas, self)
-        toolbar.update()
-        self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        # toolbar = NavigationToolbar2Tk(self.canvas, self)
+        # toolbar.update()
+        # self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.pack(side="top", fill=tk.BOTH, expand=True, pady=5)        
 
@@ -148,8 +151,8 @@ class GraphFrame(tk.Frame):
             return
 
         nx.draw_networkx_nodes(self.G, self.pos, node_color=self.color_map, node_size=self.node_size, linewidths=None)
-        nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=20)
-        nx.draw_networkx_labels(self.G, pos_higher, verticalalignment='bottom')
+        nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=5)
+        nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom')
         plt.box(on=False)
 
         self.canvas.draw()

@@ -31,15 +31,21 @@ class MoriGui(tk.Frame):
         self.numberConnected = tk.IntVar()
         self.numberConnected.set(0)
            
-        self.createWidgets()
-        self.pack()    
+
 
         self.tmpEspIds = {}
 
         # self.new_window = tk.Toplevel(self.master)
-        self.graph = GraphHost(self.master)
-        self.graph_frame = GraphFrame(self.graph, self)
-        self.graph_frame.updateConnected()        
+        # self.graph = GraphHost(self.master)
+        # self.graph_frame = GraphFrame(self.graph, self)
+        # self.graph_frame.updateConnected()        
+
+        self.graph_frame = GraphFrame(self.master, self.wifi_host)
+        self.graph_frame.updateConnected()   
+        self.graph_frame.pack(side="right")             
+
+        self.createWidgets()
+        self.pack()    
 
               
     def createWidgets(self):
