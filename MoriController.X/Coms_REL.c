@@ -5,17 +5,16 @@
 #include "mcc_generated_files/uart4.h"
 #include "Coms_REL.h"
 
-uint8_t RelSwitch[4] = {0}; // switch case variable
-uint8_t RelBytCnt[4] = {0}; // incoming byte counter
 uint8_t RelBytExp[4] = {0}; // expected number of bytes
-uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
-uint8_t RelBytDta[4][100]; // = {0}; // array to store relay data
-uint8_t TmpByteBuffer[100];
+uint8_t RelBytDta[4][100]; // array to store relay data
 uint8_t alloc[4] = {0, 0, 0, 0};
 uint8_t WIFI_EDGE = 255;
 
 /* ******************** RELAY HANDLER *************************************** */
 bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
+    static uint8_t RelSwitch[4] = {0}; // switch case variable
+    static uint8_t RelBytCnt[4] = {0}; // incoming byte counter
+    static uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
     bool out = false;
     switch (RelSwitch[inEdge]) {
         case 0:

@@ -177,7 +177,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     static uint16_t seed = 0; // rand() seed 
     static bool seedflag = false; // rand() seed flag
-    static uint8_t edge;
+    uint8_t edge;
     
     Coms_123_ConHandle(); // inter-module connection handler
     

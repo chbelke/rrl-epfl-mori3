@@ -4,10 +4,10 @@ bool DAC_Flag[3] = {false, false, false};
 uint8_t DAC_Value[3] = {0, 0, 0};
 
 void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
-    static I2C1_MESSAGE_STATUS status;
-    static I2C1_TRANSACTION_REQUEST_BLOCK TRB;
-    static uint8_t *pWrite, writeBuffer[3], nCount = 3;
-    static uint16_t timeOut, slaveTimeOut;
+    I2C1_MESSAGE_STATUS status;
+    I2C1_TRANSACTION_REQUEST_BLOCK TRB;
+    uint8_t *pWrite, writeBuffer[3], nCount = 3;
+    uint16_t timeOut, slaveTimeOut;
     
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
@@ -53,11 +53,11 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
 }
 
 void Mnge_DAC_Ctrl(void) {
-    uint8_t i;
-    for (i=0; i<3; i++){
-        if (DAC_Flag[i]){
-            Mnge_DAC_Write(i,DAC_Value[i]);
-            DAC_Flag[i] = false;
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++) {
+        if (DAC_Flag[edge]){
+            Mnge_DAC_Write(edge,DAC_Value[edge]);
+            DAC_Flag[edge] = false;
         }
     }
 }

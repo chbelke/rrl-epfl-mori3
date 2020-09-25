@@ -10,10 +10,7 @@
 #include "Coms_ESP.h"
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
-uint8_t Trq_Limit[3] = {0, 0, 0};
-float rPID_eOld[3] = {0, 0, 0};
-float rPID_I[3] = {0, 0, 0};
-float rPID_D[3] = {0, 0, 0};
+uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
@@ -45,6 +42,10 @@ void Acts_ROT_Out(uint8_t edge, int16_t duty) {
 
 /* ******************** ROTARY MOTOR PID ************************************ */
 void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
+    static float rPID_eOld[3] = {0, 0, 0};
+    static float rPID_I[3] = {0, 0, 0};
+    static float rPID_D[3] = {0, 0, 0};
+    
     float desired = ((float)target) / 10 - 180;
     
     // avoid bad control inputs

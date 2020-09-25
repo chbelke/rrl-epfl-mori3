@@ -9,12 +9,6 @@
 #include "mcc_generated_files/adc1.h"
 
 uint8_t Ext_Desired[3] = {60, 60, 60};
-uint8_t Ext_DesiredOld[3] = {60, 60, 60};
-float lPID_eOld[3] = {0, 0, 0};
-float lPID_I[3] = {0, 0, 0};
-uint8_t Stbl_Count[3] = {0, 0, 0};
-int16_t Stbl_dOld[3] = {0, 0, 0};
-bool Stbl_Flag[3] = {false, false, false};
 
 /* ******************** ARDUINO MAP FUNCTION ******************************** */
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
@@ -51,6 +45,11 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
 
 /* ******************** LINEAR MOTOR PID ************************************ */
 void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
+    static float lPID_I[3] = {0, 0, 0};
+    static uint8_t Stbl_Count[3] = {0, 0, 0};
+    static int16_t Stbl_dOld[3] = {0, 0, 0};
+    static bool Stbl_Flag[3] = {false, false, false};
+
     // avoid bad control inputs
     if (target < MotLin_MinInput) target = MotLin_MinInput;
     else if (target > MotLin_MaxInput) target = MotLin_MaxInput;
@@ -71,6 +70,8 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
             OUT_max = MotLin_MAX_3;
             break;
         default:
+            OUT_min = 200;
+            OUT_max = 800;
             break;
     }
     uint16_t desired = (uint16_t) map(target, 0, 120, OUT_max, OUT_min);
@@ -143,7 +144,6 @@ uint8_t Acts_LIN_GetTarget(uint8_t edge) {
 
 /* ******************** SET DESIRED EXTENSION ******************************* */
 void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
-    Ext_DesiredOld[edge] = Ext_Desired[edge];
     Ext_Desired[edge] = desired;
     Flg_EdgeRequest_Ext[edge] = true; //  relevant when coupled
 }
@@ -165,6 +165,8 @@ uint8_t Acts_LIN_GetCurrent(uint8_t edge) {
             IN_max = MotLin_MAX_3;
             break;
         default:
+            IN_min = 200;
+            IN_max = 800;
             break;
     }
     return (uint8_t) map(ADC1_Return(edge), IN_min, IN_max, 120, 0);

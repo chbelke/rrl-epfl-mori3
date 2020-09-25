@@ -56,9 +56,6 @@
 #include "../Defs_Mod.h"
 
 volatile uint16_t ADC1_Values[3] = {512, 512, 512};
-volatile uint16_t ADC1_ValuesA[4] = {512, 512, 512, 512};
-volatile uint16_t ADC1_ValuesB[4] = {512, 512, 512, 512};
-volatile uint16_t ADC1_ValuesC[4] = {512, 512, 512, 512};
 
 /**
   Section: File Specific Functions
@@ -117,6 +114,9 @@ void __attribute__((__interrupt__, auto_psv, weak)) _AD1Interrupt(void) {
 
 void ADC1_Update(void) {
     uint16_t i;
+    static uint16_t ADC1_ValuesA[4] = {512, 512, 512, 512};
+    static uint16_t ADC1_ValuesB[4] = {512, 512, 512, 512};
+    static uint16_t ADC1_ValuesC[4] = {512, 512, 512, 512};
 
     // update previous values
     ADC1_ValuesA[3] = ADC1_ValuesA[2];

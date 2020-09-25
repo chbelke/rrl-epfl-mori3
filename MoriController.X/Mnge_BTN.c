@@ -8,6 +8,7 @@
 
 volatile int k = 0;
 void Button_Eval() {
+    Flg_Button = false;
 //    k = k + 1;
 //    switch (k) {
 //        case 1:
@@ -29,7 +30,6 @@ void Button_Eval() {
 //            k = 0;
 //            break;
 //    }
-    Acts_ROT_SetWiggle(1);
 }
 
 int Button_ReturnState() {

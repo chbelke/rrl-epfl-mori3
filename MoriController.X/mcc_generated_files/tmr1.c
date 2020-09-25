@@ -172,7 +172,7 @@ uint16_t TMR1_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
-    static uint8_t k = 0, m = 0, edge = 0;
+    static uint8_t k = 0, m = 0;
     static bool light = false;
     k++;
     if (k >= 10){
@@ -192,6 +192,7 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         light = !light;
     }
     
+    uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // angle control loops
         if (MODE_ENC_CON) Sens_ENC_Read(edge); // always update encoder reading
         if (Flg_EdgeWig[edge])
