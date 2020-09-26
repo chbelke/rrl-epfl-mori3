@@ -112,7 +112,6 @@ class WirelessHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
-        print(msg)
         if addr in self.noWifiDict:
             self.publishThroughHub(msg, addr)
         elif addr in self.UDPDict:
@@ -265,8 +264,6 @@ class WirelessHost(threading.Thread):
         message = bytearray(str.encode("rel "))
         for i, edge in enumerate(self.noWifiDict[espNum][1]):
             alloc = int(0b11100000)
-            print(i, edge)
-            print(int(edge))
             alloc = alloc | int(edge)
             message.append(alloc)
             if i ==0:

@@ -70,7 +70,7 @@ class PingHandler(threading.Thread):
                             self.sendPing(esp)
                             self.pingBusy[esp] = True
                     elif time.perf_counter() - self.getTsPingDict(esp) > 2:
-                        print("TIMEOUT", esp)
+                        print(colored("TIMEOUT: "+ esp, "red"))
                         self.pingBusy[esp] = False
                         self.addPingResult(esp, np.inf, False)
                         self.pingCount[esp] -= 1 # decrement
@@ -95,7 +95,7 @@ class PingHandler(threading.Thread):
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(0.001)    
+            self.event.wait(0.1)    
 
 
 

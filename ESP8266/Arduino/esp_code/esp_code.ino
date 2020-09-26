@@ -84,6 +84,8 @@ Led led_blue(5);
 void setup()
 {
   Serial.begin(115200);
+  Serial.setRxBufferSize(1024);
+  // Serial.setTxBufferSize(1024);
   delay(500);
   sprintf(clientName, "%08X", ESP.getChipId());
   sprintf(publishName, "esp/%s/pub", clientName);

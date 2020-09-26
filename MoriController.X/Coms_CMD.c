@@ -104,7 +104,7 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
             break;
             
         case 50: // END BYTE NOT RECEIVED **************************************
-            if (byte == EDG_End) // wait for next end byte
+            if ((byte == EDG_End) || (byte == ESP_End)) // wait for next end byte
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;            
 
@@ -123,7 +123,7 @@ bool Coms_CMD_Reset(uint8_t* state, bool* alloc) {
 void Coms_CMD_OverflowError() {
     const char *casetoo = "tooLong";
     Coms_ESP_Verbose_Write(casetoo);
-//    state = 50;
+    state[edge] = 50;
 }
 
 

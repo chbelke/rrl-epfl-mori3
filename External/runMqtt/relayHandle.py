@@ -10,7 +10,6 @@ def relayHandle(pyld, espNum):
         msg = ' '.join(pyld[1:])
         espNum = "0"+str(msg[0:7])
         msg = msg[7:].rsplit(' ')
-        print("MSG", espNum, msg)
         return msg, espNum
     except:
         try:    #special accomodation for pings
@@ -18,7 +17,6 @@ def relayHandle(pyld, espNum):
             msg = []
             msg.append(pyld[1][7:11].decode('UTF-8'))
             msg.append(pyld[1][12:])
-            print(msg)
             return msg, espNum
         except:
             print(colored("IN TRACEBACK", 'red'))

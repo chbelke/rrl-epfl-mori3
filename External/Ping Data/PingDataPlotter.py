@@ -35,8 +35,9 @@ for esp in pingData.keys(): #redundant?
     faultCount = 0
     faultList = []
     timeoutCount = 0
+    # print(arrayLength)
 
-    for lv in range(0, arrayLength): # boolean array 'False' indicates error
+    for lv in range(0, len(pingData[esp]["arr_0"])): # boolean array 'False' indicates error
         if not pingData[esp]['arr_1'][lv]:
             faultCount += 1
             faultList.append(True)
