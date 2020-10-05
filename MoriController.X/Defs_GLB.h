@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'E' // module name by letter
+#define MODULE 'A' // module name by letter
 
 
 
@@ -44,8 +44,9 @@
 #define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active false
+#define STAT_MotLin_Active true
 #define STAT_MotRot_Active true
+#define STAT_Cplngs_Active true
 
 
 /* ******************** BATTERY ********************************************* */
@@ -60,6 +61,12 @@ extern volatile bool MODE_LED_PARTY;
 /* ********************  FLAGS ********************************************** */
 extern volatile bool Flg_LiveAng;
 extern volatile bool Flg_LiveExt;
+extern volatile bool Flg_BatLow;
+extern volatile bool Flg_Button;
+
+extern volatile bool Flg_Drive[3];
+extern volatile bool Flg_DrvCplSequence[3];
+
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
@@ -67,8 +74,6 @@ extern volatile bool Flg_EdgeWig[3];
 extern volatile bool Flg_EdgeRequest_Ang[3];
 extern volatile bool Flg_EdgeRequest_Ext[3];
 extern volatile bool Flg_EdgeRequest_Cpl[3];
-extern volatile bool Flg_BatLow;
-extern volatile bool Flg_Button;
 
 extern volatile bool Flg_EdgeDemo;
 
@@ -156,17 +161,18 @@ extern volatile bool Flg_i2c_DAC;
 #define MotLin_MaxInput 120         // from 0 to 12 mm -> min: 0, max:120
 
 #define MotLin_SlowRegion 50        // slow region near min and max
-#define MotLin_SlowFactor 1.5         // linear slow down factor in slow region
+#define MotLin_SlowFactor 1.2       // linear slow down factor in slow region
 
-#define MotLin_PID_de 12            // acceptable error band ~ *0.01mm
-#define MotLin_PID_dt 50            // timer period
-#define MotLin_PID_kP 25            // proportional component
-#define MotLin_PID_kI 12            // integral component
-#define MotLin_PID_kD 0             // derivative component
+#define MotLin_PID_erband 4         // acceptable error band ~ *0.01mm
+#define MotLin_PID_stable 5         // stable time in sec
+#define MotLin_PID_period 0.05f     // timer period
+#define MotLin_PID_kP 162.0f        // proportional component
+#define MotLin_PID_kI 101.3f        // integral component
+#define MotLin_PID_kD 8.4f          // integral component
 
-#define MotLin_PID_Imax 15
-#define MotLin_PID_Max 512
-
+#define MotLin_PID_DMax 1024
+#define MotLin_PID_Imax 1024
+#define MotLin_PID_Max 1024
 
 /* ******************** ROTARY MOTORS *************************************** */
 #define ROT_DIR_1 LATCbits.LATC6
@@ -175,7 +181,7 @@ extern volatile bool Flg_i2c_DAC;
 
 #define MotRot_AngleRange 240       // overall range (in degrees)
 
-#define MotRot_PID_dt 0.01f         // timer period (currently not used)
+#define MotRot_PID_period 0.01f         // timer period (currently not used)
 #define MotRot_PID_kP 153.0f        // proportional component
 #define MotRot_PID_kI 53.9f         // integral component
 #define MotRot_PID_kD 3.4f          // derivative component
@@ -184,9 +190,10 @@ extern volatile bool Flg_i2c_DAC;
 #define MotRot_PID_Imax 1024
 #define MotRot_PID_Max 1024
 
-#define MotRot_TorqueLimit 100      // torque limit /255
-#define MotRot_WiggleTime 6         // seconds
-#define MotRot_WiggleTroque 50      // wiggle torque limit /255
+#define MotRot_TorqueLimit 255      // torque limit /255
+#define MotRot_WiggleTime 10        // seconds
+#define MotRot_WiggleTorque 65      // wiggle torque limit /255
+#define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
 
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           5
@@ -222,8 +229,8 @@ extern volatile bool Flg_i2c_DAC;
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
 #define SMA_Period_1 150 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
-#define SMA_Period_2 150 // split into high I opening and low I maintain phases
-#define SMA_Duty_1 150 // 8-bit PWM value for first phase
+#define SMA_Period_2 200 // split into high I opening and low I maintain phases
+#define SMA_Duty_1 100 // 150 // 8-bit PWM value for first phase
 #define SMA_Duty_2 60 // 8-bit PWM value for second phase
 
 #endif	/* DEFS_H */

@@ -1,7 +1,7 @@
 #include "Mnge_DAC.h"
 
-bool DAC_Flag[3] = {false, false, false};
-uint8_t DAC_Value[3] = {0, 0, 0};
+volatile bool DAC_Flag[3] = {false, false, false};
+volatile uint8_t DAC_Value[3] = {0, 0, 0};
 
 void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
     I2C1_MESSAGE_STATUS status;
@@ -48,7 +48,7 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
         else
             timeOut++;
         
-        __delay_us(10);
+        __delay_us(1);
     }
 }
 

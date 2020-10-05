@@ -1,7 +1,7 @@
 #include "Coms_123.h"
 #include "Coms_ESP.h"
 #include "Coms_CMD.h"
-#include "Defs.h"
+#include "Defs_GLB.h"
 #include "mcc_generated_files/uart4.h"
 #include "Coms_REL.h"
 

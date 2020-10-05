@@ -1,5 +1,5 @@
 #include "Mnge_BAT.h"
-#include "Defs.h"
+#include "Defs_GLB.h"
 
 // called in TMR5
 void Battery_Check() {

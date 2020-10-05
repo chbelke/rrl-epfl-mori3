@@ -1,4 +1,4 @@
-#include "Defs.h"
+#include "Defs_GLB.h"
 #include "mcc_generated_files/uart4.h"
 #include "mcc_generated_files/adc1.h"
 #include "Acts_LIN.h"
@@ -43,6 +43,7 @@ void Tmrs_CBK_Timer5_Handle(void) {
     uint8_t edge;
     
     Coms_123_ConHandle(); // inter-module connection handler
+    Acts_ROT_DrvHandle();
     
     Battery_Check(); // check if LBO has been trigger for interval
     
@@ -88,7 +89,6 @@ void Tmrs_CBK_Timer5_Handle(void) {
             srand(seed);
             seedflag = true;
         }
-        
          // RGB LED blinking
         for (edge = 0; edge < 3; edge++){
             if (ColFlg[edge]){
@@ -106,7 +106,6 @@ void Tmrs_CBK_Timer5_Handle(void) {
                 }
             }
         }
-        
         // MotRot dance
         if (DrvFlg){
             DrvRst = 2 + rand() % 15;

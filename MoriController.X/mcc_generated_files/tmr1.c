@@ -54,7 +54,7 @@
 #include <libpic30.h>
 #include "adc1.h"
 #include "tmr1.h"
-#include "../Defs.h"
+#include "../Defs_GLB.h"
 #include "../Acts_ROT.h"
 #include "../Sens_ENC.h"
 #include "../Mnge_PWM.h"
@@ -200,7 +200,8 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         else if (MODE_ENC_CON && Flg_EdgeRequest_Ang[edge] && Flg_EdgeAct[edge])
             Acts_ROT_PID(edge, Sens_ENC_Get(edge), Acts_ROT_GetTarget(edge));
         else
-            if (!MODE_LED_PARTY) Acts_ROT_Out(edge, 0);// make sure motors are off
+            if (!MODE_LED_PARTY && !Flg_Drive[edge])
+                Acts_ROT_Out(edge, 0);// make sure motors are off
     }
     
     // Manage remaining i2c communication (must be tmr1)

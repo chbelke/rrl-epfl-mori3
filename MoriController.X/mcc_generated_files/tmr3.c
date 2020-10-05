@@ -57,7 +57,7 @@
 #include "adc1.h"
 #include "uart4.h"
 #include "../Acts_LIN.h"
-#include "../Defs.h"
+#include "../Defs_GLB.h"
 #include "../Acts_ROT.h"
 #include "../Acts_CPL.h"
 #include "../Sens_ENC.h"

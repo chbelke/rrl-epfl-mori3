@@ -47,7 +47,7 @@
 */
 
 #include "pwm.h"
-#include "../Defs.h"
+#include "../Defs_GLB.h"
 
 /**
   Section: Driver Interface
