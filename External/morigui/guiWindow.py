@@ -33,16 +33,7 @@ class MoriGui(tk.Frame):
            
 
 
-        self.tmpEspIds = {}
-
-        # self.new_window = tk.Toplevel(self.master)
-        # self.graph = GraphHost(self.master)
-        # self.graph_frame = GraphFrame(self.graph, self)
-        # self.graph_frame.updateConnected()        
-
-        self.graph_frame = GraphFrame(self.master, self.wifi_host)
-        self.graph_frame.updateConnected()   
-        self.graph_frame.pack(side="right")             
+        self.tmpEspIds = {}          
 
         self.createWidgets()
         self.pack()    
@@ -57,6 +48,7 @@ class MoriGui(tk.Frame):
         frame5 = tk.Frame(self)
         frame6 = tk.Frame(self)
 
+
         self.frame_party = PartyFrame(frame1, self.wifi_host)
         self.frame_start = StartStop(frame1, self.wifi_host)
         self.frame_pubg = PublishGlobal(frame2, self.wifi_host)
@@ -64,7 +56,9 @@ class MoriGui(tk.Frame):
         self.frame_udp = ListUDP(frame4, self, self.wifi_host)
         self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)
         self.frame_binary = PublishBinary(frame6, self, self.wifi_host)
+        graph_frame = GraphFrame(self.master, self.wifi_host)
 
+        graph_frame.pack(side="right")     
         frame5.pack(side="right", padx=10, pady=10, expand=True)
         frame1.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
         frame4.pack(side="right", padx=10, pady=10, expand=True)

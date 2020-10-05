@@ -24,7 +24,7 @@ class GraphHost(tk.Toplevel):
     def __init__(self, master=None, *args, **kwargs):
         Thread(tk.Toplevel.__init__(self, master))
 
-        self.title("yoooooooooooooooooo")
+        self.title("gooey")
         # self.geometry("200x200")
         # label = tk.Label(self, text="FUKKIN LABEL YOOOO")
         # label.pack()
@@ -52,24 +52,23 @@ class GraphFrame(tk.Frame):
         self.colourDict = {'WiFi': 'xkcd:blue', 'UDP': 'xkcd:green', 'Lost': 'xkcd:red', 'Hub': 'xkcd:gold', 'NoWifi': 'xkcd:grey'}        
            
         self.createWidgets()
-        # animate = matplotlib.animation.FuncAnimation(self.fig, self.plotFigure, interval=1000)
+        self.updateConnected()           
 
 
               
     def createWidgets(self):
-        # self.fig = plt.figure(figsize=(5,5), dpi=100)
         self.fig = plt.figure(figsize=(3,3), dpi=100)
-        # self.fig.tight_layout(pad=2)
         self.ax = self.fig.add_subplot(111)
         
 
         self.canvas = FigureCanvasTkAgg(self.fig, self)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-        # toolbar = NavigationToolbar2Tk(self.canvas, self)
-        # toolbar.update()
-        # self.canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.redraw_button = tk.Button(self)
+        self.redraw_button["text"] = "Redraw",
+        self.redraw_button["command"] = lambda: self.redrawGraph()
+        self.redraw_button.pack({"side": "bottom"})   
 
         self.pack(side="top", fill=tk.BOTH, expand=True, pady=5)        
 
@@ -170,6 +169,14 @@ class GraphFrame(tk.Frame):
         except AttributeError:
             self.pos = tmp_pos
         return
+
+
+    def redrawGraph(self):
+        self.G=nx.DiGraph()
+        self.G.add_nodes_from(self.nodes)
+        self.G.add_edges_from(self.edges)
+        self.pos = nx.spring_layout(self.G)
+        return        
 
 
     def updateColors(self):
