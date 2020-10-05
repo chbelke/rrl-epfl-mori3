@@ -1,5 +1,5 @@
 #include "Mnge_BTN.h"
-#include "Defs.h"
+#include "Defs_GLB.h"
 #include "mcc_generated_files/uart4.h"
 #include "Coms_ESP.h"
 #include "Acts_ROT.h"

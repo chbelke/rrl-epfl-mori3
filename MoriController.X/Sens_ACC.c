@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpic30.h>
-#include "Defs.h"
+#include "Defs_GLB.h"
 #include "Mnge_RGB.h"
 #include "math.h"
 #include "dsp.h"
@@ -72,7 +72,7 @@ void Sens_ACC_Setup(void) {
         else
             timeOut++;
 
-        __delay_us(10);
+        __delay_us(1);
     }
 
 }
@@ -122,7 +122,7 @@ void Sens_ACC_Read(void) {
         else
             timeOut++;
 
-        __delay_us(10);
+        __delay_us(1);
     }
 
     uint8_t i;

@@ -1,4 +1,4 @@
-#include "Defs.h"
+#include "Defs_GLB.h"
 #include "Coms_CMD.h"
 #include "Coms_ESP.h"
 #include "Coms_REL.h"
@@ -321,7 +321,7 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
  * - 0b010ooxxx manual indicator followed by 3 pwm values (1 signed byte each)
  * - 0b011xxooo automatic indicator followed by reference edge 0,1,2
  * - 0b011ooxoo direction (0 = inwards, 1 = outwards)
- * - 0b011oooxx tbd
+ * - 0b011xxxxx if xxx = 111, last xx initicates drive&coupling sequence
  * 10 = coupling & led input
  * - 0b10xxxooo retract couplings 0,1,2 (if already open, interval prolonged)
  * - 0b10oooxxx rgb led values follow in order
@@ -364,7 +364,11 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                 }
             } else if (((byte >> 6) & 0x03) == 1) { // ******** DRIVE INPUT
                 if (byte & 0b00100000) { // automatic drive mode
-                    EspInCase[edge] = 19;
+                    if ((byte & 0b00011100) == 28){ // drive&couple sequence
+                        EspInCase[edge] = 22;
+                    } else {
+                        EspInCase[edge] = 19;
+                    }
                 } else { // manual drive mode
                     EspInCase[edge] = 15;
                     // only last three bits relevant when counting rec. bytes
@@ -376,7 +380,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             } else if (((byte >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
                 //            Coms_ESP_Verbose_Write(coms_message);
                 if (byte & 0b00000111) {
-                    EspInCase[edge] = 22;
+                    EspInCase[edge] = 32;
                     // only last three bits relevant when counting rec. bytes
                     uint8_t EspInAlocTemp = (byte & 0b00000111);
                     for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
@@ -384,7 +388,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                     }
                     //                Coms_ESP_Verbose_Write(coms_1);
                 } else {
-                    EspInCase[edge] = 25;
+                    EspInCase[edge] = 35;
                     EspInBits[edge] = 0;
                     EspInBits2[edge] = 0;
                 }
@@ -500,7 +504,10 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
                         if ((alloc[edge] >> (2 - m)) & 0b00000001) {
-                            Acts_ROT_Out(m, DrivePWM[edge][m]*8);
+                            if (!Flg_EdgeCon[edge]){
+                                Acts_ROT_Out(m, DrivePWM[edge][m]*8);
+                                Flg_Drive[edge] = true;
+                            }
                         }
                     }
                 } else {
@@ -528,8 +535,12 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
         case 21: // verify drive inputs
             if (byte == ESP_End) {
                 if (EspInByts[edge] == 4) {
-                    Coms_ESP_Drive(DriveSpd[edge], DriveCrv[edge],
+                    if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2]){
+                        Acts_ROT_Drive(DriveSpd[edge], DriveCrv[edge],
                             ((alloc[edge] & 0x18) >> 3), ((alloc[edge] & 0x04) >> 2));
+                        uint8_t i;
+                        for (i = 0; i < 3; i++) Flg_Drive[edge] = true;
+                    }
                 } else {
                     EspInLost[edge] = EspInLost[edge] + 1; // data lost
                 }
@@ -539,32 +550,44 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             EspInCase[edge] = 0;
             return true;
             break;
+            
+        case 22: ;// DRIVE AND COUPLING SEQUENCE
+            uint8_t OUTedge = alloc[edge] & 0b00000011;
+            if (byte == ESP_End) {
+                Flg_EdgeRequest_Cpl[OUTedge] = true;
+                Flg_DrvCplSequence[OUTedge] = true;
+            } else {
+                EspIn0End[edge] = EspIn0End[edge] + 1; // no end byte
+            }
+            EspInCase[edge] = 0;
+            return true;
+            break;
 
-        case 22: // COUPLING & LED INPUT ***************************************
+        case 32: // COUPLING & LED INPUT ***************************************
             if (alloc[edge] & 0b00000100) {
                 RgbPWM[edge][0] = byte;
                 EspInByts[edge] = EspInByts[edge] + 1;
-                EspInCase[edge] = 23;
+                EspInCase[edge] = 33;
                 break;
             }
 
-        case 23:
+        case 33:
             if (alloc[edge] & 0b00000010) {
                 RgbPWM[edge][1] = byte;
                 EspInByts[edge] = EspInByts[edge] + 1;
-                EspInCase[edge] = 24;
+                EspInCase[edge] = 34;
                 break;
             }
 
-        case 24:
+        case 34:
             if (alloc[edge] & 0b00000001) {
                 RgbPWM[edge][2] = byte;
                 EspInByts[edge] = EspInByts[edge] + 1;
-                EspInCase[edge] = 25;
+                EspInCase[edge] = 35;
                 break;
             }
 
-        case 25: // verify coupling inputs
+        case 35: // verify coupling inputs
             if (byte == ESP_End) {
                 if (EspInByts[edge] == (2 + EspInBits[edge])) {
                     // set smas
@@ -590,7 +613,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             return true;
             break;
 
-        case 26:
+        case 36:
             break;
 
         default:
@@ -606,7 +629,7 @@ void Coms_CMD_SetEdge(uint8_t inEdge, uint8_t byte) {
 
     // Set extensions
     for (j = 1; j <= 3; j++) {
-        if ((byte >> (5 - (j - 1)))) {
+        if ((byte >> (5 - (j - 1))) & 0x01) {
             Acts_LIN_SetTarget(j - 1, CmdExtTemp[inEdge][j - 1]);
         }
     }
@@ -618,3 +641,4 @@ void Coms_CMD_SetEdge(uint8_t inEdge, uint8_t byte) {
         }
     }
 }
+

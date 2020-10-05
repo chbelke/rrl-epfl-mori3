@@ -47,7 +47,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "Defs.h"
+#include "Defs_GLB.h"
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
 #include "Sens_ACC.h"
@@ -72,6 +72,9 @@ volatile bool Flg_LiveAng = false;
 volatile bool Flg_LiveExt = false;
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
+
+volatile bool Flg_Drive[3] = {false, false, false};
+volatile bool Flg_DrvCplSequence[3] = {false, false, false};
 
 // edge state handles
 volatile bool Flg_EdgeCon[3] = {false, false, false}; // connection detected

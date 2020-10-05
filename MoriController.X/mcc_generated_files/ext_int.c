@@ -49,7 +49,7 @@
  */
 
 #include "ext_int.h"
-#include "../Defs.h"
+#include "../Defs_GLB.h"
 
 //***User Area Begin->code: Add External Interrupt handler specific headers 
 

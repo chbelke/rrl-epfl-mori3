@@ -52,7 +52,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <libpic30.h>
-#include "../Defs.h"
+#include "../Defs_GLB.h"
 #include "tmr5.h"
 
 
