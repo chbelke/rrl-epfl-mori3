@@ -11,6 +11,7 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import networkx as nx
+from PIL import Image, ImageTk
 
 # from runMqtt.wifi_host import wifi_host
 from runMqtt.wirelessHost import WirelessHost
@@ -25,16 +26,19 @@ class GraphHost():
         self.master = master
         self.wifi_host = wifi_host
         self.frame = frame
+        self.image = ImageTk.PhotoImage(Image.open("images/frog_smol.png"))
         self.createWidgets()
 
     def createWidgets(self):        
         graph_frame = GraphFrame(self.frame, self.wifi_host)
         redraw_frame = RedrawFrame(self.frame, graph_frame)
         legend_frame = LegendFrame(self.frame, graph_frame)
+        photo_frame = PhotoFrame(self.frame, self.image)
 
         graph_frame.pack(side="left", fill=tk.BOTH, expand=True, pady=5)
+        redraw_frame.pack(side="top", expand=True, pady=5)
         legend_frame.pack(side="top", expand=True, pady=5)
-        redraw_frame.pack(side="bottom", expand=True, pady=5)
+        photo_frame.pack(side="bottom", expand=True, pady=5)
         
 
 
@@ -49,7 +53,7 @@ class RedrawFrame(tk.Frame):
         self.redraw_button["text"] = "Redraw",
         self.redraw_button["command"] = lambda: self.graphFrame.redrawGraph()
         self.redraw_button.pack({"side": "bottom"})         
-        self.pack(side="bottom", fill=tk.BOTH, expand=True, pady=5) 
+        self.pack(side="top", fill=tk.BOTH, expand=True, pady=5) 
 
 
 
@@ -241,3 +245,18 @@ class GraphFrame(tk.Frame):
             self.color_map.append(self.colourDict[state])
 
         return
+
+
+class PhotoFrame(tk.Frame):
+    def __init__(self, master, image):
+        tk.Frame.__init__(self, master)
+
+        canvas = tk.Canvas(self, width=100, height=100)
+        canvas.pack(side='bottom')
+        canvas.create_image(50, 50, image=image)
+        # self.legend.patch.set_facecolor('#d9d9d9')   
+
+        # img = tk.Label(self, image=render)
+        # img.image = render
+        # img.place(x=0, y=0)       
+        self.pack(side="bottom")#, fill=tk.BOTH, expand=1)
