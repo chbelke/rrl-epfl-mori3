@@ -266,10 +266,6 @@ void requestNeighbour(byte* payload, unsigned int len)
 
   byte neighbour = payload[byte_count]-48;   //-48 = ascii to int conversion
 
-  // char buff[50];
-  // sprintf(buff, "INFO: Req Neighbour %d", int(neighbour));
-  // publish(buff);
-
   serial_write_two(0b11010111, neighbour);
 }
 
@@ -297,41 +293,6 @@ void echoPing(byte* payload, unsigned int len)
     sprintf(buff, "%s%c", buff, payload[i]);
   }
   publish(buff);
-}
-
-
-void setPicLED(byte* payload, unsigned int len)
-{
-  byte num_following = 0;
-  byte alloc = 0b10000000;
-  byte alloc_mask = 0b00000100;
-  byte LED[3];
-  
-  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, LED)) {
-    return;
-  }
-
-  Serial.write(0b11001101); //205
-  Serial.write(alloc);
-  for(byte i=0; i< num_following; i++)
-  {
-    Serial.write(LED[i]);
-  }
-  Serial.write(END_BYTE);
-  return;
-  // char buff[50];
-  // sprintf(buff, "INFO: Set LEDS:");
-  // byte j = 0;
-  // for(byte i=0; i < 3; i++){
-  //   if(alloc & (alloc_mask >> i)) {
-  //     sprintf(buff, "%s %d", buff, LED[j]);  
-  //     j++;
-  //   } else {
-  //     sprintf(buff, "%s -", buff);  
-  //   }
-  // }
-  // sprintf(buff, "%s : %d %d %d, %d", buff, LED[0], LED[1], LED[2], num_following);
-  // publish(buff);  
 }
 
 
@@ -366,6 +327,29 @@ void openPicCouplings(byte* payload, unsigned int len)
   return;
 }
 
+
+void setPicLED(byte* payload, unsigned int len)
+{
+  byte num_following = 0;
+  byte alloc = 0b10000000;
+  byte alloc_mask = 0b00000100;
+  byte LED[3];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, LED, false)) {
+    return;
+  }
+
+  Serial.write(0b11001101); //205
+  Serial.write(alloc);
+  for(byte i=0; i< num_following; i++)
+  {
+    Serial.write(LED[i]);
+  }
+  Serial.write(END_BYTE);
+  return;
+}
+
+
 void setPicEdges(byte* payload, unsigned int len)
 {
   byte num_following = 0;
@@ -373,7 +357,7 @@ void setPicEdges(byte* payload, unsigned int len)
   byte alloc_mask = 0b00100000;
   byte extensions[3];
   
-  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, extensions)) {
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, extensions, false)) {
     return;
   }
 
@@ -387,37 +371,75 @@ void setPicEdges(byte* payload, unsigned int len)
   return;
 }
 
-
 void setPicAngles(byte* payload, unsigned int len)
 {
+  byte num_following = 0;
+  byte alloc = 0b00000000;
+  byte alloc_mask = 0b00000100;
+  byte angles[6];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, angles, true)) {
+    return;
+  }
+
+  Serial.write(0b11001101); //205
+  Serial.write(alloc);
+  for(byte i=0; i< num_following; i++)
+  {
+    Serial.write(angles[i]);
+  }
+  Serial.write(END_BYTE);
 
   return;
+
+  // char buff[50];
+  // sprintf(buff, "INFO: Set Angles:");
+  // byte j = 0;
+  // for(byte i=0; i < 3; i++){
+  //   if(alloc & (alloc_mask >> i)) {
+  //     sprintf(buff, "%s %d", buff, angles[j]*256 + angles[j+1]);  
+  //     j++;
+  //     j++;
+  //   } else {
+  //     sprintf(buff, "%s -", buff);  
+  //   }
+  // }
+  // // sprintf(buff, "%s : %d %d %d, %d", buff, angles[0], angles[1], angles[2], num_following);
+  // publish(buff);    
+  // return;
 }
 
 
-bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, byte *alloc, byte *num_following, byte *values)
+//Used in setPicEdges setPicLED, and setPicAngles
+bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, 
+          byte *alloc, byte *num_following, byte *values, bool flg_two_bytes)
 {
-  // if((alloc == NULL) || (num_following == NULL) || (LED == NULL)) {
-  //   return false; //some pointers pointing to NULL
-  // }
-
   byte byte_count = 0;
   byte pre_count = 0;
   char tmp_payload[5];
 
   byte_count = detectSpaceChar(payload, byte_count, len);
   byte_count++;
-  for(byte i=0; i<3; i++){ //For the 3 LEDs
+  for(byte i=0; i<3; i++){ //For the 3 Edges
     bool jumpFlag = false;
     pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
     
     byte_count = detectSpaceChar(payload, byte_count, len);
-    if(byte_count > len) {
+
+    if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
       byte_count = len;
     }
-    if(byte_count > pre_count + 3) {
-      publish("ERR: Shape value > 3 chars");
-      return false;
+
+    if(flg_two_bytes){
+      if(byte_count > pre_count + 4) {
+        publish("ERR: Angle value > 4 chars");
+        return false;
+      }
+    } else {
+      if(byte_count > pre_count + 3) {
+        publish("ERR: Shape value > 3 chars");
+        return false;
+      }
     }
 
     byte j;
@@ -433,18 +455,30 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, byt
     }
 
     tmp_payload[j] = '\0';
-    values[*num_following] = byte(atoi(tmp_payload));
-    if(values[*num_following] > 255) {
-      byte_count++;
-      continue;
+    if(flg_two_bytes){
+      int tmp_val = atoi(tmp_payload);
+      values[*num_following] = highByte(tmp_val);
+      values[*num_following + 1] = lowByte(tmp_val);
+      if(tmp_val > 3600) { //skips loop if value too high
+        byte_count++;
+        continue;
+      }
+      *num_following = *num_following + 2;
+    } else {
+      values[*num_following] = byte(atoi(tmp_payload));
+      if(values[*num_following] > 255) {  
+        byte_count++;
+        continue;
+      }
+      *num_following = *num_following + 1;
     }
-    *num_following = *num_following + 1;
 
     *alloc = *alloc | (alloc_mask  >> i);
     byte_count++;
   }
   return true;
 }
+
 
 
 byte detectSpaceChar(byte* payload, int byte_count, unsigned int max_len)
