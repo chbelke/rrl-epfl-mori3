@@ -75,7 +75,7 @@ class MoriGui(tk.Frame):
         # tmp = self.numberConnected.get()
         self.numberConnected.set(self.wifi_host.getNumberConnected())
 
-        if self.tmpEspIds != self.wifi_host.getEspIds():
+        while self.tmpEspIds != self.wifi_host.getEspIds():
             espOrder = self.wifi_host.getEspOrder()
             self.tmpEspIds = copy.deepcopy(self.wifi_host.getEspIds())
             self.moriNumber = []
