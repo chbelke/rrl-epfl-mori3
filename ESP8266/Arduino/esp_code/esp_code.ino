@@ -232,6 +232,11 @@ void normalOp()
     lastMessage = millis();
   }
 
+  if (Serial.hasOverrun())
+  {
+    publish("ERR: SERIAL OVERRAN");
+  }
+
   if(led_cycle)
   {
     static int led_sel = 0;
