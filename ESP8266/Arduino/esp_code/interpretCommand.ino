@@ -290,25 +290,12 @@ void disableWifi()
 void echoPing(byte* payload, unsigned int len)
 {
   // Echo the message back to the external computer
-  char buff[len+5];// = "PNG: 12345678901234567890123456789012";
+  char buff[85];// = "PNG: 12345678901234567890123456789012";
   sprintf(buff, "PNG: ");
   for (int i = 4; i < len; i++)
   {
     sprintf(buff, "%s%c", buff, payload[i]);
   }
-  // char buff[] = {a, b, c, d, e, f, g};
-  // const char *tmp = "PING:";
-  // memcpy(&buff, &tmp, 5);
-  // char newPayload[len];
-  // for (int lv = 0; lv < len; lv++)
-  //   {
-  //     newPayload[lv] = payload[lv];
-  //     //Serial.print((char)payload[lv]);
-  //     //Serial.print(' ');
-  //   }
-  // Serial.print("Length is: ");
-  // Serial.println(len);
-  // memcpy(&buff[5], &newPayload[4], len-4);
   publish(buff);
 }
 
