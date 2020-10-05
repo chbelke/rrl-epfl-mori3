@@ -19,24 +19,73 @@ from morigui.frames.party import PartyFrame
 
 
 
-class GraphHost(tk.Toplevel):
+class GraphHost():
 
-    def __init__(self, master=None, *args, **kwargs):
-        Thread(tk.Toplevel.__init__(self, master))
+    def __init__(self, frame, master=None, wifi_host=None, *args, **kwargs):
+        self.master = master
+        self.wifi_host = wifi_host
+        self.frame = frame
+        self.createWidgets()
 
-        self.title("gooey")
-        # self.geometry("200x200")
-        # label = tk.Label(self, text="FUKKIN LABEL YOOOO")
-        # label.pack()
+    def createWidgets(self):        
+        graph_frame = GraphFrame(self.frame, self.wifi_host)
+        redraw_frame = RedrawFrame(self.frame, graph_frame)
+        legend_frame = LegendFrame(self.frame, graph_frame)
+
+        graph_frame.pack(side="left", fill=tk.BOTH, expand=True, pady=5)
+        legend_frame.pack(side="top", expand=True, pady=5)
+        redraw_frame.pack(side="bottom", expand=True, pady=5)
+        
+
+
+class RedrawFrame(tk.Frame):
+    def __init__(self, master, graphFrame):
+        tk.Frame.__init__(self, master)
+        self.graphFrame = graphFrame
+        self.createWidgets()
+
+    def createWidgets(self):
+        self.redraw_button = tk.Button(self)
+        self.redraw_button["text"] = "Redraw",
+        self.redraw_button["command"] = lambda: self.graphFrame.redrawGraph()
+        self.redraw_button.pack({"side": "bottom"})         
+        self.pack(side="bottom", fill=tk.BOTH, expand=True, pady=5) 
+
+
+
+class LegendFrame(tk.Frame):
+    def __init__(self, master, graphFrame):
+        tk.Frame.__init__(self, master)
+        self.graphFrame = graphFrame
+        self.createWidgets()
+
+    def createWidgets(self):
+        self.legend = plt.figure(figsize=(1.3,2), dpi=100)
+        self.ax_leg = self.legend.add_subplot(111)
+        self.legend.patch.set_facecolor('#d9d9d9')   
+
+
+        self.drawLegend()
+        plt.figure(self.legend.number)
+        plt.gcf().canvas = FigureCanvasTkAgg(self.legend, self)
+        plt.gcf().canvas.draw()
+        plt.gcf().canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def drawLegend(self):
+        plt.figure(self.legend.number)
+        colors = self.graphFrame.colourDict
+        handles = [matplotlib.patches.Patch(color=colors[x], label=x) for x in colors.keys()]        
+        plt.legend(handles=handles)
+        plt.gca().set_axis_off()
 
 
 class GraphFrame(tk.Frame):
 
-    def __init__(self, master=None, guiHost=None, *args, **kwargs):
+    def __init__(self, master=None, wifi_host=None, *args, **kwargs):
         Thread(tk.Frame.__init__(self, master))
         self.master = master
         # self.wifi_host = guiHost.wifi_host
-        self.wifi_host = guiHost
+        self.wifi_host = wifi_host
 
         self.connMatrix = []
         self.nodes = []
@@ -61,14 +110,9 @@ class GraphFrame(tk.Frame):
         self.ax = self.fig.add_subplot(111)
         
 
-        self.canvas = FigureCanvasTkAgg(self.fig, self)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-
-        self.redraw_button = tk.Button(self)
-        self.redraw_button["text"] = "Redraw",
-        self.redraw_button["command"] = lambda: self.redrawGraph()
-        self.redraw_button.pack({"side": "bottom"})   
+        plt.gcf().canvas = FigureCanvasTkAgg(self.fig, self)
+        plt.gcf().canvas.draw()
+        plt.gcf().canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         self.pack(side="top", fill=tk.BOTH, expand=True, pady=5)        
 
@@ -112,6 +156,7 @@ class GraphFrame(tk.Frame):
 
 
     def plotFigure(self):
+        plt.figure(self.fig.number)
         self.ax=plt.gca()
         self.ax.clear()
         self.ax.set_xlim(-1,1)
@@ -154,7 +199,7 @@ class GraphFrame(tk.Frame):
         nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom')
         plt.box(on=False)
 
-        self.canvas.draw()
+        plt.gcf().canvas.draw()
 
     def plotGraph(self):
         self.G=nx.DiGraph()
