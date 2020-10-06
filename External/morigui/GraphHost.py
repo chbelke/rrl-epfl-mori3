@@ -242,4 +242,4 @@ class PhotoFrame(tk.Frame):
         canvas = tk.Canvas(self, width=50, height=50)
         canvas.pack(side='bottom')
         canvas.create_image(25, 25, image=image)
-        self.pack(side="bottom")#, fill=tk.BOTH, expand=1)
+        self.pack(side="bottom")

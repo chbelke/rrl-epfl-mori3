@@ -16,16 +16,16 @@ class PublishGlobal():
         self.pub_label = tk.Label(self.frame, text="Publish Global Message")
         self.pub_label.pack()
      
+        self.pub_cmd = tk.Entry(self.frame, bd=1)
+        self.pub_cmd.pack(side='right', fill=tk.X, expand=True, padx=5) 
+
         self.Mqtt_pub = tk.Button(self.frame)
         self.Mqtt_pub["text"] = "Publish",
         self.Mqtt_pub["command"] = lambda: self.publishGlobal()
-        self.Mqtt_pub.pack({"side": "right"}, fill=tk.X, expand=True)
+        self.Mqtt_pub.pack({"side": "left"}, fill=tk.X, expand=True)
 
-        self.pub_cmd = tk.Entry(self.frame, bd=1)
-        self.pub_cmd.pack(fill=tk.X, expand=True, padx=5) 
 
     def publishGlobal(self):
         text = self.pub_cmd.get()
         self.mqtthost.publishGlobal(text)
         print("Published \"" + text + "\" to esp/rec")
-#        self.pub_cmd.delete(0, 'end')
