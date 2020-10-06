@@ -112,6 +112,11 @@ class WirelessHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
+        try:
+            if self.macDict[self.idDict[addr]][0] == "Lost":
+                print(colored("Unable to publish to ESP " + addr, 'red'))
+        except KeyError:
+            pass
         if addr in self.noWifiDict:
             self.publishThroughHub(msg, addr)
         elif addr in self.UDPDict:
@@ -151,6 +156,19 @@ class WirelessHost(threading.Thread):
 
     def getNumberConnected(self):
         return self.numberModules
+
+
+    def resetOnInterval(self, espNum):
+        if espNum not in self.idDict:
+            return
+        mac = self.idDict[espNum]
+        self.coTimeDict[mac] = time.time()
+        self.setCoTimeDict(self.coTimeDict)
+        if not (self.macDict.get(mac) is None) and not (mac in self.macOrder): #Check if the ESP has been referenced and offline
+            print(colored("New ESP connected", "green"))
+            self.macOrder.append(mac)
+            self.setMacOrder(self.macOrder)
+        return        
 
 
     def setIPDict(self, IPDict, EPDict):
@@ -274,12 +292,6 @@ class WirelessHost(threading.Thread):
         message.extend(msg)
         message.append(0b00001110)      #14 (esp end)
         message.append(0b00101010)      #42 (coupling end)
-            
-        # print(msg_len)
-        # print(message)
-        # for i in message:
-        #     print(hex(i), end=' ')
-        # print()
 
         return message
 
@@ -291,19 +303,36 @@ class WirelessHost(threading.Thread):
     def espLost(self, espNum):
         print(colored("ESP " + espNum + " lost", "red"))
         self.macDict.get(self.idDict[espNum])[0] = "Lost"
+        if espNum in self.noWifiDict:
+            del self.noWifiDict[espNum]        
 
     def espMQTT(self, espNum):
         self.macDict.get(self.idDict[espNum])[0] = "WiFi"
+        if espNum in self.noWifiDict:
+            del self.noWifiDict[espNum]
 
 
     def updateNoWifiDict(self, espNum):
         path, edge_path = self.shortestPath(espNum)
-        target_hub = path[0]
-        self.noWifiDict[espNum] = [target_hub, edge_path, path]
+        if path == []:
+            print(colored("Error ESP " + espNum + " has no path to the hub", 'red'))
+            self.macDict.get(self.idDict[espNum])[0] = "Lost"
+        else:
+            target_hub = path[0]
+            self.noWifiDict[espNum] = [target_hub, edge_path, path]
+
 
     def espLostCheck(self, espNum):
         try:
             if self.macDict.get(self.idDict[espNum])[0] == "Lost":
+                return True
+            return False
+        except KeyError:
+            return False
+
+    def espNoWifiCheck(self, espNum):
+        try:
+            if self.macDict.get(self.idDict[espNum])[0] == "NoWifi":
                 return True
             return False
         except KeyError:

@@ -68,11 +68,14 @@ def interpretMessage(self, wifi_host, pyld, espNum):
       if(self.wifi_host.espLostCheck(espNum)):
          self.wifi_host.espMQTT(espNum)
          print(colored("ESP Reconnected: " + espNum, "green"))
+      elif(self.wifi_host.espNoWifiCheck(espNum)):
+         self.wifi_host.espMQTT(espNum)
       cmd = pyld[0]
       if cmd == "REL:":
          pyld, espNum = relayHandle.relayHandle(pyld, espNum)
          cmd = pyld[0]
       commands.commands[cmd](wifi_host, pyld, espNum)
+      self.wifi_host.resetOnInterval(espNum)
    except:
       traceback.print_exc()
 
