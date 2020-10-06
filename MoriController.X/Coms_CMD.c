@@ -321,7 +321,7 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
 
     if (set_flg_alloc[edge]) {
         flag[edge] = byte & 0b01111111; //first bit determines on or off
-        flag_set[edge] = (byte >> 7) & 0b00000001;
+        flag_set[edge] = ((byte >> 7) & 0x01)!=0;
         set_flg_alloc[edge] = false;
         return false;
     }
@@ -335,10 +335,18 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
     switch (flag[edge]) {
         case 0:
             Flg_MotRot_Active = flag_set[edge];
+            if (!flag_set[edge]){
+                uint8_t i;
+                for (i = 0; i <3; i++) Flg_EdgeRequest_Ang[i] = false;
+            }
             break;
             
         case 1:
-            Flg_MotRot_Active = flag_set[edge];
+            Flg_MotLin_Active = flag_set[edge];
+            if (!flag_set[edge]){
+                uint8_t i;
+                for (i = 0; i <3; i++) Flg_EdgeRequest_Ext[i] = false;
+            }
             break;
 
         case 2:
