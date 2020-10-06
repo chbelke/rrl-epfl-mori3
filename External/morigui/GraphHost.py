@@ -26,7 +26,7 @@ class GraphHost():
         self.master = master
         self.wifi_host = wifi_host
         self.frame = frame
-        self.image = ImageTk.PhotoImage(Image.open("images/frog_smol.png"))
+        self.image = ImageTk.PhotoImage(Image.open("images/Sign_Smaller.png"))
         self.createWidgets()
 
     def createWidgets(self):        
@@ -251,9 +251,9 @@ class PhotoFrame(tk.Frame):
     def __init__(self, master, image):
         tk.Frame.__init__(self, master)
 
-        canvas = tk.Canvas(self, width=100, height=100)
+        canvas = tk.Canvas(self, width=50, height=50)
         canvas.pack(side='bottom')
-        canvas.create_image(50, 50, image=image)
+        canvas.create_image(25, 25, image=image)
         # self.legend.patch.set_facecolor('#d9d9d9')   
 
         # img = tk.Label(self, image=render)
