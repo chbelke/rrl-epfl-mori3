@@ -109,8 +109,7 @@ class GraphFrame(tk.Frame):
               
     def createWidgets(self):
         self.fig = plt.figure(figsize=(3,3), dpi=100)
-        self.ax = self.fig.add_subplot(111)
-        
+        # self.ax = self.fig.add_subplot(111) 
 
         plt.gcf().canvas = FigureCanvasTkAgg(self.fig, self)
         plt.gcf().canvas.draw()
@@ -122,6 +121,11 @@ class GraphFrame(tk.Frame):
     def updateConnected(self): #Updates the number of connected ESPs and the lists
         self.after(500, self.updateConnected)
        
+
+        if not self.fig.get_axes():
+            self.plotEmptyGraph()
+            return
+
         if self.wifi_host.getNumberConnected() <= 0:
             return
 
@@ -133,10 +137,7 @@ class GraphFrame(tk.Frame):
             self.mori_status = copy.deepcopy(self.wifi_host.getEspIds())
         
         self.updateColors()
-        
-        # if update_flag:
         self.plotFigure()
-
 
 
     def newConnectionMatrix(self):
@@ -231,8 +232,16 @@ class GraphFrame(tk.Frame):
                 self.color_map.append(self.colourDict["NoWifi"])
                 continue
             self.color_map.append(self.colourDict[state])
-
         return
+
+
+    def plotEmptyGraph(self):
+        plt.figure(self.fig.number)
+        self.ax=plt.gca()     
+        plt.box(on=False)
+        plt.axis('off')
+        plt.gcf().canvas.draw()
+        return  
 
 
 class PhotoFrame(tk.Frame):
