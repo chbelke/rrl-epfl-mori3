@@ -88,7 +88,6 @@ class GraphFrame(tk.Frame):
     def __init__(self, master=None, wifi_host=None, *args, **kwargs):
         Thread(tk.Frame.__init__(self, master))
         self.master = master
-        # self.wifi_host = guiHost.wifi_host
         self.wifi_host = wifi_host
 
         self.connMatrix = []
@@ -100,7 +99,6 @@ class GraphFrame(tk.Frame):
         self.G=nx.DiGraph()
         self.color_map = []
         self.node_size = 70
-        # self.font_size = 18
         self.font_size = 10
         self.colourDict = {'WiFi': 'xkcd:blue', 'UDP': 'xkcd:green', 'Lost': 'xkcd:red', 'Hub': 'xkcd:gold', 'NoWifi': 'xkcd:grey'}        
            
@@ -165,17 +163,7 @@ class GraphFrame(tk.Frame):
         self.ax.clear()
         self.ax.set_xlim(-1,1)
         self.ax.set_ylim(-1,1)        
-        # self.ax.plot(random.sample(range(1, 10), 8), random.sample(range(1, 10), 8))
         self.plotGraph()
-        
-
-        # nx.draw(self.G, self.pos, node_color=self.color_map, node_size=self.node_size,
-        #     font_size=self.font_size)
-
-        # pos_comp = {}
-        # comp = 0.8  # offset on the y axis
-        # for k, v in self.pos.items():
-        #     pos_comp[k] = (v[0]*comp, v[1]*comp)
 
         x_values, y_values = zip(*self.pos.values())
         x_max = max(x_values)
@@ -254,9 +242,4 @@ class PhotoFrame(tk.Frame):
         canvas = tk.Canvas(self, width=50, height=50)
         canvas.pack(side='bottom')
         canvas.create_image(25, 25, image=image)
-        # self.legend.patch.set_facecolor('#d9d9d9')   
-
-        # img = tk.Label(self, image=render)
-        # img.image = render
-        # img.place(x=0, y=0)       
         self.pack(side="bottom")#, fill=tk.BOTH, expand=1)
