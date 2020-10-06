@@ -22,7 +22,7 @@ bool Coms_CMD_SetMotRotOn(uint8_t);
 bool Coms_CMD_SetMotRotOff(uint8_t);
 bool Coms_CMD_SetMotLinOn(uint8_t);
 bool Coms_CMD_SetMotLinOff(uint8_t);
-
+bool Coms_CMD_SetFlags(uint8_t, uint8_t);
 bool Coms_CMD_Restart_PIC(uint8_t);
 
 #endif	/* COMS_CMD_H */

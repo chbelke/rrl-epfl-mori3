@@ -535,11 +535,6 @@ bool relayToComputer(byte c)
 
   count++;
 
-  // char buff[50];
-  // sprintf(buff, "INFO: len = %d, count = %d", int(len), int(count));
-  // publish(buff);
-
-
   switch (state) {  //request
 
     case 6:  //Relay to WiFi Edge

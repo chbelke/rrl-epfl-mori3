@@ -32,7 +32,12 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
             if (Coms_CMD_Shape(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
-
+            
+        case 17:
+            if (Coms_CMD_SetFlags(edge, byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+            
         case 18:
             if(Coms_CMD_Set_PARTYMODE(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -63,7 +68,7 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 24:
+        case 24:        
             if (Coms_CMD_Request_WiFiEdge(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
@@ -78,22 +83,22 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 27:
+        case 27:    //Depricated
             if (Coms_CMD_SetMotRotOn(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 28:
+        case 28:    //Depricated
             if (Coms_CMD_SetMotRotOff(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 29:
+        case 29:    //Depricated
             if (Coms_CMD_SetMotLinOn(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 30:
+        case 30:    //Depricated
             if (Coms_CMD_SetMotLinOff(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
@@ -121,9 +126,8 @@ bool Coms_CMD_Reset(uint8_t* state, bool* alloc) {
 }
 
 void Coms_CMD_OverflowError() {
-    const char *casetoo = "tooLong";
-    Coms_ESP_Verbose_Write(casetoo);
-    state[edge] = 50;
+    Coms_ESP_Verbose_Write("tooLong");
+//    state[edge] = 50;
 }
 
 
@@ -309,6 +313,61 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
     return false;
 }
 
+
+bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
+    static bool set_flg_alloc[4] = {true, true, true, true};
+    static uint8_t flag[4];
+    static bool flag_set[4];
+
+    if (set_flg_alloc[edge]) {
+        flag[edge] = byte & 0b01111111; //first bit determines on or off
+        flag_set[edge] = (byte >> 7) & 0b00000001;
+        set_flg_alloc[edge] = false;
+        return false;
+    }
+    
+    if (byte != ESP_End) {
+        Coms_CMD_OverflowError();
+        set_flg_alloc[edge] = true;
+        return true;
+    }
+    
+    switch (flag[edge]) {
+        case 0:
+            Flg_MotRot_Active = flag_set[edge];
+            break;
+            
+        case 1:
+            Flg_MotRot_Active = flag_set[edge];
+            break;
+
+        case 2:
+            // Flag1 = flag_set[edge];
+            break;            
+            
+        case 3:
+            // Flag2 = flag_set[edge];
+            break;            
+
+        case 4:
+            // Flag3 = flag_set[edge];
+            break;            
+
+        case 5:
+            // Flag4 = flag_set[edge];
+            break;            
+
+        case 6:
+            // Flag5 = flag_set[edge];
+            break;
+            
+        default:
+            break;
+    }
+
+    set_flg_alloc[edge] = true;
+    return true;
+}
 
 //----------- Fukkin massive-ass shape command -----------//
 

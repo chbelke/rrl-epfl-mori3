@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 35;
+  int sw_case = 48;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -179,6 +179,62 @@ void commands(byte* payload, unsigned int len)
     case 34: //Disable Hub
       stopHub();
       break;                
+
+    case 35: //flag
+      enableRotMotors();
+      break;  
+
+    case 36: //flag
+      disbleRotMotors();
+      break;
+
+    case 37: //flag
+      enableLinMotors();
+      break;
+
+    case 38: //flag
+      disbleLinMotors();
+      break;
+
+    case 39: //flag
+      enableFlag1();
+      break;
+
+    case 40: //flag
+      disableFlag1();
+      break;
+
+    case 41: //flag
+      enableFlag2();
+      break;
+
+    case 42: //flag
+      disableFlag2();
+      break;      
+
+    case 43: //flag
+      enableFlag3();
+      break;
+
+    case 44: //flag
+      disableFlag3();
+      break;      
+
+    case 45: //flag
+      enableFlag4();
+      break;
+
+    case 46: //flag
+      disableFlag4();
+      break;      
+
+    case 47: //flag
+      enableFlag4();
+      break;
+
+    case 48: //flag
+      disableFlag4();
+      break;      
 
     default:
       publish("ERR: Command not understood");
@@ -522,4 +578,74 @@ void setAsHub()
 void stopHub()
 {
   publish("HUB: Off");
+}
+
+
+void enableRotMotors() {
+  serial_write_flags(0b10000000);
+  return;
+}
+
+void disbleRotMotors() {
+  serial_write_flags(0b00000000);
+  return;
+}
+
+void enableLinMotors() {
+  serial_write_flags(0b10000001);
+  return;
+}
+
+void disbleLinMotors() {
+  serial_write_flags(0b00000001);
+  return;
+}
+
+void enableFlag1() {
+  serial_write_flags(0b10000010);
+  return;
+}
+
+void disableFlag1() {
+  serial_write_flags(0b00000010);
+  return;
+}
+
+void enableFlag2() {
+  serial_write_flags(0b10000011);
+  return;
+}
+
+void disableFlag2() {
+  serial_write_flags(0b00000011);
+  return;
+}
+
+void enableFlag3() {
+  serial_write_flags(0b10000100);
+  return;
+}
+
+void disableFlag3() {
+  serial_write_flags(0b00000100);
+  return;
+}
+
+void enableFlag4() {
+  serial_write_flags(0b10000101);
+  return;
+}
+
+void disableFlag4() {
+  serial_write_flags(0b00000101);
+  return;
+}
+
+void enableFlag5() {
+  serial_write_flags(0b10000110);
+  return;
+}
+void disableFlag5() {
+  serial_write_flags(0b00000110);
+  return;
 }
