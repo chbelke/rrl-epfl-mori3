@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 48;
+  int sw_case = 50;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -236,6 +236,11 @@ void commands(byte* payload, unsigned int len)
       disableFlag4();
       break;      
 
+    case 49:
+      driveAndCouple();
+      break;      
+
+
     default:
       publish("ERR: Command not understood");
   }
@@ -384,6 +389,38 @@ void openPicCouplings(byte* payload, unsigned int len)
 }
 
 
+void driveAndCouple(byte* payload, unsigned int len)
+{
+  char tmp_payload[5];
+  byte alloc = 0b11011100;
+  
+  byte byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len) {
+    byte_count = len;
+  }
+  byte_count++;
+  tmp_payload[0] = payload[byte_count];
+  tmp_payload[1] = '\0';
+  
+  byte value = byte(atoi(tmp_payload))-1;
+
+  if(value > 3) {
+    publish("ERR: Can\'t open coupling > 3");
+  }
+
+  alloc = alloc | (0b00000011 & value);
+
+  char buff[50];
+  sprintf(buff, "INFO: Opening coupling %d", value+1);
+  publish(buff);  
+
+  Serial.write(0b11001101); //205
+  Serial.write(alloc);
+  Serial.write(END_BYTE);
+  return;
+}
+
+
 void setPicLED(byte* payload, unsigned int len)
 {
   byte num_following = 0;
@@ -447,22 +484,6 @@ void setPicAngles(byte* payload, unsigned int len)
   Serial.write(END_BYTE);
 
   return;
-
-  // char buff[50];
-  // sprintf(buff, "INFO: Set Angles:");
-  // byte j = 0;
-  // for(byte i=0; i < 3; i++){
-  //   if(alloc & (alloc_mask >> i)) {
-  //     sprintf(buff, "%s %d", buff, angles[j]*256 + angles[j+1]);  
-  //     j++;
-  //     j++;
-  //   } else {
-  //     sprintf(buff, "%s -", buff);  
-  //   }
-  // }
-  // // sprintf(buff, "%s : %d %d %d, %d", buff, angles[0], angles[1], angles[2], num_following);
-  // publish(buff);    
-  // return;
 }
 
 
@@ -645,7 +666,29 @@ void enableFlag5() {
   serial_write_flags(0b10000110);
   return;
 }
+
 void disableFlag5() {
   serial_write_flags(0b00000110);
   return;
+}
+
+void wiggleCoupling(byte* payload, unsigned int len)
+{
+  int byte_count = 0;
+
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len){
+    publish("ERR: payload has no space");
+    return;
+  }
+  byte_count++;
+
+  byte coupling = payload[byte_count]-48-1;   //-48 == ascii to int conversion
+
+  if (coupling > 3) { //0-2 == couplings, 3 == all couplings
+    publish("ERR: Wifi edge > 4");
+    return;
+  }
+
+  serial_write_two(0b11010000, coupling);
 }

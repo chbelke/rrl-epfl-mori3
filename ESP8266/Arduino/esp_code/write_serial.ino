@@ -84,7 +84,7 @@ void serial_write_two(byte alloc, byte message)
 
 void serial_write_flags(byte message)
 {  
-  Serial.write(0b01010001);
+  Serial.write(0b11010001);
   Serial.write(message);
   Serial.write(END_BYTE);
 }
