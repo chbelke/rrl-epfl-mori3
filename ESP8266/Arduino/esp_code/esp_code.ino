@@ -218,8 +218,8 @@ void publish(char* buff)
 
 void normalOp()
 {
-//  scanWifis();
   readSerial();
+  update_tx_buffer();
   long unsigned currentTime = millis();
   if(currentTime - lastMacPub > 2000)
   {

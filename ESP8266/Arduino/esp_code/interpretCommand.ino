@@ -382,9 +382,9 @@ void openPicCouplings(byte* payload, unsigned int len)
   sprintf(buff, "INFO: Opening coupling %d", value+1);
   publish(buff);  
 
-  Serial.write(0b11001101); //205
-  Serial.write(alloc);
-  Serial.write(END_BYTE);
+  write_to_buffer(0b11001101); //205
+  write_to_buffer(alloc);
+  write_to_buffer(END_BYTE);
   return;
 }
 
@@ -414,9 +414,9 @@ void driveAndCouple(byte* payload, unsigned int len)
   sprintf(buff, "INFO: Opening coupling %d", value+1);
   publish(buff);  
 
-  Serial.write(0b11001101); //205
-  Serial.write(alloc);
-  Serial.write(END_BYTE);
+  write_to_buffer(0b11001101); //205
+  write_to_buffer(alloc);
+  write_to_buffer(END_BYTE);
   return;
 }
 
@@ -432,13 +432,13 @@ void setPicLED(byte* payload, unsigned int len)
     return;
   }
 
-  Serial.write(0b11001101); //205
-  Serial.write(alloc);
+  write_to_buffer(0b11001101); //205
+  write_to_buffer(alloc);
   for(byte i=0; i< num_following; i++)
   {
-    Serial.write(LED[i]);
+    write_to_buffer(LED[i]);
   }
-  Serial.write(END_BYTE);
+  write_to_buffer(END_BYTE);
   return;
 }
 
@@ -454,13 +454,13 @@ void setPicEdges(byte* payload, unsigned int len)
     return;
   }
 
-  Serial.write(0b11001101); //205
-  Serial.write(alloc);
+  write_to_buffer(0b11001101); //205
+  write_to_buffer(alloc);
   for(byte i=0; i< num_following; i++)
   {
-    Serial.write(extensions[i]);
+    write_to_buffer(extensions[i]);
   }
-  Serial.write(END_BYTE);
+  write_to_buffer(END_BYTE);
   return;
 }
 
@@ -475,13 +475,13 @@ void setPicAngles(byte* payload, unsigned int len)
     return;
   }
 
-  Serial.write(0b11001101); //205
-  Serial.write(alloc);
+  write_to_buffer(0b11001101); //205
+  write_to_buffer(alloc);
   for(byte i=0; i< num_following; i++)
   {
-    Serial.write(angles[i]);
+    write_to_buffer(angles[i]);
   }
-  Serial.write(END_BYTE);
+  write_to_buffer(END_BYTE);
 
   return;
 }
