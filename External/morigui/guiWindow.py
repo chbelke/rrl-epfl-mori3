@@ -57,7 +57,7 @@ class MoriGui(tk.Frame):
         self.frame_publ = PublishLocal(frame3, self, self.wifi_host)
         self.frame_udp = ListUDP(frame4, self, self.wifi_host)
         self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)
-        self.frame_binary = PublishBinary(frame6, self, self.wifi_host)
+        # self.frame_binary = PublishBinary(frame6, self, self.wifi_host)
         self.frame_graph = GraphHost(frame7, self.master, self.wifi_host)
 
         # frame8.pack(side="left", padx=10, pady=10, expand=True)
@@ -65,7 +65,7 @@ class MoriGui(tk.Frame):
         frame5.pack(side="right", padx=10, pady=10, expand=True)
         frame1.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
         frame4.pack(side="right", padx=10, pady=10, expand=True)
-        frame6.pack(side="bottom", padx=10, pady=10, expand=True)
+        # frame6.pack(side="bottom", padx=10, pady=10, expand=True)
         frame2.pack(side="bottom", padx=10, pady=10, expand=True)
         frame3.pack(padx = 10)
 
@@ -89,5 +89,5 @@ class MoriGui(tk.Frame):
                 self.moriNumber.append(self.tmpEspIds[espOrder[i]])
 
             self.frame_publ.update_menu(self.moriNumber)
-            self.frame_binary.update_menu(self.moriNumber)
+            # self.frame_binary.update_menu(self.moriNumber)
         self.frame_udp.update_udp()

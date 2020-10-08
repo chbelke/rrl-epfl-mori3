@@ -73,16 +73,8 @@ class PublishBinary():
             else:
                 message.extend(str.encode(txt))
 
-
-        # message.append(END_BYTE)
-
         print(message)
-        # decMessage = message.decode()
         for i in message:
             print(i, end=' ')
         print()
-
         self.mqtthost.publishLocal(message, number)
-        # print("success?")
-        # self.pub_loc_entry.delete(0, 'end')
-        
