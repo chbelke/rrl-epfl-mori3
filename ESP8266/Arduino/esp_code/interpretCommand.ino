@@ -237,7 +237,7 @@ void commands(byte* payload, unsigned int len)
       break;      
 
     case 49:
-      driveAndCouple();
+      driveAndCouple(payload, len);
       break;      
 
 

@@ -108,6 +108,10 @@ volatile bool Flg_i2c_DAC = false;
 volatile bool flg_tmr3_elapsed = true;
 volatile bool flg_tmr5_elapsed = true;
 
+// Determines the frequency that the PIC updates ESP (10s of ms)
+volatile uint16_t ESP_Update_Delay = 10;
+volatile uint16_t ESP_DataLog_Time_Elapsed = 0;
+
 /*
                          Main application
  */
@@ -166,7 +170,8 @@ int main(void) {
             }        
             Coms_123_Eval(edge);
         }
-        Coms_ESP_Eval();      
+        Coms_ESP_Eval();
+        Coms_ESP_StateUpdate();
     }
     return 1;
 }
