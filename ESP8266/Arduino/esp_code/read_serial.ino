@@ -546,7 +546,7 @@ bool dataLog(byte c)
     sprintf(buff, "DLG: ");
     for(int i=0; i<len+4; i++)  
     {
-      sprintf(buff, "%s%x", buff, storage[i]);
+      sprintf(buff, "%s%d", buff, storage[i]);
     }
     publish(buff);
     memset(storage, 0, sizeof(storage));

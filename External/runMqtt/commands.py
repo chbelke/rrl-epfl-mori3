@@ -14,6 +14,7 @@ import runMqtt.operations.getRequest as getRequest
 import runMqtt.operations.getPing as getPing
 import runMqtt.operations.getHub as getHub
 import runMqtt.operations.getWifi as getWifi
+import runMqtt.operations.getDataLog as getDataLog
 
 commands = {
    'DST:': getRSSI.getRSSI,
@@ -31,5 +32,6 @@ commands = {
    'REQ:': getRequest.getRequest,
    'PNG:': getPing.getPing,
    'HUB:': getHub.getHub,
-   'WIFI:': getWifi.getWifi
+   'WIFI:': getWifi.getWifi,
+   'DLG:': getDataLog.getDataLog,
 }   

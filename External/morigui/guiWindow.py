@@ -17,6 +17,7 @@ from morigui.frames.startstop import StartStop
 from morigui.frames.listudp import ListUDP
 from morigui.frames.pubbulk import PublishBulk
 from morigui.frames.pubbinary import PublishBinary
+from morigui.frames.datalog import DataLog
 
 
 class MoriGui(tk.Frame):
@@ -31,8 +32,6 @@ class MoriGui(tk.Frame):
         self.numberConnected = tk.IntVar()
         self.numberConnected.set(0)
            
-
-
         self.tmpEspIds = {}          
 
         self.createWidgets()
@@ -48,8 +47,10 @@ class MoriGui(tk.Frame):
         frame5 = tk.Frame(self)
         frame6 = tk.Frame(self)
         frame7 = tk.Frame(self)
+        frame8 = tk.Frame(self)
 
 
+        self.frame_datalog = DataLog(frame1, self.wifi_host)
         self.frame_party = PartyFrame(frame1, self.wifi_host)
         self.frame_start = StartStop(frame1, self.wifi_host)
         self.frame_pubg = PublishGlobal(frame2, self.wifi_host)
@@ -57,8 +58,9 @@ class MoriGui(tk.Frame):
         self.frame_udp = ListUDP(frame4, self, self.wifi_host)
         self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)
         self.frame_binary = PublishBinary(frame6, self, self.wifi_host)
-        self.graph_frame = GraphHost(frame7, self.master, self.wifi_host)
+        self.frame_graph = GraphHost(frame7, self.master, self.wifi_host)
 
+        # frame8.pack(side="left", padx=10, pady=10, expand=True)
         frame7.pack(side="right", padx=10, pady=10, expand=True)
         frame5.pack(side="right", padx=10, pady=10, expand=True)
         frame1.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
