@@ -17,6 +17,7 @@ void readSerial()
       serial_case = ((c >> 5) & 0b00000111);
       alloc = false;
     }        
+  
 
     switch(serial_case){
       case 0:
@@ -524,13 +525,13 @@ bool dataLog(byte c)
 
   if (alloc) {
     alloc = false;
-    storage[0] = (alloc & 0b00011111);
+    storage[0] = (c & 0b00011111);
     len = dataLogCalcLen(storage[0]);
     time = millis();
-    storage[1] = (byte) time;
-    storage[2] = (byte) time >> 8;
-    storage[3] = (byte) time >> 16;
-    storage[4] = (byte) time >> 24;
+    storage[1] = (byte) (time >> 24);
+    storage[2] = (byte) (time >> 16);
+    storage[3] = (byte) (time >> 8);
+    storage[4] = (byte) time;
     count = 1;
     return false;
   }
@@ -546,7 +547,7 @@ bool dataLog(byte c)
     sprintf(buff, "DLG: ");
     for(int i=0; i<len+4; i++)  
     {
-      sprintf(buff, "%s%d", buff, storage[i]);
+      sprintf(buff, "%s%.2x", buff, storage[i]);
     }
     publish(buff);
     memset(storage, 0, sizeof(storage));

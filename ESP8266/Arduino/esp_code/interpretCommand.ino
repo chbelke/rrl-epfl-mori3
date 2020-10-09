@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 50;
+  int sw_case = 255;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -229,11 +229,11 @@ void commands(byte* payload, unsigned int len)
       break;      
 
     case 47: //flag
-      enableFlag4();
+      enableFlag5();
       break;
 
     case 48: //flag
-      disableFlag4();
+      disableFlag5();
       break;      
 
     case 49:
@@ -241,10 +241,14 @@ void commands(byte* payload, unsigned int len)
       break;      
 
     case 50:
+      wiggleCoupling(payload, len);
+      break;
+
+    case 51:
       setDatalogFlag(payload, len);
       break;      
 
-    case 51:
+    case 52:
       setDatalogPeriod(payload, len);
       break;            
 

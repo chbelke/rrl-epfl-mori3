@@ -74,6 +74,7 @@ class WirelessHost(threading.Thread):
         self.connMatrix = {}
 
         self.dir = "DataLog/"
+        self.dataLogFile=None
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
         self.pingHandler = PingHandler(self)
@@ -346,15 +347,18 @@ class WirelessHost(threading.Thread):
         dtString = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         self.fileName = self.dir + dtString + ".csv"
         self.dataLogFile=open(self.fileName, 'w')
-        header = "Name, time, ang1, ang2, ang3, edg1, edg2, edg3, orn1, orn2, orn3"
+        header = "Name, time, ang1, ang2, ang3, edg1, edg2, edg3, orn1, orn2, orn3\n"
         self.writeDataLogFile(header)
 
 
     def writeDataLogFile(self, line):
         try:
             self.dataLogFile.write(line)
-        except IOError:
-            print(colored("Could not write to file", red))
+        except AttributeError:
+            return
+        except ValueError:
+            return
+            # print(colored("Could not write to file", 'red'))
 
 
     def closeDataLogFile(self):
