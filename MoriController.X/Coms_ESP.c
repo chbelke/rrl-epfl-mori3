@@ -383,7 +383,7 @@ void Coms_ESP_StateUpdate(void) {
     
     if ((Coms_ESP_Data_Transmission &0b00000111) == 0) return;
     
-    UART4_Write((0b110000000 | Coms_ESP_Data_Transmission)); //New alloc byte
+    UART4_Write((0b11000000 | Coms_ESP_Data_Transmission)); //New alloc byte
 //    UART4_Write(time - prevTime);
 //    UART4_Write(Coms_ESP_Data_Transmission);
     

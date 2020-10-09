@@ -21,16 +21,16 @@ def getDataLog(self, pyld, espNum):
     try:
         time = (values[4] << 24) | (values[3] << 16) | (values[2] << 8) | values[1];
         if values[0] & 0b00000001:    #angles
-            for j in range(0,2):
-                angles[j] = values[i+1]*256 + values[i]
+            for j in range(0,3):
+                angles[j] = values[i]*256 + values[i+1]
                 i += 2
         if values[0] & 0b00000010:    #edges
-            for j in range(0,2):
+            for j in range(0,3):
                 edges[j] = values[i]
                 i += 1
         if values[0] & 0b00000100:    #orient
-            for j in range(0,2):
-                orient[j] = values[i+1]*256 + values[i]
+            for j in range(0,3):
+                orient[j] = values[i]*256 + values[i+1]
                 i += 2                
         cscString = [espNum, str(time), str(angles).strip('[]'), str(edges).strip('[]'), str(orient).strip('[]') + '\n']
         self.writeDataLogFile(','.join(cscString))
