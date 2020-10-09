@@ -1,4 +1,3 @@
-
 const int ring_size = 512;
 
 struct ring_buffer

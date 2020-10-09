@@ -95,8 +95,8 @@ extern volatile bool Flg_i2c_PWM;
 extern volatile bool Flg_i2c_ACC;
 extern volatile bool Flg_i2c_DAC;
 
-extern volatile uint16_t ESP_Update_Delay;
-extern volatile uint16_t ESP_DataLog_Time_Elapsed;
+extern volatile uint8_t ESP_Update_Delay;
+extern volatile uint8_t ESP_DataLog_Time_Elapsed;
 
 
 /* ******************** PERIPHERALS ***************************************** */

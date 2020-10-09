@@ -73,9 +73,10 @@ void Coms_ESP_Eval() { // called in main
 //                case 3: // xxx == 011, idle mode
 //                    EdgInCase[edge] = 10;
 //                    break;
-//                case 4: // xxx == 100, connection detected or acknowledged
-//                    EdgInCase[edge] = 20;
-//                    break;
+                case 5: // xxx == 101, ESP only communication
+                    Coms_ESP_Handle(EspIn & 0b00011111);
+                    EspInCase = 5;
+                    break;
                 case 6: // xxx == 110, command
                     Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 6;
@@ -86,6 +87,11 @@ void Coms_ESP_Eval() { // called in main
                     break;
             }
             break;   
+
+        case 5:
+            if (Coms_ESP_Handle(EspIn))
+                EspInCase = 0;
+            break;
             
         case 6:
             if (Coms_CMD_Handle(ESP_URT_NUM, EspIn))
@@ -98,6 +104,33 @@ void Coms_ESP_Eval() { // called in main
             break;
     }
             
+}
+
+bool Coms_ESP_Handle(uint8_t byte) {
+    static bool alloc = true;
+    static uint8_t state;
+
+    if (alloc) {
+        state = (byte & 0b00011111);
+        alloc = false;
+        return false;
+    }
+    
+    //Note: can use Coms_CMD_Reset; using pointers to local variables
+    switch (state) {
+        case 1:
+            if (Coms_ESP_SetDatalogFlags(byte))
+                return Coms_CMD_Reset(&state, &alloc); 
+            break;
+        case 2:
+            if (Coms_ESP_SetDatalogPeriod(byte))
+                return Coms_CMD_Reset(&state, &alloc); 
+            break;
+        default:
+            break;
+                   
+    }
+    return false;
 }
 
 void Coms_ESP_Boot(void)
@@ -344,10 +377,11 @@ bool Coms_ESP_VerifyID() {
 
 void Coms_ESP_StateUpdate(void) {
     // Only updates every N ms
-    if (ESP_DataLog_Time_Elapsed < ESP_Update_Delay) {
-        return;
-    }
+    if (ESP_DataLog_Time_Elapsed < ESP_Update_Delay) return;
+    
     ESP_DataLog_Time_Elapsed = 0;
+    
+    if ((Coms_ESP_Data_Transmission &0b00000111) == 0) return;
     
     UART4_Write((0b110000000 | Coms_ESP_Data_Transmission)); //New alloc byte
 //    UART4_Write(time - prevTime);
@@ -366,4 +400,41 @@ void Coms_ESP_StateUpdate(void) {
         //To add neighbour transmission if time holds
     }
     UART4_Write(ESP_End);
+}
+
+
+bool Coms_ESP_SetDatalogFlags(uint8_t byte) {
+    static uint8_t count = 0;
+    static uint8_t flags;
+    if (count >= 1) {
+        if (byte == ESP_End) {
+            Coms_ESP_Data_Transmission = flags;
+        } else {
+            Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
+    } else {
+        flags = byte;
+        count++;
+    }
+    return false;    
+}
+
+bool Coms_ESP_SetDatalogPeriod(uint8_t byte) {
+    static uint8_t count = 0;
+    static uint8_t period;
+    if (count >= 1) {
+        if (byte == ESP_End) {
+            ESP_Update_Delay = period;
+        } else {
+            Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
+    } else {
+        period = byte;
+        count++;
+    }
+    return false;    
 }

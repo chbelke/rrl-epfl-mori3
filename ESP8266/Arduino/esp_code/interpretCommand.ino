@@ -240,6 +240,13 @@ void commands(byte* payload, unsigned int len)
       driveAndCouple(payload, len);
       break;      
 
+    case 50:
+      setDatalogFlag(payload, len);
+      break;      
+
+    case 51:
+      setDatalogPeriod(payload, len);
+      break;            
 
     default:
       publish("ERR: Command not understood");
@@ -688,7 +695,73 @@ void wiggleCoupling(byte* payload, unsigned int len)
   if (coupling > 3) { //0-2 == couplings, 3 == all couplings
     publish("ERR: Wifi edge > 4");
     return;
-  }
+  } 
 
   serial_write_two(0b11010000, coupling);
+}
+
+
+void setDatalogFlag(byte* payload, unsigned int len) 
+{
+  int byte_count = 0;
+  char tmp_payload[5];
+
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len){
+    publish("ERR: payload has no space");
+    return;
+  }
+  byte_count++;
+  int pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
+  byte_count = detectSpaceChar(payload, byte_count, len);
+
+  if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
+    byte_count = len;
+  }
+
+  byte j;
+  for(j=0; j<byte_count-pre_count; j++) {
+    if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
+      publish("ERR: Number not ascii");
+      return;
+    }
+    tmp_payload[j] = char(payload[pre_count+j]);
+  }
+  tmp_payload[j] = '\0';
+  byte flag = (byte)atoi(tmp_payload);
+
+  serial_write_two(0b10100001, flag);
+}
+
+
+void setDatalogPeriod(byte* payload, unsigned int len) 
+{
+  int byte_count = 0;
+  char tmp_payload[5];
+
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  if(byte_count > len){
+    publish("ERR: payload has no space");
+    return;
+  }
+  byte_count++;
+  int pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
+  byte_count = detectSpaceChar(payload, byte_count, len);
+
+  if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
+    byte_count = len;
+  }
+
+  byte j;
+  for(j=0; j<byte_count-pre_count; j++) {
+    if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
+      publish("ERR: Number not ascii");
+      return;
+    }
+    tmp_payload[j] = char(payload[pre_count+j]);
+  }
+  tmp_payload[j] = '\0';
+  byte freq = (byte)atoi(tmp_payload);
+
+  serial_write_two(0b10100010, freq);
 }

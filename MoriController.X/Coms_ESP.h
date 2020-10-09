@@ -12,8 +12,8 @@
 
 void Coms_ESP_Eval (void);
 void Coms_ESP_Boot (void);
+bool Coms_ESP_Handle(uint8_t);
 
-void Coms_ESP_StateUpdate(void);
 uint8_t Coms_ESP_ReturnID (uint8_t);
 void Coms_ESP_Verbose (void);
 
@@ -41,6 +41,10 @@ void Coms_ESP_No_WiFi_Edge(void);
 void Coms_ESP_Return_WiFi_Edge(uint8_t);
 void Coms_ESP_Request_ID(void);
 bool Coms_ESP_VerifyID(void);
+
+void Coms_ESP_StateUpdate(void);
+bool Coms_ESP_SetDatalogFlags(uint8_t);
+bool Coms_ESP_SetDatalogPeriod(uint8_t);
 
 #endif	/* COMS_ESP_H */
 
