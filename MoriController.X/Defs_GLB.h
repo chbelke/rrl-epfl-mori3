@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'A' // module name by letter
+#define MODULE 'E' // module name by letter
 
 
 
@@ -228,9 +228,9 @@ extern volatile bool Flg_i2c_DAC;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period_1 150 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
+#define SMA_Period_1 140 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
 #define SMA_Period_2 200 // split into high I opening and low I maintain phases
-#define SMA_Duty_1 100 // 150 // 8-bit PWM value for first phase
-#define SMA_Duty_2 60 // 8-bit PWM value for second phase
+#define SMA_Duty_1 130 // 150 // 8-bit PWM value for first phase
+#define SMA_Duty_2 65 // 8-bit PWM value for second phase
 
 #endif	/* DEFS_H */

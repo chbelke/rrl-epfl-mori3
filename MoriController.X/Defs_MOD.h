@@ -78,33 +78,33 @@
     #define MotLin_MIN_3 73
     #define MotLin_MAX_3 992
 #elif  MODULE == 'C' // MINs verified
-    #define MotLin_MIN_1 72
+    #define MotLin_MIN_1 70
     #define MotLin_MAX_1 988
-    #define MotLin_MIN_2 79
+    #define MotLin_MIN_2 78
     #define MotLin_MAX_2 996
-    #define MotLin_MIN_3 85
+    #define MotLin_MIN_3 79
     #define MotLin_MAX_3 995
 #elif  MODULE == 'D' // MINs verified
-    #define MotLin_MIN_1 87
+    #define MotLin_MIN_1 79
     #define MotLin_MAX_1 999
-    #define MotLin_MIN_2 75
+    #define MotLin_MIN_2 67
     #define MotLin_MAX_2 989
-    #define MotLin_MIN_3 82
+    #define MotLin_MIN_3 74
     #define MotLin_MAX_3 995
 #elif  MODULE == 'E' // MINs verified
-    #define MotLin_MIN_1 83
-    #define MotLin_MAX_1 998
+    #define MotLin_MIN_1 79
+    #define MotLin_MAX_1 1000
     #define MotLin_MIN_2 69
-    #define MotLin_MAX_2 987
-    #define MotLin_MIN_3 79
+    #define MotLin_MAX_2 988
+    #define MotLin_MIN_3 72
     #define MotLin_MAX_3 993
 #elif  MODULE == 'F'
-    #define MotLin_MIN_1 101
-    #define MotLin_MAX_1 996
-    #define MotLin_MIN_2 83
+    #define MotLin_MIN_1 72
+    #define MotLin_MAX_1 993
+    #define MotLin_MIN_2 81
     #define MotLin_MAX_2 1000
-    #define MotLin_MIN_3 66
-    #define MotLin_MAX_3 990
+    #define MotLin_MIN_3 71
+    #define MotLin_MAX_3 995
 #else // safe values
     #define MotLin_MIN_1 200
     #define MotLin_MAX_1 800
