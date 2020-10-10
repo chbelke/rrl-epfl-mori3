@@ -18,6 +18,7 @@ from runMqtt.wirelessHost import WirelessHost
 
 from morigui.frames.party import PartyFrame
 
+from Settings import names
 
 
 class GraphHost():
@@ -148,7 +149,7 @@ class GraphFrame(tk.Frame):
     def getNodes(self):
         self.nodes = []
         for connId in self.connMatrix:
-            self.nodes.append(connId)
+            self.nodes.append(names.idsToName[connId])
 
     def getEdges(self):
         self.edges = []
@@ -208,7 +209,6 @@ class GraphFrame(tk.Frame):
             self.pos = tmp_pos
         return
 
-
     def redrawGraph(self):
         self.G=nx.DiGraph()
         self.G.add_nodes_from(self.nodes)
@@ -221,7 +221,7 @@ class GraphFrame(tk.Frame):
         self.color_map = []
         espIds = self.wifi_host.getIdDict()
         for node in self.G:
-            state = self.mori_status[espIds[node]][0]
+            state = self.mori_status[espIds[names.nameToIds[node]]][0]
             if state == "Lost":
                 self.color_map.append(self.colourDict[state])
                 continue

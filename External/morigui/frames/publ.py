@@ -2,6 +2,7 @@ import tkinter as tk
 import base64
 from termcolor import colored
 
+from Settings import names
 
 class PublishLocal():
 
@@ -16,6 +17,7 @@ class PublishLocal():
         self.listMoriVar.set(self.moriNumber[0])
         self.listMoriVar.trace('w', self.option_select)        
         self.load()
+        print("NAMES: ", )
 
         self.frame.master.bind('<Return>', 
             lambda event=None: self.pub_loc_button.invoke())
@@ -50,7 +52,7 @@ class PublishLocal():
 
         self.pub_bin_entry = tk.Entry(self.frame_binary, bd=1)
         self.pub_bin_entry.pack({"side": "right"}, fill=tk.X, padx=5, expand=True)
-        
+
         self.pub_bin_button = tk.Button(self.frame_binary)
         self.pub_bin_button["text"] = "Publish",
         self.pub_bin_button["command"] = lambda: self.publishBinary()
@@ -62,7 +64,7 @@ class PublishLocal():
 
 
     def option_select(self, *args):
-        print("ESP " + self.listMoriVar.get() + " selected.")
+        print(self.listMoriVar.get() + " selected.")
 
 
     def publishLocal(self):
@@ -79,9 +81,9 @@ class PublishLocal():
             splitText = text.split("ping",1)
             if (splitText[1].strip().isnumeric()):
                 num = int(splitText[1])
-            self.wirelesshost.pingHandler.setPingCount(number, num)
+            self.wirelesshost.pingHandler.setPingCount(self.checkName(number), num)
             return
-        self.wirelesshost.publishLocal(text, number)
+        self.wirelesshost.publishLocal(text, self.checkName(number))
 
 
     def publishBinary(self):
@@ -107,17 +109,23 @@ class PublishLocal():
         for i in message:
             print(i, end=' ')
         print()
-        self.wirelesshost.publishLocal(message, number)        
+        self.wirelesshost.publishLocal(message, names.nameToIds[number])
 
 
     def update_menu(self, list_of_modules):
         self.moriNumber = list_of_modules
-        print(self.moriNumber)
+        print("HERE", self.moriNumber)
         menu = self.listMori["menu"]
         menu.delete(0, "end")
 
         #Create all roll down menus
         self.list_of_modules = list_of_modules
         for mori_individ in self.moriNumber:
-            menu.add_command(label=mori_individ, 
-                         command=lambda value=mori_individ[1]: self.listMoriVar.set(value))              
+            menu.add_command(label=[mori_individ[0], names.idsToName[mori_individ[1]]], 
+                         command=lambda value=names.idsToName[mori_individ[1]]: self.listMoriVar.set(value))
+
+    def checkName(self, name):
+        try:
+            return names.nameToIds[name]
+        except KeyError:
+            return name
