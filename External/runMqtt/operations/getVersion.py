@@ -1,6 +1,8 @@
 import serial, time
 import sys
 
+from Settings import names
+
 def getVersion(self, pyld, espNum):
 
 	mac =  pyld[1].replace(":", "")

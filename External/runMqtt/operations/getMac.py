@@ -1,8 +1,10 @@
 from termcolor import colored
 
+from Settings import names
+
 def getMac(self, pyld, espNum):
 
-    print(colored("MAC address recieved: " + pyld[1], 'green'))
+    print(colored("MAC recieved: " + pyld[1] + "for" + names.idsToName[espNum], 'green'))
     mac = pyld[1].replace(":", "")
     mac = mac.lower()
     mac = mac[:1] + 'e' + mac[2:] #Hack
