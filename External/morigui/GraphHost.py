@@ -27,7 +27,10 @@ class GraphHost():
         self.master = master
         self.wifi_host = wifi_host
         self.frame = frame
-        self.image = ImageTk.PhotoImage(Image.open("images/Sign_Smaller.png"))
+        if (random.random() > 0.1):
+            self.image = ImageTk.PhotoImage(Image.open("images/Sign_Smaller.png"))
+        else:
+            self.image = ImageTk.PhotoImage(Image.open("images/frog_smol.png"))
         self.createWidgets()
 
     def createWidgets(self):        
@@ -154,7 +157,6 @@ class GraphFrame(tk.Frame):
     def getEdges(self):
         self.edges = []
         for connId in self.connMatrix:
-            print("connId ",connId)
             for i in range(0,3):
                 if self.connMatrix[connId][i] != 0:
                     self.edges.append((names.idsToName[connId],names.idsToName[self.connMatrix[connId][i]]))
