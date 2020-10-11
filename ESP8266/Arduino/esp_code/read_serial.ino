@@ -17,6 +17,7 @@ void readSerial()
       serial_case = ((c >> 5) & 0b00000111);
       alloc = false;
     }        
+  
 
     switch(serial_case){
       case 0:
@@ -33,6 +34,10 @@ void readSerial()
       
       case 4:
         if(stateInfo(c)) alloc = true;
+        break;
+
+      case 6:
+        if(dataLog(c)) alloc = true;
         break;
       
       case 7:
@@ -509,6 +514,73 @@ bool stateInfo(byte c)
   return false;
 }
 
+
+bool dataLog(byte c) 
+{
+  static bool alloc = true;
+  static byte count;
+  static byte len;
+  static byte storage[PACKET_SIZE];
+  long time = 0;
+
+  if (alloc) {
+    alloc = false;
+    storage[0] = (c & 0b00011111);
+    len = dataLogCalcLen(storage[0]);
+    time = millis();
+    storage[1] = (byte) (time >> 24);
+    storage[2] = (byte) (time >> 16);
+    storage[3] = (byte) (time >> 8);
+    storage[4] = (byte) time;
+    count = 1;
+    return false;
+  }
+
+  if (count == 1) {
+    storage[5] = c;
+    count++;
+    return false;
+  }
+
+  if ((c == END_BYTE) && (count == len)) {
+    char buff[50];
+    sprintf(buff, "DLG: ");
+    for(int i=0; i<len+4; i++)  
+    {
+      sprintf(buff, "%s%.2x", buff, storage[i]);
+    }
+    publish(buff);
+    memset(storage, 0, sizeof(storage));
+    count = 0;
+    alloc = true;
+    len = 0;
+    return true;
+  } else if (count < len) {
+    storage[count+4]=c;
+    count++;
+  } else {
+    if(serialErrorHandle(c))
+    {
+      publish("ERR: Unable to Log");
+      memset(storage, 0, sizeof(storage));               
+      count = 0;
+      alloc = true;
+      len = 0;
+      return true;
+    }        
+  }  
+  return false;
+}
+
+
+byte dataLogCalcLen(byte alloc_byte)
+{
+  byte len = 2; // alloc +  end byte
+  if(alloc_byte & 0b00000001) len += 6; //angles = 3*16
+  if(alloc_byte & 0b00000010) len += 3; //edges = 3*8
+  if(alloc_byte & 0b00000100) len += 6; //Orient = 3*16
+  return len;
+}
 
 bool relayToComputer(byte c)
 {

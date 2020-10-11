@@ -5,6 +5,7 @@ from termcolor import colored
 
 import json
 
+from Settings import names
 
 MAX_INPUT = 100
 ROT_MOTOR_MIN = 200
@@ -55,16 +56,16 @@ class PublishBulk():
                     elif key.lower() == 'wifiedge':
                         self.SetEdge(text, key, esp)
                     elif type(text[esp][key]) is str:
-                        self.mqtthost.publishLocal(text[esp], esp)                     
+                        self.mqtthost.publishLocal(text[esp], self.checkName(esp))                    
             elif type(text[esp]) is str:
                 if text[esp].startswith("ping"):
                     num = 1
                     splitText = text[esp].split("ping",1)
                     if (splitText[1].strip().isnumeric()):
                         num = int(splitText[1])
-                    self.mqtthost.pingHandler.setPingCount(esp, num)
+                    self.mqtthost.pingHandler.setPingCount(self.checkName(esp), num)
                     continue
-                self.mqtthost.publishLocal(text[esp], esp)
+                self.mqtthost.publishLocal(text[esp], self.checkName(esp))
 
     def ClearBulk(self):
         self.pub_cmd.delete("1.0", 'end')
@@ -78,7 +79,7 @@ class PublishBulk():
         message.append(int(edge))
         message.append(END_BYTE)
 
-        self.mqtthost.publishLocal(message, esp)
+        self.mqtthost.publishLocal(message, self.checkName(esp))
 
 
     def InterpretShape (self, text, key, esp):
@@ -112,7 +113,7 @@ class PublishBulk():
                 message.extend(cmd_bytes.to_bytes(numbytes, byteorder='big'))
             message.append(END_BYTE)
             print(message)
-            self.mqtthost.publishLocal(message, esp)
+            self.mqtthost.publishLocal(message, self.checkName(esp))
 
 
         if 'coup' in cmds or 'led' in cmds:
@@ -141,10 +142,16 @@ class PublishBulk():
                 message.extend(cmd_bytes.to_bytes(1, byteorder='big'))
             message.append(END_BYTE)
             print(message)
-            self.mqtthost.publishLocal(message, esp)
+            self.mqtthost.publishLocal(message, self.checkName(esp))
         
 
         if 'drive' in cmds:
             print(colored('Drive functionality not implimented', 'red'))
             return
         return
+
+    def checkName(self, name):
+        try:
+            return names.nameToIds[name]
+        except KeyError:
+            return name

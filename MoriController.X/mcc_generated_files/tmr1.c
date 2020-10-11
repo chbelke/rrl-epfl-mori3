@@ -217,6 +217,7 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         Mnge_DAC_Ctrl(); 
         Flg_i2c_DAC = false;
     }
+    ESP_DataLog_Time_Elapsed++;
 }
 
 void  TMR1_SetInterruptHandler(void (* InterruptHandler)(void))

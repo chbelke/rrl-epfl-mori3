@@ -33,7 +33,7 @@ void relay(byte* payload, unsigned int len)
 
   while(byte_count < len)
   {
-    Serial.write(payload[byte_count]);
+    write_to_buffer(payload[byte_count]);
     byte_count++;
   }
 
@@ -43,8 +43,8 @@ void relay(byte* payload, unsigned int len)
 
 void serial_write_one(byte alloc)
 {  
-  Serial.write(alloc);
-  Serial.write(END_BYTE);
+  write_to_buffer(alloc);
+  write_to_buffer(END_BYTE);
 
 
   if(verbose_flag)
@@ -76,17 +76,17 @@ void serial_write_one(byte alloc)
 
 void serial_write_two(byte alloc, byte message)
 {  
-  Serial.write(alloc);
-  Serial.write(message);
-  Serial.write(END_BYTE);
+  write_to_buffer(alloc);
+  write_to_buffer(message);
+  write_to_buffer(END_BYTE);
 }
 
 
 void serial_write_flags(byte message)
 {  
-  Serial.write(0b01010001);
-  Serial.write(message);
-  Serial.write(END_BYTE);
+  write_to_buffer(0b11010001);
+  write_to_buffer(message);
+  write_to_buffer(END_BYTE);
 }
 
 
@@ -95,20 +95,20 @@ void serial_write_to_hub(char* buff)
   // client.publish(publishName, "INFO: WHAT THE HELL");
   byte len = strlen(buff);
 
-  Serial.write(0b11100110); //Relay to Wifi Edge
-  Serial.write(byte(len+11));
+  write_to_buffer(0b11100110); //Relay to Wifi Edge
+  write_to_buffer(byte(len+11));
 
   for (byte i=1; i<8; i++)
   {
-    Serial.write(clientName[i]);
+    write_to_buffer(clientName[i]);
   }
 
   for (byte i=0; i<len; i++)
   {
-    Serial.write(buff[i]);
+    write_to_buffer(buff[i]);
   }
-  Serial.write(END_BYTE);
-  Serial.write(42);
+  write_to_buffer(END_BYTE);
+  write_to_buffer(42);
 
 
 
@@ -127,8 +127,8 @@ void serial_write_to_hub(char* buff)
   //   tmp[i] = (buff[i]);
   // }
 
-  // tmp[i] = Serial.write(END_BYTE);
-  // tmp[i+1] = Serial.write(42);
+  // tmp[i] = write_to_buffer(END_BYTE);
+  // tmp[i+1] = write_to_buffer(42);
 
 
   // char fuff[50];
@@ -139,10 +139,10 @@ void serial_write_to_hub(char* buff)
 
 void serial_write_id()
 {
-  Serial.write(0b11010011);
+  write_to_buffer(0b11010011);
   for(byte i=2; i < 8; i++)
-    Serial.write(clientName[i]);
-  Serial.write(END_BYTE);
+    write_to_buffer(clientName[i]);
+  write_to_buffer(END_BYTE);
 }
 
 

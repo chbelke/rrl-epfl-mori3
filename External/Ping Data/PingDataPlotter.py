@@ -6,6 +6,16 @@ from matplotlib.ticker import PercentFormatter
 from termcolor import colored
 import os
 
+import names
+
+
+def checkName(name):
+    try:
+        return names.idsToName[name]
+    except KeyError:
+        return name
+
+
 dir = input("Please enter the Ping Data directory name:")
 
 pingData = {}
@@ -46,18 +56,22 @@ for esp in pingData.keys(): #redundant?
         else:
             faultList.append(False)
     if faultCount == 0:
-        print(colored(esp + ": " + str(arrayLength) + " ping packets read without faults", "green"))
+        print(colored(checkName(esp) + ": " + str(arrayLength) + " ping packets read without faults", "green"))
     else:
-        print(colored(esp + ": " + str(faultCount) + " out of " + str(arrayLength) + " ping packets had faults, ("\
+        print(colored(checkName(esp) + ": " + str(faultCount) + " out of " + str(arrayLength) + " ping packets had faults, ("\
         + str(100.0*float(faultCount)/float(arrayLength)) + " %) of which " + str(timeoutCount) + " were timeouts", "red")) # timedout counts as corrupted
 
     pingDataTime = np.delete(pingData[esp]['arr_0'], faultList) # Remove faulty data
     
     # We can set the number of bins with the `bins` kwarg
     ax.hist(pingDataTime[1:], bins=len(pingDataTime[1:]), density=True, histtype='step', cumulative=-1)
+
+labels = [checkName(x) for x in pingData.keys()]
+print(labels)
     
 plt.xticks(rotation='vertical')
-plt.legend(pingData.keys())
+# plt.legend(pingData.keys())
+plt.legend(labels)
 plt.yscale("log")
 plt.xlabel("Latency (ms)")
 plt.ylabel("CCDF")

@@ -41,15 +41,9 @@ void readUDP()
     ip_flag = true;
   }  
   
-  UDP.read(udpInBuff, PACKET_SIZE);
-  unsigned int len = int(udpInBuff[0]);
-  byte udp_packet[len];
-  for(int i=0; i< len; i++)
-  {
-    udp_packet[i] = udpInBuff[i+1];
-  }
+  int len = UDP.read(udpInBuff, PACKET_SIZE);
 
-  commands(udp_packet, len);
+  commands(udpInBuff, len);
 }
 
 

@@ -36,6 +36,8 @@ from runMqtt.udpHost import UDPHost
 from runMqtt.pingHandler import PingHandler
 from runMqtt.Utils import *
 
+from Settings import names
+
 
 #udp/w/p100/i192.168.0.53/m01 00111111 0900090009000000-1200120 150
 
@@ -73,6 +75,8 @@ class WirelessHost(threading.Thread):
 
         self.connMatrix = {}
 
+        self.dir = "DataLog/"
+        self.dataLogFile=None
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
         self.pingHandler = PingHandler(self)
@@ -91,15 +95,15 @@ class WirelessHost(threading.Thread):
             if time.time() - loopTime > 2:
                 print("\nTime Elapsed: {:.2f}".format(loopTime-startTime))
                 print(colored("Referenced ESPs : ","yellow"), end=' ')
-                print(self.macDict, end="\n\n")
-
-                print("------- Connections -------")
-                for node in self.connMatrix:
-                    print(node, self.connMatrix[node])
-
+                for idty in self.idDict:
+                    print(names.idsToName[idty], end=", ")
                 print()
-                print(self.noWifiDict)
-                
+
+                # print("------- Connections -------")
+                # for node in self.connMatrix:
+                #     print(node, self.connMatrix[node])
+
+                # print()                
                 
                 loopTime = time.time()
             self.event.wait(0.25)    
@@ -114,7 +118,7 @@ class WirelessHost(threading.Thread):
     def publishLocal(self, msg, addr):
         try:
             if self.macDict[self.idDict[addr]][0] == "Lost":
-                print(colored("Unable to publish to ESP " + addr, 'red'))
+                print(colored("Unable to publish to " + names.idsToName[addr], 'red'))
         except KeyError:
             pass
         if addr in self.noWifiDict:
@@ -129,7 +133,7 @@ class WirelessHost(threading.Thread):
         if addr not in self.noWifiDict:
             self.updateNoWifiDict(addr)
         if self.noWifiDict[addr][2] == False:
-            print(colored("ERROR: no path to hub for " + addr, 'red'))
+            print(colored("ERROR: no path to hub for " + names.idsToName[addr], 'red'))
             return
         msg = self.buildRelayMessage(addr, msg)
         host = self.noWifiDict[addr][0]
@@ -165,7 +169,7 @@ class WirelessHost(threading.Thread):
         self.coTimeDict[mac] = time.time()
         self.setCoTimeDict(self.coTimeDict)
         if not (self.macDict.get(mac) is None) and not (mac in self.macOrder): #Check if the ESP has been referenced and offline
-            print(colored("New ESP connected", "green"))
+            print(colored(names.idsToName[espNum] + " connected", "green"))
             self.macOrder.append(mac)
             self.setMacOrder(self.macOrder)
         return        
@@ -297,11 +301,11 @@ class WirelessHost(threading.Thread):
 
 
     def espUDP(self, espNum):
-        print(colored("UDP enabled for: " + espNum, 'green'))
+        print(colored("UDP enabled for: " + names.idsToName[espNum], 'green'))
         self.macDict.get(self.idDict[espNum])[0] = "UDP"
 
     def espLost(self, espNum):
-        print(colored("ESP " + espNum + " lost", "red"))
+        print(colored("ESP " + names.idsToName[espNum] + " lost", "red"))
         self.macDict.get(self.idDict[espNum])[0] = "Lost"
         if espNum in self.noWifiDict:
             del self.noWifiDict[espNum]        
@@ -315,7 +319,7 @@ class WirelessHost(threading.Thread):
     def updateNoWifiDict(self, espNum):
         path, edge_path = self.shortestPath(espNum)
         if path == []:
-            print(colored("Error ESP " + espNum + " has no path to the hub", 'red'))
+            print(colored("Error " + names.idsToName[espNum] + " has no path to the hub", 'red'))
             self.macDict.get(self.idDict[espNum])[0] = "Lost"
         else:
             target_hub = path[0]
@@ -337,6 +341,30 @@ class WirelessHost(threading.Thread):
             return False
         except KeyError:
             return False
+
+
+    def createDataLogFile(self):
+        if not os.path.exists(self.dir):
+            os.makedirs(self.dir)
+        dtString = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        self.fileName = self.dir + dtString + ".csv"
+        self.dataLogFile=open(self.fileName, 'w')
+        header = "Name, time, ang1, ang2, ang3, edg1, edg2, edg3, orn1, orn2, orn3\n"
+        self.writeDataLogFile(header)
+
+
+    def writeDataLogFile(self, line):
+        try:
+            self.dataLogFile.write(line)
+        except AttributeError:
+            return
+        except ValueError:
+            return
+            # print(colored("Could not write to file", 'red'))
+
+
+    def closeDataLogFile(self):
+        self.dataLogFile.close()
 
 
     def exit(self):

@@ -33,6 +33,8 @@ bool Flg_Booted_Up = false;
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
 uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
+uint8_t Coms_ESP_Data_Transmission = 0;
+
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
  * It gets called from the ISR each time a byte is received. It first checks
@@ -71,9 +73,10 @@ void Coms_ESP_Eval() { // called in main
 //                case 3: // xxx == 011, idle mode
 //                    EdgInCase[edge] = 10;
 //                    break;
-//                case 4: // xxx == 100, connection detected or acknowledged
-//                    EdgInCase[edge] = 20;
-//                    break;
+                case 5: // xxx == 101, ESP only communication
+                    Coms_ESP_Handle(EspIn & 0b00011111);
+                    EspInCase = 5;
+                    break;
                 case 6: // xxx == 110, command
                     Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 6;
@@ -84,6 +87,11 @@ void Coms_ESP_Eval() { // called in main
                     break;
             }
             break;   
+
+        case 5:
+            if (Coms_ESP_Handle(EspIn))
+                EspInCase = 0;
+            break;
             
         case 6:
             if (Coms_CMD_Handle(ESP_URT_NUM, EspIn))
@@ -98,6 +106,33 @@ void Coms_ESP_Eval() { // called in main
             
 }
 
+bool Coms_ESP_Handle(uint8_t byte) {
+    static bool alloc = true;
+    static uint8_t state;
+
+    if (alloc) {
+        state = (byte & 0b00011111);
+        alloc = false;
+        return false;
+    }
+    
+    //Note: can use Coms_CMD_Reset; using pointers to local variables
+    switch (state) {
+        case 1:
+            if (Coms_ESP_SetDatalogFlags(byte))
+                return Coms_CMD_Reset(&state, &alloc); 
+            break;
+        case 2:
+            if (Coms_ESP_SetDatalogPeriod(byte))
+                return Coms_CMD_Reset(&state, &alloc); 
+            break;
+        default:
+            break;
+                   
+    }
+    return false;
+}
+
 void Coms_ESP_Boot(void)
 {
     if(UART4_Read() == ESP_End){ //Purges all in queue until first end byte
@@ -105,93 +140,6 @@ void Coms_ESP_Boot(void)
     } 
 }
 
-/* ******************** ESP COMMAND TO DRIVE ******************************** */
-//void Coms_ESP_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
-//    float Mo = curve * 137.9;
-//    float Sa = speed * 4;
-//    if (!direc) { // inwards or outwards
-//        Sa = -1 * Sa;
-//    }
-//
-//    float a, b, c; // extension values from 180
-//    switch (edge) {
-//        case 0:
-//            a = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-//            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-//            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
-//            break;
-//        case 1:
-//            a = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-//            b = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
-//            c = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-//            break;
-//        case 2:
-//            a = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
-//            b = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-//            c = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-//            break;
-//        default:
-//            a = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-//            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-//            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
-//            break;
-//    }
-//
-//    // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
-//    float beta = acosf((a * a + c * c - b * b) / (2 * a * c));
-//    float gamm = acosf((a * a + b * b - c * c) / (2 * a * b));
-//
-//    // wheel coordinates (for a: [WHEEL, 0])
-//    float Wb[2] = {(b - WHEEL) * cosf(gamm), (b - WHEEL) * sinf(gamm)};
-//    float Wc[2] = {a - WHEEL * cosf(beta), WHEEL * sinf(beta)};
-//
-//    // second point in wheel direction
-//    float Wb2[2] = {Wb[0] - cosf(PI / 2 - gamm), Wb[1] + sinf(PI / 2 - gamm)};
-//    float Wc2[2] = {Wc[0] + cosf(PI / 2 - beta), Wc[1] + sinf(PI / 2 - beta)};
-//
-//    // centroid coordinates
-//    float D[2] = {(b * cosf(gamm) + a) / 3, b * sinf(gamm) / 3};
-//
-//    // moment arm of wheel force to centroid
-//    float Da = fabsf(D[0] - WHEEL);
-//    float Db = fabsf((Wb2[1] - Wb[1]) * D[0]
-//            - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] - Wb2[1] * Wb[0])
-//            / sqrtf(powf(Wb2[1] - Wb[1], 2) + powf(Wb2[0] - Wb[0], 2));
-//    float Dc = fabsf((Wc2[1] - Wc[1]) * D[0]
-//            - (Wc2[0] - Wc[0]) * D[1] + Wc2[0] * Wc[1] - Wc2[1] * Wc[0])
-//            / sqrtf(powf(Wc2[1] - Wc[1], 2) + powf(Wc2[0] - Wc[0], 2));
-//
-//    // wheel speeds
-//    float Sc = (Mo - Sa * Da) / (Db * cosf(PI / 2 - beta) / cosf(PI / 2 - gamm) + Dc);
-//    float Sb = Sc * cosf(PI / 2 - beta) / cosf(PI / 2 - gamm);
-//
-//    Sc = SxOUT*Sc;
-//    Sb = SxOUT*Sb;
-//
-//    // output depending on driving edge
-//    switch (edge) {
-//        case 0:
-//            Acts_ROT_Out(0, Sa);
-//            Acts_ROT_Out(1, Sb);
-//            Acts_ROT_Out(2, Sc);
-//            break;
-//        case 1:
-//            Acts_ROT_Out(1, Sa);
-//            Acts_ROT_Out(2, Sb);
-//            Acts_ROT_Out(0, Sc);
-//            break;
-//        case 2:
-//            Acts_ROT_Out(2, Sa);
-//            Acts_ROT_Out(0, Sb);
-//            Acts_ROT_Out(1, Sc);
-//            break;
-//        default:
-//            Acts_ROT_Out(0, Sa);
-//            Acts_ROT_Out(1, Sb);
-//            Acts_ROT_Out(2, Sc);
-//            break;
-//    }
-//}
 
 /* ******************** RETURN ID BY BYTE *********************************** */
 uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
@@ -202,10 +150,6 @@ uint8_t Coms_ESP_ReturnID(uint8_t byteNum) {
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose() 
 {
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0);
     UART4_Write(6); // Message length
     uint8_t i;
@@ -213,18 +157,12 @@ void Coms_ESP_Verbose()
         UART4_Write(Acts_LIN_GetCurrent(i));
     }
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose_Write(const char *message) 
-{
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted        
-    
+{    
     UART4_Write(0);
     uint8_t len = strlen(message);
     UART4_Write(len); // Message length
@@ -236,23 +174,15 @@ void Coms_ESP_Verbose_Write(const char *message)
         message++;
     }
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 /* ******************** VERBOSE OUTPUT ************************************** */
 void Coms_ESP_Verbose_One_Byte(uint8_t byte) 
 {
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted        
-    
     UART4_Write(0);
     UART4_Write(1); // Message length
     UART4_Write(byte);
     UART4_Write(ESP_End);
-    
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
@@ -297,13 +227,8 @@ void Coms_ESP_LED_On(uint8_t edge, bool OnOff) {
     uint8_t alloc = 0b01000001 + OnOff;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
@@ -311,13 +236,8 @@ void Coms_ESP_LED_Tgl(uint8_t edge) {
     uint8_t alloc = 0b01000000;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
@@ -325,14 +245,9 @@ void Coms_ESP_LED_Blk(uint8_t edge, uint8_t blink) { // blink*4 = period;
     uint8_t alloc = 0b01000100;   // Cmd, ---, blink
     edge++;
     alloc |= (edge << 3) & 0b00011000;
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(alloc);  // LED R, Set Blink Freq
     UART4_Write(blink);
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
@@ -343,89 +258,67 @@ void Coms_ESP_LED_Set_Blink_Freq(uint8_t edge, uint8_t blink)
 
 void Coms_ESP_Interpret() {
     static uint8_t ESP_bnk_frq = 128;
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
     UART4_Write(0b01001100);  // LED R, Set Blink Freq
     UART4_Write(ESP_bnk_frq);
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
     ESP_bnk_frq++;
 }
 
 /* ******************** Wifi Edges *********************************** */
-void Coms_ESP_No_WiFi_Edge()
-{
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
+void Coms_ESP_No_WiFi_Edge() {
     UART4_Write(0b10011001);  // 100 = states, 00000 = WiFi Edge
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
-void Coms_ESP_Return_WiFi_Edge(uint8_t edge)
-{
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted            
+void Coms_ESP_Return_WiFi_Edge(uint8_t edge) {
     UART4_Write(0b10011000);  // 100 = states, 11000 = Set WiFi Edge
     UART4_Write(edge);
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;
 }
 
 
 /* ******************** Requests ******************** */
-void Coms_ESP_Request_Edges()
-{
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+void Coms_ESP_Request_Edges() {
     UART4_Write(0b10010100);
+    Coms_ESP_Write_Edges();
+    UART4_Write(ESP_End);
+}
+
+void Coms_ESP_Write_Edges() {
     uint8_t i;
     for (i = 0; i < 3; i++) {
         UART4_Write(Acts_LIN_GetCurrent(i));
     }
-    UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;  
 }
 
-
-void Coms_ESP_Request_Angles()
-{
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+void Coms_ESP_Request_Angles() {
     UART4_Write(0b10010101);
+    Coms_ESP_Write_Angles();
+    UART4_Write(ESP_End);
+}
+
+//writes just angle data, as opposed to start bytes
+void Coms_ESP_Write_Angles() {
     uint8_t i;
     for (i = 0; i < 3; i++) {
         UART4_Write16(Acts_ROT_GetCurrent(i));
     }
-    UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
 
 
-void Coms_ESP_Request_Orient()
-{
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
+void Coms_ESP_Request_Orient() {
     UART4_Write(0b10010110);
+    Coms_ESP_Write_Orient();
+    UART4_Write(ESP_End);
+}
+
+
+void Coms_ESP_Write_Orient() {
     uint8_t i;
     for (i = 0; i < 3; i++) {    
         UART4_Write16(Sens_ACC_GetAngle(i));
     }
-    UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;  
 }
 
 
@@ -441,54 +334,35 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
         return;
     }
     
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010111);
     UART4_Write(edge);
     for(i=edge*6; i<6+edge*6; i++)
         UART4_Write(*(neighbour+i));
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
 
 
 void Coms_ESP_Request_WiFiEdge()
 {
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10011000);
     UART4_Write(Coms_REL_GetWiFiEdge());
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
 
 void Coms_ESP_Neighbour_Disconnected(uint8_t edge)
 {
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010010);
     UART4_Write(edge);
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
 
 
 void Coms_ESP_Request_ID()
 {
-//    while(Flg_Uart_Lock[ESP_URT_NUM])   //wait for uart to unlock
-//    {
-//    }
-    Flg_Uart_Lock[ESP_URT_NUM] = true;   //locks s.t. the sequence is uninterrupted    
     UART4_Write(0b10010011);
     UART4_Write(ESP_End);
-    Flg_Uart_Lock[ESP_URT_NUM] = false;      
 }
+
 
 bool Coms_ESP_VerifyID() {
     bool ID_Ok = true;
@@ -500,78 +374,67 @@ bool Coms_ESP_VerifyID() {
     return ID_Ok;
 }
 
-/* Com_ESP_Drive - Online calc verification */
-/* https://repl.it/languages/c
 
-#include <stdio.h>
-#include <stdint.h>
-#include "math.h"
-#define WHEEL 68.15f
-#define PI 3.1415926535897931159979634685441851615905761718750
-#define Sfact 0.9 // Step 3: maximising Sb & Sc at a=b=192,c=180
-
-int
-main ()
-{
-  uint8_t speed = 255;
-  int8_t curve = -127;
-  uint8_t edge = 0;
-  uint8_t direc = 0;
-
-  float Mo = curve * 137.9; // Step 2: minimising Sb & Sc at a=b=180,c=193.5
-  float Sa = speed * 4; // Step 1: from 8 bit to 10 bit
-  if (!direc)
-    {				// inwards or outwards
-      Sa = -1 * Sa;
+void Coms_ESP_StateUpdate(void) {
+    // Only updates every N ms
+    if (ESP_DataLog_Time_Elapsed < ESP_Update_Delay) return;
+    
+    ESP_DataLog_Time_Elapsed = 0;
+    
+    if ((Coms_ESP_Data_Transmission &0b00000111) == 0) return;
+    
+    UART4_Write((0b11000000 | Coms_ESP_Data_Transmission)); //New alloc byte
+//    UART4_Write(time - prevTime);
+//    UART4_Write(Coms_ESP_Data_Transmission);
+    
+    if (Coms_ESP_Data_Transmission & 0b00000001)
+        Coms_ESP_Write_Angles();
+    
+    if (Coms_ESP_Data_Transmission & 0b00000010)
+        Coms_ESP_Write_Edges();
+    
+    if (Coms_ESP_Data_Transmission & 0b00000100)
+        Coms_ESP_Write_Orient();    
+    
+    if (Coms_ESP_Data_Transmission & 0b00001000) {
+        //To add neighbour transmission if time holds
     }
-
-  float a = 192;
-  float b = 192;
-  float c = 180;
-
-  // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
-  float beta = acosf ((a * a + c * c - b * b) / (2 * a * c));
-  float gamm = acosf ((a * a + b * b - c * c) / (2 * a * b));
-
-  // wheel coordinates (for a: [WHEEL, 0])
-  float Wb[2] = { (b - WHEEL) * cosf (gamm), (b - WHEEL) * sinf (gamm) };
-  float Wc[2] = { a - WHEEL * cosf (beta), WHEEL * sinf (beta) };
-
-  // second point in wheel direction
-  float Wb2[2] =
-    { Wb[0] - cosf (PI / 2 - gamm), Wb[1] + sinf (PI / 2 - gamm) };
-  float Wc2[2] =
-    { Wc[0] + cosf (PI / 2 - beta), Wc[1] + sinf (PI / 2 - beta) };
-
-  // centroid coordinates
-  float D[2] = { (b * cosf (gamm) + a) / 3, b * sinf (gamm) / 3 };
-
-  printf ("D1: %4.4f \n", D[0]);
-  printf ("D2: %4.4f \n", D[1]);
-
-  // moment arm of wheel force to centroid
-  float Da = fabsf (D[0] - WHEEL);
-  float Db = fabsf ((Wb2[1] - Wb[1]) * D[0]
-            - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] -
-            Wb2[1] * Wb[0]) / sqrtf (powf (Wb2[1] - Wb[1],
-                           2) + powf (Wb2[0] - Wb[0],
-                                  2));
-  float Dc =
-    fabsf ((Wc2[1] - Wc[1]) * D[0] - (Wc2[0] - Wc[0]) * D[1] +
-       Wc2[0] * Wc[1] - Wc2[1] * Wc[0]) / sqrtf (powf (Wc2[1] - Wc[1],
-                               2) + powf (Wc2[0] -
-                                      Wc[0],
-                                      2));
-
-  // wheel speeds
-  float Sc =
-    (Mo - Sa * Da) / (Db * cosf (PI / 2 - beta) / cosf (PI / 2 - gamm) + Dc);
-  float Sb = Sc * cosf (PI / 2 - beta) / cosf (PI / 2 - gamm);
-  
-  printf ("fact: %4.4f \n", cosf (PI / 2 - beta) / cosf (PI / 2 - gamm));
-  printf ("Sa: %4.4f \n", Sa);
-  printf ("Sb: %4.4f \n", Sb*Sfact);
-  printf ("Sc: %4.4f \n", Sc*Sfact);
-  return 0;
+    UART4_Write(ESP_End);
 }
- */
+
+
+bool Coms_ESP_SetDatalogFlags(uint8_t byte) {
+    static uint8_t count = 0;
+    static uint8_t flags;
+    if (count >= 1) {
+        if (byte == ESP_End) {
+            Coms_ESP_Data_Transmission = flags;
+        } else {
+            Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
+    } else {
+        flags = byte;
+        count++;
+    }
+    return false;    
+}
+
+bool Coms_ESP_SetDatalogPeriod(uint8_t byte) {
+    static uint8_t count = 0;
+    static uint8_t period;
+    if (count >= 1) {
+        if (byte == ESP_End) {
+            ESP_Update_Delay = period;
+        } else {
+            Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
+    } else {
+        period = byte;
+        count++;
+    }
+    return false;    
+}

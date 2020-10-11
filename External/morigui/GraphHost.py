@@ -18,6 +18,7 @@ from runMqtt.wirelessHost import WirelessHost
 
 from morigui.frames.party import PartyFrame
 
+from Settings import names
 
 
 class GraphHost():
@@ -148,14 +149,15 @@ class GraphFrame(tk.Frame):
     def getNodes(self):
         self.nodes = []
         for connId in self.connMatrix:
-            self.nodes.append(connId)
+            self.nodes.append(names.idsToName[connId])
 
     def getEdges(self):
         self.edges = []
         for connId in self.connMatrix:
+            print("connId ",connId)
             for i in range(0,3):
                 if self.connMatrix[connId][i] != 0:
-                    self.edges.append((connId,self.connMatrix[connId][i]))
+                    self.edges.append((names.idsToName[connId],names.idsToName[self.connMatrix[connId][i]]))
 
 
     def plotFigure(self):
@@ -188,7 +190,7 @@ class GraphFrame(tk.Frame):
             return
 
         nx.draw_networkx_nodes(self.G, self.pos, node_color=self.color_map, node_size=self.node_size, linewidths=None)
-        nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=5)
+        nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=10)
         nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom')
         plt.box(on=False)
 
@@ -198,7 +200,7 @@ class GraphFrame(tk.Frame):
         self.G=nx.DiGraph()
         self.G.add_nodes_from(self.nodes)
         self.G.add_edges_from(self.edges)
-        tmp_pos = nx.spring_layout(self.G)
+        tmp_pos = nx.kamada_kawai_layout(self.G)
         try:
             for label in tmp_pos:
                 if label in self.pos:
@@ -208,12 +210,11 @@ class GraphFrame(tk.Frame):
             self.pos = tmp_pos
         return
 
-
     def redrawGraph(self):
         self.G=nx.DiGraph()
         self.G.add_nodes_from(self.nodes)
         self.G.add_edges_from(self.edges)
-        self.pos = nx.spring_layout(self.G)
+        self.pos = nx.kamada_kawai_layout(self.G)
         return        
 
 
@@ -221,17 +222,20 @@ class GraphFrame(tk.Frame):
         self.color_map = []
         espIds = self.wifi_host.getIdDict()
         for node in self.G:
-            state = self.mori_status[espIds[node]][0]
-            if state == "Lost":
+            try:
+                state = self.mori_status[espIds[names.nameToIds[node]]][0]
+                if state == "Lost":
+                    self.color_map.append(self.colourDict[state])
+                    continue
+                elif node in self.wifi_host.getHubDict():
+                    self.color_map.append(self.colourDict["Hub"])
+                    continue
+                elif node in self.wifi_host.getNoWifiDict():
+                    self.color_map.append(self.colourDict["NoWifi"])
+                    continue
                 self.color_map.append(self.colourDict[state])
-                continue
-            elif node in self.wifi_host.getHubDict():
-                self.color_map.append(self.colourDict["Hub"])
-                continue
-            elif node in self.wifi_host.getNoWifiDict():
-                self.color_map.append(self.colourDict["NoWifi"])
-                continue
-            self.color_map.append(self.colourDict[state])
+            except KeyError:
+                self.color_map.append("xkcd:pink")
         return
 
 

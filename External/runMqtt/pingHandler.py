@@ -70,7 +70,7 @@ class PingHandler(threading.Thread):
                             self.sendPing(esp)
                             self.pingBusy[esp] = True
                     elif time.perf_counter() - self.getTsPingDict(esp) > 2:
-                        print(colored("TIMEOUT: "+ esp, "red"))
+                        print(colored("TIMEOUT: "+ names.idsToName[esp], "red"))
                         self.pingBusy[esp] = False
                         self.addPingResult(esp, np.inf, False)
                         self.pingCount[esp] -= 1 # decrement
@@ -95,7 +95,7 @@ class PingHandler(threading.Thread):
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(0.1)    
+            self.event.wait(2)    
 
 
 
@@ -137,7 +137,7 @@ class PingHandler(threading.Thread):
     def sendPing(self, number):
         #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
         data = bytearray()
-        for lv in range(32):  # generate 32 bytes of random data
+        for lv in range(64):  # generate 32 bytes of random data
         # for lv in range(16):  # generate 32 bytes of random data
             data.append(random.randint(0x01,0xFF)) # avoid NULL characters
         

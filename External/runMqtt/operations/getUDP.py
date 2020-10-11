@@ -1,5 +1,7 @@
 from termcolor import colored
 
+from Settings import names
+
 def startUDP(self, pyld, espNum):
 
     if pyld[1] == "Start":
@@ -11,7 +13,7 @@ def startUDP(self, pyld, espNum):
 
     elif pyld[1] == "Stop":
         if espNum in self.UDPDict:
-            print(colored("UDP disabled for: " + espNum, 'red'))
+            print(colored("UDP disabled for: " + names.idsToName[espNum], 'red'))
             self.macDict.get(self.idDict[espNum])[0] = "WiFi"
             self.UDPDict.remove(espNum)
 

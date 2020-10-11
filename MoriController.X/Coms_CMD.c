@@ -33,6 +33,11 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
             
+        case 16:
+            if (Coms_CMD_WiggleEdge(edge, byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;      
+            
         case 17:
             if (Coms_CMD_SetFlags(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -152,6 +157,16 @@ bool Coms_CMD_Restart_PIC(uint8_t byte) {
 }
 
 
+//-------------------- Functional Commands --------------------//
+bool Coms_CMD_WiggleEdge(uint8_t edge, uint8_t byte) {
+    if (byte == ESP_End) {
+        Acts_ROT_SetWiggle(edge);
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;
+}
+
 //------------------------- Requests -------------------------//
 bool Coms_CMD_Request_Edges(uint8_t byte) {
     if (byte == ESP_End) {
@@ -254,6 +269,7 @@ bool Coms_CMD_Set_ID(uint8_t byte)
     return false;       
 }
 
+// Depricated
 bool Coms_CMD_SetMotRotOn(uint8_t byte)
 {
     if (byte == ESP_End) {
@@ -264,6 +280,7 @@ bool Coms_CMD_SetMotRotOn(uint8_t byte)
     return true;
 }
 
+// Depricated
 bool Coms_CMD_SetMotRotOff(uint8_t byte) {
     if (byte == ESP_End) {
         Flg_MotRot_Active = false;
@@ -273,6 +290,7 @@ bool Coms_CMD_SetMotRotOff(uint8_t byte) {
     return true;
 }
 
+// Depricated
 bool Coms_CMD_SetMotLinOn(uint8_t byte) {
     if (byte == ESP_End) {
         Flg_MotLin_Active = true;
@@ -282,6 +300,7 @@ bool Coms_CMD_SetMotLinOn(uint8_t byte) {
     return true;
 }
 
+// Depricated
 bool Coms_CMD_SetMotLinOff(uint8_t byte) {
     if (byte == ESP_End) {
         Flg_MotLin_Active = false;

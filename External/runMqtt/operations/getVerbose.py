@@ -2,8 +2,10 @@ import traceback
 from termcolor import colored
 import codecs
 
+from Settings import names
+
 def getVerbose(self, pyld, espNum):
-    print(colored(espNum + "-", 'yellow'), end="")
+    print(colored(names.idsToName[espNum] + "-", 'yellow'), end="")
     for i in pyld:
         print(colored(i, 'yellow'), end=" ")    
     print()
