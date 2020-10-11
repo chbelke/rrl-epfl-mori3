@@ -63,7 +63,7 @@ class PublishBulk():
                     splitText = text[esp].split("ping",1)
                     if (splitText[1].strip().isnumeric()):
                         num = int(splitText[1])
-                    self.mqtthost.pingHandler.setPingCount(esp, num)
+                    self.mqtthost.pingHandler.setPingCount(self.checkName(esp), num)
                     continue
                 self.mqtthost.publishLocal(text[esp], self.checkName(esp))
 
