@@ -6,6 +6,16 @@ from matplotlib.ticker import PercentFormatter
 from termcolor import colored
 import os
 
+import names
+
+
+def checkName(name):
+    try:
+        return names.idsToName[name]
+    except KeyError:
+        return name
+
+
 dir = input("Please enter the Ping Data directory name:")
 
 pingData = {}
@@ -55,9 +65,13 @@ for esp in pingData.keys(): #redundant?
     
     # We can set the number of bins with the `bins` kwarg
     ax.hist(pingDataTime[1:], bins=len(pingDataTime[1:]), density=True, histtype='step', cumulative=-1)
+
+labels = [checkName(x) for x in pingData.keys()]
+print(labels)
     
 plt.xticks(rotation='vertical')
-plt.legend(pingData.keys())
+# plt.legend(pingData.keys())
+plt.legend(labels)
 plt.yscale("log")
 plt.xlabel("Latency (ms)")
 plt.ylabel("CCDF")
