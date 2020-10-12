@@ -70,6 +70,7 @@ class WirelessHost(threading.Thread):
         self.UDPDict = []
         self.HubDict = []
         self.noWifiDict = {}
+        self.wifiEdge = {}
 
         self.version = 0.50
 
@@ -187,6 +188,7 @@ class WirelessHost(threading.Thread):
 
     def setHubDict(self, HubDict):
         self.HubDict = HubDict
+        self.updateWifiEdges()
 
     def getNoWifiDict(self):
         return self.noWifiDict
@@ -226,6 +228,8 @@ class WirelessHost(threading.Thread):
 
     def setMacOrder(self, macOrder):
         self.macOrder = macOrder
+        new = [names.idsToName[self.macDict[esp][1]] for esp in macOrder]
+        self.macOrder =  [x for _,x in sorted(zip(new, macOrder))]
 
 
     def getLeaderIds(self):
@@ -256,6 +260,50 @@ class WirelessHost(threading.Thread):
 
     def getConnMatrix(self):
         return self.connMatrix
+
+
+    # Inefficient: Update BFS with hashes
+    def updateWifiEdges(self):
+        self.pathDict = {}
+        tmp_path_dict = {}
+        tmp_id_list = []
+        for hub in self.HubDict:
+            
+            tmp_path_dict[hub] = {}
+            for target in self.idDict:
+                if target in self.HubDict:
+                    continue
+                if target in tmp_path_dict[hub]:
+                    continue
+                tmp = BFS(self, hub, target, self.connMatrix)
+                if tmp[0] is False:
+                    continue
+                for i, node in enumerate(tmp):
+                    if node in self.HubDict:
+                        continue
+                    if node in tmp_path_dict[hub]:
+                        continue
+                    tmp_id_list.append(node)
+                    tmp_path_dict[hub][node] = tmp[:i+1] #+1 okay because last is always hub
+
+        for target in tmp_id_list:           
+            path = [None]*10
+            for hub in self.HubDict:
+                if len(tmp_path_dict[hub][target]) < len(path):
+                    path = tmp_path_dict[hub][target]
+            self.pathDict[target] = path
+
+        for target in self.pathDict:
+            path = self.pathDict[target]
+            if path == False:
+                wifi_edge[target] = None
+                continue
+            edge = self.connMatrix[target].index(path[-2]) #itself then next in path
+            self.wifiEdge[target] = edge+1
+
+        for target in tmp_id_list:
+            self.publishLocal("wedge {}".format(self.wifiEdge[target]), target)
+        return
 
 
     def shortestPath(self, target):

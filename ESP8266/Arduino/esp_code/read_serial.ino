@@ -167,7 +167,7 @@ bool setLEDs(byte d)
       {
         if(LED == 1)
         {
-          led_red.On();
+          led_red.On(); //backwards, I know
         } else if (LED == 2)
         {
           led_green.On();
@@ -187,7 +187,7 @@ bool setLEDs(byte d)
       {
         if(LED == 1)
         {
-          led_red.Off();
+          led_red.Off();  //not a type - just bad code
         } else if (LED == 2)
         {
           led_green.Off();

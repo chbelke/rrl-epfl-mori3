@@ -132,7 +132,6 @@ void commands(byte* payload, unsigned int len)
 
     case 23:
       disableWifi();
-      
       break;
 
     case 24:
@@ -237,11 +236,11 @@ void commands(byte* payload, unsigned int len)
       break;      
 
     case 49:
-      driveAndCouple(payload, len);
+      wiggleCoupling(payload, len);
       break;      
 
     case 50:
-      wiggleCoupling(payload, len);
+      driveAndCouple(payload, len);
       break;
 
     case 51:
@@ -250,7 +249,11 @@ void commands(byte* payload, unsigned int len)
 
     case 52:
       setDatalogPeriod(payload, len);
-      break;            
+      break;         
+
+    case 53:
+      stopParty();
+      break;         
 
     default:
       publish("ERR: Command not understood");
@@ -594,6 +597,14 @@ void PARTYMODE()
   if(!led_green.getBlinkFlag())  
     led_green.Blink();
   serial_write_one(0b11010010);
+}
+
+void stopParty()
+{
+  led_red.On();
+  led_green.On();
+  led_blue.On();
+  serial_write_one(0b11001111);
 }
 
 void setAsHub()
