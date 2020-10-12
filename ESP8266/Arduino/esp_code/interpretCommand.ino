@@ -406,7 +406,7 @@ void openPicCouplings(byte* payload, unsigned int len)
 void driveAndCouple(byte* payload, unsigned int len)
 {
   char tmp_payload[5];
-  byte alloc = 0b11011100;
+  byte alloc = 0b01111100;
   
   byte byte_count = detectSpaceChar(payload, byte_count, len);
   if(byte_count > len) {
