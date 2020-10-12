@@ -162,8 +162,6 @@ class GraphFrame(tk.Frame):
                 if self.connMatrix[connId][i] != 0:
                     self.edges.append((names.idsToName[connId],names.idsToName[self.connMatrix[connId][i]]))
                     self.edge_locs[self.edges[-1]] = (i+1)
-        print(self.edges)
-        print(self.edge_locs)
 
 
     def plotFigure(self):
