@@ -156,10 +156,14 @@ class GraphFrame(tk.Frame):
 
     def getEdges(self):
         self.edges = []
+        self.edge_locs = {}
         for connId in self.connMatrix:
             for i in range(0,3):
                 if self.connMatrix[connId][i] != 0:
                     self.edges.append((names.idsToName[connId],names.idsToName[self.connMatrix[connId][i]]))
+                    self.edge_locs[self.edges[-1]] = (i+1)
+        print(self.edges)
+        print(self.edge_locs)
 
 
     def plotFigure(self):
@@ -184,7 +188,7 @@ class GraphFrame(tk.Frame):
             plt.ylim(min(-1,y_min - y_margin), max(1,y_max + y_margin))        
 
         pos_higher = {}
-        y_off = 0.01  # offset on the y axis
+        y_off = 0.05  # offset on the y axis
         for k, v in self.pos.items():
             pos_higher[k] = (v[0], v[1]+y_off)
 
@@ -193,7 +197,8 @@ class GraphFrame(tk.Frame):
 
         nx.draw_networkx_nodes(self.G, self.pos, node_color=self.color_map, node_size=self.node_size, linewidths=None)
         nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=10)
-        nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom')
+        nx.draw_networkx_edge_labels(self.G, self.pos, self.edge_locs, label_pos= 0.8, font_size=8, font_color='red', verticalalignment='center', font_weight='bold')
+        nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom', alpha=0.7)
         plt.box(on=False)
 
         plt.gcf().canvas.draw()
