@@ -32,6 +32,11 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
             if (Coms_CMD_Shape(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
+        
+        case 15:
+            if (Coms_CMD_Stop_PARTYMODE(byte))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;            
             
         case 16:
             if (Coms_CMD_WiggleEdge(edge, byte))
@@ -225,6 +230,17 @@ bool Coms_CMD_Request_WiFiEdge(uint8_t byte) {
 bool Coms_CMD_No_WifiEdge(uint8_t byte) {
     if (byte == ESP_End) {
         Coms_ESP_Request_WiFiEdge(byte);
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;
+}
+
+
+bool Coms_CMD_Stop_PARTYMODE(uint8_t byte)
+{
+    if (byte == ESP_End) {
+        MODE_LED_PARTY = false; // XXX to be replaced by separate off routine
     } else {
         Coms_CMD_OverflowError();
     }
