@@ -601,6 +601,9 @@ void PARTYMODE()
 
 void stopParty()
 {
+  led_red.On();
+  led_green.On();
+  led_blue.On();
   serial_write_one(0b11001111);
 }
 
