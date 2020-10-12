@@ -228,6 +228,8 @@ class WirelessHost(threading.Thread):
 
     def setMacOrder(self, macOrder):
         self.macOrder = macOrder
+        new = [names.idsToName[self.macDict[esp][1]] for esp in macOrder]
+        self.macOrder =  [x for _,x in sorted(zip(new, macOrder))]
 
 
     def getLeaderIds(self):
