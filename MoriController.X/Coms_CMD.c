@@ -164,12 +164,21 @@ bool Coms_CMD_Restart_PIC(uint8_t byte) {
 
 //-------------------- Functional Commands --------------------//
 bool Coms_CMD_WiggleEdge(uint8_t edge, uint8_t byte) {
-    if (byte == ESP_End) {
-        Acts_ROT_SetWiggle(edge);
+    static uint8_t count = 0;
+    static uint8_t side;
+    if (count >= 1) {
+        if (byte == ESP_End) {
+            Acts_ROT_SetWiggle(side);
+        } else {
+            Coms_CMD_OverflowError();
+        }
+        count = 0;
+        return true;
     } else {
-        Coms_CMD_OverflowError();
+        side = byte;
+        count++;
     }
-    return true;
+    return false;    
 }
 
 //------------------------- Requests -------------------------//

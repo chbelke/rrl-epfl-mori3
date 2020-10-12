@@ -236,11 +236,11 @@ void commands(byte* payload, unsigned int len)
       break;      
 
     case 49:
-      driveAndCouple(payload, len);
+      wiggleCoupling(payload, len);
       break;      
 
     case 50:
-      wiggleCoupling(payload, len);
+      driveAndCouple(payload, len);
       break;
 
     case 51:
