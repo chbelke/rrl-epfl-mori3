@@ -18,6 +18,7 @@ from morigui.frames.listudp import ListUDP
 from morigui.frames.pubbulk import PublishBulk
 from morigui.frames.pubbinary import PublishBinary
 from morigui.frames.datalog import DataLog
+from morigui.frames.loadfile import LoadFile
 
 
 class MoriGui(tk.Frame):
@@ -57,10 +58,10 @@ class MoriGui(tk.Frame):
         self.frame_publ = PublishLocal(frame3, self, self.wifi_host)
         self.frame_udp = ListUDP(frame4, self, self.wifi_host)
         self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)
-        # self.frame_binary = PublishBinary(frame6, self, self.wifi_host)
         self.frame_graph = GraphHost(frame7, self.master, self.wifi_host)
+        self.frame_file = LoadFile(frame8, self.wifi_host)
 
-        # frame8.pack(side="left", padx=10, pady=10, expand=True)
+        frame8.pack(side="left", padx=10, pady=10, expand=True)
         frame7.pack(side="right", padx=10, pady=10, expand=True)
         frame5.pack(side="right", padx=10, pady=10, expand=True)
         frame1.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
