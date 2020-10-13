@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import filedialog
 import json
 
-
+from Settings import names
 
 
 class LoadFile():
@@ -24,8 +24,6 @@ class LoadFile():
     def load(self):
 
         frame_load_display = tk.Frame(self.frame)
-        # frame_disp_text = tk.Frame(self.frame, relief=tk.RAISED, borderwidth=1, 
-        #     padx=5, pady=5)
         frame_disp_text = tk.Frame(self.frame)
         frame_prev_next = tk.Frame(self.frame)
 
@@ -111,6 +109,16 @@ class LoadFile():
 
 
     def runJson(self):
-        print("GOGOGOGO")
+        for module in self.fileContents[self.iteration]:
+            if module == 'Label':
+                continue
+            self.mqtthost.publishLocal(self.fileContents[self.iteration][module], self.checkName(module))  
         self.iterateJson()
+
+
+    def checkName(self, name):
+        try:
+            return names.nameToIds[name]
+        except KeyError:
+            return name    
 
