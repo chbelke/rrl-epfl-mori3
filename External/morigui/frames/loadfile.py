@@ -13,12 +13,9 @@ class LoadFile():
     def __init__(self, frame, mqtthost):
         self.frame = frame
         self.mqtthost = mqtthost
-
         self.fileName = []
         self.fileContents = []
-
         self.iteration = 0
-
         self.load()
 
     def load(self):
@@ -27,10 +24,10 @@ class LoadFile():
         frame_disp_text = tk.Frame(self.frame)
         frame_prev_next = tk.Frame(self.frame)
 
-        self.load_button = tk.Button(frame_load_display)
-        self.load_button["text"] = "LoadFile",
-        self.load_button["command"] = lambda: self.openFile()
-        self.load_button.pack({"side": "top"}, fill=tk.X, expand=True)
+        load_button = tk.Button(frame_load_display)
+        load_button["text"] = "LoadFile",
+        load_button["command"] = lambda: self.openFile()
+        load_button.pack({"side": "top"}, fill=tk.X, expand=True)
 
         self.next_stage = tk.Label(frame_load_display, font='Helvetica 10 bold')
         self.next_stage["text"] = "No File Loaded"
@@ -43,7 +40,7 @@ class LoadFile():
         self.next_button = tk.Button(frame_prev_next)
         self.next_button["text"] = "Next",
         self.next_button["command"] = lambda: self.iterateJson()
-        self.next_button.pack({"side": "right"}, fill=tk.X, expand=True)
+        self.next_button.pack({"side": "left"}, fill=tk.X, expand=True)
 
         self.run_button = tk.Button(frame_prev_next)
         self.run_button["text"] = "Run",
