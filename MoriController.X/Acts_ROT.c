@@ -1,7 +1,7 @@
-#include <xc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <libpic30.h>
+//#include <xc.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <libpic30.h>
 #include "Defs_GLB.h"
 #include "Defs_MOD.h"
 #include "Mnge_DAC.h"
@@ -22,8 +22,7 @@ uint8_t DrvInterval[3] = {0, 0, 0};
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
-    if (!STAT_MotRot_Active) duty = 0; // rotary motors off
-    if (!Flg_MotRot_Active) duty = 0;
+    if (!MODE_MotRot_Active || !FLG_MotRot_Active) duty = 0; // rotary motors off
     switch (edge) {
         case 0:
             if (duty > 0) ROT_DIR_1 = 1; // direction output
@@ -97,16 +96,16 @@ void Acts_ROT_Wiggle(uint8_t edge){
     static uint16_t Wgl_Count[3] = {0, 0, 0};
     Wgl_Count[edge]++;
     if (Wgl_Count[edge] <= (MotRot_WiggleTime * 100)){
-        if (Wgl_Count[edge] <= MotRot_WiggleTime * 67){
-            Acts_ROT_Out(edge, 1024);
-            if (Flg_EdgeSyn[edge]) Wgl_Count[edge] = MotRot_WiggleTime * 68;
+        if (Wgl_Count[edge] <= MotRot_WiggleTime * 60){
+            Acts_ROT_Out(edge, 600);
+            if (Flg_EdgeSyn[edge]) Wgl_Count[edge] = MotRot_WiggleTime * 61;
         }
-        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 85)
-            Acts_ROT_Out(edge, -1024);
-        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 94)
-            Acts_ROT_Out(edge, 1024);
+        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 90)
+            Acts_ROT_Out(edge, -600);
+        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 97)
+            Acts_ROT_Out(edge, 600);
         else 
-            Acts_ROT_Out(edge, -1024);
+            Acts_ROT_Out(edge, -600);
     } else {
         Acts_ROT_Out(edge, 0);
         Mnge_DAC_Set(edge, Trq_Limit[edge]);
@@ -240,7 +239,7 @@ uint16_t Acts_ROT_GetTarget(uint8_t edge) {
 /* ******************** SET DESIRED ANGLE *********************************** */
 void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
     Ang_Desired[edge] = desired;
-    Flg_EdgeRequest_Ang[edge] = true;
+    Flg_EdgeReq_Ang[edge] = true;
 }
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */

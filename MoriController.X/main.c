@@ -45,7 +45,7 @@
 /**
   Section: Included Files
  */
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include "Defs_GLB.h"
 #include "Mnge_PWM.h"
@@ -68,36 +68,29 @@ volatile bool MODE_LED_RNBOW = false;
 volatile bool MODE_LED_PARTY = false;
 
 /* GLOBAL FLAGS */
-volatile bool Flg_LiveAng = false;
-volatile bool Flg_LiveExt = false;
+volatile bool FLG_WaitAllEdges = true;
+volatile bool FLG_MotLin_Active = false;
+volatile bool FLG_MotRot_Active = false;
+volatile bool FLG_Verbose = false;
+
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
 
+// driving flags
 volatile bool Flg_Drive[3] = {false, false, false};
-volatile bool Flg_DrvCplSequence[3] = {false, false, false};
+volatile bool Flg_DriveAndCouple[3] = {false, false, false};
 
 // edge state handles
 volatile bool Flg_EdgeCon[3] = {false, false, false}; // connection detected
 volatile bool Flg_EdgeSyn[3] = {false, false, false}; // connection acknowledged
 volatile bool Flg_EdgeAct[3] = {false, false, false}; // executing action
 volatile bool Flg_EdgeWig[3] = {false, false, false}; // wiggle flag
-volatile bool Flg_EdgeRequest_Ang[3] = {false, false, false};
-volatile bool Flg_EdgeRequest_Ext[3] = {false, false, false};
-volatile bool Flg_EdgeRequest_Cpl[3] = {false, false, false};
+volatile bool Flg_EdgeReq_Ang[3] = {false, false, false};
+volatile bool Flg_EdgeReq_Ext[3] = {false, false, false};
+volatile bool Flg_EdgeReq_Cpl[3] = {false, false, false};
 
-
-volatile bool Flg_DelayStart = true;
-volatile bool Flg_Verbose = false;
 volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
-/* declaration for other source files is contained in define.h */
-
-volatile bool Flg_EdgeDemo = false;
-
-volatile bool Flg_MotLin_Active = false;
-volatile bool Flg_MotRot_Active = false;
 volatile bool Flg_ID_check = false;
-
-volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 
 // i2c flags set anywhere, checked and executed in tmr1
 volatile bool Flg_i2c_PWM = false;
@@ -105,12 +98,13 @@ volatile bool Flg_i2c_ACC = false;
 volatile bool Flg_i2c_DAC = false;
 
 // Flags declaring that the timer interrupt has triggered
-volatile bool flg_tmr3_elapsed = true;
-volatile bool flg_tmr5_elapsed = true;
+volatile bool Flg_Tmr3 = true;
+volatile bool Flg_Tmr5 = true;
 
 // Determines the frequency that the PIC updates ESP (10s of ms)
 volatile uint8_t ESP_Update_Delay = 100;
 volatile uint8_t ESP_DataLog_Time_Elapsed = 0;
+volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 
 /*
                          Main application
@@ -128,13 +122,13 @@ int main(void) {
         LED_Y = LED_Off;    
         for (edge = 0; edge < 3; edge++)
         {
-            if(flg_tmr3_elapsed) {
+            if(Flg_Tmr3) {
                 Tmrs_CBK_Timer3_Handle();
-                flg_tmr3_elapsed = false;
+                Flg_Tmr3 = false;
             }
-            if(flg_tmr5_elapsed) {
+            if(Flg_Tmr5) {
                 Tmrs_CBK_Timer5_Handle();
-                flg_tmr5_elapsed = false;
+                Flg_Tmr5 = false;
             }        
             Coms_123_Eval(edge);
         }
@@ -148,8 +142,8 @@ int main(void) {
         while (1);
     }
 
-    Flg_MotLin_Active = true;
-    Flg_MotRot_Active = true;
+    FLG_MotLin_Active = true;
+    FLG_MotRot_Active = true;
     
     // - Set rotary motor current limits -
     /* unexpected behaviour when limit not set (can set itself randomly 
@@ -160,13 +154,13 @@ int main(void) {
     while (1){
         for (edge = 0; edge < 3; edge++)
         {
-            if(flg_tmr3_elapsed) {
+            if(Flg_Tmr3) {
                 Tmrs_CBK_Timer3_Handle();
-                flg_tmr3_elapsed = false;
+                Flg_Tmr3 = false;
             }
-            if(flg_tmr5_elapsed) {
+            if(Flg_Tmr5) {
                 Tmrs_CBK_Timer5_Handle();
-                flg_tmr5_elapsed = false;
+                Flg_Tmr5 = false;
             }        
             Coms_123_Eval(edge);
         }

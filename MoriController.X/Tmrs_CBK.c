@@ -12,24 +12,21 @@
 #include "Coms_ESP.h"
 #include "Acts_CPL.h"
 
-void Tmrs_CBK_Timer3_Handle(void)
-{
+void Tmrs_CBK_Timer3_Handle(void) {
     Coms_123_ActHandle(); // action synchronisation handle
 
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // open coupling if requested
-        if ((Flg_EdgeRequest_Cpl[edge]) &&
-                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge])) {
+        if ((Flg_EdgeReq_Cpl[edge]) && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge])) {
             Acts_CPL_On(edge);
-            Flg_EdgeRequest_Cpl[edge] = false;
+            Flg_EdgeReq_Cpl[edge] = false;
         }
     }
     Acts_CPL_Ctrl(); // coupling sma controller
 
     ADC1_Update(); // read analog potentiometer inputs
     for (edge = 0; edge < 3; edge++) { // extension control loops
-        if (Flg_EdgeRequest_Ext[edge] &&
-                (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
+        if (Flg_EdgeReq_Ext[edge] && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
         else 
             Acts_LIN_Out(edge, 0);// make sure motors are off
@@ -57,7 +54,7 @@ void Tmrs_CBK_Timer5_Handle(void) {
         i++;
     }
     
-    if (Flg_Verbose && WIFI_EN) {
+    if (FLG_Verbose && WIFI_EN) {
         static uint8_t j = 0;
         if(!(j % 5)) Coms_ESP_Verbose();
         j++;

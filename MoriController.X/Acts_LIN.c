@@ -1,8 +1,8 @@
-#include <xc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <libpic30.h>
-#include <stdbool.h>
+//#include <xc.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <libpic30.h>
+//#include <stdbool.h>
 #include "math.h"
 #include "dsp.h"
 #include "Defs_GLB.h"
@@ -21,7 +21,7 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
 /* ******************** LINEAR MOTOR OUTPUTS ******************************** */
 void Acts_LIN_Out(uint8_t edge, int16_t duty) {
     static int16_t oldDuty[3] = {0, 0, 0};
-    if (!STAT_MotLin_Active || !Flg_MotLin_Active) duty = 0; // linear motors off
+    if (!MODE_MotLin_Active || !FLG_MotLin_Active) duty = 0; // linear motors off
     int16_t out = 0;
     
     // ramp up
@@ -105,7 +105,7 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
         Stbl_Count[edge]++;
         if (Stbl_Count[edge] >= MotLin_PID_stable * 20){
             Stbl_Flag[edge] = true;
-            Flg_EdgeRequest_Ext[edge] = false;
+            Flg_EdgeReq_Ext[edge] = false;
         }
     } else {
         Stbl_Count[edge] = 0;
@@ -173,7 +173,7 @@ uint8_t Acts_LIN_GetTarget(uint8_t edge) {
 /* ******************** SET DESIRED EXTENSION ******************************* */
 void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
     Ext_Desired[edge] = desired;
-    Flg_EdgeRequest_Ext[edge] = true; //  relevant when coupled
+    Flg_EdgeReq_Ext[edge] = true; //  relevant when coupled
 }
 
 /* ******************** RETURN FORMATTED EXTENTION ************************** */

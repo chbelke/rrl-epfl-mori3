@@ -195,9 +195,9 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // angle control loops
         if (MODE_ENC_CON) Sens_ENC_Read(edge); // always update encoder reading
-        if (Flg_EdgeWig[edge])
+        if (Flg_EdgeWig[edge]) // wiggle is always ok, check first
             Acts_ROT_Wiggle(edge);
-        else if (MODE_ENC_CON && Flg_EdgeRequest_Ang[edge] && Flg_EdgeAct[edge])
+        else if (MODE_ENC_CON && Flg_EdgeReq_Ang[edge] && Flg_EdgeAct[edge])
             Acts_ROT_PID(edge, Sens_ENC_Get(edge), Acts_ROT_GetTarget(edge));
         else
             if (!MODE_LED_PARTY && !Flg_Drive[edge])

@@ -145,7 +145,7 @@ void Coms_CMD_OverflowError() {
 
 bool Coms_CMD_Verbose(uint8_t byte) {
     if (byte == ESP_End) {
-        Flg_Verbose = !Flg_Verbose;
+        FLG_Verbose = !FLG_Verbose;
     } else {
         Coms_CMD_OverflowError();
     }
@@ -298,7 +298,7 @@ bool Coms_CMD_Set_ID(uint8_t byte)
 bool Coms_CMD_SetMotRotOn(uint8_t byte)
 {
     if (byte == ESP_End) {
-        Flg_MotRot_Active = true;
+        FLG_MotRot_Active = true;
     } else {
         Coms_CMD_OverflowError();
     }
@@ -308,7 +308,7 @@ bool Coms_CMD_SetMotRotOn(uint8_t byte)
 // Depricated
 bool Coms_CMD_SetMotRotOff(uint8_t byte) {
     if (byte == ESP_End) {
-        Flg_MotRot_Active = false;
+        FLG_MotRot_Active = false;
     } else {
         Coms_CMD_OverflowError();
     }
@@ -318,7 +318,7 @@ bool Coms_CMD_SetMotRotOff(uint8_t byte) {
 // Depricated
 bool Coms_CMD_SetMotLinOn(uint8_t byte) {
     if (byte == ESP_End) {
-        Flg_MotLin_Active = true;
+        FLG_MotLin_Active = true;
     } else {
         Coms_CMD_OverflowError();
     }
@@ -328,7 +328,7 @@ bool Coms_CMD_SetMotLinOn(uint8_t byte) {
 // Depricated
 bool Coms_CMD_SetMotLinOff(uint8_t byte) {
     if (byte == ESP_End) {
-        Flg_MotLin_Active = false;
+        FLG_MotLin_Active = false;
     } else {
         Coms_CMD_OverflowError();
     }
@@ -378,23 +378,23 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
     
     switch (flag[edge]) {
         case 0:
-            Flg_MotRot_Active = flag_set[edge];
+            FLG_MotRot_Active = flag_set[edge];
             if (!flag_set[edge]){
                 uint8_t i;
-                for (i = 0; i <3; i++) Flg_EdgeRequest_Ang[i] = false;
+                for (i = 0; i <3; i++) Flg_EdgeReq_Ang[i] = false;
             }
             break;
             
         case 1:
-            Flg_MotLin_Active = flag_set[edge];
+            FLG_MotLin_Active = flag_set[edge];
             if (!flag_set[edge]){
                 uint8_t i;
-                for (i = 0; i <3; i++) Flg_EdgeRequest_Ext[i] = false;
+                for (i = 0; i <3; i++) Flg_EdgeReq_Ext[i] = false;
             }
             break;
 
         case 2:
-            // Flag1 = flag_set[edge];
+            FLG_WaitAllEdges = flag_set[edge];
             break;            
             
         case 3:
@@ -665,8 +665,8 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
         case 22: ;// DRIVE AND COUPLING SEQUENCE
             uint8_t OUTedge = alloc[edge] & 0b00000011;
             if (byte == ESP_End) {
-                Flg_EdgeRequest_Cpl[OUTedge] = true;
-                Flg_DrvCplSequence[OUTedge] = true;
+                Flg_EdgeReq_Cpl[OUTedge] = true;
+                Flg_DriveAndCouple[OUTedge] = true;
             } else {
                 EspIn0End[edge] = EspIn0End[edge] + 1; // no end byte
             }
@@ -705,7 +705,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
                         if (alloc[edge] & (0b00100000 >> m)) {
-                            Flg_EdgeRequest_Cpl[m] = true;
+                            Flg_EdgeReq_Cpl[m] = true;
                         }
                     }
                     // update leds

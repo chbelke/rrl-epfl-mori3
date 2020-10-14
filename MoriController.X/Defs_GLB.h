@@ -19,8 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'A' // module name by letter
-
+#define MODULE 'C' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -44,9 +43,9 @@
 #define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
-#define STAT_MotLin_Active true
-#define STAT_MotRot_Active true
-#define STAT_Cplngs_Active true
+#define MODE_MotLin_Active true
+#define MODE_MotRot_Active true
+#define MODE_Cplngs_Active true
 
 
 /* ******************** BATTERY ********************************************* */
@@ -59,44 +58,40 @@ extern volatile bool MODE_LED_RNBOW;
 extern volatile bool MODE_LED_PARTY;
 
 /* ********************  FLAGS ********************************************** */
-extern volatile bool Flg_LiveAng;
-extern volatile bool Flg_LiveExt;
+// FLG can be set externally, Flg is only used by program
+extern volatile bool FLG_WaitAllEdges;
+extern volatile bool FLG_MotLin_Active;
+extern volatile bool FLG_MotRot_Active;
+extern volatile bool FLG_Verbose;
+
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
 
 extern volatile bool Flg_Drive[3];
-extern volatile bool Flg_DrvCplSequence[3];
+extern volatile bool Flg_DriveAndCouple[3];
 
 extern volatile bool Flg_EdgeCon[3];
 extern volatile bool Flg_EdgeSyn[3];
 extern volatile bool Flg_EdgeAct[3];
 extern volatile bool Flg_EdgeWig[3];
-extern volatile bool Flg_EdgeRequest_Ang[3];
-extern volatile bool Flg_EdgeRequest_Ext[3];
-extern volatile bool Flg_EdgeRequest_Cpl[3];
+extern volatile bool Flg_EdgeReq_Ang[3];
+extern volatile bool Flg_EdgeReq_Ext[3];
+extern volatile bool Flg_EdgeReq_Cpl[3];
 
-extern volatile bool Flg_EdgeDemo;
-
-extern volatile bool Flg_DelayStart;
-extern volatile bool Flg_Verbose;
 extern volatile bool Flg_Uart_Lock[4];
-
-extern volatile bool Flg_MotLin_Active;
-extern volatile bool Flg_MotRot_Active;
 extern volatile bool Flg_ID_check;
-
-extern volatile bool flg_tmr3_elapsed;
-extern volatile bool flg_tmr5_elapsed;
-
-/* ******************** STATE INFO ****************************************** */
-extern volatile uint8_t ESP_ID[6];
 
 extern volatile bool Flg_i2c_PWM;
 extern volatile bool Flg_i2c_ACC;
 extern volatile bool Flg_i2c_DAC;
 
+extern volatile bool Flg_Tmr3;
+extern volatile bool Flg_Tmr5;
+
+/* ******************** STATE INFO ****************************************** */
 extern volatile uint8_t ESP_Update_Delay;
 extern volatile uint8_t ESP_DataLog_Time_Elapsed;
+extern volatile uint8_t ESP_ID[6];
 
 
 /* ******************** PERIPHERALS ***************************************** */
@@ -195,8 +190,8 @@ extern volatile uint8_t ESP_DataLog_Time_Elapsed;
 #define MotRot_PID_Max 1024
 
 #define MotRot_TorqueLimit 255      // torque limit /255
-#define MotRot_WiggleTime 10        // seconds
-#define MotRot_WiggleTorque 65      // wiggle torque limit /255
+#define MotRot_WiggleTime 15        // seconds
+#define MotRot_WiggleTorque 80      // wiggle torque limit /255
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
 
 /* ******************** I2C ************************************************* */
@@ -232,9 +227,9 @@ extern volatile uint8_t ESP_DataLog_Time_Elapsed;
 #define TLC59208_LEDOUT1Add 0x8D // address LEDOUT0, auto increment enabled
 #define TLC59208_LEDOUT1 0xAA // LEDOUT0 all outputs PWM controlled
 
-#define SMA_Period_1 150 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
-#define SMA_Period_2 200 // split into high I opening and low I maintain phases
-#define SMA_Duty_1 100 // 150 // 8-bit PWM value for first phase
-#define SMA_Duty_2 60 // 8-bit PWM value for second phase
+#define SMA_Period_1 140 // SMA on-time (updated in 20 Hz loop) -> 100 = 5 sec.
+#define SMA_Period_2 200 // split into high I open (1) and low I stay phases (2)
+#define SMA_Duty_1 130 // 150 // 8-bit PWM value for first phase
+#define SMA_Duty_2 65 // 8-bit PWM value for second phase
 
 #endif	/* DEFS_H */
