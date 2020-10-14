@@ -165,8 +165,7 @@ uint16_t TMR5_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {   
-    flg_tmr5_elapsed = true;
-//    Tmrs_CBK_Timer5_Handle();
+    Flg_Tmr5 = true;
 }
 
 void  TMR5_SetInterruptHandler(void (* InterruptHandler)(void))

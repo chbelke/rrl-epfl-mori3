@@ -32,7 +32,7 @@ void Acts_CPL_On(uint8_t edge) { // called in tmr3 if request flag is set
     Acts_CPL_Open[edge] = true;
     CPL_Count_1[edge] = 0;
     CPL_Count_2[edge] = SMA_Period_2;
-    if (STAT_Cplngs_Active) Acts_CPL_Set(edge, SMA_Duty_1);
+    if (MODE_Cplngs_Active) Acts_CPL_Set(edge, SMA_Duty_1);
     Coms_ESP_LED_Set_Blink_Freq(edge, 5);
 }
 
@@ -51,9 +51,9 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
         if (CPL_Count_1[edge] < SMA_Period_1) { // first pwm phase (high current)
             CPL_Count_1[edge]++;
             if (CPL_Count_1[edge] >= SMA_Period_1) {
-                if (STAT_Cplngs_Active) Acts_CPL_Set(edge, SMA_Duty_2);
+                if (MODE_Cplngs_Active) Acts_CPL_Set(edge, SMA_Duty_2);
                 CPL_Count_2[edge] = 0;
-                if (Flg_DrvCplSequence[edge]){ // if part of drive&couple sequence
+                if (Flg_DriveAndCouple[edge]){ // if part of drive&couple sequence
                     if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2]){
                         Acts_ROT_Drive(255, 0, edge, 1);
                         uint8_t i;
@@ -68,10 +68,10 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
             CPL_Count_2[edge]++;
             if (CPL_Count_2[edge] >= SMA_Period_2) {
                 Acts_CPL_Off(edge);
-                if (Flg_DrvCplSequence[edge]){ // if part of drive&couple sequence
+                if (Flg_DriveAndCouple[edge]){ // if part of drive&couple sequence
                     Acts_ROT_SetWiggle(edge);
                     Acts_ROT_Out(edge, 0);
-                    Flg_DrvCplSequence[edge] = false;
+                    Flg_DriveAndCouple[edge] = false;
                 }
             }
         } else {

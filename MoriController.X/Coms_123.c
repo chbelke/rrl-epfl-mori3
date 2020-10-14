@@ -19,6 +19,7 @@ volatile uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
 volatile uint8_t EdgActCnt[3] = {0, 0, 0}; // no idle byte received counter
 volatile bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 volatile bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
+volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready send
 
 // Neighbour ID variables
 uint8_t EdgByteCount[3] = {0, 0, 0};
@@ -29,6 +30,7 @@ uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrCurExt[3] = {0, 0, 0}; // current extension received by neighbour
 uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
 volatile bool NbrCmdMatch[3] = {false, false, false};
+volatile bool NbrEdgesRdy[3] = {false, false, false};
 
 // Outcoing bytes based on mode (EdgInAloc explanation below)
 #define COMS_123_Conn 0b10010000
@@ -49,7 +51,7 @@ volatile bool NbrCmdMatch[3] = {false, false, false};
  * - 0b010xoooo length command received, follows in one byte
  * - 0b010oxooo angle command received, follows in two bytes
  * - 0b010ooxoo coupling command received
- * - 0b010oooxo confirm match
+ * - 0b010oooxx 11 cmd match and go, 01 cmd match and wait
  * 011 = idle mode
  * - 0b011ooooo
  * 100 = connection detected or acknowledged
@@ -205,18 +207,14 @@ void Coms_123_Eval(uint8_t edge) { // called in main
 
         case 30: // COMMAND ****************************************************
             Coms_123_ResetIntervals(edge);
-            if (Coms_CMD_Handle(edge, EdgIn)) {
+            if (Coms_CMD_Handle(edge, EdgIn))
                 EdgInCase[edge] = 0;
-            }
-//            EdgInCase[edge] = 50;
             break;
 
         case 40: // RELAY ******************************************************
             Coms_123_ResetIntervals(edge);
-            if (Coms_REL_Handle(edge, EdgIn)) {
+            if (Coms_REL_Handle(edge, EdgIn))
                 EdgInCase[edge] = 0;
-            }
-//            EdgInCase[edge] = 50;
             break;
 
         case 50: // END BYTE NOT RECEIVED **************************************
@@ -296,6 +294,17 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
 void Coms_123_ActHandle() { // called in tmr3 at 20Hz
     uint8_t edge, byte;
     for (edge = 0; edge < 3; edge++) {
+        if (Flg_EdgeCon[edge]){
+            if (NbrCmdMatch[edge])
+                Flg_AllEdgRdy[edge] = true;
+            else 
+                Flg_AllEdgRdy[edge] = false;
+        } else { // not connected or no command received, other edges can go
+            Flg_AllEdgRdy[edge] = true;
+            NbrEdgesRdy[edge] = true;
+        }
+    }
+    for (edge = 0; edge < 3; edge++) {
         if (Flg_EdgeSyn[edge]) {
             if (Flg_EdgeAct[edge]) {
                 if (EdgActCnt[edge] >= EDG_ActIntrvl) {
@@ -307,24 +316,32 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
             }
 
             byte = 0b01000000;
-            if (Flg_EdgeRequest_Ext[edge])
+            if (Flg_EdgeReq_Ext[edge] && FLG_MotLin_Active && MODE_MotLin_Active)
                 byte = byte | 0b00010000;
-            if (Flg_EdgeRequest_Ang[edge])
+            if (Flg_EdgeReq_Ang[edge] && FLG_MotRot_Active && MODE_MotRot_Active)
                 byte = byte | 0b00001000;
-            if (Flg_EdgeRequest_Cpl[edge])
+            if (Flg_EdgeReq_Cpl[edge] && MODE_Cplngs_Active)
                 byte = byte | 0b00000100;
-            if (NbrCmdMatch[edge])
-                byte = byte | 0b00000010;
+            if (NbrCmdMatch[edge]){ // neighbour matched own cmd
+                if (FLG_WaitAllEdges){
+                    if (Flg_AllEdgRdy[0] && Flg_AllEdgRdy[1] && Flg_AllEdgRdy[2]) {
+                        byte = byte | 0b00000001; // my edges are ready, wait
+                        if (NbrEdgesRdy[0] && NbrEdgesRdy[1] && NbrEdgesRdy[2])
+                            byte = byte | 0b00000010; // my nbrs are ready, go
+                    }
+                } else {
+                    byte = byte | 0b00000011;
+                }
+            }
 
-            if ((!Flg_Uart_Lock[edge]) && (Flg_EdgeRequest_Ext[edge] ||
-                    Flg_EdgeRequest_Ang[edge] || Flg_EdgeRequest_Cpl[edge])) {
+            if (!Flg_Uart_Lock[edge]){ // request check removed for nbr sync
                 Flg_Uart_Lock[edge] = true;
                 Coms_123_Write(edge, byte);
-                if (Flg_EdgeRequest_Ext[edge]) {
+                if (Flg_EdgeReq_Ext[edge]) {
                     Coms_123_Write(edge, Acts_LIN_GetTarget(edge));
                     Coms_123_Write(edge, Acts_LIN_GetCurrent(edge));
                 }
-                if (Flg_EdgeRequest_Ang[edge]) {
+                if (Flg_EdgeReq_Ang[edge]) {
                     uint16_t AngTemp = Acts_ROT_GetTarget(edge);
                     Coms_123_Write(edge, (uint8_t) ((AngTemp & 0xFF00) >> 8));
                     Coms_123_Write(edge, (uint8_t) (AngTemp & 0x00FF));
@@ -343,47 +360,53 @@ void Coms_123_ActVerify(uint8_t edge) {
     bool NbrCmdNoGo = false;
 
     // extensions command verification
-    if ((EdgInAloc[edge] & 0b00010000) && (Flg_EdgeRequest_Ext[edge])) {
+    if ((EdgInAloc[edge] & 0b00010000) && (Flg_EdgeReq_Ext[edge])) {
         if (NbrCmdExt[edge] != Acts_LIN_GetTarget(edge))
             NbrCmdNoGo = true; // values do not match, NOGO
         // check if neighbour current extension is in range of own
         if ((NbrCurExt[edge] < Acts_LIN_GetCurrent(edge) - EDG_ExtCurRng) ||
                 (NbrCurExt[edge] > Acts_LIN_GetCurrent(edge) + EDG_ExtCurRng))
             NbrCmdNoGo = true; // values not in range, NOGO
-    } else if (((EdgInAloc[edge] & 0b00010000) == 0) && (!Flg_EdgeRequest_Ext[edge])) {
+    } else if (((EdgInAloc[edge] & 0b00010000) == 0) && (!Flg_EdgeReq_Ext[edge])) {
         // ok, no commands from either side
     } else {
         NbrCmdNoGo = true; // mismatch, NOGO
     }
 
     // angle command verification
-    if ((EdgInAloc[edge] & 0b00001000) && (Flg_EdgeRequest_Ang[edge])) {
+    if ((EdgInAloc[edge] & 0b00001000) && (Flg_EdgeReq_Ang[edge])) {
         if (NbrCmdAng[edge] != Acts_ROT_GetTarget(edge))
             NbrCmdNoGo = true; // values do not match, NOGO
-    } else if (((EdgInAloc[edge] & 0b00001000) == 0) && (!Flg_EdgeRequest_Ang[edge])) {
+    } else if (((EdgInAloc[edge] & 0b00001000) == 0) && (!Flg_EdgeReq_Ang[edge])) {
         // ok, no commands from either side
     } else {
         NbrCmdNoGo = true; // mismatch, NOGO
     }
 
     // coupling command verification
-    if ((EdgInAloc[edge] & 0b00000100) && (Flg_EdgeRequest_Cpl[edge])) {
-        ; // open coupling?           NbrCmdNoGo = true;
-    } else if (((EdgInAloc[edge] & 0b00000100) == 0) && (!Flg_EdgeRequest_Cpl[edge])) {
+    if ((EdgInAloc[edge] & 0b00000100) && (Flg_EdgeReq_Cpl[edge])) {
+        ; // open coupling? XXX
+    } else if (((EdgInAloc[edge] & 0b00000100) == 0) && (!Flg_EdgeReq_Cpl[edge])) {
         // ok, no commands from either side
     } else {
         NbrCmdNoGo = true; // mismatch, NOGO
     }
 
-    // everything is ok and something received
-    if ((!NbrCmdNoGo) && (EdgInAloc[edge] & 0b00011100)) {
+    // everything is ok // and something received
+    if (!NbrCmdNoGo){ // && (EdgInAloc[edge] & 0b00011111)) {
         NbrCmdMatch[edge] = true;
-        if (EdgInAloc[edge] & 0b00000010) {
+        if ((EdgInAloc[edge] & 0b00000011) == 3) { // good to go
             Flg_EdgeAct[edge] = true;
+            NbrEdgesRdy[edge] = true;
         } else {
             Flg_EdgeAct[edge] = false;
+            if ((EdgInAloc[edge] & 0b00000011) == 1) // nbr ready
+                NbrEdgesRdy[edge] = true;
+            else
+                NbrEdgesRdy[edge] = false;
         }
     } else {
+        NbrEdgesRdy[edge] = false;
         NbrCmdMatch[edge] = false;
         Flg_EdgeAct[edge] = false;
     }
@@ -459,9 +482,9 @@ void Coms_123_Disconnected(uint8_t edge) {
     Flg_IDRcvd[edge] = false;
 
     // reset requests so it doesnt start moving because it's no longer connected
-    Flg_EdgeRequest_Ext[edge] = false;
-    Flg_EdgeRequest_Ang[edge] = false;
-    Flg_EdgeRequest_Cpl[edge] = false;
+    Flg_EdgeReq_Ext[edge] = false;
+    Flg_EdgeReq_Ang[edge] = false;
+    Flg_EdgeReq_Cpl[edge] = false;
 }
 
 uint8_t * Coms_123_GetNeighbour(uint8_t edge) {

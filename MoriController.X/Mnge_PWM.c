@@ -1,8 +1,8 @@
 #include "Mnge_PWM.h"
-#include <xc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <libpic30.h>
+//#include <xc.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <libpic30.h>
 #include "Defs_GLB.h"
 
 volatile uint8_t PWM_Values[8] = {0, 10, 10, 0, 0, 0, 0, 0};
