@@ -70,9 +70,7 @@ class LoadFile():
         except FileNotFoundError:
             print("Cannot open file")
             return
-        print(self.fileName)
-        print(self.fileContents)
-
+        self.iteration = 0
         self.displayJson()
 
     def displayJson(self):
