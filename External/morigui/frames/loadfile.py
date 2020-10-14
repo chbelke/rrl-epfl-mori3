@@ -66,7 +66,7 @@ class LoadFile():
 
         try:
             with open(self.fileName, 'r') as f:
-                self.fileContents = json.load(f)
+                self.fileContents = json.load(f, object_pairs_hook=self.value_resolver)
         except FileNotFoundError:
             print("Cannot open file")
             return
@@ -79,7 +79,8 @@ class LoadFile():
         for module in self.fileContents[self.iteration]:
             if module == 'Label':
                 continue
-            textstr = textstr + module[:4] + ": " + self.fileContents[self.iteration][module] + "\n"
+            for cmd in self.fileContents[self.iteration][module]:
+                textstr = textstr + module[:4] + ": " + cmd + "\n"
         self.show_json["text"] = textstr[:-1] #remove last \n
 
 
@@ -107,8 +108,20 @@ class LoadFile():
         for module in self.fileContents[self.iteration]:
             if module == 'Label':
                 continue
-            self.mqtthost.publishLocal(self.fileContents[self.iteration][module], self.checkName(module))  
+            for cmd in self.fileContents[self.iteration][module]:
+                self.mqtthost.publishLocal(cmd, self.checkName(module))  
         self.iterateJson()
+
+
+    def value_resolver(self, pairs):
+        print(pairs)
+        unique_modules = set([i[0] for i in pairs])
+        new_dict = {}
+        print(unique_modules)
+        for module in unique_modules:
+            values = [v for k, v in pairs if k == module]
+            new_dict[module] = values
+        return dict(new_dict)        
 
 
     def checkName(self, name):
