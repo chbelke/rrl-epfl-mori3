@@ -19,7 +19,7 @@ def getDataLog(self, pyld, espNum):
     orient = [0]*3
     i = 5;
     try:
-        time = (values[4] << 24) | (values[3] << 16) | (values[2] << 8) | values[1];
+        time = (values[1] << 24) | (values[2] << 16) | (values[3] << 8) | values[4];
         if values[0] & 0b00000001:    #angles
             for j in range(0,3):
                 angles[j] = values[i]*256 + values[i+1]

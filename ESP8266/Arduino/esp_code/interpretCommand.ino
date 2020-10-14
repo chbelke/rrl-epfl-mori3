@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 255;
+  int sw_case = 54;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
