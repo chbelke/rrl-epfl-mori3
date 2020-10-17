@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'C' // module name by letter
+#define MODULE 'D' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -45,7 +45,7 @@
 
 #define MODE_MotLin_Active true
 #define MODE_MotRot_Active true
-#define MODE_Cplngs_Active true
+#define MODE_Cplngs_Active false
 
 
 /* ******************** BATTERY ********************************************* */
@@ -121,7 +121,9 @@ extern volatile uint8_t ESP_ID[6];
 #define EDG_IdlIntrvl 3             // idle check at 5Hz, 5 = 1 sec = con lost
 #define EDG_ConIntrvl 10            // con check at 5Hz, 10 = 2 sec = con lost
 #define EDG_ActIntrvl 2             // act check at 20Hz, 3 = 
-#define EDG_ExtCurRng 3             // current neighbour ext. must be (own +-)
+#define EDG_ExtNbrRng 5             // current neighbour ext. must be (own +-)
+#define EDG_ExtSlwRng 3             // if nbr <= this >= EDG_ExtNbrRng, slw down
+#define EDG_ExtSlwVal 768           // slow down to this 
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
@@ -189,10 +191,11 @@ extern volatile uint8_t ESP_ID[6];
 #define MotRot_PID_Imax 1024
 #define MotRot_PID_Max 1024
 
-#define MotRot_TorqueLimit 255      // torque limit /255
+#define MotRot_TorqueLimit 128      // /255, 160 GPX safe, 64 backdrive safe
 #define MotRot_WiggleTime 15        // seconds
 #define MotRot_WiggleTorque 80      // wiggle torque limit /255
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
+#define MotRot_DrvCplPushInterval 140 // push interval at 20Hz (< SMA_Period_2)
 
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           5

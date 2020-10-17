@@ -617,7 +617,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                         if ((alloc[edge] >> (2 - m)) & 0b00000001) {
                             if (!Flg_EdgeCon[edge]){
                                 Acts_ROT_Out(m, DrivePWM[edge][m]*8);
-                                Flg_Drive[edge] = true;
+                                Acts_ROT_SetDrvInterval(m, 5);
                             }
                         }
                     }
@@ -647,10 +647,10 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             if (byte == ESP_End) {
                 if (EspInByts[edge] == 4) {
                     if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2]){
-                        Acts_ROT_Drive(DriveSpd[edge], DriveCrv[edge],
-                            ((alloc[edge] & 0x18) >> 3), ((alloc[edge] & 0x04) >> 2));
                         uint8_t i;
                         for (i = 0; i < 3; i++) Flg_Drive[edge] = true;
+                        Acts_ROT_Drive(DriveSpd[edge], DriveCrv[edge],
+                            ((alloc[edge] & 0x18) >> 3), ((alloc[edge] & 0x04) >> 2));
                     }
                 } else {
                     EspInLost[edge] = EspInLost[edge] + 1; // data lost

@@ -102,7 +102,7 @@ void Acts_ROT_Wiggle(uint8_t edge){
         }
         else if (Wgl_Count[edge] <= MotRot_WiggleTime * 90)
             Acts_ROT_Out(edge, -600);
-        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 97)
+        else if (Wgl_Count[edge] <= MotRot_WiggleTime * 98)
             Acts_ROT_Out(edge, 600);
         else 
             Acts_ROT_Out(edge, -600);
@@ -177,6 +177,9 @@ void Acts_ROT_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc){
     Sc = SxOUT*Sc;
     Sb = SxOUT*Sb;
 
+    uint8_t i;
+    for (i = 0; i < 3; i++) Acts_ROT_SetDrvInterval(i, 5); // lasts for 1 sec
+    
     // output depending on driving edge
     switch (edge) {
         case 0:
@@ -197,9 +200,6 @@ void Acts_ROT_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc){
         default:
             break;
     }
-    
-    uint8_t i;
-    for (i = 0; i < 3; i++) Acts_ROT_SetDrvInterval(i, 5); // lasts for 1 sec
 }
 
 /* ******************** DRIVE HANDLE ************************************* */
@@ -216,6 +216,7 @@ void Acts_ROT_DrvHandle(){
 
 void Acts_ROT_SetDrvInterval(uint8_t edge, uint8_t interval){
     DrvInterval[edge] = interval;
+    Flg_Drive[edge] = true;
 }
 
 /* ******************** ACTIVATE WIGGLE ************************************* */

@@ -57,20 +57,23 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
                     if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2]){
                         Acts_ROT_Drive(255, 0, edge, 1);
                         uint8_t i;
-                        for (i = 0; i < 3; i++){
-                            Acts_ROT_SetDrvInterval(i, (uint8_t)(SMA_Period_2/20)*5 - 1);
-                            Flg_Drive[i] = true;
-                        }
+                        for (i = 0; i < 3; i++) // overwrite interval in _Drive
+                            Acts_ROT_SetDrvInterval(i, (uint8_t)(SMA_Period_2/20)*5);
                     }
                 }
             }
         } else if (CPL_Count_2[edge] < SMA_Period_2) { // second pwm phase (maintain)
             CPL_Count_2[edge]++;
-            if (CPL_Count_2[edge] >= SMA_Period_2) {
+            if ((CPL_Count_2[edge] >= (SMA_Period_2 - MotRot_DrvCplPushInterval))
+                    && (Flg_DriveAndCouple[edge])){
+                Acts_ROT_Out(edge, 0);
+                uint8_t i;
+                for (i = 0; i < 3; i++)
+                    if (i != edge) Acts_ROT_Out(i, ((int8_t)128)*8);
+            } else if (CPL_Count_2[edge] >= SMA_Period_2) {
                 Acts_CPL_Off(edge);
                 if (Flg_DriveAndCouple[edge]){ // if part of drive&couple sequence
                     Acts_ROT_SetWiggle(edge);
-                    Acts_ROT_Out(edge, 0);
                     Flg_DriveAndCouple[edge] = false;
                 }
             }

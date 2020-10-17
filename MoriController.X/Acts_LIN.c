@@ -11,6 +11,7 @@
 #include "mcc_generated_files/adc1.h"
 
 uint8_t Ext_Desired[3] = {60, 60, 60};
+uint16_t MotLin_PWM_Max[3] = {MotLin_PID_Max, MotLin_PID_Max, MotLin_PID_Max};
 #define RampUp 128
 
 /* ******************** ARDUINO MAP FUNCTION ******************************** */
@@ -32,6 +33,10 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
         if ((duty - oldDuty[edge]) < RampUp) out = oldDuty[edge] - RampUp;
         else out = duty;
     }
+    
+    // limit max speed
+    if (duty < -MotLin_PWM_Max[edge]) duty = -MotLin_PWM_Max[edge];
+    else if (duty > MotLin_PWM_Max[edge]) duty = MotLin_PWM_Max[edge];
     
     switch (edge) {
         case 0:
@@ -174,6 +179,11 @@ uint8_t Acts_LIN_GetTarget(uint8_t edge) {
 void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
     Ext_Desired[edge] = desired;
     Flg_EdgeReq_Ext[edge] = true; //  relevant when coupled
+}
+
+/* ******************** SET MAX PWM VALUE *********************************** */
+void Acts_LIN_SetMaxPWM(uint8_t edge, uint16_t MaxPWM){
+    MotLin_PWM_Max[edge] = MaxPWM;
 }
 
 /* ******************** RETURN FORMATTED EXTENTION ************************** */

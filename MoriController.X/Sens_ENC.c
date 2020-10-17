@@ -50,6 +50,8 @@ void Sens_ENC_Read(uint8_t edge) {
             break;//return (0);
         else
             timeOut++;
+
+        __delay_us(1);
     }
     
     // combine 14 bit result
