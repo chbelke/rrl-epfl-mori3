@@ -18,6 +18,7 @@ from morigui.frames.listudp import ListUDP
 from morigui.frames.pubbulk import PublishBulk
 from morigui.frames.pubbinary import PublishBinary
 from morigui.frames.datalog import DataLog
+from morigui.frames.pinglog import PingLog
 from morigui.frames.loadfile import LoadFile
 
 
@@ -52,6 +53,7 @@ class MoriGui(tk.Frame):
 
 
         self.frame_datalog = DataLog(frame1, self.wifi_host)
+        self.frame_pinglog = PingLog(frame1, self.wifi_host)
         self.frame_party = PartyFrame(frame1, self.wifi_host)
         self.frame_start = StartStop(frame1, self.wifi_host)
         self.frame_pubg = PublishGlobal(frame2, self.wifi_host)

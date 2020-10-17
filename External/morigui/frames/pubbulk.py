@@ -61,7 +61,7 @@ class PublishBulk():
                 elif type(cmd) is str:
                     if cmd.startswith("ping"):
                         num = 1
-                        splitText = text[esp].split("ping",1)
+                        splitText = cmd.split("ping",1)
                         if (splitText[1].strip().isnumeric()):
                             num = int(splitText[1])
                         self.mqtthost.pingHandler.setPingCount(self.checkName(esp), num)
