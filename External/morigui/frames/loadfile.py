@@ -37,6 +37,11 @@ class LoadFile():
         self.show_json["text"] = ""
         self.show_json.pack({"side": "top"}, fill=tk.X)
 
+        self.prev_button = tk.Button(frame_prev_next)
+        self.prev_button["text"] = "Prev",
+        self.prev_button["command"] = lambda: self.prevJson()
+        self.prev_button.pack({"side": "left"}, fill=tk.X, expand=True)
+
         self.next_button = tk.Button(frame_prev_next)
         self.next_button["text"] = "Next",
         self.next_button["command"] = lambda: self.iterateJson()
@@ -47,11 +52,6 @@ class LoadFile():
         self.run_button["fg"]   = "green"
         self.run_button["command"] = lambda: self.runJson()
         self.run_button.pack({"side": "right"}, fill=tk.X, expand=True)
-
-        self.prev_button = tk.Button(frame_prev_next)
-        self.prev_button["text"] = "Prev",
-        self.prev_button["command"] = lambda: self.prevJson()
-        self.prev_button.pack({"side": "left"}, fill=tk.X, expand=True)
 
         frame_load_display.pack(side="top", expand=True, pady=5)
         frame_disp_text.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
@@ -74,7 +74,7 @@ class LoadFile():
         self.displayJson()
 
     def displayJson(self):
-        self.next_stage["text"] = self.fileContents[self.iteration]["Label"]
+        self.next_stage["text"] = self.fileContents[self.iteration]["Label"][0]
         textstr = ""
         for module in self.fileContents[self.iteration]:
             if module == 'Label':
@@ -114,10 +114,8 @@ class LoadFile():
 
 
     def value_resolver(self, pairs):
-        print(pairs)
         unique_modules = set([i[0] for i in pairs])
         new_dict = {}
-        print(unique_modules)
         for module in unique_modules:
             values = [v for k, v in pairs if k == module]
             new_dict[module] = values

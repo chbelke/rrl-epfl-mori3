@@ -65,15 +65,15 @@ def splitMessageUDP(wifi_host, msg, addr):
 # The callback for when a PUBLISH message is received from the server.
 def interpretMessage(self, wifi_host, pyld, espNum):
    try:
-      if(self.wifi_host.espLostCheck(espNum)):
-         self.wifi_host.espMQTT(espNum)
-         print(colored("ESP Reconnected: " + espNum, "green"))
-      elif(self.wifi_host.espNoWifiCheck(espNum)):
-         self.wifi_host.espMQTT(espNum)
       cmd = pyld[0]
+      if(self.wifi_host.espNoWifiCheck(espNum)):
+         self.wifi_host.espMQTT(espNum)
       if cmd == "REL:":
          pyld, espNum = relayHandle.relayHandle(pyld, espNum)
          cmd = pyld[0]
+      if(self.wifi_host.espLostCheck(espNum)):
+         self.wifi_host.espMQTT(espNum)
+         print(colored("ESP Reconnected: " + espNum, "green"))
       commands.commands[cmd](wifi_host, pyld, espNum)
       self.wifi_host.resetOnInterval(espNum)
    except:

@@ -17,7 +17,6 @@ class PublishLocal():
         self.listMoriVar.set(self.moriNumber[0])
         self.listMoriVar.trace('w', self.option_select)        
         self.load()
-        print("NAMES: ", )
 
         self.frame.master.bind('<Return>', 
             lambda event=None: self.pub_loc_button.invoke())

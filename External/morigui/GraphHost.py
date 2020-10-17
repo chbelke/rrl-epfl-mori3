@@ -98,7 +98,8 @@ class GraphFrame(tk.Frame):
         self.nodes = []
         self.edges = []
         self.mori_status = {}
-
+        self.redraw_iteration = 0
+        self.redraw_flag = False
 
         self.G=nx.DiGraph()
         self.color_map = []
@@ -124,7 +125,6 @@ class GraphFrame(tk.Frame):
             
     def updateConnected(self): #Updates the number of connected ESPs and the lists
         self.after(500, self.updateConnected)
-       
 
         if not self.fig.get_axes():
             self.plotEmptyGraph()
@@ -136,12 +136,21 @@ class GraphFrame(tk.Frame):
         tmp = copy.deepcopy(self.connMatrix)
         if tmp != self.wifi_host.getConnMatrix():
             self.newConnectionMatrix()
+            self.redraw_flag = True
 
         if self.mori_status != self.wifi_host.getEspIds():
             self.mori_status = copy.deepcopy(self.wifi_host.getEspIds())
+            self.redraw_flag = True
         
+        prev_colours = copy.deepcopy(self.color_map)
         self.updateColors()
-        self.plotFigure()
+        if prev_colours != self.color_map:
+            self.redraw_flag = True
+
+        if self.redraw_flag:
+            self.plotFigure()
+
+        self.redraw_flag = False            
 
 
     def newConnectionMatrix(self):
@@ -194,9 +203,9 @@ class GraphFrame(tk.Frame):
             return
 
         nx.draw_networkx_nodes(self.G, self.pos, node_color=self.color_map, node_size=self.node_size, linewidths=None)
-        nx.draw_networkx_edges(self.G, self.pos, width=1, arrowsize=10)
-        nx.draw_networkx_edge_labels(self.G, self.pos, self.edge_locs, label_pos= 0.8, font_size=8, font_color='red', verticalalignment='center', font_weight='bold')
-        nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom', alpha=0.7)
+        nx.draw_networkx_edges(self.G, self.pos, width=1, arrows=False)
+        nx.draw_networkx_edge_labels(self.G, self.pos, self.edge_locs, label_pos= 0.7, font_size=10, font_color='red', verticalalignment='center', font_weight='bold')
+        nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom', alpha=0.5)
         plt.box(on=False)
 
         plt.gcf().canvas.draw()
@@ -205,7 +214,7 @@ class GraphFrame(tk.Frame):
         self.G=nx.DiGraph()
         self.G.add_nodes_from(self.nodes)
         self.G.add_edges_from(self.edges)
-        tmp_pos = nx.kamada_kawai_layout(self.G)
+        tmp_pos = self.getNewGraph()
         try:
             for label in tmp_pos:
                 if label in self.pos:
@@ -219,8 +228,18 @@ class GraphFrame(tk.Frame):
         self.G=nx.DiGraph()
         self.G.add_nodes_from(self.nodes)
         self.G.add_edges_from(self.edges)
-        self.pos = nx.kamada_kawai_layout(self.G)
-        return        
+        self.pos = self.getNewGraph()
+        self.redraw_flag = True
+        return
+
+    def getNewGraph(self):
+
+        if self.redraw_iteration == 0:
+            pos = nx.kamada_kawai_layout(self.G)
+        else: 
+            pos = nx.spring_layout(self.G, k=10/len(self.G))
+        self.redraw_iteration = (self.redraw_iteration + 1) %3
+        return pos
 
 
     def updateColors(self):
@@ -232,7 +251,7 @@ class GraphFrame(tk.Frame):
                 if state == "Lost":
                     self.color_map.append(self.colourDict[state])
                     continue
-                elif node in self.wifi_host.getHubDict():
+                elif names.nameToIds[node] in self.wifi_host.getHubDict():
                     self.color_map.append(self.colourDict["Hub"])
                     continue
                 elif node in self.wifi_host.getNoWifiDict():

@@ -93,18 +93,14 @@ class WirelessHost(threading.Thread):
         self.pingHandler.run()
 
         while not self.event.is_set():
-            if time.time() - loopTime > 2:
+            if time.time() - loopTime > 0.5:
                 print("\nTime Elapsed: {:.2f}".format(loopTime-startTime))
                 print(colored("Referenced ESPs : ","yellow"), end=' ')
+                txt = ""
                 for idty in self.idDict:
-                    print(names.idsToName[idty], end=", ")
-                print()
-
-                # print("------- Connections -------")
-                # for node in self.connMatrix:
-                #     print(node, self.connMatrix[node])
-
-                # print()                
+                    txt += names.idsToName[idty]
+                    txt += ", "
+                print(txt[:-2])
                 
                 loopTime = time.time()
             self.event.wait(0.25)    
@@ -117,17 +113,18 @@ class WirelessHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
-        try:
-            if self.macDict[self.idDict[addr]][0] == "Lost":
-                print(colored("Unable to publish to " + names.idsToName[addr], 'red'))
-        except KeyError:
-            pass
         if addr in self.noWifiDict:
             self.publishThroughHub(msg, addr)
-        elif addr in self.UDPDict:
-            self.udpClient.write(msg, addr)        
         else:
-            self.mqttClient.publishLocal(msg, addr)
+            try:
+                if self.macDict[self.idDict[addr]][0] == "Lost":
+                    print(colored("Unable to publish to " + names.idsToName[addr], 'red'))
+            except KeyError:
+                pass
+            if addr in self.UDPDict:
+                self.udpClient.write(msg, addr)        
+            else:
+                self.mqttClient.publishLocal(msg, addr)
 
 
     def publishThroughHub(self, msg, addr):
@@ -189,6 +186,7 @@ class WirelessHost(threading.Thread):
     def setHubDict(self, HubDict):
         self.HubDict = HubDict
         self.updateWifiEdges()
+        print("self.HubDict", self.HubDict)
 
     def getNoWifiDict(self):
         return self.noWifiDict
@@ -355,8 +353,8 @@ class WirelessHost(threading.Thread):
     def espLost(self, espNum):
         print(colored("ESP " + names.idsToName[espNum] + " lost", "red"))
         self.macDict.get(self.idDict[espNum])[0] = "Lost"
-        if espNum in self.noWifiDict:
-            del self.noWifiDict[espNum]        
+        # if espNum in self.noWifiDict:
+        #     del self.noWifiDict[espNum]        
 
     def espMQTT(self, espNum):
         self.macDict.get(self.idDict[espNum])[0] = "WiFi"
