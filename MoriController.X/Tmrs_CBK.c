@@ -17,9 +17,11 @@ void Tmrs_CBK_Timer3_Handle(void) {
 
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // open coupling if requested
-        if ((Flg_EdgeReq_Cpl[edge]) && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge])) {
+        if ((Flg_EdgeReq_Cpl[edge]) && ((!Flg_EdgeCon[edge]) ||
+                (Flg_EdgeReq_CplNbrWait[edge]))){
             Acts_CPL_On(edge);
             Flg_EdgeReq_Cpl[edge] = false;
+            Flg_EdgeReq_CplNbrWait[edge] = false;
         }
     }
     Acts_CPL_Ctrl(); // coupling sma controller
@@ -28,7 +30,7 @@ void Tmrs_CBK_Timer3_Handle(void) {
     for (edge = 0; edge < 3; edge++) { // extension control loops
         if (Flg_EdgeReq_Ext[edge] && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
-        else 
+        else
             Acts_LIN_Out(edge, 0);// make sure motors are off
     }
 }

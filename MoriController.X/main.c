@@ -88,6 +88,7 @@ volatile bool Flg_EdgeWig[3] = {false, false, false}; // wiggle flag
 volatile bool Flg_EdgeReq_Ang[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Ext[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Cpl[3] = {false, false, false};
+volatile bool Flg_EdgeReq_CplNbrWait[3] = {false, false, false};
 
 volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
 volatile bool Flg_ID_check = false;
@@ -119,9 +120,8 @@ int main(void) {
 
     // verify own id with esp
     while (!Flg_ID_check) {
-        LED_Y = LED_Off;    
-        for (edge = 0; edge < 3; edge++)
-        {
+        LED_Y = LED_Off;
+        for (edge = 0; edge < 3; edge++) {
             if(Flg_Tmr3) {
                 Tmrs_CBK_Timer3_Handle();
                 Flg_Tmr3 = false;
@@ -152,8 +152,7 @@ int main(void) {
     for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
 
     while (1){
-        for (edge = 0; edge < 3; edge++)
-        {
+        for (edge = 0; edge < 3; edge++) {
             if(Flg_Tmr3) {
                 Tmrs_CBK_Timer3_Handle();
                 Flg_Tmr3 = false;

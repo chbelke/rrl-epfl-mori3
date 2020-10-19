@@ -72,6 +72,7 @@ void Acts_CPL_Ctrl(void) { // called in tmr3, switches off when counter runs out
                     if (i != edge) Acts_ROT_Out(i, ((int8_t)128)*8);
             } else if (CPL_Count_2[edge] >= SMA_Period_2) {
                 Acts_CPL_Off(edge);
+                LED_R = LED_Off;
                 if (Flg_DriveAndCouple[edge]){ // if part of drive&couple sequence
                     Acts_ROT_SetWiggle(edge);
                     Flg_DriveAndCouple[edge] = false;

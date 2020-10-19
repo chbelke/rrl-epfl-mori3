@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'D' // module name by letter
+#define MODULE 'E' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -77,6 +77,7 @@ extern volatile bool Flg_EdgeWig[3];
 extern volatile bool Flg_EdgeReq_Ang[3];
 extern volatile bool Flg_EdgeReq_Ext[3];
 extern volatile bool Flg_EdgeReq_Cpl[3];
+extern volatile bool Flg_EdgeReq_CplNbrWait[3];
 
 extern volatile bool Flg_Uart_Lock[4];
 extern volatile bool Flg_ID_check;
@@ -191,7 +192,7 @@ extern volatile uint8_t ESP_ID[6];
 #define MotRot_PID_Imax 1024
 #define MotRot_PID_Max 1024
 
-#define MotRot_TorqueLimit 128      // /255, 160 GPX safe, 64 backdrive safe
+#define MotRot_TorqueLimit 64      // /255, 160 GPX safe, 64 backdrive safe
 #define MotRot_WiggleTime 15        // seconds
 #define MotRot_WiggleTorque 80      // wiggle torque limit /255
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
