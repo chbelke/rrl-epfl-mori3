@@ -100,7 +100,7 @@ class PingHandler(threading.Thread):
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(0.1)    
+            self.event.wait(0.01)    
 
 
 
@@ -148,7 +148,7 @@ class PingHandler(threading.Thread):
     def sendPing(self, number):
         #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
         data = bytearray()
-        for lv in range(64):  # generate 32 bytes of random data
+        for lv in range(32):  # generate 32 bytes of random data
         # for lv in range(16):  # generate 32 bytes of random data
             data.append(random.randint(0x01,0xFF)) # avoid NULL characters
         
