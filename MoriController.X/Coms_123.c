@@ -27,6 +27,7 @@ uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t NbrIDCount[3] = {0, 0, 0};
 uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrValExt[3] = {0, 0, 0}; // current extension received by neighbour
+uint8_t NbrValSpd[3] = {0, 0, 0}; // speed value received by neighbour
 uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
 volatile bool NbrCmdMatch[3] = {false, false, false};
 volatile bool NbrEdgesRdy[3] = {false, false, false};
@@ -136,6 +137,12 @@ void Coms_123_Eval(uint8_t edge) { // called in main
         case 5:
             if (EdgInAloc[edge] & 0b00001000) {
                 NbrCmdAng[edge] = NbrCmdAng[edge] | (uint16_t) EdgIn;
+                EdgInCase[edge] = 6;
+                break;
+            }
+        case 6:
+            if (EdgInAloc[edge] & 0b00001000) {
+                NbrValSpd[edge] = EdgIn;
                 EdgInCase[edge] = 7;
                 break;
             }
@@ -355,6 +362,7 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
                     uint16_t AngTemp = Acts_ROT_GetTarget(edge);
                     Coms_123_Write(edge, (uint8_t) ((AngTemp & 0xFF00) >> 8));
                     Coms_123_Write(edge, (uint8_t) (AngTemp & 0x00FF));
+                    Coms_123_Write(edge, Acts_ROT_GetSpeedLimit(edge));
                 }
                 Coms_123_Write(edge, EDG_End);
                 Flg_Uart_Lock[edge] = false;
@@ -396,6 +404,8 @@ void Coms_123_ActVerify(uint8_t edge) {
     // angle command verification
     if ((EdgInAloc[edge] & 0b00001000) && (Flg_EdgeReq_Ang[edge])) {
         if (NbrCmdAng[edge] != Acts_ROT_GetTarget(edge))
+            NbrCmdNoGo = true; // values do not match, NOGO
+        else if (NbrValSpd[edge] != Acts_ROT_GetSpeedLimit(edge))
             NbrCmdNoGo = true; // values do not match, NOGO
     } else if (((EdgInAloc[edge] & 0b00001000) == 0) && (!Flg_EdgeReq_Ang[edge])) {
         // ok, no commands from either side

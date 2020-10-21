@@ -302,7 +302,7 @@ void Coms_ESP_Request_Angles() {
 void Coms_ESP_Write_Angles() {
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(Acts_ROT_GetCurrent(i));
+        UART4_Write16(Acts_ROT_GetAngle(i));
     }
 }
 

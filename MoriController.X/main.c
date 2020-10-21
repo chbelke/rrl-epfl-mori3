@@ -149,7 +149,8 @@ int main(void) {
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
+    for (edge = 0; edge < 3; edge++) 
+        Acts_ROT_SetCurrentLimit(edge, MotRot_TorqueLimit);
 
     while (1){
         for (edge = 0; edge < 3; edge++) {

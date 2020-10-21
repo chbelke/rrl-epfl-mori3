@@ -14,15 +14,18 @@
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
-
+uint16_t Spd_Limit[3] = {MotRot_PID_Max, MotRot_PID_Max, MotRot_PID_Max};
 uint8_t DrvInterval[3] = {0, 0, 0};
 
 #define WHEEL 68.15f // wheel distance from vertex
-#define SxOUT 0.9 // output speed factor for non-primary wheels
+#define SxOUT 0.9f // output speed factor for non-primary wheels
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
     if (!MODE_MotRot_Active || !FLG_MotRot_Active) duty = 0; // rotary motors off
+    else if (duty > Spd_Limit[edge]) duty = Spd_Limit[edge];
+    else if (duty < -Spd_Limit[edge]) duty = -Spd_Limit[edge];
+    
     switch (edge) {
         case 0:
             if (duty > 0) ROT_DIR_1 = 1; // direction output
@@ -226,16 +229,25 @@ void Acts_ROT_SetWiggle(uint8_t edge){
 }
 
 /* ******************** ROTARY MOTOR CURRENT LIMIT ************************** */
-void Acts_ROT_Limit(uint8_t edge, uint8_t limit) {
+void Acts_ROT_SetCurrentLimit(uint8_t edge, uint8_t limit) {
     Trq_Limit[edge] = limit; // save limit so wiggle remembers
     Mnge_DAC_Set(edge, limit);
+}
+
+/* ******************** SET ROTARY MOTOR SPEED LIMIT ************************ */
+void Acts_ROT_SetSpeedLimit(uint8_t edge, uint8_t limit) {
+    Spd_Limit[edge] = ((uint16_t) limit)*4;
+}
+
+/* ******************** RETURN ROTARY MOTOR SPEED LIMIT ********************* */
+uint8_t Acts_ROT_GetSpeedLimit(uint8_t edge) {
+    return Spd_Limit[edge]/4;
 }
 
 /* ******************** GET DESIRED ANGLE *********************************** */
 uint16_t Acts_ROT_GetTarget(uint8_t edge) {
     return Ang_Desired[edge];
 }
-
 
 /* ******************** SET DESIRED ANGLE *********************************** */
 void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
@@ -244,7 +256,7 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 }
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
-uint16_t Acts_ROT_GetCurrent(uint8_t edge) {
+uint16_t Acts_ROT_GetAngle(uint8_t edge) {
     float rawAngle = 10 * Sens_ENC_Get(edge);
     return (uint16_t) map((int16_t)rawAngle, -1800, 1800, 0, 3600);
 }
