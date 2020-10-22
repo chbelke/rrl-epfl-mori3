@@ -14,16 +14,19 @@ import threading
 import runMqtt.commands as commands
 import runMqtt.relayHandle as relayHandle
 
+from Settings import names
+
 
 def splitMessage(msg):
    topic = msg.topic.rsplit('/') #example: split esp/00215A97/pub into [esp, 00215A97, pub]
 
    if(topic[0] !="esp"):
-      return
-   if(topic[-1] != "pub"): #index -1 is last index of the list
-      return
+      espNum = topic[0]
+   else:
+      espNum = topic[1]
+   # if(topic[-1] != "pub"): #index -1 is last index of the list
+   #    return
 
-   espNum = topic[1]
 
    try:
       pyld = msg.payload.decode('UTF-8')
@@ -65,6 +68,7 @@ def splitMessageUDP(wifi_host, msg, addr):
 # The callback for when a PUBLISH message is received from the server.
 def interpretMessage(self, wifi_host, pyld, espNum):
    try:
+      espNum = names.convertFromLetter(espNum)
       cmd = pyld[0]
       if(self.wifi_host.espNoWifiCheck(espNum)):
          self.wifi_host.espMQTT(espNum)

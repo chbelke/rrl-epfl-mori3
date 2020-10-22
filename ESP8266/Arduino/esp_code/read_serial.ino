@@ -347,6 +347,26 @@ bool stateInfo(byte c)
 
   switch (state) {  //request
 
+    case 17:
+      if (c == char(END_BYTE))
+      {
+        clientLetter = char(storage[0]);
+        sprintf(publishName, "%c/p", clientLetter);
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;          
+      } else if (count == 1) {
+        storage[0]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 17");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
     case 18:    //Neighbour Disconnected
       if (c == char(END_BYTE))
       {

@@ -152,19 +152,15 @@ int main(void) {
     for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
 
     while (1){
-        for (edge = 0; edge < 3; edge++)
-        {
-            if(Flg_Tmr3) {
-                Tmrs_CBK_Timer3_Handle();
-                Flg_Tmr3 = false;
-            }
-            if(Flg_Tmr5) {
-                Tmrs_CBK_Timer5_Handle();
-                Flg_Tmr5 = false;
-            }        
-            Coms_123_Eval(edge);
-        }
+        Tmrs_CBK_Evaluate_Timers();
+        Coms_123_Eval(0);
+        Tmrs_CBK_Evaluate_Timers();
+        Coms_123_Eval(1);
+        Tmrs_CBK_Evaluate_Timers();
+        Coms_123_Eval(2);
+        Tmrs_CBK_Evaluate_Timers();
         Coms_ESP_Eval();
+        Tmrs_CBK_Evaluate_Timers();
         Coms_ESP_StateUpdate();
     }
     return 1;

@@ -11,6 +11,19 @@
 #include "Coms_123.h"
 #include "Coms_ESP.h"
 #include "Acts_CPL.h"
+#include "Tmrs_CBK.h"
+
+
+void Tmrs_CBK_Evaluate_Timers(void) {
+    if(Flg_Tmr3) {
+        Tmrs_CBK_Timer3_Handle();
+        Flg_Tmr3 = false;
+    }
+    if(Flg_Tmr5) {
+        Tmrs_CBK_Timer5_Handle();
+        Flg_Tmr5 = false;
+    }           
+}
 
 void Tmrs_CBK_Timer3_Handle(void) {
     Coms_123_ActHandle(); // action synchronisation handle

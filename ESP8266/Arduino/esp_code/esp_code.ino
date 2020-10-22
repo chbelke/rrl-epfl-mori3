@@ -37,6 +37,7 @@ const int mqttPort = 1883;
 char clientName[16];
 char publishName[36];
 char recieveName[36];
+char clientLetter = 255;
 
 const float softwareVersion = 0.5;
 
@@ -92,8 +93,8 @@ void setup()
   // Serial.setTxBufferSize(1024);
   delay(500);
   sprintf(clientName, "%08X", ESP.getChipId());
-  sprintf(publishName, "esp/%s/pub", clientName);
-  sprintf(recieveName, "esp/%s/rec", clientName);
+  sprintf(publishName, "%s/p", clientName);
+  sprintf(recieveName, "%s/r", clientName);
   verbose_print("ChipID: ");
   verbose_println(clientName);
   verbose_println(publishName);
@@ -227,14 +228,11 @@ void normalOp()
     lastMacPub = millis();
   }
   
-//   if (abs(lastMessage - millis()) > 10000)
-//   {
-//     char buff[50];
-//     sprintf(buff, "INFO: RunState: %d", runState);
-//     publish(buff);
-// //    client.publish(publishName, "INFO: Just chillin");
-//     lastMessage = millis();
-//   }
+  if ((clientLetter == 255) && (abs(lastMessage - millis()) > 2000))
+  {
+    serial_write_one(0b10100011);
+    lastMessage = millis();
+  }
 
   if (Serial.hasOverrun())
   {
@@ -323,6 +321,7 @@ void startMQTT()
       delay(2000);
     }
   }
+  serial_write_one(0b10100011);
   wifi_ind_led.On();
 
   //--------------------------- MQTT -----------------------------------------//

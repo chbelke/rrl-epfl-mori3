@@ -84,18 +84,11 @@ void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge) {
 
 /* ******************** RELAY TO NEIGHBOUR ********************************** */
 void Coms_REL_ToEdge(uint8_t edge, uint8_t inEdge) {
-    //    while(Flg_Uart_Lock[edge])   //wait for uart to unlock
-    //    {
-    //    }
-    Flg_Uart_Lock[edge] = true; //locks s.t. the sequence is uninterrupted
-
     if (((RelBytDta[inEdge][0] >> 5) & 0x07) == 7) {
         Coms_REL_RelayStandard(edge, inEdge);
     } else { //If last byte is not a command
         Coms_REL_RelayCommand(edge, inEdge);
     }
-
-    Flg_Uart_Lock[edge] = false;
 }
 
 /* ******************** RELAY TO WIFI HUB *********************************** */

@@ -126,6 +126,11 @@ bool Coms_ESP_Handle(uint8_t byte) {
             if (Coms_ESP_SetDatalogPeriod(byte))
                 return Coms_CMD_Reset(&state, &alloc); 
             break;
+        case 3:
+            if (Coms_ESP_SetClientLetter(byte))
+                return Coms_CMD_Reset(&state, &alloc); 
+            break;            
+            
         default:
             break;
                    
@@ -437,4 +442,16 @@ bool Coms_ESP_SetDatalogPeriod(uint8_t byte) {
         count++;
     }
     return false;    
+}
+
+
+bool Coms_ESP_SetClientLetter(uint8_t byte) {
+    if (byte == ESP_End) {
+        UART4_Write(0b10010001);
+        UART4_Write(MODULE);
+        UART4_Write(ESP_End);        
+    } else {
+        Coms_CMD_OverflowError();
+    }
+    return true;
 }

@@ -19,3 +19,27 @@ nameToIds = {
 	"Elaine": "000AC170",
 	"Farnsworth": "000AC173"
 }
+
+letterToIds = {
+	"H": "00056375",
+	"H": "0005659D",
+	"A": "000AC171",
+	"B": "000AC172",
+	"C": "00D00BD5",
+	"D": "000AC175",
+	"E": "000AC170",
+	"F": "000AC173"
+}
+
+
+def checkName(name):
+    try:
+        return nameToIds[name]
+    except KeyError:
+        return name
+
+def convertFromLetter(name):
+	try:
+		return letterToIds[name]
+	except KeyError:
+		return name

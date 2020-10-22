@@ -114,9 +114,9 @@ class LoadFile():
                     splitText = cmd.split("ping",1)
                     if (splitText[1].strip().isnumeric()):
                         num = int(splitText[1])
-                    self.mqtthost.pingHandler.setPingCount(self.checkName(module), num)
+                    self.mqtthost.pingHandler.setPingCount(names.checkName(module), num)
                     continue
-                self.mqtthost.publishLocal(cmd, self.checkName(module))  
+                self.mqtthost.publishLocal(cmd, names.checkName(module))  
         self.iterateJson()
 
 
@@ -126,12 +126,5 @@ class LoadFile():
         for module in unique_modules:
             values = [v for k, v in pairs if k == module]
             new_dict[module] = values
-        return dict(new_dict)        
-
-
-    def checkName(self, name):
-        try:
-            return names.nameToIds[name]
-        except KeyError:
-            return name    
+        return dict(new_dict)          
 

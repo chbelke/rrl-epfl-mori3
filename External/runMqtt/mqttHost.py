@@ -67,7 +67,7 @@ class MqttHost(threading.Thread):
         self.Connected = True
         self.client.subscribe("esp/pub")
         print("Subscribing to esp publishers")
-        self.client.subscribe("esp/+/pub")
+        self.client.subscribe("+/p")
         self.client.publish("esp/rec","mac")
         print("Calling for MAC addresses")
         self.macCallTime = time.time()
@@ -92,8 +92,8 @@ class MqttHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
-        print("esp/{}/rec".format(addr), msg)
-        self.client.publish("esp/{}/rec".format(addr), msg)
+        print("{}/r".format(addr), msg)
+        self.client.publish("{}/r".format(addr), msg)
  
 
     def exit(self):

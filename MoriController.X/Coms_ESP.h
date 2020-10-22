@@ -45,6 +45,7 @@ bool Coms_ESP_VerifyID(void);
 void Coms_ESP_StateUpdate(void);
 bool Coms_ESP_SetDatalogFlags(uint8_t);
 bool Coms_ESP_SetDatalogPeriod(uint8_t);
+bool Coms_ESP_SetClientLetter(uint8_t);
 
 #endif	/* COMS_ESP_H */
 
