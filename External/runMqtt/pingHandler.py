@@ -30,6 +30,7 @@ import random
 from termcolor import colored
 
 from runMqtt.recieveMessage import *
+from Settings import names
 
 
 class PingHandler(threading.Thread):
@@ -46,7 +47,11 @@ class PingHandler(threading.Thread):
         self.ping_thread = None
         self.dir = "PingData/Data/"
         self.dataLogFile=None
-        self.waitForBulk = False  
+        self.waitForBulk = False
+        self.randList = list(range(0x01,0xFF))
+        self.randList.remove(14)
+        self.randList.remove(42)
+        print(self.randList)
         
     def run(self):
         self.thread_terminate = False
@@ -100,7 +105,7 @@ class PingHandler(threading.Thread):
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(0.01)    
+            self.event.wait(0.5)    
 
 
 
@@ -150,7 +155,8 @@ class PingHandler(threading.Thread):
         data = bytearray()
         for lv in range(32):  # generate 32 bytes of random data
         # for lv in range(16):  # generate 32 bytes of random data
-            data.append(random.randint(0x01,0xFF)) # avoid NULL characters
+            # data.append(random.randint(0x01,0xFF)) # avoid NULL characters
+            data.append(random.choice(self.randList)) # avoid NULL characters
         
         text = bytearray(str.encode("png ")) # build a message with a command for the esp and the random data
         text.extend(data)
