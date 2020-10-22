@@ -446,7 +446,7 @@ bool stateInfo(byte c)
     case 23:  //read neighbour
       if (c == char(END_BYTE))
       {
-        sprintf(serial_packet, "REQ: NB %x %x %x %x %x %x %x", storage[0], storage[1], 
+        sprintf(serial_packet, "REQ: NB %.2x%.2x%.2x%.2x%.2x%.2x%.2x", storage[0], storage[1], 
                             storage[2], storage[3], storage[4], storage[5], storage[6]);     
         publish(serial_packet);
         memset(serial_packet, 0, sizeof(serial_packet));

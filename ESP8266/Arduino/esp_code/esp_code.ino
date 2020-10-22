@@ -227,14 +227,14 @@ void normalOp()
     lastMacPub = millis();
   }
   
-  if (abs(lastMessage - millis()) > 10000)
-  {
-    char buff[50];
-    sprintf(buff, "INFO: RunState: %d", runState);
-    publish(buff);
-//    client.publish(publishName, "INFO: Just chillin");
-    lastMessage = millis();
-  }
+//   if (abs(lastMessage - millis()) > 10000)
+//   {
+//     char buff[50];
+//     sprintf(buff, "INFO: RunState: %d", runState);
+//     publish(buff);
+// //    client.publish(publishName, "INFO: Just chillin");
+//     lastMessage = millis();
+//   }
 
   if (Serial.hasOverrun())
   {
