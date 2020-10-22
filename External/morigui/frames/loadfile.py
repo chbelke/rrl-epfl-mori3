@@ -109,6 +109,13 @@ class LoadFile():
             if module == 'Label':
                 continue
             for cmd in self.fileContents[self.iteration][module]:
+                if cmd.startswith("ping"):
+                    num = 1
+                    splitText = cmd.split("ping",1)
+                    if (splitText[1].strip().isnumeric()):
+                        num = int(splitText[1])
+                    self.mqtthost.pingHandler.setPingCount(self.checkName(module), num)
+                    continue
                 self.mqtthost.publishLocal(cmd, self.checkName(module))  
         self.iterateJson()
 

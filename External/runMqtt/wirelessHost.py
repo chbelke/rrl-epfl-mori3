@@ -362,8 +362,8 @@ class WirelessHost(threading.Thread):
 
     def espMQTT(self, espNum):
         self.macDict.get(self.idDict[espNum])[0] = "WiFi"
-        if espNum in self.noWifiDict:
-            del self.noWifiDict[espNum]
+        # if espNum in self.noWifiDict:
+        #     del self.noWifiDict[espNum]
 
 
     def updateNoWifiDict(self, espNum):

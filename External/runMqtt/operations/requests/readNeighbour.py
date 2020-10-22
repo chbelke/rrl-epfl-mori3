@@ -1,15 +1,11 @@
 from termcolor import colored
 import traceback
+import codecs
 
 def readNeighbour(self, pyld, espNum):
-    # print(colored(espNum + ": Neighbour edge "+ pyld[2] + ':', 'green'), end=' ')
-    # print("HERE")
-    tmp = [None] * 8
-    tmp[0] = '0'
-    tmp[1] = '0'
-    for i in range(2,8):
-        tmp[i] = bytearray.fromhex(pyld[i+1]).decode()
-    neighbour = ''.join(tmp)
-    self.updateConnection(espNum, pyld[2], neighbour)
+    tmp = bytearray.fromhex(pyld[2]).decode()
+    neighbour = '00'+ tmp[1:]
+    edge = int(pyld[2][1], 16)
+    self.updateConnection(espNum, edge, neighbour)
     # print(colored(str(neighbour) + " connected", 'green'))
     return
