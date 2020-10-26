@@ -1,6 +1,8 @@
 from termcolor import colored
 import traceback
 
+from Settings import names
+
 def relayHandle(pyld, espNum):
     print(pyld)
     # msgld = ' '.join(pyld)
@@ -8,15 +10,17 @@ def relayHandle(pyld, espNum):
 
     try:
         msg = ' '.join(pyld[1:])
-        espNum = "0"+str(msg[0:7])
-        msg = msg[7:].rsplit(' ')
+        # espNum = "0"+str(msg[0:7])
+        espNum = names.convertFromLetter(msg[0])
+        msg = msg[1:].rsplit(' ')
         return msg, espNum
     except:
         try:    #special accomodation for pings
-            espNum = '0' + pyld[1][0:7].decode('UTF-8')   #espNum
+            espNum = names.convertFromLetter(chr(pyld[1][0]))
+            # espNum = '0' + pyld[1][0:7].decode('UTF-8')   #espNum
             msg = []
-            msg.append(pyld[1][7:11].decode('UTF-8'))
-            msg.append(pyld[1][12:])
+            msg.append(pyld[1][1:5].decode('UTF-8'))
+            msg.append(pyld[1][6:])
             return msg, espNum
         except:
             print(colored("IN TRACEBACK", 'red'))

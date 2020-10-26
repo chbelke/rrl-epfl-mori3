@@ -51,7 +51,7 @@ class PingHandler(threading.Thread):
         self.randList = list(range(0x01,0xFF))
         self.randList.remove(14)
         self.randList.remove(42)
-        print(self.randList)
+        self.sequenIter = 0
         
     def run(self):
         self.thread_terminate = False
@@ -63,22 +63,28 @@ class PingHandler(threading.Thread):
     def checkPing(self):
         run=True
         while not self.event.is_set():
-            i = 1
             try:
-                for esp in self.pingCount.keys():
-                    if self.pingCount[esp] <= 0:
-                        continue
-
+                allgood = all(busy == False for busy in self.pingBusy.values())
+                for i, esp in enumerate(self.pingCount.keys()):
                     if not esp in self.pingBusy: # if it's the first ping we're sending
-                        self.sendPing(esp)
-                        self.pingBusy[esp] = True
-                    elif not self.pingBusy[esp]: # we already sent a ping and we're no longer busy so the ping returned
+                        self.pingBusy[esp] = False
+                    if not self.pingBusy[esp]: # we already sent a ping and we're no longer busy so the ping returned
+                        if not self.waitForBulk:
+                            if not all(busy == False for busy in self.pingBusy.values()):
+                                continue
+                            if i != self.sequenIter:
+                                continue
+                            else:
+                                self.sequenIter += 1
+                                self.sequenIter %= len(self.pingCount.keys())
+                        else:
+                            if not allgood:
+                                continue
                         self.pingCount[esp] -= 1 # decrement
                         if self.pingCount[esp] > 0:
-                            if self.waitForBulk and not all(busy == False for busy in self.pingBusy.values()):
-                                continue
                             self.sendPing(esp)
                             self.pingBusy[esp] = True
+
                     elif time.perf_counter() - self.getTsPingDict(esp) > 2:
                         print(colored("TIMEOUT: "+ names.idsToName[esp], "red"))
                         self.pingBusy[esp] = False
@@ -86,26 +92,13 @@ class PingHandler(threading.Thread):
                         self.pingCount[esp] -= 1 # decrement
 
                     if self.pingCount[esp] == 0:
-                        # arr1 = np.array(self.pingResults[esp]["time"]) #save data to file
-                        # arr2 = np.array(self.pingResults[esp]["integrity"])
-                        # dtString = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-                        # if self.newBatchFlag:
-                        #     self.dir = "Ping Data/Data/Batch_" + dtString
-                        #     if not os.path.exists(self.dir):
-                        #         os.makedirs(self.dir)
-                        #         #print("\nNew batch, Made directory: " + self.dir) #debug
-                        #     self.newBatchFlag = False
-                        #     #print("Batch flag set to false\n") #debug
-                        # np.savez(self.dir + "/PD_" + esp + "_" + dtString, arr1, arr2)
                         print(colored("Ping data for " + esp + " saved!", "green"))
-                        # self.pingBusy.pop(esp) #remove key
-                        # if len(self.pingBusy) == 0: #End of batch
-                        #     self.newBatchFlag = True
-                            #print("\nBatch flag set to true") #debug
+                        # self.pingCount.pop(esp)
+                        self.pingBusy.pop(esp) #remove key
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(0.5)    
+            self.event.wait(1)    
 
 
 
@@ -154,7 +147,7 @@ class PingHandler(threading.Thread):
         #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
         data = bytearray()
         for lv in range(32):  # generate 32 bytes of random data
-        # for lv in range(16):  # generate 32 bytes of random data
+        # for lv in range(8):  # generate 32 bytes of random data
             # data.append(random.randint(0x01,0xFF)) # avoid NULL characters
             data.append(random.choice(self.randList)) # avoid NULL characters
         

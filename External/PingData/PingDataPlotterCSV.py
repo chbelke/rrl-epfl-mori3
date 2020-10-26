@@ -100,14 +100,16 @@ for esp in pingData.keys():
     color_iter += 1
 
 
-labels = [checkName(x) for x in pingData.keys()]
-labels = [hub_name_dict[x] for x in pingData.keys()]
-handles, _ = ax.get_legend_handles_labels()
-# labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
-order = [1, 0, 2, 3]
-handles = [pltNum[idx][0] for idx in order]
-labels = [labels[idx] for idx in order]
-print(handles, labels)
+# labels = [checkName(x) for x in pingData.keys()]
+# labels = [hub_name_dict[x] for x in pingData.keys()]
+# handles, _ = ax.get_legend_handles_labels()
+# # labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
+# order = [1, 0, 2, 3]
+# handles = [pltNum[idx][0] for idx in order]
+# labels = [labels[idx] for idx in order]
+# print(handles, labels)
+
+handles, labels = ax.get_legend_handles_labels()
 
 # handles, labels = plt.gca().get_legend_handles_labels()
 # order = [1,0,2,3]
@@ -120,7 +122,7 @@ for legobj in leg.legendHandles:
     legobj.set_linewidth(4.0)
 
 ax.set_ylim(0,1)
-ax.set_xlim(0,160)
+ax.set_xlim(0,200)
 # plt.yscale("log")
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
