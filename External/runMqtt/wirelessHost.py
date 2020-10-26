@@ -92,18 +92,22 @@ class WirelessHost(threading.Thread):
         self.udpClient.usp_rec.run()
         self.pingHandler.run()
 
+        self.printReference(loopTime, startTime)
         while not self.event.is_set():
-            if time.time() - loopTime > 0.5:
-                print("\nTime Elapsed: {:.2f}".format(loopTime-startTime))
-                print(colored("Referenced ESPs : ","yellow"), end=' ')
-                txt = ""
-                for idty in self.idDict:
-                    txt += names.idsToName[idty]
-                    txt += ", "
-                print(txt[:-2])
-                
+            if time.time() - loopTime > 10:
+                self.printReference(loopTime, startTime)               
                 loopTime = time.time()
             self.event.wait(0.25)    
+
+
+    def printReference(self, loopTime, startTime):
+        print("\nTime Elapsed: {:.2f}".format(loopTime-startTime))
+        print(colored("Referenced ESPs : ","yellow"), end=' ')
+        txt = ""
+        for idty in self.idDict:
+            txt += names.idsToName[idty]
+            txt += ", "
+        print(txt[:-2])        
 
 
     def publishGlobal(self, msg):
@@ -358,8 +362,8 @@ class WirelessHost(threading.Thread):
 
     def espMQTT(self, espNum):
         self.macDict.get(self.idDict[espNum])[0] = "WiFi"
-        if espNum in self.noWifiDict:
-            del self.noWifiDict[espNum]
+        # if espNum in self.noWifiDict:
+        #     del self.noWifiDict[espNum]
 
 
     def updateNoWifiDict(self, espNum):

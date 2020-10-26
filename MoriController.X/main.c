@@ -88,7 +88,6 @@ volatile bool Flg_EdgeWig[3] = {false, false, false}; // wiggle flag
 volatile bool Flg_EdgeReq_Ang[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Ext[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Cpl[3] = {false, false, false};
-volatile bool Flg_EdgeReq_CplNbrWait[3] = {false, false, false};
 
 volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
 volatile bool Flg_ID_check = false;
@@ -120,8 +119,9 @@ int main(void) {
 
     // verify own id with esp
     while (!Flg_ID_check) {
-        LED_Y = LED_Off;
-        for (edge = 0; edge < 3; edge++) {
+        LED_Y = LED_Off;    
+        for (edge = 0; edge < 3; edge++)
+        {
             if(Flg_Tmr3) {
                 Tmrs_CBK_Timer3_Handle();
                 Flg_Tmr3 = false;
@@ -149,22 +149,18 @@ int main(void) {
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    for (edge = 0; edge < 3; edge++) 
-        Acts_ROT_SetCurrentLimit(edge, MotRot_TorqueLimit);
+    for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
 
     while (1){
-        for (edge = 0; edge < 3; edge++) {
-            if(Flg_Tmr3) {
-                Tmrs_CBK_Timer3_Handle();
-                Flg_Tmr3 = false;
-            }
-            if(Flg_Tmr5) {
-                Tmrs_CBK_Timer5_Handle();
-                Flg_Tmr5 = false;
-            }        
-            Coms_123_Eval(edge);
-        }
+        Tmrs_CBK_Evaluate_Timers();
+        Coms_123_Eval(0);
+        Tmrs_CBK_Evaluate_Timers();
+        Coms_123_Eval(1);
+        Tmrs_CBK_Evaluate_Timers();
+        Coms_123_Eval(2);
+        Tmrs_CBK_Evaluate_Timers();
         Coms_ESP_Eval();
+        Tmrs_CBK_Evaluate_Timers();
         Coms_ESP_StateUpdate();
     }
     return 1;

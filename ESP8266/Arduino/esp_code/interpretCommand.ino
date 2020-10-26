@@ -365,6 +365,11 @@ void echoPing(byte* payload, unsigned int len)
   sprintf(buff, "PNG: ");
   for (int i = 4; i < len; i++)
   {
+    if(((payload[i] == 0x00) && (i!=len-1)) || (payload[i] == 0xFF))
+    {
+      publish("PNG: Err");
+      return;
+    }
     sprintf(buff, "%s%c", buff, payload[i]);
   }
   publish(buff);

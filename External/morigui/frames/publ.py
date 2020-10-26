@@ -80,9 +80,9 @@ class PublishLocal():
             splitText = text.split("ping",1)
             if (splitText[1].strip().isnumeric()):
                 num = int(splitText[1])
-            self.wirelesshost.pingHandler.setPingCount(self.checkName(number), num)
+            self.wirelesshost.pingHandler.setPingCount(names.checkName(number), num)
             return
-        self.wirelesshost.publishLocal(text, self.checkName(number))
+        self.wirelesshost.publishLocal(text, names.checkName(number))
 
 
     def publishBinary(self):
@@ -122,9 +122,3 @@ class PublishLocal():
         for mori_individ in self.moriNumber:
             menu.add_command(label=[mori_individ[0], names.idsToName[mori_individ[1]]], 
                          command=lambda value=names.idsToName[mori_individ[1]]: self.listMoriVar.set(value))
-
-    def checkName(self, name):
-        try:
-            return names.nameToIds[name]
-        except KeyError:
-            return name

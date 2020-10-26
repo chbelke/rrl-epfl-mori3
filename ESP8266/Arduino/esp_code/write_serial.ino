@@ -96,11 +96,20 @@ void serial_write_to_hub(char* buff)
   byte len = strlen(buff);
 
   write_to_buffer(0b11100110); //Relay to Wifi Edge
-  write_to_buffer(byte(len+11));
-
-  for (byte i=1; i<8; i++)
+  
+  if (clientLetter == 255)
   {
-    write_to_buffer(clientName[i]);
+    write_to_buffer(byte(len+11));
+    for (byte i=1; i<8; i++)
+    {
+      write_to_buffer(clientName[i]);
+    }
+  }
+  else
+  {
+    write_to_buffer(byte(len+5));
+    write_to_buffer(clientLetter);
+
   }
 
   for (byte i=0; i<len; i++)
