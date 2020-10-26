@@ -42,8 +42,12 @@ void readUDP()
   }  
   
   int len = UDP.read(udpInBuff, PACKET_SIZE);
+  if (len > 0)
+  {
+    udpInBuff[len] = '\0';
+  }  
 
-  commands(udpInBuff, len);
+  commands(udpInBuff, len+1);
 }
 
 
