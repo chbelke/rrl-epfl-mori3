@@ -4,7 +4,7 @@ import traceback
 from Settings import names
 
 def relayHandle(pyld, espNum):
-    print(pyld)
+    # print(pyld)
     # msgld = ' '.join(pyld)
     # print(colored(espNum + "-" + msgld, 'red'))
 
