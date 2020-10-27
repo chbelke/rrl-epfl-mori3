@@ -24,102 +24,103 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
 
     switch (state[edge]) {
         case 0:
-            if (Coms_CMD_Verbose(byte))
+            if (Coms_CMD_Verbose(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 13:
-            if (Coms_CMD_Shape(edge, byte))
+            if (Coms_CMD_Shape(edge, byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
         
         case 15:
-            if (Coms_CMD_Stop_PARTYMODE(byte))
+            if (Coms_CMD_Stop_PARTYMODE(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;            
             
         case 16:
-            if (Coms_CMD_WiggleEdge(edge, byte))
+            if (Coms_CMD_WiggleEdge(edge, byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;      
             
         case 17:
-            if (Coms_CMD_SetFlags(edge, byte))
+            if (Coms_CMD_SetFlags(edge, byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
             
         case 18:
-            if(Coms_CMD_Set_PARTYMODE(byte))
+            if(Coms_CMD_Set_PARTYMODE(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 19:
-            if(Coms_CMD_Set_ID(byte))
+            if(Coms_CMD_Set_ID(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 20:
-            if (Coms_CMD_Request_Edges(byte))
+            if (Coms_CMD_Request_Edges(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 21:
-            if (Coms_CMD_Request_Angles(byte))
+            if (Coms_CMD_Request_Angles(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 22:
-            if (Coms_CMD_Request_Orient(byte))
+            if (Coms_CMD_Request_Orient(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 23:
-            if (Coms_CMD_Request_Neighbour(byte))
+            if (Coms_CMD_Request_Neighbour(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 24:        
-            if (Coms_CMD_Request_WiFiEdge(byte))
+            if (Coms_CMD_Request_WiFiEdge(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 25:
-            if (Coms_CMD_No_WifiEdge(byte))
+            if (Coms_CMD_No_WifiEdge(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 26:
-            if (Coms_CMD_SetWiFiEdge(edge, byte))
+            if (Coms_CMD_SetWiFiEdge(edge, byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 27:    //Depricated
-            if (Coms_CMD_SetMotRotOn(byte))
+            if (Coms_CMD_SetMotRotOn(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 28:    //Depricated
-            if (Coms_CMD_SetMotRotOff(byte))
+            if (Coms_CMD_SetMotRotOff(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 29:    //Depricated
-            if (Coms_CMD_SetMotLinOn(byte))
+            if (Coms_CMD_SetMotLinOn(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 30:    //Depricated
-            if (Coms_CMD_SetMotLinOff(byte))
+            if (Coms_CMD_SetMotLinOff(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 31:
-            if (Coms_CMD_Restart_PIC(byte))
+            if (Coms_CMD_Restart_PIC(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
             
         case 50: // END BYTE NOT RECEIVED **************************************
             if ((byte == EDG_End) || (byte == ESP_End)) // wait for next end byte
+                Coms_ESP_Verbose_Write("CMD_OVL");
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;            
 
@@ -129,48 +130,47 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
     return false;
 }
 
-bool Coms_CMD_Reset(uint8_t* state, bool* alloc) {
+bool Coms_CMD_Reset(uint8_t *state, bool *alloc) {
     *alloc = true;
     *state = 0;
     return true;
 }
 
-void Coms_CMD_OverflowError() {
-    Coms_ESP_Verbose_Write("tooLong");
-//    state[edge] = 50;
+void Coms_CMD_OverflowError(uint8_t *state) {
+    *state = 50;
 }
 
 
 //------------------------- Misc. -------------------------//
 
-bool Coms_CMD_Verbose(uint8_t byte) {
+bool Coms_CMD_Verbose(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         FLG_Verbose = !FLG_Verbose;
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
-bool Coms_CMD_Restart_PIC(uint8_t byte) {
+bool Coms_CMD_Restart_PIC(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         __asm__ volatile ("reset");
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 
 //-------------------- Functional Commands --------------------//
-bool Coms_CMD_WiggleEdge(uint8_t edge, uint8_t byte) {
+bool Coms_CMD_WiggleEdge(uint8_t edge, uint8_t byte, uint8_t *state) {
     static uint8_t count = 0;
     static uint8_t side;
     if (count >= 1) {
         if (byte == ESP_End) {
             Acts_ROT_SetWiggle(side);
         } else {
-            Coms_CMD_OverflowError();
+            Coms_CMD_OverflowError(state);
         }
         count = 0;
         return true;
@@ -182,41 +182,41 @@ bool Coms_CMD_WiggleEdge(uint8_t edge, uint8_t byte) {
 }
 
 //------------------------- Requests -------------------------//
-bool Coms_CMD_Request_Edges(uint8_t byte) {
+bool Coms_CMD_Request_Edges(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         Coms_ESP_Request_Edges();
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
-bool Coms_CMD_Request_Angles(uint8_t byte) {
+bool Coms_CMD_Request_Angles(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         Coms_ESP_Request_Angles();
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
-bool Coms_CMD_Request_Orient(uint8_t byte) {
+bool Coms_CMD_Request_Orient(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         Coms_ESP_Request_Orient();
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
-bool Coms_CMD_Request_Neighbour(uint8_t byte) {
+bool Coms_CMD_Request_Neighbour(uint8_t byte, uint8_t *state) {
     static uint8_t count = 0;
     static uint8_t side;
     if (count >= 1) {
         if (byte == ESP_End) {
             Coms_ESP_Request_Neighbour(side);
         } else {
-            Coms_CMD_OverflowError();
+            Coms_CMD_OverflowError(state);
         }
         count = 0;
         return true;
@@ -227,49 +227,49 @@ bool Coms_CMD_Request_Neighbour(uint8_t byte) {
     return false;
 }
 
-bool Coms_CMD_Request_WiFiEdge(uint8_t byte) {
+bool Coms_CMD_Request_WiFiEdge(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         Coms_ESP_Request_WiFiEdge();
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
-bool Coms_CMD_No_WifiEdge(uint8_t byte) {
+bool Coms_CMD_No_WifiEdge(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         Coms_ESP_Request_WiFiEdge(byte);
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 
-bool Coms_CMD_Stop_PARTYMODE(uint8_t byte)
+bool Coms_CMD_Stop_PARTYMODE(uint8_t byte, uint8_t *state)
 {
     if (byte == ESP_End) {
         MODE_LED_PARTY = false; // XXX to be replaced by separate off routine
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 
-bool Coms_CMD_Set_PARTYMODE(uint8_t byte)
+bool Coms_CMD_Set_PARTYMODE(uint8_t byte, uint8_t *state)
 {
     if (byte == ESP_End) {
         MODE_LED_PARTY = true; // XXX to be replaced by separate off routine
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 
 //------------------------- Setters -------------------------//
-bool Coms_CMD_Set_ID(uint8_t byte)
+bool Coms_CMD_Set_ID(uint8_t byte, uint8_t *state)
 {
     static uint8_t count=0;
     static uint8_t tmpID[6];
@@ -283,7 +283,7 @@ bool Coms_CMD_Set_ID(uint8_t byte)
             }
             Flg_ID_check = true;
         } else {
-            Coms_CMD_OverflowError();
+            Coms_CMD_OverflowError(state);
         }
         count = 0;
         return true;
@@ -295,47 +295,47 @@ bool Coms_CMD_Set_ID(uint8_t byte)
 }
 
 // Depricated
-bool Coms_CMD_SetMotRotOn(uint8_t byte)
+bool Coms_CMD_SetMotRotOn(uint8_t byte, uint8_t *state)
 {
     if (byte == ESP_End) {
         FLG_MotRot_Active = true;
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 // Depricated
-bool Coms_CMD_SetMotRotOff(uint8_t byte) {
+bool Coms_CMD_SetMotRotOff(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         FLG_MotRot_Active = false;
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 // Depricated
-bool Coms_CMD_SetMotLinOn(uint8_t byte) {
+bool Coms_CMD_SetMotLinOn(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         FLG_MotLin_Active = true;
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
 // Depricated
-bool Coms_CMD_SetMotLinOff(uint8_t byte) {
+bool Coms_CMD_SetMotLinOff(uint8_t byte, uint8_t *state) {
     if (byte == ESP_End) {
         FLG_MotLin_Active = false;
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
     }
     return true;
 }
 
-bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
+bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte, uint8_t *state) {
     static uint8_t tmp_wifi_edge[4] = {255, 255, 255, 255};
     static bool databyte = true; //Former count - but only one byte sent
     if (byte == ESP_End) {
@@ -350,7 +350,7 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
         tmp_wifi_edge[edge] = byte;
         databyte = false;
     } else {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
         databyte = true;
         return true;
     }
@@ -358,7 +358,7 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
 }
 
 
-bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
+bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte, uint8_t *state) {
     static bool set_flg_alloc[4] = {true, true, true, true};
     static uint8_t flag[4];
     static bool flag_set[4];
@@ -371,7 +371,7 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
     }
     
     if (byte != ESP_End) {
-        Coms_CMD_OverflowError();
+        Coms_CMD_OverflowError(state);
         set_flg_alloc[edge] = true;
         return true;
     }
@@ -440,7 +440,7 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
  * - 0b11xxxxxx tbd
  */
 
-bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
+bool Coms_CMD_Shape(uint8_t edge, uint8_t byte, uint8_t *state) {
     static uint8_t alloc[4];
     static uint8_t EspInCase[4];
     static uint8_t EspInBits[4];
