@@ -183,9 +183,13 @@ void loop()
       normalOp();
       break;
     case 12:  //restart wireless
+      normalOp();
       startInternet();
+      normalOp();
       startMQTT();
       normalOp();
+      runState = 13;
+    case 13:
       publish("WIFI: On");
       runState = 3;
       break;
@@ -200,7 +204,7 @@ void publish(char* buff)
   verbose_print("Sent ");
   verbose_print(buff);
   verbose_print(" via ");
-  if ((runState == 10) || (runState == 11))
+  if ((runState == 10) || (runState == 11) || (runState == 12))
   {
     serial_write_to_hub(buff);
   }
@@ -283,6 +287,8 @@ void startInternet()
   {
     if(millis() - connectionTime > 10000) //if longer than 10s to connect
       ESP.reset();
+    if (runState == 12)
+      normalOp();
     delay(500);
     purgeSerial();
     verbose_println("Connecting to WiFi..");
@@ -315,6 +321,8 @@ void startMQTT()
   while (!client.connected()) {
     if(millis() - connectionTime > 10000) //if longer than 10s to connect
       ESP.reset();
+    if (runState == 12)
+      normalOp();    
     verbose_println("Connecting to MQTT...");
     wifi_ind_led.Toggle();
     if (client.connect(clientName))
