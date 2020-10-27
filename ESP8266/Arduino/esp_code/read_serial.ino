@@ -674,7 +674,7 @@ void purgeSerial()
 
 bool serialErrorHandle(byte c)
 {
-  if(c == END_BYTE)
+  if((c == END_BYTE) || c == 42)
   {
     return true;
   }
