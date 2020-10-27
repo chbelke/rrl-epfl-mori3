@@ -65,7 +65,10 @@ class PingHandler(threading.Thread):
         while not self.event.is_set():
             try:
                 allgood = all(busy == False for busy in self.pingBusy.values())
-                for i, esp in enumerate(self.pingCount.keys()):
+                keys = list(self.pingCount)
+                if self.waitForBulk:
+                    random.shuffle(keys)
+                for i, esp in enumerate(keys):
                     if not esp in self.pingBusy: # if it's the first ping we're sending
                         self.pingBusy[esp] = False
                     if not self.pingBusy[esp]: # we already sent a ping and we're no longer busy so the ping returned
@@ -98,7 +101,7 @@ class PingHandler(threading.Thread):
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(1)    
+            self.event.wait(0.05)    
 
 
 
@@ -146,8 +149,8 @@ class PingHandler(threading.Thread):
     def sendPing(self, number):
         #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
         data = bytearray()
-        for lv in range(32):  # generate 32 bytes of random data
-        # for lv in range(8):  # generate 32 bytes of random data
+        # for lv in range(64):  # generate 32 bytes of random data
+        for lv in range(8):  # generate 32 bytes of random data
             # data.append(random.randint(0x01,0xFF)) # avoid NULL characters
             data.append(random.choice(self.randList)) # avoid NULL characters
         
