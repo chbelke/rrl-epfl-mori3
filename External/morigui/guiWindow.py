@@ -89,7 +89,10 @@ class MoriGui(tk.Frame):
             print(colored("Online ESPs: ", "blue") + colored(espOrder, "blue"))
             print("")
             for i in range(len(espOrder)):
-                self.moriNumber.append(self.tmpEspIds[espOrder[i]])
+                try:
+                    self.moriNumber.append(self.tmpEspIds[espOrder[i]])
+                except KeyError:
+                    continue
 
             self.frame_publ.update_menu(self.moriNumber)
             # self.frame_binary.update_menu(self.moriNumber)
