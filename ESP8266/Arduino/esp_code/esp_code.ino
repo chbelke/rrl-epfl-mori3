@@ -278,8 +278,11 @@ void startInternet()
   delay(100);
   WiFi.begin(brn_ssid, brn_password);
 
+  unsigned long connectionTime = millis();
   while (WiFi.status() != WL_CONNECTED)
   {
+    if(millis() - connectionTime > 10000) //if longer than 10s to connect
+      ESP.reset();
     delay(500);
     purgeSerial();
     verbose_println("Connecting to WiFi..");
@@ -308,7 +311,10 @@ void startInternet()
 
 void startMQTT()
 {
+  unsigned long connectionTime = millis();
   while (!client.connected()) {
+    if(millis() - connectionTime > 10000) //if longer than 10s to connect
+      ESP.reset();
     verbose_println("Connecting to MQTT...");
     wifi_ind_led.Toggle();
     if (client.connect(clientName))
@@ -318,7 +324,7 @@ void startMQTT()
       purgeSerial();
       verbose_print("failed with state ");
       verbose_println(client.state());
-      delay(2000);
+      delay(1000);  // changed (could be too quick)
     }
   }
   serial_write_one(0b10100011);
