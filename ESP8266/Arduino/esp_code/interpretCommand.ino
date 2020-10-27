@@ -529,6 +529,11 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask,
       byte_count = len;
     }
 
+    if(byte_count >= len && i < 2) { // no space at the end of the command (e.g., "led 10 10 10")
+      publish("ERR: No values following");
+      return false;
+    }
+
     if(flg_two_bytes){
       if(byte_count > pre_count + 4) {
         publish("ERR: Angle value > 4 chars");
