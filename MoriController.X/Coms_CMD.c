@@ -383,23 +383,23 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
             }
             break;
 
-        case 2:
+        case 2: // f1
             FLG_WaitAllEdges = flag_set[edge];
-            break;
+            break;            
+            
+        case 3: // f2
+            MODE_LED_EDGES = flag_set[edge];
+            break;            
 
-        case 3:
-            // Flag2 = flag_set[edge];
-            break;
-
-        case 4:
+        case 4: // f3
             // Flag3 = flag_set[edge];
-            break;
+            break;            
 
-        case 5:
+        case 5: // f4
             // Flag4 = flag_set[edge];
-            break;
+            break;            
 
-        case 6:
+        case 6: // f5
             // Flag5 = flag_set[edge];
             break;
 

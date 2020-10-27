@@ -45,7 +45,7 @@
 
 #define MODE_MotLin_Active true
 #define MODE_MotRot_Active true
-#define MODE_Cplngs_Active false
+#define MODE_Cplngs_Active true
 
 
 /* ******************** BATTERY ********************************************* */
@@ -196,7 +196,7 @@ extern volatile uint8_t ESP_ID[6];
 #define MotRot_WiggleTime 15        // seconds
 #define MotRot_WiggleTorque 80      // wiggle torque limit /255
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
-#define MotRot_DrvCplPushInterval 140 // push interval at 20Hz (< SMA_Period_2)
+#define MotRot_DrvCplPushInterval 100 // push interval at 20Hz (< SMA_Period_2)
 
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           5

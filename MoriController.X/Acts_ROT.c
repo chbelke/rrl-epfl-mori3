@@ -14,7 +14,7 @@
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
-uint16_t Spd_Limit[3] = {MotRot_PID_Max, MotRot_PID_Max, MotRot_PID_Max};
+int16_t Spd_Limit[3] = {MotRot_PID_Max, MotRot_PID_Max, MotRot_PID_Max};
 uint8_t DrvInterval[3] = {0, 0, 0};
 
 #define WHEEL 68.15f // wheel distance from vertex
@@ -101,7 +101,13 @@ void Acts_ROT_Wiggle(uint8_t edge){
     if (Wgl_Count[edge] <= (MotRot_WiggleTime * 100)){
         if (Wgl_Count[edge] <= MotRot_WiggleTime * 60){
             Acts_ROT_Out(edge, 600);
-            if (Flg_EdgeSyn[edge]) Wgl_Count[edge] = MotRot_WiggleTime * 61;
+            if (Flg_EdgeSyn[edge]){
+                Wgl_Count[edge] = MotRot_WiggleTime * 61;
+                if (Flg_DriveAndCouple[edge]){
+                    uint8_t i;
+                    for (i = 0; i < 3; i++) if (i != edge) Acts_ROT_Out(i, 0);
+                }
+            }
         }
         else if (Wgl_Count[edge] <= MotRot_WiggleTime * 90)
             Acts_ROT_Out(edge, -600);
