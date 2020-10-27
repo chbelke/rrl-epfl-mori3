@@ -32,29 +32,29 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
             if (Coms_CMD_Shape(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
-        
+
         case 15:
             if (Coms_CMD_Stop_PARTYMODE(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
-            break;            
-            
+            break;
+
         case 16:
             if (Coms_CMD_WiggleEdge(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
-            break;      
-            
+            break;
+
         case 17:
             if (Coms_CMD_SetFlags(edge, byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
-            
+
         case 18:
-            if(Coms_CMD_Set_PARTYMODE(byte))
+            if (Coms_CMD_Set_PARTYMODE(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
         case 19:
-            if(Coms_CMD_Set_ID(byte))
+            if (Coms_CMD_Set_ID(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
@@ -78,7 +78,7 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 24:        
+        case 24:
             if (Coms_CMD_Request_WiFiEdge(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
@@ -93,22 +93,22 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 27:    //Depricated
+        case 27: //Depricated
             if (Coms_CMD_SetMotRotOn(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 28:    //Depricated
+        case 28: //Depricated
             if (Coms_CMD_SetMotRotOff(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 29:    //Depricated
+        case 29: //Depricated
             if (Coms_CMD_SetMotLinOn(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
-        case 30:    //Depricated
+        case 30: //Depricated
             if (Coms_CMD_SetMotLinOff(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
@@ -117,11 +117,11 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
             if (Coms_CMD_Restart_PIC(byte))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
-            
+
         case 50: // END BYTE NOT RECEIVED **************************************
             if ((byte == EDG_End) || (byte == ESP_End)) // wait for next end byte
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
-            break;            
+            break;
 
         default:
             return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -137,12 +137,11 @@ bool Coms_CMD_Reset(uint8_t* state, bool* alloc) {
 
 void Coms_CMD_OverflowError() {
     Coms_ESP_Verbose_Write("tooLong");
-//    state[edge] = 50;
+    //    state[edge] = 50;
 }
 
 
 //------------------------- Misc. -------------------------//
-
 bool Coms_CMD_Verbose(uint8_t byte) {
     if (byte == ESP_End) {
         FLG_Verbose = !FLG_Verbose;
@@ -178,7 +177,7 @@ bool Coms_CMD_WiggleEdge(uint8_t edge, uint8_t byte) {
         side = byte;
         count++;
     }
-    return false;    
+    return false;
 }
 
 //------------------------- Requests -------------------------//
@@ -245,9 +244,7 @@ bool Coms_CMD_No_WifiEdge(uint8_t byte) {
     return true;
 }
 
-
-bool Coms_CMD_Stop_PARTYMODE(uint8_t byte)
-{
+bool Coms_CMD_Stop_PARTYMODE(uint8_t byte) {
     if (byte == ESP_End) {
         MODE_LED_PARTY = false; // XXX to be replaced by separate off routine
     } else {
@@ -256,9 +253,7 @@ bool Coms_CMD_Stop_PARTYMODE(uint8_t byte)
     return true;
 }
 
-
-bool Coms_CMD_Set_PARTYMODE(uint8_t byte)
-{
+bool Coms_CMD_Set_PARTYMODE(uint8_t byte) {
     if (byte == ESP_End) {
         MODE_LED_PARTY = true; // XXX to be replaced by separate off routine
     } else {
@@ -269,16 +264,13 @@ bool Coms_CMD_Set_PARTYMODE(uint8_t byte)
 
 
 //------------------------- Setters -------------------------//
-bool Coms_CMD_Set_ID(uint8_t byte)
-{
-    static uint8_t count=0;
+bool Coms_CMD_Set_ID(uint8_t byte) {
+    static uint8_t count = 0;
     static uint8_t tmpID[6];
-    if (count >= 6)
-    {
+    if (count >= 6) {
         if (byte == ESP_End) {
             uint8_t i;
-            for(i=0; i<6; i++)
-            {
+            for (i = 0; i < 6; i++) {
                 ESP_ID[i] = tmpID[i];
             }
             Flg_ID_check = true;
@@ -291,12 +283,11 @@ bool Coms_CMD_Set_ID(uint8_t byte)
         tmpID[count] = byte;
         count++;
     }
-    return false;       
+    return false;
 }
 
 // Depricated
-bool Coms_CMD_SetMotRotOn(uint8_t byte)
-{
+bool Coms_CMD_SetMotRotOn(uint8_t byte) {
     if (byte == ESP_End) {
         FLG_MotRot_Active = true;
     } else {
@@ -357,7 +348,6 @@ bool Coms_CMD_SetWiFiEdge(uint8_t edge, uint8_t byte) {
     return false;
 }
 
-
 bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
     static bool set_flg_alloc[4] = {true, true, true, true};
     static uint8_t flag[4];
@@ -365,54 +355,54 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
 
     if (set_flg_alloc[edge]) {
         flag[edge] = byte & 0b01111111; //first bit determines on or off
-        flag_set[edge] = ((byte >> 7) & 0x01)!=0;
+        flag_set[edge] = ((byte >> 7) & 0x01) != 0;
         set_flg_alloc[edge] = false;
         return false;
     }
-    
+
     if (byte != ESP_End) {
         Coms_CMD_OverflowError();
         set_flg_alloc[edge] = true;
         return true;
     }
-    
+
     switch (flag[edge]) {
         case 0:
             FLG_MotRot_Active = flag_set[edge];
-            if (!flag_set[edge]){
+            if (!flag_set[edge]) {
                 uint8_t i;
-                for (i = 0; i <3; i++) Flg_EdgeReq_Ang[i] = false;
-            }
-            break;
-            
-        case 1:
-            FLG_MotLin_Active = flag_set[edge];
-            if (!flag_set[edge]){
-                uint8_t i;
-                for (i = 0; i <3; i++) Flg_EdgeReq_Ext[i] = false;
+                for (i = 0; i < 3; i++) Flg_EdgeReq_Ang[i] = false;
             }
             break;
 
-        case 2:
+        case 1:
+            FLG_MotLin_Active = flag_set[edge];
+            if (!flag_set[edge]) {
+                uint8_t i;
+                for (i = 0; i < 3; i++) Flg_EdgeReq_Ext[i] = false;
+            }
+            break;
+
+        case 2: // f1
             FLG_WaitAllEdges = flag_set[edge];
             break;            
             
-        case 3:
-            // Flag2 = flag_set[edge];
+        case 3: // f2
+            MODE_LED_EDGES = flag_set[edge];
             break;            
 
-        case 4:
+        case 4: // f3
             // Flag3 = flag_set[edge];
             break;            
 
-        case 5:
+        case 5: // f4
             // Flag4 = flag_set[edge];
             break;            
 
-        case 6:
+        case 6: // f5
             // Flag5 = flag_set[edge];
             break;
-            
+
         default:
             break;
     }
@@ -422,7 +412,6 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
 }
 
 //----------- Fukkin massive-ass shape command -----------//
-
 /* EspInAloc: 
  * 0bxx000000, where xx = indicator
  * 00 = extension and angular values
@@ -436,10 +425,10 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte) {
  * 10 = coupling & led input
  * - 0b10xxxooo retract couplings 0,1,2 (if already open, interval prolonged)
  * - 0b10oooxxx rgb led values follow in order
- * 11 = tbd - mode selection?
- * - 0b11xxxxxx tbd
+ * 11 = parameter update
+ * - 0b11xxxooo speed setting rotary motors 0,1,2 (1 = value follows in order)
+ * - 0b11oooxxx tbd
  */
-
 bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
     static uint8_t alloc[4];
     static uint8_t EspInCase[4];
@@ -452,6 +441,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
     static uint8_t DriveSpd[3];
     static uint8_t DriveCrv[3]; // automatic drive mode speed and curv
     static uint8_t RgbPWM[4][3]; // rgb led values
+    static uint8_t MotRotSpd[4][3];
 
     switch (EspInCase[edge]) {
         case 0: // CHECK START BYTE
@@ -461,21 +451,22 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
 
         case 1: // INPUT ALLOCATION ********************************************
             // if xx == 00, count bits         
-            if (((byte >> 6) & 0x03) == 0) { // *** ANGLE & EXTENSION INPUT
+            if (((byte >> 6) & 0x03) == 0) { // ******** ANGLE & EXTENSION INPUT
                 EspInCase[edge] = 2;
                 // Brian Kernighan: http://graphics.stanford.edu ...
                 //  ... /~seander/bithacks.html#CountBitsSetNaive
-                uint8_t EspInAlocTemp = byte;
-                for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
-                    EspInAlocTemp &= EspInAlocTemp - 1; // clear the LSB set
+                uint8_t EspInAlocTmp = byte;
+                for (EspInBits[edge] = 0; EspInAlocTmp; EspInBits[edge]++) {
+                    EspInAlocTmp &= EspInAlocTmp - 1; // clear the LSB set
                 }
-                EspInAlocTemp = byte & 0b00000111; // angle input is 2 bytes
-                for (EspInBits2[edge] = 0; EspInAlocTemp; EspInBits2[edge]++) {
-                    EspInAlocTemp &= EspInAlocTemp - 1;
+                EspInAlocTmp = byte & 0b00000111; // angle input is 2 bytes
+                for (EspInBits2[edge] = 0; EspInAlocTmp; EspInBits2[edge]++) {
+                    EspInAlocTmp &= EspInAlocTmp - 1;
                 }
-            } else if (((byte >> 6) & 0x03) == 1) { // ******** DRIVE INPUT
+
+            } else if (((byte >> 6) & 0x03) == 1) { // ************* DRIVE INPUT
                 if (byte & 0b00100000) { // automatic drive mode
-                    if ((byte & 0b00011100) == 28){ // drive&couple sequence
+                    if ((byte & 0b00011100) == 28) { // drive&couple sequence
                         EspInCase[edge] = 22;
                     } else {
                         EspInCase[edge] = 19;
@@ -483,25 +474,35 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                 } else { // manual drive mode
                     EspInCase[edge] = 15;
                     // only last three bits relevant when counting rec. bytes
-                    uint8_t EspInAlocTemp = (byte & 0b00000111);
-                    for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
-                        EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
+                    uint8_t EspInAlocTmp = (byte & 0b00000111);
+                    for (EspInBits[edge] = 0; EspInAlocTmp; EspInBits[edge]++) {
+                        EspInAlocTmp &= EspInAlocTmp - 1; // clear LSB set
                     }
                 }
-            } else if (((byte >> 6) & 0x03) == 2) { // COUPLING & LED INPUT
+
+            } else if (((byte >> 6) & 0x03) == 2) { // **** COUPLING & LED INPUT
                 //            Coms_ESP_Verbose_Write(coms_message);
                 if (byte & 0b00000111) {
                     EspInCase[edge] = 32;
                     // only last three bits relevant when counting rec. bytes
-                    uint8_t EspInAlocTemp = (byte & 0b00000111);
-                    for (EspInBits[edge] = 0; EspInAlocTemp; EspInBits[edge]++) {
-                        EspInAlocTemp &= EspInAlocTemp - 1; // clear LSB set
+                    uint8_t EspInAlocTmp = (byte & 0b00000111);
+                    for (EspInBits[edge] = 0; EspInAlocTmp; EspInBits[edge]++) {
+                        EspInAlocTmp &= EspInAlocTmp - 1; // clear LSB set
                     }
                     //                Coms_ESP_Verbose_Write(coms_1);
                 } else {
                     EspInCase[edge] = 35;
                     EspInBits[edge] = 0;
                     EspInBits2[edge] = 0;
+                }
+
+            } else if (((byte >> 6) & 0x03) == 3) { // ******** PARAMETER UPDATE
+                if (byte & 0b00111000) { // rotary motor speed setting
+                    EspInCase[edge] = 40;
+                    uint8_t EspInAlocTmp = (byte & 0b00111000);
+                    for (EspInBits[edge] = 0; EspInAlocTmp; EspInBits[edge]++) {
+                        EspInAlocTmp &= EspInAlocTmp - 1; // clear the LSB set
+                    }
                 }
             }
             EspInByts[edge] = EspInByts[edge] + 1;
@@ -533,7 +534,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
         case 8: // ANGLE INPUTS ************************************************
             /* cases 8 to 13, two bytes per motor input */
             if (alloc[edge] & 0b00000100) {
-                CmdAngTemp[edge][0] =  0xFF00 & ((uint16_t) (byte) << 8);
+                CmdAngTemp[edge][0] = 0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 9;
                 break;
@@ -547,7 +548,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             }
         case 10:
             if (alloc[edge] & 0b00000010) {
-                CmdAngTemp[edge][1] =  0xFF00 & ((uint16_t) (byte) << 8);
+                CmdAngTemp[edge][1] = 0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 11;
                 break;
@@ -561,7 +562,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             }
         case 12:
             if (alloc[edge] & 0b00000001) {
-                CmdAngTemp[edge][2] =  0xFF00 & ((uint16_t) (byte) << 8);
+                CmdAngTemp[edge][2] = 0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 13;
                 break;
@@ -615,7 +616,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                     uint8_t m;
                     for (m = 0; m <= 2; m++) {
                         if ((alloc[edge] >> (2 - m)) & 0b00000001) {
-                            if (!Flg_EdgeCon[edge]){
+                            if (!Flg_EdgeCon[edge]) {
                                 Acts_ROT_Out(m, DrivePWM[edge][m]*8);
                                 Acts_ROT_SetDrvInterval(m, 5);
                             }
@@ -646,11 +647,12 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
         case 21: // verify drive inputs
             if (byte == ESP_End) {
                 if (EspInByts[edge] == 4) {
-                    if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2]){
+                    if (!Flg_EdgeCon[0] && !Flg_EdgeCon[1] && !Flg_EdgeCon[2]) {
                         uint8_t i;
                         for (i = 0; i < 3; i++) Flg_Drive[edge] = true;
                         Acts_ROT_Drive(DriveSpd[edge], DriveCrv[edge],
-                            ((alloc[edge] & 0x18) >> 3), ((alloc[edge] & 0x04) >> 2));
+                                ((alloc[edge] & 0x18) >> 3),
+                                ((alloc[edge] & 0x04) >> 2));
                     }
                 } else {
                     EspInLost[edge] = EspInLost[edge] + 1; // data lost
@@ -661,8 +663,8 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             EspInCase[edge] = 0;
             return true;
             break;
-            
-        case 22: ;// DRIVE AND COUPLING SEQUENCE
+
+        case 22:; // DRIVE AND COUPLING SEQUENCE
             uint8_t OUTedge = alloc[edge] & 0b00000011;
             if (byte == ESP_End) {
                 Flg_EdgeReq_Cpl[OUTedge] = true;
@@ -681,7 +683,6 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                 EspInCase[edge] = 33;
                 break;
             }
-
         case 33:
             if (alloc[edge] & 0b00000010) {
                 RgbPWM[edge][1] = byte;
@@ -689,7 +690,6 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
                 EspInCase[edge] = 34;
                 break;
             }
-
         case 34:
             if (alloc[edge] & 0b00000001) {
                 RgbPWM[edge][2] = byte;
@@ -724,9 +724,45 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte) {
             return true;
             break;
 
-        case 36:
-            break;
+        case 40: // ROTARY SPEED UPDATE ****************************************
+            if (alloc[edge] & 0b00100000) {
+                MotRotSpd[edge][0] = byte;
+                EspInByts[edge] = EspInByts[edge] + 1;
+                EspInCase[edge] = 41;
+                break;
+            }
 
+        case 41:
+            if (alloc[edge] & 0b00010000) {
+                MotRotSpd[edge][1] = byte;
+                EspInByts[edge] = EspInByts[edge] + 1;
+                EspInCase[edge] = 42;
+                break;
+            }
+
+        case 42:
+            if (alloc[edge] & 0b00001000) {
+                MotRotSpd[edge][2] = byte;
+                EspInByts[edge] = EspInByts[edge] + 1;
+                EspInCase[edge] = 43;
+                break;
+            }
+
+        case 43: // verify motor speed inputs
+            if (byte == ESP_End) {
+                if (EspInByts[edge] == (2 + EspInBits[edge])) {
+                    uint8_t m;
+                    for (m = 0; m <= 2; m++) {
+                        if (alloc[edge] & (0b00100000 >> m)) {
+                            Acts_ROT_SetSpeedLimit(m, MotRotSpd[edge][m]);
+                        }
+                    }
+                }
+            }
+            EspInCase[edge] = 0;
+            return true;
+            break;
+            
         default:
             EspInCase[edge] = 0;
             break;

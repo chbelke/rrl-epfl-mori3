@@ -45,7 +45,7 @@
 
 #define MODE_MotLin_Active true
 #define MODE_MotRot_Active true
-#define MODE_Cplngs_Active false
+#define MODE_Cplngs_Active true
 
 
 /* ******************** BATTERY ********************************************* */
@@ -77,6 +77,7 @@ extern volatile bool Flg_EdgeWig[3];
 extern volatile bool Flg_EdgeReq_Ang[3];
 extern volatile bool Flg_EdgeReq_Ext[3];
 extern volatile bool Flg_EdgeReq_Cpl[3];
+extern volatile bool Flg_EdgeReq_CplNbrWait[3];
 
 extern volatile bool Flg_Uart_Lock[4];
 extern volatile bool Flg_ID_check;
@@ -191,11 +192,11 @@ extern volatile uint8_t ESP_ID[6];
 #define MotRot_PID_Imax 1024
 #define MotRot_PID_Max 1024
 
-#define MotRot_TorqueLimit 128      // /255, 160 GPX safe, 64 backdrive safe
+#define MotRot_TorqueLimit 149      // /255, 237 stall, 149 GPX safe, 63 backdrive safe
 #define MotRot_WiggleTime 15        // seconds
 #define MotRot_WiggleTorque 80      // wiggle torque limit /255
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
-#define MotRot_DrvCplPushInterval 140 // push interval at 20Hz (< SMA_Period_2)
+#define MotRot_DrvCplPushInterval 100 // push interval at 20Hz (< SMA_Period_2)
 
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX           5
@@ -211,8 +212,8 @@ extern volatile uint8_t ESP_ID[6];
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */
 #define MMA8452Q_Address 0x1C //i2c address
 #define MMA8452Q_CTRL_REG1_ADDR 0x2A //Ctrl reg address to be modified at Setup
-#define MMA8452Q_CTRL_REG1_STBY 0x00 //Value ctrl reg must be modified to at Setup
-#define MMA8452Q_CTRL_REG1_ACTV 0x01 //Value ctrl reg must be modified to at Setup
+#define MMA8452Q_CTRL_REG1_STBY 0x00 //Value ctrl reg must be modified at Setup
+#define MMA8452Q_CTRL_REG1_ACTV 0x01 //Value ctrl reg must be modified at Setup
 #define MMA8452Q_CTRL_REG2_ADDR 0x0E //XYZ_DATA_CFG register (range and filter)
 #define MMA8452Q_CTRL_REG2_RNGE 0x00 //2g range and high-pass filter off
 #define MMA8452Q_OUT_X_MSB_ADDR 0x01 //Address of first data register to be read
