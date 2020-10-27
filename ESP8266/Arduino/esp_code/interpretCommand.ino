@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 54;
+  int sw_case = 55;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -253,7 +253,10 @@ void commands(byte* payload, unsigned int len)
 
     case 53:
       stopParty();
-      break;         
+      break;
+
+    case 54:
+      pubName();
 
     default:
       publish("ERR: Command not understood");

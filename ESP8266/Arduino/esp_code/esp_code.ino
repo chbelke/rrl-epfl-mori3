@@ -51,7 +51,7 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "frt", "frf", "flt", "flf", "f1t", //frt = flag rot true; flf - flag lin false
                 "f1f", "f2t", "f2f", "f3t", "f3f", 
                 "f4t", "f4f", "f5t", "f5f", "wiggles",
-                "drcoup", "dlflag", "dlperiod", "cops"};  
+                "drcoup", "dlflag", "dlperiod", "cops", "name"};  
 
 char stringIP[16];
 char charMAC[18];

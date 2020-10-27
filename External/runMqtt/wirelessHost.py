@@ -55,7 +55,7 @@ class WirelessHost(threading.Thread):
         self.macOrder = []          # ['mac', 'mac', mac]
         self.coTimeDict = {}
         self.data = []
-        self.macCallTime = time.time()
+
         self.verCallTimeDict = {}
         self.verCalledDict = {}
                 
