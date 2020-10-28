@@ -13,7 +13,7 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 55;
+  int sw_case = 56;
   for(int i=0; i < sw_case; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
@@ -257,6 +257,11 @@ void commands(byte* payload, unsigned int len)
 
     case 54:
       pubName();
+      break;
+
+    case 55:  //Angular speed
+      setPicSpeed(payload, len);      
+      break;
 
     default:
       publish("ERR: Command not understood");
@@ -485,6 +490,29 @@ void setPicEdges(byte* payload, unsigned int len)
   write_to_buffer(END_BYTE);
   return;
 }
+
+
+void setPicSpeed(byte* payload, unsigned int len)
+{
+  byte num_following = 0;
+  byte alloc = 0b11000000;
+  byte alloc_mask = 0b00100000;
+  byte speed[3];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, speed, false)) {
+    return;
+  }
+
+  write_to_buffer(0b11001101); //205
+  write_to_buffer(alloc);
+  for(byte i=0; i< num_following; i++)
+  {
+    write_to_buffer(speed[i]);
+  }
+  write_to_buffer(END_BYTE);
+  return;
+}
+
 
 void setPicAngles(byte* payload, unsigned int len)
 {
