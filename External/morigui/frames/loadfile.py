@@ -124,10 +124,15 @@ class LoadFile():
     def runButtonClicked(self):
         if self.auto_update_flag == True:
             self.auto_update_run = not self.auto_update_run
+            self.toggleRunButton()
         else:
+            self.run_button["text"] = "Run",
+            self.run_button["fg"]   = "green"            
             self.runJson()        
 
     def runJson(self):
+        if 'Jump' in self.fileContents[self.iteration]:
+            self.jumpToSection()
         for module in self.fileContents[self.iteration]:
             if module == 'Label':
                 continue
@@ -156,11 +161,21 @@ class LoadFile():
         if self.auto_update_button['text'] == "Manual":
             self.auto_update_flag = True
             self.auto_update_run = False
+            self.run_button["text"] = "Run",
+            self.run_button["fg"]   = "green"             
             self.last_update_time = time.time()
             self.auto_update_button.configure(text="Automatic", fg="green")
         else:
             self.auto_update_flag = False
             self.auto_update_button.configure(text="Manual", fg="red")
+
+    def toggleRunButton(self):
+        if self.auto_update_run == False:
+            self.run_button["text"] = "Stop",
+            self.run_button["fg"]   = "red"
+        else:
+            self.run_button["text"] = "Run",
+            self.run_button["fg"]   = "green"
 
 
     def checkAutoUpdate(self):
@@ -174,3 +189,14 @@ class LoadFile():
         if all(stable_state[module] == True for module in stable_state):
             self.runJson()
             self.last_update_time = time.time()
+
+
+    def jumpToSection(self):
+        section_jump = self.fileContents[self.iteration]['Jump'][0]
+        for i, cmdList in enumerate(self.fileContents):
+            if section_jump in cmdList['Label']:
+                self.iteration = i
+                self.displayJson()
+                return
+        print(colored('GUI Error: No label found corresponding to the jump', 'red'))
+        self.iterateJson()
