@@ -41,7 +41,7 @@ char clientLetter = 255;
 
 const float softwareVersion = 0.5;
 
-char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
+char *cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "g_shape", "udp", "noudp", "verb", "noverb",
                 "rel", "cont", "nocon", "rled", "gled",
                 "bled", "wedge", "rshape", "redge","rang",
@@ -52,7 +52,8 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "f1f", "f2t", "f2f", "f3t", "f3f", 
                 "f4t", "f4f", "f5t", "f5f", "wiggles",
                 "drcoup", "dlflag", "dlperiod", "cops", "name",
-                "spd"};  
+                "spd"};
+int numCmds;
 
 char stringIP[16];
 char charMAC[18];
@@ -89,6 +90,7 @@ Led led_blue(5);
 //--------------------------- Start ----------------------------------------//
 void setup()
 {
+  numCmds = sizeof(cmdLine)/sizeof(cmdLine[0]);
   Serial.begin(115200);
   Serial.setRxBufferSize(1024);
   // Serial.setTxBufferSize(1024);

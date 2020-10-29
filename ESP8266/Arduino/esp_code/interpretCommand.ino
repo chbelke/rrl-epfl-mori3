@@ -5,7 +5,6 @@ void commands(byte* payload, unsigned int len)
   {
     verbose_print((char)payload[i]);
   }
-  
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -13,8 +12,8 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 56;
-  for(int i=0; i < sw_case; i++)
+  int sw_case = numCmds;
+  for(int i=0; i < numCmds; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
