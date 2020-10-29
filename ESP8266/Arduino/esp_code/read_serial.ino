@@ -338,14 +338,25 @@ bool stateInfo(byte c)
       state = (c & 0b00011111);
       alloc = false;
       count = 1;
-
-      // char duff[50];
-      // sprintf(duff, "INFO: case= = %d", (int)state);  
-      // publish(duff);      
       return false;
   }  
 
   switch (state) {  //request
+
+    case 12:
+      publish("INFO: Not Stable");
+      alloc = true;
+      return true;
+      break;
+
+    case 13:
+      publish("INFO: Stable");
+
+      alloc = true;
+      return true;
+      break;
+
+    //Case 15-16 free 
 
     case 17:
       if (c == char(END_BYTE))

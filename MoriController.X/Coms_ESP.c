@@ -211,6 +211,15 @@ void Coms_ESP_Verbose_One_Byte(uint8_t byte)
 }
 
 
+void Coms_ESP_SendStable(bool flg_stable_state) 
+{
+    uint8_t alloc = 0b10001100; //case 12 - 13 on ESP
+    alloc |= flg_stable_state;
+    UART4_Write(alloc);
+    UART4_Write(ESP_End);
+}
+
+
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {
     static uint8_t interval[3] = {0, 7, 14}; // only update if state change or 3s passed

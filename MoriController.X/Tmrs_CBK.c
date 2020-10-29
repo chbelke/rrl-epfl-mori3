@@ -52,6 +52,7 @@ void Tmrs_CBK_Timer3_Handle(void) {
 void Tmrs_CBK_Timer5_Handle(void) {
     static uint16_t seed = 0; // rand() seed 
     static bool seedflag = false; // rand() seed flag
+    static bool flg_stable_state = true;
     uint8_t edge;
     
     Coms_123_ConHandle(); // inter-module connection handler
@@ -138,4 +139,16 @@ void Tmrs_CBK_Timer5_Handle(void) {
 
     // varying ID check time between modules ensures varying rand() seed
     if (Flg_ID_check && !seedflag) seed++;
+    
+    Tmrs_CBK_UpdateStableFlag(&flg_stable_state);
+    Coms_ESP_SendStable(flg_stable_state);
+}
+
+void Tmrs_CBK_UpdateStableFlag(bool *flg_stable_state)
+{
+    if (Act_LIN_IsStable()) {
+        *flg_stable_state = true;
+    } else {
+        *flg_stable_state = false;
+    }
 }
