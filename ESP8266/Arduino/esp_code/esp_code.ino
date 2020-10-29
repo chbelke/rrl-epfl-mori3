@@ -63,8 +63,6 @@ bool verGood = true;   //assumes we are up to date unless otherwise
 
 char runState = 0;
 
-unsigned long lastMessage = millis();
-unsigned long lastMacPub = millis();
 int moriShape[6] = {200, 200, 200, 0, 0, 0};
 
 WiFiClient espClient;
@@ -75,14 +73,15 @@ bool flag_control = false;
 bool verbose_flag = false;
 bool led_cycle = false;
 
+unsigned long lastMessage = millis();
+unsigned long lastMacPub = millis();
 unsigned long led_sel_time = millis();
+unsigned long lastStabPub = millis();
 
 byte wifi_edge = 255; //Stored as 0-2, but publishes as 1-3
+byte stable_status = 0;
 
-#define END_BYTE 0b00001110
-
-#define LED_PIN 4
-Led wifi_ind_led(LED_PIN);
+Led wifi_ind_led(4);
 Led led_red(14);
 Led led_green(12);
 Led led_blue(5);
@@ -229,10 +228,11 @@ void normalOp()
   readSerial();
   update_tx_buffer();
   long unsigned currentTime = millis();
-  if(currentTime - lastMacPub > 2000)
+  if(currentTime - lastStabPub > 2000)
   {
-    pubOn(); //Publish connection message
-    lastMacPub = millis();
+    // pubOn(); //Publish connection message
+    publishStaticState();
+    lastStabPub = millis();
   }
   
   if ((clientLetter == 255) && (abs(lastMessage - millis()) > 2000))

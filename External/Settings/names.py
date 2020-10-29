@@ -38,6 +38,12 @@ def checkName(name):
     except KeyError:
         return name
 
+def checkId(ids):
+	try:
+		return idsToName[ids]
+	except KeyError:
+		return ids
+
 def convertFromLetter(name):
 	try:
 		return letterToIds[name]

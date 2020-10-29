@@ -344,16 +344,31 @@ bool stateInfo(byte c)
   switch (state) {  //request
 
     case 12:
-      publish("INFO: Not Stable");
-      alloc = true;
-      return true;
+      if (c == char(END_BYTE))
+      {    
+        updateStableState(STATE_UNSTABLE);
+        alloc = true;
+        return true;
+      } else {
+        if(serialErrorHandle(c)) {
+          alloc = true;
+          return true;
+        }
+      }
       break;
 
     case 13:
-      publish("INFO: Stable");
-
-      alloc = true;
-      return true;
+      if (c == char(END_BYTE))
+      {    
+        updateStableState(STATE_STABLE);
+        alloc = true;
+        return true;
+      } else {
+        if(serialErrorHandle(c)) {
+          alloc = true;
+          return true;
+        }
+      }
       break;
 
     //Case 15-16 free 
@@ -680,6 +695,16 @@ bool relayToComputer(byte c)
 void purgeSerial()
 {
   while(Serial.read() >= 0);
+}
+
+
+void updateStableState(bool current_stable_state)
+{
+  //saves previous 8 states (in case we need tracking for later, and also since a bool takes a byte's of memory anywya)
+  if ((stable_status & 0b00000001) != current_stable_state)
+    publishStaticState();
+  stable_status = stable_status << 1;
+  stable_status = stable_status | current_stable_state;
 }
 
 

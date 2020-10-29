@@ -98,6 +98,7 @@ class GraphFrame(tk.Frame):
         self.nodes = []
         self.edges = []
         self.mori_status = {}
+        self.mori_stable_status = {}
         self.redraw_iteration = 0
         self.redraw_flag = False
 
@@ -105,7 +106,7 @@ class GraphFrame(tk.Frame):
         self.color_map = []
         self.node_size = 70
         self.font_size = 10
-        self.colourDict = {'WiFi': 'xkcd:blue', 'UDP': 'xkcd:green', 'Lost': 'xkcd:red', 'Hub': 'xkcd:gold', 'NoWifi': 'xkcd:grey'}        
+        self.colourDict = {'WiFi': 'xkcd:blue', 'UDP': 'xkcd:green', 'Lost': 'xkcd:red', 'Hub': 'xkcd:gold', 'NoWifi': 'xkcd:grey', 'Error': "xkcd:pink"}        
            
         self.createWidgets()
         self.updateConnected()           
@@ -124,7 +125,7 @@ class GraphFrame(tk.Frame):
 
             
     def updateConnected(self): #Updates the number of connected ESPs and the lists
-        self.after(500, self.updateConnected)
+        self.after(100, self.updateConnected)
 
         if not self.fig.get_axes():
             self.plotEmptyGraph()
@@ -141,6 +142,10 @@ class GraphFrame(tk.Frame):
         if self.mori_status != self.wifi_host.getEspIds():
             self.mori_status = copy.deepcopy(self.wifi_host.getEspIds())
             self.redraw_flag = True
+
+        if self.mori_stable_status != self.wifi_host.getStableState():
+            self.mori_stable_status = copy.deepcopy(self.wifi_host.getStableState())
+            self.redraw_flag = True            
         
         prev_colours = copy.deepcopy(self.color_map)
         self.updateColors()
@@ -206,6 +211,7 @@ class GraphFrame(tk.Frame):
         nx.draw_networkx_edges(self.G, self.pos, width=1, arrows=False)
         nx.draw_networkx_edge_labels(self.G, self.pos, self.edge_locs, label_pos= 0.7, font_size=10, font_color='red', verticalalignment='center', font_weight='bold')
         nx.draw_networkx_labels(self.G, pos_higher, font_size=self.font_size, verticalalignment='bottom', alpha=0.5)
+        self.drawActiveModules()
         plt.box(on=False)
 
         plt.gcf().canvas.draw()
@@ -233,13 +239,22 @@ class GraphFrame(tk.Frame):
         return
 
     def getNewGraph(self):
-
         if self.redraw_iteration == 0:
             pos = nx.kamada_kawai_layout(self.G)
         else: 
             pos = nx.spring_layout(self.G, k=10/len(self.G))
         self.redraw_iteration = (self.redraw_iteration + 1) %3
         return pos
+
+    def drawActiveModules(self):
+        states = self.mori_stable_status
+        tmp_locs = []
+        for module in states.keys():
+            if not states[module]: #module is unstable/moving
+                tmp_locs.append(names.checkId(module))
+        if len(tmp_locs) != 0:
+            nx.draw_networkx_nodes(self.G, self.pos, nodelist=tmp_locs, node_color='xkcd:white', node_size=self.node_size*0.1, linewidths=None)
+
 
 
     def updateColors(self):

@@ -1,3 +1,10 @@
+// ------------- Word Definitions ------------- //
+#define STATE_UNSTABLE 0
+#define STATE_STABLE 1
+
+// ------------- Important Bytes ------------- //
+#define END_BYTE 0b00001110
+
 
 // ------------- Generic Command Definitions ------------- //
 #define SET_CMD_WEDGE 0b11011010

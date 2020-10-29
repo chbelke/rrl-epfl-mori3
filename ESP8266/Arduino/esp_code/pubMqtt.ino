@@ -34,6 +34,15 @@ void pubIP()
   publish(buff);
 }
 
+
+void publishStaticState()
+{
+  char buff[50];
+  sprintf(buff, "SB: %d", (stable_status & 0b00000001));
+  publish(buff);
+  lastStabPub = millis();
+}
+
 void pubShape()
 {
   char buff[130];

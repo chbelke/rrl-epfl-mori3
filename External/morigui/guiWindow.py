@@ -74,7 +74,7 @@ class MoriGui(tk.Frame):
 
             
     def updateConnected(self): #Updates the number of connected ESPs and the lists
-        self.after(500, self.updateConnected)
+        self.after(100, self.updateConnected)
         
         self.wifi_host.updateConnected()
         # print("DJFSKLDEF ", self.wifi_host.getNumberConnected())
