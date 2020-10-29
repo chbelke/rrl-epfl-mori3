@@ -97,3 +97,5 @@ class MoriGui(tk.Frame):
             self.frame_publ.update_menu(self.moriNumber)
             # self.frame_binary.update_menu(self.moriNumber)
         self.frame_udp.update_udp()
+
+        self.frame_file.checkAutoUpdate()
