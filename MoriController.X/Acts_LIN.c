@@ -108,7 +108,7 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     // acceptable error band -> switch off motor
     if ((error > -0.5 * MotLin_PID_erband) && (error < 0.5 * MotLin_PID_erband)) {
         Stbl_Count[edge]++;
-        if (Stbl_Count[edge] >= MotLin_PID_stable * 20){
+        if (Stbl_Count[edge] >= MotLin_PID_stable * 10){
             Stbl_Flag[edge] = true;
             Flg_EdgeReq_Ext[edge] = false;
         }
