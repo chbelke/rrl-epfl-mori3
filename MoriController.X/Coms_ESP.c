@@ -85,6 +85,10 @@ void Coms_ESP_Eval() { // called in main
                     Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 7;
                     break;
+                    
+                default:
+                    EspInCase = 50;
+                    break;
             }
             break;   
 
@@ -101,6 +105,16 @@ void Coms_ESP_Eval() { // called in main
         case 7:
             if (Coms_REL_Handle(ESP_URT_NUM, EspIn))
                 EspInCase = 0;
+            break;
+            
+        case 50: // END BYTE NOT RECEIVED **************************************
+            if ((EspIn == EDG_End) || (EspIn == ESP_End)) // wait for next end byte
+                Coms_ESP_Verbose_Write("ESP_OVL");
+                EspInCase = 0;
+            break;            
+
+        default:
+            EspInCase = 50;
             break;
     }
             
@@ -136,6 +150,12 @@ bool Coms_ESP_Handle(uint8_t byte) {
                    
     }
     return false;
+}
+
+
+void Coms_ESP_OverflowError(void)
+{
+    EspInCase = 50;
 }
 
 void Coms_ESP_Boot(void)
@@ -415,7 +435,7 @@ bool Coms_ESP_SetDatalogFlags(uint8_t byte) {
         if (byte == ESP_End) {
             Coms_ESP_Data_Transmission = flags;
         } else {
-            Coms_CMD_OverflowError();
+            Coms_ESP_OverflowError();
         }
         count = 0;
         return true;
@@ -433,7 +453,7 @@ bool Coms_ESP_SetDatalogPeriod(uint8_t byte) {
         if (byte == ESP_End) {
             ESP_Update_Delay = period;
         } else {
-            Coms_CMD_OverflowError();
+            Coms_ESP_OverflowError();
         }
         count = 0;
         return true;
@@ -451,7 +471,7 @@ bool Coms_ESP_SetClientLetter(uint8_t byte) {
         UART4_Write(MODULE);
         UART4_Write(ESP_End);        
     } else {
-        Coms_CMD_OverflowError();
+        Coms_ESP_OverflowError();
     }
     return true;
 }

@@ -55,7 +55,7 @@ class WirelessHost(threading.Thread):
         self.macOrder = []          # ['mac', 'mac', mac]
         self.coTimeDict = {}
         self.data = []
-        self.macCallTime = time.time()
+
         self.verCallTimeDict = {}
         self.verCalledDict = {}
                 
@@ -111,9 +111,9 @@ class WirelessHost(threading.Thread):
 
 
     def publishGlobal(self, msg):
+        for hub in self.noWifiDict:
+            self.publishThroughHub(msg, hub)        
         self.mqttClient.publishGlobal(msg)
-        for hub in self.UDPDict:
-            self.udpClient.write(msg, hub)        
 
 
     def publishLocal(self, msg, addr):

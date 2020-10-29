@@ -5,7 +5,6 @@ void commands(byte* payload, unsigned int len)
   {
     verbose_print((char)payload[i]);
   }
-  
 
   char topic[3];
   for(int i=0; i < 3; i++)
@@ -13,8 +12,8 @@ void commands(byte* payload, unsigned int len)
     topic[i] = (char)payload[i];
   }
   
-  int sw_case = 54;
-  for(int i=0; i < sw_case; i++)
+  int sw_case = numCmds;
+  for(int i=0; i < numCmds; i++)
   {
     if (!memcmp(topic, cmdLine[i], 3)) //4 is number of bytes in memory to compare (3 chars + stop)
     {
@@ -143,7 +142,7 @@ void commands(byte* payload, unsigned int len)
       break;
 
     case 26:  //Restart Pic
-      serial_write_one(0b11011111);
+      serial_write_one(RUN_PIC_RESTART);
       break;
 
     case 27: //png
@@ -253,7 +252,15 @@ void commands(byte* payload, unsigned int len)
 
     case 53:
       stopParty();
-      break;         
+      break;
+
+    case 54:
+      pubName();
+      break;
+
+    case 55:  //Angular speed
+      setPicSpeed(payload, len);      
+      break;
 
     default:
       publish("ERR: Command not understood");
@@ -294,37 +301,38 @@ void setWifiEdge(byte* payload, unsigned int len)
   sprintf(buff, "INFO: WiFi Edge set to %d", int(wifi_edge)+1);
   publish(buff);
 
-  serial_write_two(0b11011010, wifi_edge);
+  serial_write_two(SET_CMD_WEDGE, wifi_edge);
 }
 
 
+// Depricated
 void requestShape()
 {
-  serial_write_one(0b11010100);
+  serial_write_one(REQ_CMD_SHAPE);
 }
 
 
 void requestEdge()
 {
-  serial_write_one(0b11010100);
+  serial_write_one(REQ_CMD_EDGS);
 }
 
 
 void requestAngle()
 {
-  serial_write_one(0b11010101);
+  serial_write_one(REQ_CMD_ANGS);
 }
 
 
 void requestOrientation()
 {
-  serial_write_one(0b11010110);
+  serial_write_one(REQ_CMD_ORNT);
 }
 
 
 void requestWifiEdge()
 {
-  serial_write_one(0b11011000);
+  serial_write_one(REQ_CMD_WEDGE);
 }
 
 
@@ -341,7 +349,7 @@ void requestNeighbour(byte* payload, unsigned int len)
 
   byte neighbour = payload[byte_count]-48;   //-48 = ascii to int conversion
 
-  serial_write_two(0b11010111, neighbour);
+  serial_write_two(REQ_CMD_NBR, neighbour);
 }
 
 
@@ -378,40 +386,19 @@ void echoPing(byte* payload, unsigned int len)
 
 void openPicCouplings(byte* payload, unsigned int len)
 {
-  char tmp_payload[5];
-  byte alloc = 0b10000000;
-  
-  byte byte_count = detectSpaceChar(payload, byte_count, len);
-  if(byte_count > len) {
-    byte_count = len;
-  }
-  byte_count++;
-  tmp_payload[0] = payload[byte_count];
-  tmp_payload[1] = '\0';
-  
-  byte value = byte(atoi(tmp_payload))-1;
-
-  if(value >3) {
-    publish("ERR: Can\'t open coupling > 3");
-  }
-
-  alloc = alloc | (0b00100000 >> value);
-
-  char buff[50];
-  sprintf(buff, "INFO: Opening coupling %d", value+1);
-  publish(buff);  
-
-  write_to_buffer(0b11001101); //205
-  write_to_buffer(alloc);
-  write_to_buffer(END_BYTE);
-  return;
+  setCouplingShapeCommand(payload, len, SHAPE_CMD_COUP_MASK, SHAPE_CMD_COUP_ALLOC);
 }
 
 
-void driveAndCouple(byte* payload, unsigned int len)
+void driveAndCouple(byte *payload, unsigned int len)
+{
+  setCouplingShapeCommand(payload, len, SHAPE_CMD_DRVE_MASK, SHAPE_CMD_DRVE_ALLOC);
+}
+
+
+void setCouplingShapeCommand(byte *payload, unsigned int len, byte alloc_mask, byte alloc)
 {
   char tmp_payload[5];
-  byte alloc = 0b01111100;
   
   byte byte_count = detectSpaceChar(payload, byte_count, len);
   if(byte_count > len) {
@@ -427,82 +414,60 @@ void driveAndCouple(byte* payload, unsigned int len)
     publish("ERR: Can\'t open coupling > 3");
   }
 
-  alloc = alloc | (0b00000011 & value);
+  alloc = alloc | (alloc_mask & value);
 
   char buff[50];
   sprintf(buff, "INFO: Opening coupling %d", value+1);
   publish(buff);  
 
-  write_to_buffer(0b11001101); //205
+  write_to_buffer(SHAPE_COMMAND_ALLOC); //205
   write_to_buffer(alloc);
   write_to_buffer(END_BYTE);
-  return;
+  return;  
 }
 
 
-void setPicLED(byte* payload, unsigned int len)
+void setPicLED(byte *payload, unsigned int len)
 {
-  byte num_following = 0;
-  byte alloc = 0b10000000;
-  byte alloc_mask = 0b00000100;
-  byte LED[3];
-  
-  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, LED, false)) {
-    return;
-  }
-
-  write_to_buffer(0b11001101); //205
-  write_to_buffer(alloc);
-  for(byte i=0; i< num_following; i++)
-  {
-    write_to_buffer(LED[i]);
-  }
-  write_to_buffer(END_BYTE);
-  return;
+  setShapeCommand(payload, len, SHAPE_CMD_LEDS_MASK, SHAPE_CMD_LEDS_ALLOC, false);
 }
 
 
-void setPicEdges(byte* payload, unsigned int len)
+void setPicEdges(byte *payload, unsigned int len)
 {
-  byte num_following = 0;
-  byte alloc = 0b00000000;
-  byte alloc_mask = 0b00100000;
-  byte extensions[3];
-  
-  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, extensions, false)) {
-    return;
-  }
-
-  write_to_buffer(0b11001101); //205
-  write_to_buffer(alloc);
-  for(byte i=0; i< num_following; i++)
-  {
-    write_to_buffer(extensions[i]);
-  }
-  write_to_buffer(END_BYTE);
-  return;
+  setShapeCommand(payload, len, SHAPE_CMD_EDGS_MASK, SHAPE_CMD_EDGS_ALLOC, false);
 }
 
-void setPicAngles(byte* payload, unsigned int len)
+
+void setPicSpeed(byte *payload, unsigned int len)
+{
+  setShapeCommand(payload, len, SHAPE_CMD_SPDS_MASK, SHAPE_CMD_SPDS_ALLOC, false);
+}
+
+
+void setPicAngles(byte *payload, unsigned int len)
+{
+  setShapeCommand(payload, len, SHAPE_CMD_ANGS_MASK, SHAPE_CMD_ANGS_ALLOC, true);
+}
+
+
+void setShapeCommand(byte *payload, unsigned int len, byte alloc_mask, 
+          byte alloc, bool flg_two_bytes)
 {
   byte num_following = 0;
-  byte alloc = 0b00000000;
-  byte alloc_mask = 0b00000100;
-  byte angles[6];
+  byte values[6];
   
-  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, angles, true)) {
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, values, flg_two_bytes)) {
     return;
   }
 
-  write_to_buffer(0b11001101); //205
+  write_to_buffer(SHAPE_COMMAND_ALLOC); //205
   write_to_buffer(alloc);
   for(byte i=0; i< num_following; i++)
   {
-    write_to_buffer(angles[i]);
+    write_to_buffer(values[i]);
   }
   write_to_buffer(END_BYTE);
-
-  return;
 }
 
 
@@ -524,6 +489,11 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask,
 
     if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
       byte_count = len;
+    }
+
+    if(byte_count >= len && i < 2) { // no space at the end of the command (e.g., "led 10 10 10")
+      publish("ERR: No values following");
+      return false;
     }
 
     if(flg_two_bytes){
@@ -601,7 +571,7 @@ void PARTYMODE()
   led_green.setBlinkFreq(random(10, 255));
   if(!led_green.getBlinkFlag())  
     led_green.Blink();
-  serial_write_one(0b11010010);
+  serial_write_one(SET_PARTY_HYPE);
 }
 
 void stopParty()
@@ -609,13 +579,13 @@ void stopParty()
   led_red.On();
   led_green.On();
   led_blue.On();
-  serial_write_one(0b11001111);
+  serial_write_one(ITS_THE_POPO);
 }
 
 void setAsHub()
 {
   wifi_edge = 3;
-  serial_write_two(0b11011010, wifi_edge);
+  serial_write_two(SET_CMD_WEDGE, wifi_edge);
   publish("HUB: On");
   if((runState != 3) && (runState != 5)){
     runState = 4;
@@ -630,72 +600,72 @@ void stopHub()
 
 
 void enableRotMotors() {
-  serial_write_flags(0b10000000);
+  serial_write_flags(FLG_CMD_ENBL_ROTM);
   return;
 }
 
 void disbleRotMotors() {
-  serial_write_flags(0b00000000);
+  serial_write_flags(FLG_CMD_DSBL_ROTM);
   return;
 }
 
 void enableLinMotors() {
-  serial_write_flags(0b10000001);
+  serial_write_flags(FLG_CMD_ENBL_LINM);
   return;
 }
 
 void disbleLinMotors() {
-  serial_write_flags(0b00000001);
+  serial_write_flags(FLG_CMD_DSBL_LINM);
   return;
 }
 
 void enableFlag1() {
-  serial_write_flags(0b10000010);
+  serial_write_flags(FLG_CMD_ENBL_FLG1);
   return;
 }
 
 void disableFlag1() {
-  serial_write_flags(0b00000010);
+  serial_write_flags(FLG_CMD_DSBL_FLG1);
   return;
 }
 
 void enableFlag2() {
-  serial_write_flags(0b10000011);
+  serial_write_flags(FLG_CMD_ENBL_FLG2);
   return;
 }
 
 void disableFlag2() {
-  serial_write_flags(0b00000011);
+  serial_write_flags(FLG_CMD_DSBL_FLG2);
   return;
 }
 
 void enableFlag3() {
-  serial_write_flags(0b10000100);
+  serial_write_flags(FLG_CMD_ENBL_FLG3);
   return;
 }
 
 void disableFlag3() {
-  serial_write_flags(0b00000100);
+  serial_write_flags(FLG_CMD_DSBL_FLG3);
   return;
 }
 
 void enableFlag4() {
-  serial_write_flags(0b10000101);
+  serial_write_flags(FLG_CMD_ENBL_FLG4);
   return;
 }
 
 void disableFlag4() {
-  serial_write_flags(0b00000101);
+  serial_write_flags(FLG_CMD_DSBL_FLG4);
   return;
 }
 
 void enableFlag5() {
-  serial_write_flags(0b10000110);
+  serial_write_flags(FLG_CMD_ENBL_FLG5);
   return;
 }
 
 void disableFlag5() {
-  serial_write_flags(0b00000110);
+  serial_write_flags(FLG_CMD_DSBL_FLG5);
   return;
 }
 
@@ -717,52 +687,38 @@ void wiggleCoupling(byte* payload, unsigned int len)
     return;
   } 
 
-  serial_write_two(0b11010000, coupling);
+  serial_write_two(RUN_COUP_WIGGLE, coupling);
 }
 
 
 void setDatalogFlag(byte* payload, unsigned int len) 
 {
-  int byte_count = 0;
-  char tmp_payload[5];
-
-  byte_count = detectSpaceChar(payload, byte_count, len);
-  if(byte_count > len){
-    publish("ERR: payload has no space");
-    return;
-  }
-  byte_count++;
-  int pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
-  byte_count = detectSpaceChar(payload, byte_count, len);
-
-  if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
-    byte_count = len;
-  }
-
-  byte j;
-  for(j=0; j<byte_count-pre_count; j++) {
-    if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
-      publish("ERR: Number not ascii");
-      return;
-    }
-    tmp_payload[j] = char(payload[pre_count+j]);
-  }
-  tmp_payload[j] = '\0';
-  byte flag = (byte)atoi(tmp_payload);
-
-  serial_write_two(0b10100001, flag);
+  bool successFlag = true;
+  byte flag = extractFollowingNumber(payload, len, &successFlag);
+  if(successFlag)
+    serial_write_two(DLG_CMD_FLAG_SET, flag);
 }
 
 
 void setDatalogPeriod(byte* payload, unsigned int len) 
+{
+  bool successFlag = true;
+  byte freq = extractFollowingNumber(payload, len, &successFlag);
+  if(successFlag)
+    serial_write_two(DLG_CMD_PERD_SET, freq);
+}
+
+
+byte extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
 {
   int byte_count = 0;
   char tmp_payload[5];
 
   byte_count = detectSpaceChar(payload, byte_count, len);
   if(byte_count > len){
+    *successFlag = false;
     publish("ERR: payload has no space");
-    return;
+    return 0;
   }
   byte_count++;
   int pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
@@ -775,13 +731,12 @@ void setDatalogPeriod(byte* payload, unsigned int len)
   byte j;
   for(j=0; j<byte_count-pre_count; j++) {
     if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
+      *successFlag = false;
       publish("ERR: Number not ascii");
-      return;
+      return 0;
     }
     tmp_payload[j] = char(payload[pre_count+j]);
   }
   tmp_payload[j] = '\0';
-  byte freq = (byte)atoi(tmp_payload);
-
-  serial_write_two(0b10100010, freq);
+  return (byte)atoi(tmp_payload);
 }

@@ -19,6 +19,13 @@ void pubOn()
   publish("ON: ");
 }
 
+void pubName()
+{
+  char buff[50];
+  sprintf(buff, "NM: %s %s", publishName, charMAC);
+  publish(buff);
+}
+
 
 void pubIP()
 {

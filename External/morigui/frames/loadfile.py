@@ -74,7 +74,10 @@ class LoadFile():
         self.displayJson()
 
     def displayJson(self):
-        self.next_stage["text"] = self.fileContents[self.iteration]["Label"][0]
+        try:
+            self.next_stage["text"] = self.fileContents[self.iteration]["Label"][0]
+        except KeyError:
+            self.next_stage["text"] = ""
         textstr = ""
         for module in self.fileContents[self.iteration]:
             if module == 'Label':

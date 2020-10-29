@@ -24,8 +24,8 @@ def splitMessage(msg):
       espNum = topic[0]
    else:
       espNum = topic[1]
-   # if(topic[-1] != "pub"): #index -1 is last index of the list
-   #    return
+   if(topic[-1] != "p"): #index -1 is last index of the list
+      return
 
 
    try:
@@ -35,12 +35,6 @@ def splitMessage(msg):
       pyld = []
       pyld.append(msg.payload[0:4].decode('UTF-8'))
       pyld.append(msg.payload[5:])
-      # if start == "VBS:":
-      #    end = bytearray.fromhex(msg.payload[4:-1]).decode()
-      #    print("end: ", end)
-      #    pyld = [start, end].flatten()
-      #    print(pyld)
-
    
    return pyld, espNum
 

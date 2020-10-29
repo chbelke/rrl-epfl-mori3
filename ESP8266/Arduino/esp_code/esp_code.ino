@@ -41,7 +41,7 @@ char clientLetter = 255;
 
 const float softwareVersion = 0.5;
 
-char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
+char *cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "g_shape", "udp", "noudp", "verb", "noverb",
                 "rel", "cont", "nocon", "rled", "gled",
                 "bled", "wedge", "rshape", "redge","rang",
@@ -51,7 +51,9 @@ char* cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "frt", "frf", "flt", "flf", "f1t", //frt = flag rot true; flf - flag lin false
                 "f1f", "f2t", "f2f", "f3t", "f3f", 
                 "f4t", "f4f", "f5t", "f5f", "wiggles",
-                "drcoup", "dlflag", "dlperiod", "cops"};  
+                "drcoup", "dlflag", "dlperiod", "cops", "name",
+                "spd"};
+int numCmds;
 
 char stringIP[16];
 char charMAC[18];
@@ -88,6 +90,7 @@ Led led_blue(5);
 //--------------------------- Start ----------------------------------------//
 void setup()
 {
+  numCmds = sizeof(cmdLine)/sizeof(cmdLine[0]);
   Serial.begin(115200);
   Serial.setRxBufferSize(1024);
   // Serial.setTxBufferSize(1024);
@@ -183,9 +186,13 @@ void loop()
       normalOp();
       break;
     case 12:  //restart wireless
+      normalOp();
       startInternet();
+      normalOp();
       startMQTT();
       normalOp();
+      runState = 13;
+    case 13:
       publish("WIFI: On");
       runState = 3;
       break;
@@ -200,7 +207,7 @@ void publish(char* buff)
   verbose_print("Sent ");
   verbose_print(buff);
   verbose_print(" via ");
-  if ((runState == 10) || (runState == 11))
+  if ((runState == 10) || (runState == 11) || (runState == 12))
   {
     serial_write_to_hub(buff);
   }
@@ -278,8 +285,13 @@ void startInternet()
   delay(100);
   WiFi.begin(brn_ssid, brn_password);
 
+  unsigned long connectionTime = millis();
   while (WiFi.status() != WL_CONNECTED)
   {
+    if(millis() - connectionTime > 10000) //if longer than 10s to connect
+      ESP.reset();
+    if (runState == 12)
+      normalOp();
     delay(500);
     purgeSerial();
     verbose_println("Connecting to WiFi..");
@@ -308,7 +320,12 @@ void startInternet()
 
 void startMQTT()
 {
+  unsigned long connectionTime = millis();
   while (!client.connected()) {
+    if(millis() - connectionTime > 10000) //if longer than 10s to connect
+      ESP.reset();
+    if (runState == 12)
+      normalOp();    
     verbose_println("Connecting to MQTT...");
     wifi_ind_led.Toggle();
     if (client.connect(clientName))
@@ -318,7 +335,7 @@ void startMQTT()
       purgeSerial();
       verbose_print("failed with state ");
       verbose_println(client.state());
-      delay(2000);
+      delay(1000);  // changed (could be too quick)
     }
   }
   serial_write_one(0b10100011);

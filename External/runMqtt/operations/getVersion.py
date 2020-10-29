@@ -36,6 +36,6 @@ def getVersion(self, pyld, espNum):
 	
 		self.verCalledDict[mac] = True
 
-	elif time.time() - self.verCallTimeDict.get(mac) > 3:
+	elif time.time() - self.verCallTimeDict.get(mac) > 1:
 		self.verCalledDict[mac] = False	   
 	return
