@@ -701,10 +701,10 @@ void purgeSerial()
 void updateStableState(bool current_stable_state)
 {
   //saves previous 8 states (in case we need tracking for later, and also since a bool takes a byte's of memory anywya)
-  if ((stable_status & 0b00000001) != current_stable_state)
-    publishStaticState();
   stable_status = stable_status << 1;
   stable_status = stable_status | current_stable_state;
+  if ((stable_status & 0b00000010) != current_stable_state)
+    publishStaticState();
 }
 
 

@@ -235,7 +235,7 @@ void normalOp()
     lastStabPub = millis();
   }
   
-  if ((clientLetter == 255) && (abs(lastMessage - millis()) > 2000))
+  if ((clientLetter == 255) && (millis() - lastMessage  > 2000))
   {
     serial_write_one(0b10100011);
     lastMessage = millis();
