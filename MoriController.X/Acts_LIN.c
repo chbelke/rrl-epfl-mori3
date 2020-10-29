@@ -12,7 +12,7 @@
 
 uint8_t Ext_Desired[3] = {60, 60, 60};
 uint16_t MotLin_PWM_Max[3] = {MotLin_PID_Max, MotLin_PID_Max, MotLin_PID_Max};
-volatile bool Stbl_Flag[3] = {false, false, false};
+volatile bool Stbl_Flag[3] = {true, true, true};
 #define RampUp 128
 
 /* ******************** ARDUINO MAP FUNCTION ******************************** */
