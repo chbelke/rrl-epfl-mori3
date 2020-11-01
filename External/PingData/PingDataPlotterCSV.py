@@ -23,11 +23,19 @@ hub_name_dict =  {
     "00056375": "Huzzah1",
     "0005659D": "Huzzah2",
     "000AC171": "Alfred",
-    "000AC172": "Hub",
-    "00D00BD5": "2 Away",
-    "000AC175": "Darlene",
-    "000AC170": "3 Away",
-    "000AC173": "1 Away"
+    "000AC172": "1 Away",
+    "00D00BD5": "4 Away",
+    "000AC175": "3 Away",
+    "000AC170": "Hub",
+    "000AC173": "2 Away"
+}
+
+order_dict =  {
+    "1 Away": 1,
+    "4 Away": 4,
+    "3 Away": 3,
+    "Hub": 0,
+    "2 Away": 2
 }
 
 pltNum = [None]*6
@@ -64,7 +72,8 @@ for module in pingData:
     pingData[module]['time'] = pingData[module]['time'][1:-1]
     pingData[module]['integrity'] = pingData[module]['integrity'][1:-1]
 
-fig, ax = plt.subplots(tight_layout=True)
+# fig, ax = plt.subplots(tight_layout=True)
+fig, ax = plt.subplots()
 
 for esp in pingData.keys():
     # Check how many data corruptions occured
@@ -97,16 +106,24 @@ for esp in pingData.keys():
     counts=counts.astype(float)/data_size
     cdf = 1-np.cumsum(counts)
     pltNum[color_iter] = plt.plot(bin_edges[0:-1], cdf, linestyle='-', linewidth=2, color=colors[color_iter], label=checkName(esp))    
+    # pltNum[color_iter] = plt.plot(bin_edges[0:-1], cdf, linestyle='-', linewidth=2, color=colors[color_iter], label=checkName(esp), clip_on=False)    
     color_iter += 1
 
 
-# labels = [checkName(x) for x in pingData.keys()]
+# # labels = [checkName(x) for x in pingData.keys()]
 # labels = [hub_name_dict[x] for x in pingData.keys()]
 # handles, _ = ax.get_legend_handles_labels()
+# order = [4, 0, 1, 2, 3,4]
 # # labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
-# order = [1, 0, 2, 3]
-# handles = [pltNum[idx][0] for idx in order]
-# labels = [labels[idx] for idx in order]
+# order = [order_dict[x] for x in labels]
+# print(order)
+# print(labels)
+# print()
+# labels = [label for _, label in sorted(zip(order,labels))]
+# handles = [handles for _, handles in sorted(zip(order,handles))]
+
+# # handles = [pltNum[idx][0] for idx in order]
+# # labels = [labels[idx] for idx in order]
 # print(handles, labels)
 
 handles, labels = ax.get_legend_handles_labels()
@@ -121,12 +138,15 @@ leg = plt.legend(handles, labels, loc='upper right', fontsize=14, markerscale=5,
 for legobj in leg.legendHandles:
     legobj.set_linewidth(4.0)
 
-ax.set_ylim(0,1)
-ax.set_xlim(0,200)
+ax.set_ylim(0,1.01)
+ax.set_xlim(0,300)
+ax.set_xlim(0,160)
 # plt.yscale("log")
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 ax.tick_params(axis='both', which='major', labelsize=11)
+
+# plt.tight_layout()
 
 plt.xlabel("Latency (ms)", fontsize=14)
 plt.ylabel("CCDF", fontsize=14)
