@@ -113,7 +113,6 @@ class PublishLocal():
 
     def update_menu(self, list_of_modules):
         self.moriNumber = list_of_modules
-        print("HERE", self.moriNumber)
         menu = self.listMori["menu"]
         menu.delete(0, "end")
 

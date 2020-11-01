@@ -19,12 +19,28 @@ void pubOn()
   publish("ON: ");
 }
 
+void pubName()
+{
+  char buff[50];
+  sprintf(buff, "NM: %s %s", publishName, charMAC);
+  publish(buff);
+}
+
 
 void pubIP()
 {
   char buff[40] = "IP: ";
   strcat(buff, stringIP);
   publish(buff);
+}
+
+
+void publishStaticState()
+{
+  char buff[50];
+  sprintf(buff, "SB: %d", (stable_status & 0b00000001));
+  publish(buff);
+  lastStabPub = millis();
 }
 
 void pubShape()

@@ -338,14 +338,40 @@ bool stateInfo(byte c)
       state = (c & 0b00011111);
       alloc = false;
       count = 1;
-
-      // char duff[50];
-      // sprintf(duff, "INFO: case= = %d", (int)state);  
-      // publish(duff);      
       return false;
   }  
 
   switch (state) {  //request
+
+    case 12:
+      if (c == char(END_BYTE))
+      {    
+        updateStableState(STATE_UNSTABLE);
+        alloc = true;
+        return true;
+      } else {
+        if(serialErrorHandle(c)) {
+          alloc = true;
+          return true;
+        }
+      }
+      break;
+
+    case 13:
+      if (c == char(END_BYTE))
+      {    
+        updateStableState(STATE_STABLE);
+        alloc = true;
+        return true;
+      } else {
+        if(serialErrorHandle(c)) {
+          alloc = true;
+          return true;
+        }
+      }
+      break;
+
+    //Case 15-16 free 
 
     case 17:
       if (c == char(END_BYTE))
@@ -672,9 +698,19 @@ void purgeSerial()
 }
 
 
+void updateStableState(bool current_stable_state)
+{
+  //saves previous 8 states (in case we need tracking for later, and also since a bool takes a byte's of memory anywya)
+  stable_status = stable_status << 1;
+  stable_status = stable_status | current_stable_state;
+  if ((stable_status & 0b00000010) != current_stable_state)
+    publishStaticState();
+}
+
+
 bool serialErrorHandle(byte c)
 {
-  if(c == END_BYTE)
+  if((c == END_BYTE) || c == 42)
   {
     return true;
   }

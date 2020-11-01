@@ -74,7 +74,7 @@ class MoriGui(tk.Frame):
 
             
     def updateConnected(self): #Updates the number of connected ESPs and the lists
-        self.after(500, self.updateConnected)
+        self.after(100, self.updateConnected)
         
         self.wifi_host.updateConnected()
         # print("DJFSKLDEF ", self.wifi_host.getNumberConnected())
@@ -89,8 +89,13 @@ class MoriGui(tk.Frame):
             print(colored("Online ESPs: ", "blue") + colored(espOrder, "blue"))
             print("")
             for i in range(len(espOrder)):
-                self.moriNumber.append(self.tmpEspIds[espOrder[i]])
+                try:
+                    self.moriNumber.append(self.tmpEspIds[espOrder[i]])
+                except KeyError:
+                    continue
 
             self.frame_publ.update_menu(self.moriNumber)
             # self.frame_binary.update_menu(self.moriNumber)
         self.frame_udp.update_udp()
+
+        self.frame_file.checkAutoUpdate()

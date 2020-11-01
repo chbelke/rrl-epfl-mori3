@@ -82,8 +82,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART2_CONFIG_TX_BYTEQ_LENGTH (254+1)
-#define UART2_CONFIG_RX_BYTEQ_LENGTH (254+1)
+#define UART2_CONFIG_TX_BYTEQ_LENGTH (1023+1)
+#define UART2_CONFIG_RX_BYTEQ_LENGTH (1023+1)
 
 /** UART Driver Queue
 
@@ -410,8 +410,8 @@ unsigned int __attribute__((deprecated)) UART2_WriteBuffer( uint8_t *buffer , un
 UART2_TRANSFER_STATUS __attribute__((deprecated)) UART2_TransferStatusGet (void )
 {
     UART2_TRANSFER_STATUS status = 0;
-    uint8_t rx_count = UART2_RxDataAvailable();
-    uint8_t tx_count = UART2_TxDataAvailable();
+    uint16_t rx_count = UART2_RxDataAvailable();
+    uint16_t tx_count = UART2_TxDataAvailable();
     
     switch(rx_count)
     {

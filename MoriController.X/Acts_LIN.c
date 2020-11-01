@@ -12,6 +12,7 @@
 
 uint8_t Ext_Desired[3] = {60, 60, 60};
 uint16_t MotLin_PWM_Max[3] = {MotLin_PID_Max, MotLin_PID_Max, MotLin_PID_Max};
+volatile bool Stbl_Flag[3] = {true, true, true};
 #define RampUp 128
 
 /* ******************** ARDUINO MAP FUNCTION ******************************** */
@@ -70,8 +71,7 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     float lPID_D[3] = {0, 0, 0};
     static uint8_t Stbl_Count[3] = {0, 0, 0};
     static int16_t Stbl_dOld[3] = {0, 0, 0};
-    static bool Stbl_Flag[3] = {false, false, false};
-
+    
     // avoid bad control inputs
     if (target < MotLin_MinInput) target = MotLin_MinInput;
     else if (target > MotLin_MaxInput) target = MotLin_MaxInput;
@@ -108,7 +108,7 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     // acceptable error band -> switch off motor
     if ((error > -0.5 * MotLin_PID_erband) && (error < 0.5 * MotLin_PID_erband)) {
         Stbl_Count[edge]++;
-        if (Stbl_Count[edge] >= MotLin_PID_stable * 20){
+        if (Stbl_Count[edge] >= MotLin_PID_stable * 10){
             Stbl_Flag[edge] = true;
             Flg_EdgeReq_Ext[edge] = false;
         }
@@ -208,4 +208,12 @@ uint8_t Acts_LIN_GetCurrent(uint8_t edge) {
             break;
     }
     return (uint8_t) map(ADC1_Return(edge), IN_min, IN_max, 120, 0);
+}
+
+bool Act_LIN_IsStable(){
+    bool out = true;
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++)
+        if (!Stbl_Flag[edge]) out = false;
+    return out;
 }

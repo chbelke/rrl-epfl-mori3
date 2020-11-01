@@ -7,9 +7,9 @@ from termcolor import colored
 
 class PublishGlobal():
 
-    def __init__(self, frame, mqtthost):
+    def __init__(self, frame, wifi_host):
         self.frame = frame
-        self.mqtthost = mqtthost
+        self.wifi_host = wifi_host
         self.load()
 
     def load(self):
@@ -27,5 +27,5 @@ class PublishGlobal():
 
     def publishGlobal(self):
         text = self.pub_cmd.get()
-        self.mqtthost.publishGlobal(text)
+        self.wifi_host.publishGlobal(text)
         print("Published \"" + text + "\" to esp/rec")

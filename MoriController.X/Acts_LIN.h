@@ -9,5 +9,6 @@ uint8_t Acts_LIN_GetTarget(uint8_t);
 void Acts_LIN_SetTarget(uint8_t, uint8_t);
 void Acts_LIN_SetMaxPWM(uint8_t, uint16_t);
 uint8_t Acts_LIN_GetCurrent(uint8_t);
+bool Act_LIN_IsStable();
 
 #endif	/* ACTS_LIN_H */

@@ -55,7 +55,7 @@ class WirelessHost(threading.Thread):
         self.macOrder = []          # ['mac', 'mac', mac]
         self.coTimeDict = {}
         self.data = []
-        self.macCallTime = time.time()
+
         self.verCallTimeDict = {}
         self.verCalledDict = {}
                 
@@ -71,6 +71,7 @@ class WirelessHost(threading.Thread):
         self.HubDict = []
         self.noWifiDict = {}
         self.wifiEdge = {}
+        self.stableState = {}
 
         self.version = 0.50
 
@@ -111,9 +112,9 @@ class WirelessHost(threading.Thread):
 
 
     def publishGlobal(self, msg):
+        for hub in self.noWifiDict:
+            self.publishThroughHub(msg, hub)        
         self.mqttClient.publishGlobal(msg)
-        for hub in self.UDPDict:
-            self.udpClient.write(msg, hub)        
 
 
     def publishLocal(self, msg, addr):
@@ -180,7 +181,6 @@ class WirelessHost(threading.Thread):
     def setIPDict(self, IPDict, EPDict):
         self.EPDict = EPDict
 
-
     def setUDPDict(self, UDPDict):
         self.UDPDict = UDPDict
 
@@ -191,6 +191,12 @@ class WirelessHost(threading.Thread):
         self.HubDict = HubDict
         self.updateWifiEdges()
         print("self.HubDict", self.HubDict)
+
+    def getStableState(self):
+        return self.stableState
+
+    def setStableState(self, stableState):
+        self.stableState = stableState
 
     def getNoWifiDict(self):
         return self.noWifiDict

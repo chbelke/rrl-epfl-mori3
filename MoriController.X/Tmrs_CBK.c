@@ -30,9 +30,11 @@ void Tmrs_CBK_Timer3_Handle(void) {
 
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // open coupling if requested
-        if ((Flg_EdgeReq_Cpl[edge]) && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge])) {
+        if ((Flg_EdgeReq_Cpl[edge]) && ((!Flg_EdgeCon[edge]) ||
+                (Flg_EdgeReq_CplNbrWait[edge]))){
             Acts_CPL_On(edge);
             Flg_EdgeReq_Cpl[edge] = false;
+            Flg_EdgeReq_CplNbrWait[edge] = false;
         }
     }
     Acts_CPL_Ctrl(); // coupling sma controller
@@ -41,7 +43,7 @@ void Tmrs_CBK_Timer3_Handle(void) {
     for (edge = 0; edge < 3; edge++) { // extension control loops
         if (Flg_EdgeReq_Ext[edge] && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
-        else 
+        else
             Acts_LIN_Out(edge, 0);// make sure motors are off
     }
 }
@@ -50,6 +52,7 @@ void Tmrs_CBK_Timer3_Handle(void) {
 void Tmrs_CBK_Timer5_Handle(void) {
     static uint16_t seed = 0; // rand() seed 
     static bool seedflag = false; // rand() seed flag
+    static bool flg_stable_state = true;
     uint8_t edge;
     
     Coms_123_ConHandle(); // inter-module connection handler
@@ -136,4 +139,16 @@ void Tmrs_CBK_Timer5_Handle(void) {
 
     // varying ID check time between modules ensures varying rand() seed
     if (Flg_ID_check && !seedflag) seed++;
+    
+    Tmrs_CBK_UpdateStableFlag(&flg_stable_state);
+    Coms_ESP_SendStable(flg_stable_state);
+}
+
+void Tmrs_CBK_UpdateStableFlag(bool *flg_stable_state)
+{
+    if (Act_LIN_IsStable()) {
+        *flg_stable_state = true;
+    } else {
+        *flg_stable_state = false;
+    }
 }

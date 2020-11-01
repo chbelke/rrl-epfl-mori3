@@ -88,6 +88,7 @@ volatile bool Flg_EdgeWig[3] = {false, false, false}; // wiggle flag
 volatile bool Flg_EdgeReq_Ang[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Ext[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Cpl[3] = {false, false, false};
+volatile bool Flg_EdgeReq_CplNbrWait[3] = {true, true, true};
 
 volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
 volatile bool Flg_ID_check = false;
@@ -149,7 +150,7 @@ int main(void) {
     /* unexpected behaviour when limit not set (can set itself randomly 
      * between startups), consider defining it in an initialisation 
      * function, need to figure out what level to start with */
-    for (edge = 0; edge < 3; edge++) Acts_ROT_Limit(edge, MotRot_TorqueLimit);
+    for (edge = 0; edge < 3; edge++) Acts_ROT_SetCurrentLimit(edge, MotRot_TorqueLimit);
 
     while (1){
         Tmrs_CBK_Evaluate_Timers();
