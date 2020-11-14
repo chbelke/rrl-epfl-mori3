@@ -144,11 +144,19 @@ void Tmrs_CBK_Timer5_Handle(void) {
     Coms_ESP_SendStable(flg_stable_state);
 }
 
-void Tmrs_CBK_UpdateStableFlag(bool *flg_stable_state)
-{
-    if (Act_LIN_IsStable()) {
-        *flg_stable_state = true;
-    } else {
-        *flg_stable_state = false;
+void Tmrs_CBK_UpdateStableFlag(bool *flg_stable_state) {
+    bool out = true;
+    uint8_t edge;
+    for (edge = 0; edge < 3; edge++){
+        if (Flg_EdgeReq_Ext[edge])
+            if (!Act_LIN_InRange(edge))
+                out = false;
+        if (Flg_EdgeReq_Ang[edge])
+            if (!Act_ROT_InRange(edge))
+                out = false;
     }
+    *flg_stable_state = out;
+    
+    if (out) LED_R = LED_On;
+    else LED_R = LED_Off;
 }
