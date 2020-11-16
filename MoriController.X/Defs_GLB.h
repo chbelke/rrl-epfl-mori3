@@ -63,6 +63,7 @@ extern volatile bool FLG_WaitAllEdges;
 extern volatile bool FLG_MotLin_Active;
 extern volatile bool FLG_MotRot_Active;
 extern volatile bool FLG_Verbose;
+extern volatile bool FLG_Emergency;
 
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;

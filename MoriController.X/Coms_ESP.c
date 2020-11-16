@@ -5,6 +5,7 @@
 #include "Acts_CPL.h"
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
+#include "Mnge_ERR.h"
 #include "math.h"
 #include "dsp.h"
 #include "mcc_generated_files/uart4.h"
@@ -92,6 +93,12 @@ void Coms_ESP_Eval() { // called in main
             }
             break;   
 
+        case 1:
+            if (EspIn == ESP_End)
+                Mnge_ERR_ActivateStop();
+            EspInCase = 0;
+            break;
+            
         case 5:
             if (Coms_ESP_Handle(EspIn))
                 EspInCase = 0;

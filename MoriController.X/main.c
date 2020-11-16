@@ -72,6 +72,7 @@ volatile bool FLG_WaitAllEdges = true;
 volatile bool FLG_MotLin_Active = false;
 volatile bool FLG_MotRot_Active = false;
 volatile bool FLG_Verbose = false;
+volatile bool FLG_Emergency = false;
 
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
