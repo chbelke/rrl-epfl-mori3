@@ -5,7 +5,9 @@
 //#include <libpic30.h>
 #include "Defs_GLB.h"
 
-volatile uint8_t PWM_Values[8] = {0, 10, 10, 0, 0, 0, 0, 0};
+volatile uint8_t PWM_Values[8] =
+        {RGB_Default_Blue, RGB_Default_Green, RGB_Default_Red,
+        0, 0, 0, 0, 0};
 
 void Mnge_PWM_Setup(void) {
     uint8_t initReg1[2] = {TLC59208_MODE1Add, TLC59208_MODE1};

@@ -156,7 +156,4 @@ void Tmrs_CBK_UpdateStableFlag(bool *flg_stable_state) {
                 out = false;
     }
     *flg_stable_state = out;
-    
-    if (out) LED_R = LED_On;
-    else LED_R = LED_Off;
 }
