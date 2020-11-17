@@ -69,9 +69,11 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) { // called in main
     static uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
-
+    uint8_t EdgIn = 50;
+    
     if(!Coms_123_Ready(edge)) return; // check if byte received
-    uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
+    if(EdgInCase[edge] != 40)   //Only read alloc byte if in relay
+        EdgIn = Coms_123_Read(edge); // ready incoming byte
       
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
@@ -95,8 +97,13 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                     EdgInCase[edge] = 30;
                     break;
                 case 7: // xxx == 111, relay
-                    Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111);
-                    EdgInCase[edge] = 40;
+                    if (Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111)){
+                        EdgInCase[edge] = 0;
+                    }
+                    else {
+                        EdgInCase[edge] = 40;                        
+                    }
+                    
                     break;
                 default:
                     EdgInCase[edge] = 50;

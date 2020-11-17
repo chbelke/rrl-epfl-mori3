@@ -53,6 +53,7 @@
 #include "../Coms_123.h"
 #include "../Mnge_RGB.h"
 //#include "Coms_ESP.h"
+#include "../Defs_GLB.h"
 
 /**
   Section: Data Type Definitions
@@ -83,8 +84,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART1_CONFIG_TX_BYTEQ_LENGTH (1023+1)
-#define UART1_CONFIG_RX_BYTEQ_LENGTH (1023+1)
+#define UART1_CONFIG_TX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
+#define UART1_CONFIG_RX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
 
 /** UART Driver Queue
 
@@ -329,7 +330,7 @@ bool UART1_IsTxDone(void)
 
  *******************************************************************************/
 
-static uint8_t UART1_RxDataAvailable(void)
+static uint16_t UART1_RxDataAvailable(void)
 {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*)rxTail;

@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'D' // module name by letter
+#define MODULE 'C' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -116,6 +116,7 @@ extern volatile uint8_t ESP_ID[6];
 #define ESP_End 14                  // end byte
 #define ESP_Relay 0b00000101
 #define ESP_URT_NUM 3
+#define UART_BUFF_SIZE 1023
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte

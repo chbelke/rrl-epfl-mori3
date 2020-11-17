@@ -2,6 +2,9 @@
 #include "Coms_ESP.h"
 #include "Coms_CMD.h"
 #include "Defs_GLB.h"
+#include "mcc_generated_files/uart1.h"
+#include "mcc_generated_files/uart2.h"
+#include "mcc_generated_files/uart3.h"
 #include "mcc_generated_files/uart4.h"
 #include "Coms_REL.h"
 
@@ -10,53 +13,53 @@ uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
 uint8_t RelBytDta[4][255]; // = {0}; // array to store relay data
 uint8_t alloc[4] = {0, 0, 0, 0};
 uint8_t WIFI_EDGE = 255;
+uint8_t tmp_count = 0;
 
 /* ******************** RELAY HANDLER *************************************** */
 bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
     static uint8_t RelSwitch[4] = {0}; // switch case variable
-    static uint8_t RelBytCnt[4] = {0}; // incoming byte counter
     static uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
-    bool out = false;
+    uint8_t i;
     switch (RelSwitch[inEdge]) {
         case 0:
-            if(byte == EDG_End)
-                break;
+            if(byte == EDG_End){
+                RelSwitch[inEdge] = 50;
+                return false;
+            }
             alloc[inEdge] = byte;
             RelOutEdg[inEdge] = (alloc[inEdge] & 0b00000111);
-            RelBytCnt[inEdge] = 1;
             RelSwitch[inEdge] = 1;
-            break;
         case 1:
-            RelBytExp[inEdge] = byte;
-            RelBytCnt[inEdge]++;
-            RelSwitch[inEdge]++;
-            break;
+            if(!Coms_REL_Ready(inEdge)) return false; // check if byte receive
+            RelBytExp[inEdge] = Coms_REL_Read(inEdge);
+            RelSwitch[inEdge]= 2;
         case 2:
-            RelBytDta[inEdge][RelBytCnt[inEdge] - 2] = byte;
-            RelBytCnt[inEdge]++;
-            if (RelBytCnt[inEdge] >= RelBytExp[inEdge]) {
+            if(!Coms_REL_Ready(inEdge)) return false;
+            if ((uint8_t)(UART_BUFF_SIZE-Coms_REL_getRecieveBufferSize(inEdge))
+                    < (RelBytExp[inEdge]-2))
+                return false;
+            
+            if (Coms_REL_Peek_Buffer(inEdge, (RelBytExp[inEdge]-3)) == EDG_End) {
+                Coms_REL_Relay(inEdge, RelOutEdg[inEdge]);
                 RelSwitch[inEdge] = 0;
-                if (byte == EDG_End) {
-                    out = true;
-                    Coms_REL_Relay(inEdge, RelOutEdg[inEdge]);
-                } else {
-//                    Coms_ESP_Verbose_Write("hello");
-                    RelSwitch[inEdge] = 50;
-                }
+                return true;
+            } else {
+                RelSwitch[inEdge] = 50;
             }
-            break;
             
         case 50: // END BYTE NOT RECEIVED **************************************
-            if (byte == EDG_End) // wait for next end byte
+            byte = Coms_REL_Read(inEdge);
+            if (byte == EDG_End){ // wait for next end byte
                 RelSwitch[inEdge] = 0;
-                out = true;
+                return true;
+            }
             break;    
             
         default:
-            RelSwitch[inEdge] = 0;
+            RelSwitch[inEdge] = 50;
             break;
     }
-    return out;
+    return false;
 }
 
 /* ******************** ACTUAL RELAY **************************************** */
@@ -84,9 +87,12 @@ void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge) {
 
 /* ******************** RELAY TO NEIGHBOUR ********************************** */
 void Coms_REL_ToEdge(uint8_t edge, uint8_t inEdge) {
-    if (((RelBytDta[inEdge][0] >> 5) & 0x07) == 7) {
-        Coms_REL_RelayStandard(edge, inEdge);
+//    Coms_ESP_Verbose_One_Byte(Coms_REL_Peek_Buffer(inEdge, 0));
+    if (((Coms_REL_Peek_Buffer(inEdge, 0) >> 5) & 0x07) == 7) {
+//        Coms_ESP_Verbose_One_Byte(0x0F);
+        Coms_REL_RelayStandard(edge, inEdge);       
     } else { //If last byte is not a command
+//        Coms_ESP_Verbose_One_Byte(0xF0);
         Coms_REL_RelayCommand(edge, inEdge);
     }
 }
@@ -94,21 +100,24 @@ void Coms_REL_ToEdge(uint8_t edge, uint8_t inEdge) {
 /* ******************** RELAY TO WIFI HUB *********************************** */
 void Coms_REL_ToHub(uint8_t edge, uint8_t inEdge) {
     Coms_REL_Write(edge, 0b11100110); // Necessary (Relay + wifi edge))
-    Coms_REL_Write(edge, RelBytExp[inEdge]); // write length -1
+    Coms_REL_Write(edge, RelBytExp[inEdge]); // write length
     uint8_t count;
     for (count = 0; count < RelBytExp[inEdge] - 2; count++) {
-        Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data
+        Coms_REL_Write(edge, Coms_REL_Read(inEdge)); //data
     }
+//    Coms_REL_Read(inEdge);
 }
 
 /* ******************** GENERIC RELAY *************************************** */
 void Coms_REL_RelayStandard(uint8_t edge, uint8_t inEdge) {
-    Coms_REL_Write(edge, RelBytDta[inEdge][0]); // write next aloc
-    Coms_REL_Write(edge, RelBytExp[inEdge] - 1); // write length -1
-    uint8_t count;
-    for (count = 1; count < RelBytExp[inEdge] - 2; count++) {
-        Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data
+    Coms_REL_Write(edge, Coms_REL_Read(inEdge)); // write next aloc
+    Coms_REL_Write(edge, (RelBytExp[inEdge] - 1)); // write length -1
+//    Coms_REL_Write(edge, RelBytExp[inEdge] - 1); // write length -1
+    uint8_t i;
+    for (i=1; i < RelBytExp[inEdge] - 2; i++) {
+        Coms_REL_Write(edge, Coms_REL_Read(inEdge)); //data
     }
+//    Coms_REL_Read(inEdge);
 }
 
 /* ******************** RELAY COMMAND FOR NEIGHBOUR ************************* */
@@ -117,10 +126,11 @@ void Coms_REL_RelayCommand(uint8_t edge, uint8_t inEdge) {
         Coms_REL_Write(edge, 0b00100000);
         Coms_REL_Write(edge, RelBytExp[inEdge]-4);  
     }
-    uint8_t count; //count minus 3: relay + len + rel end
-    for (count = 0; count < RelBytExp[inEdge] - 3; count++) {
-        Coms_REL_Write(edge, RelBytDta[inEdge][count]); //data
+    uint8_t i; //count minus 3: relay + len + rel end
+    for (i=0; i < (RelBytExp[inEdge] - 3); i++) {
+        Coms_REL_Write(edge, Coms_REL_Read(inEdge)); //data
     }
+    Coms_REL_Read(inEdge); //discard last byte
 }
 
 /* ******************** SET WIFI EDGE *************************************** */
@@ -137,24 +147,124 @@ uint8_t Coms_REL_GetWiFiEdge() {
 void Coms_REL_Interpret(uint8_t inEdge) {
     uint8_t count = 0;
     uint8_t end_len = 3;
-    if (((RelBytDta[inEdge][count] >> 5) & 0x07) == 7) {
+    if (((Coms_REL_Peek_Buffer(inEdge,count) >> 5) & 0x07) == 7) {
         count = 1; //If data is relayed, skip first length
         end_len = 2;
     }
-    while (((RelBytDta[inEdge][count] >> 5) & 0x07) == 7) {
+    while (((Coms_REL_Peek_Buffer(inEdge,count) >> 5) & 0x07) == 7) {
         count++;
     }
 
     for (count = count; count < RelBytExp[inEdge] - end_len; count++) {
-        Coms_CMD_Handle(inEdge, RelBytDta[inEdge][count]); //mysterious 5th edge
+        Coms_CMD_Handle(inEdge, Coms_REL_Peek_Buffer(inEdge,count)); //mysterious 5th edge
     }
 }
 
 /* ******************** GENERIC UART WRITE ********************************** */
 void Coms_REL_Write(uint8_t edge, uint8_t byte) {
+//    Coms_ESP_Verbose_One_Byte(byte);
+//    while(!Coms_REL_TxReady(edge)){}
     if (edge < 3) {
         Coms_123_Write(edge, byte);
     } else if (edge == 3) {
         UART4_Write(byte);
     }
+}
+
+uint16_t Coms_REL_getRecieveBufferSize(uint8_t edge){
+    switch(edge) {
+        case 0:
+            return UART1_ReceiveBufferSizeGet();
+        case 1:
+            return UART2_ReceiveBufferSizeGet();
+        case 2:
+            return UART3_ReceiveBufferSizeGet();
+        case 3:
+            return UART4_ReceiveBufferSizeGet();            
+    }
+    return 0xFFFF;
+}
+
+
+uint8_t Coms_REL_Peek_Buffer(uint8_t edge, uint8_t offset) {
+    switch(edge) {
+        case 0:
+            return UART1_Peek(offset);
+        case 1:
+            return UART2_Peek(offset);
+        case 2:
+            return UART3_Peek(offset);
+        case 3:
+            return UART4_Peek(offset);            
+    }    
+    return 0;
+}
+
+uint8_t Coms_REL_Read(uint8_t edge) {
+//    uint8_
+//    switch (edge) {
+//        case 0:
+//            return UART1_Read();
+//        case 1:
+//            return UART2_Read();
+//        case 2:
+//            return UART3_Read();
+//        case 3:
+//            return UART4_Read();           
+//    }
+//    return 0;
+//}
+//    if(!Coms_REL_Ready(edge))
+//    {
+//        Coms_ESP_Verbose_One_Byte(0xFF);
+//        Coms_ESP_Verbose_One_Byte(0xFF);
+//    }
+//    while(!Coms_REL_Ready(edge)){} //Don't hate me chris
+    uint8_t byte = 0xFF;
+    switch (edge) {
+        case 0:
+            byte = UART1_Read();
+            break;
+        case 1:
+            byte = UART2_Read();
+            break;
+        case 2:
+            byte = UART3_Read();
+            break;
+        case 3:
+            byte = UART4_Read();
+            break;
+    }
+//    Coms_ESP_Verbose_One_Byte(byte);
+    return byte;
+}
+
+
+bool Coms_REL_Ready(uint8_t edge) {
+    switch (edge) {
+        case 0:
+            return UART1_IsRxReady();
+        case 1:
+            return  UART2_IsRxReady();
+        case 2:
+            return UART3_IsRxReady();
+        case 3:
+            return UART4_IsRxReady();    
+    }
+    return false;
+}
+
+
+bool Coms_REL_TxReady(uint8_t edge) {
+    switch (edge) {
+        case 0:
+            return UART1_IsTxReady();
+        case 1:
+            return  UART2_IsTxReady();
+        case 2:
+            return UART3_IsTxReady();
+        case 3:
+            return UART4_IsTxReady();    
+    }
+    return false;
 }

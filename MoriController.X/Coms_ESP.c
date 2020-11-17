@@ -58,7 +58,9 @@ void Coms_ESP_Eval() { // called in main
     }
        
     static uint8_t EspInCase = 0;
-     uint8_t EspIn = UART4_Read(); // Incoming byte
+    uint8_t EspIn = 50;
+    if(EspInCase != 7)
+        EspIn = UART4_Read(); // Incoming byte
 //    const char *message = "hello";
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
@@ -82,8 +84,11 @@ void Coms_ESP_Eval() { // called in main
                     EspInCase = 6;
                     break;
                 case 7: // xxx == 111, relay
-                    Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111);
-                    EspInCase = 7;
+                    if(Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111)){
+                        EspInCase = 0;
+                    } else {
+                        EspInCase = 7;
+                    }
                     break;
                     
                 default:
