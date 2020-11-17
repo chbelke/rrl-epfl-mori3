@@ -19,7 +19,6 @@ uint8_t tmp_count = 0;
 bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
     static uint8_t RelSwitch[4] = {0}; // switch case variable
     static uint8_t RelOutEdg[4] = {0}; // outgoing edge(s)
-    uint8_t i;
     switch (RelSwitch[inEdge]) {
         case 0:
             if(byte == EDG_End){
@@ -87,12 +86,10 @@ void Coms_REL_Relay(uint8_t inEdge, uint8_t outEdge) {
 
 /* ******************** RELAY TO NEIGHBOUR ********************************** */
 void Coms_REL_ToEdge(uint8_t edge, uint8_t inEdge) {
-//    Coms_ESP_Verbose_One_Byte(Coms_REL_Peek_Buffer(inEdge, 0));
     if (((Coms_REL_Peek_Buffer(inEdge, 0) >> 5) & 0x07) == 7) {
 //        Coms_ESP_Verbose_One_Byte(0x0F);
         Coms_REL_RelayStandard(edge, inEdge);       
     } else { //If last byte is not a command
-//        Coms_ESP_Verbose_One_Byte(0xF0);
         Coms_REL_RelayCommand(edge, inEdge);
     }
 }
@@ -105,7 +102,6 @@ void Coms_REL_ToHub(uint8_t edge, uint8_t inEdge) {
     for (count = 0; count < RelBytExp[inEdge] - 2; count++) {
         Coms_REL_Write(edge, Coms_REL_Read(inEdge)); //data
     }
-//    Coms_REL_Read(inEdge);
 }
 
 /* ******************** GENERIC RELAY *************************************** */
@@ -162,8 +158,6 @@ void Coms_REL_Interpret(uint8_t inEdge) {
 
 /* ******************** GENERIC UART WRITE ********************************** */
 void Coms_REL_Write(uint8_t edge, uint8_t byte) {
-//    Coms_ESP_Verbose_One_Byte(byte);
-//    while(!Coms_REL_TxReady(edge)){}
     if (edge < 3) {
         Coms_123_Write(edge, byte);
     } else if (edge == 3) {
@@ -201,42 +195,17 @@ uint8_t Coms_REL_Peek_Buffer(uint8_t edge, uint8_t offset) {
 }
 
 uint8_t Coms_REL_Read(uint8_t edge) {
-//    uint8_
-//    switch (edge) {
-//        case 0:
-//            return UART1_Read();
-//        case 1:
-//            return UART2_Read();
-//        case 2:
-//            return UART3_Read();
-//        case 3:
-//            return UART4_Read();           
-//    }
-//    return 0;
-//}
-//    if(!Coms_REL_Ready(edge))
-//    {
-//        Coms_ESP_Verbose_One_Byte(0xFF);
-//        Coms_ESP_Verbose_One_Byte(0xFF);
-//    }
-//    while(!Coms_REL_Ready(edge)){} //Don't hate me chris
-    uint8_t byte = 0xFF;
     switch (edge) {
         case 0:
-            byte = UART1_Read();
-            break;
+            return UART1_Read();
         case 1:
-            byte = UART2_Read();
-            break;
+            return UART2_Read();
         case 2:
-            byte = UART3_Read();
-            break;
+            return UART3_Read();
         case 3:
-            byte = UART4_Read();
-            break;
+            return UART4_Read();           
     }
-//    Coms_ESP_Verbose_One_Byte(byte);
-    return byte;
+    return 0;
 }
 
 
