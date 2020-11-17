@@ -1,7 +1,7 @@
 void readSerial()
 {
   
-  if(Serial.available())
+  while(Serial.available())
   {
     static int serial_case = 0;
     static bool alloc = true;    
@@ -10,10 +10,6 @@ void readSerial()
 
     if (alloc)
     {
-      if(c == END_BYTE)
-      {
-        return;
-      }
       serial_case = ((c >> 5) & 0b00000111);
       alloc = false;
     }        
@@ -45,7 +41,7 @@ void readSerial()
         break;   
 
       default:
-        if(c == byte(END_BYTE)) alloc = true;
+        if(serialErrorHandle(c)) alloc = true;
     }
   }
 }
@@ -701,9 +697,9 @@ void purgeSerial()
 void updateStableState(bool current_stable_state)
 {
   //saves previous 8 states (in case we need tracking for later, and also since a bool takes a byte's of memory anywya)
-  stable_status = stable_status << 1;
-  stable_status = stable_status | current_stable_state;
-  if ((stable_status & 0b00000010) != current_stable_state)
+  stable_status = (stable_status << 1) & 0b11111110;
+  stable_status = (stable_status | (current_stable_state & 0b00000001));
+  if (((stable_status & 0b00000010) >> 1) != (stable_status & 0b00000001))
     publishStaticState();
 }
 
