@@ -19,7 +19,8 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'C' // module name by letter
+#define MODULE 'A' // module name by letter
+
 
 
 /* ******************** NOTES *********************************************** */
@@ -47,6 +48,10 @@
 #define MODE_MotRot_Active true
 #define MODE_Cplngs_Active true
 
+// RGB LED Default values
+#define RGB_Default_Red 10
+#define RGB_Default_Green 10
+#define RGB_Default_Blue 0
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
@@ -63,6 +68,7 @@ extern volatile bool FLG_WaitAllEdges;
 extern volatile bool FLG_MotLin_Active;
 extern volatile bool FLG_MotRot_Active;
 extern volatile bool FLG_Verbose;
+extern volatile bool FLG_Emergency;
 
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
@@ -166,8 +172,9 @@ extern volatile uint8_t ESP_ID[6];
 #define MotLin_SlowRegion 50        // slow region near min and max
 #define MotLin_SlowFactor 1.2       // linear slow down factor in slow region
 
+#define MotLin_OkRange 2            // +- (0.1mm)
 #define MotLin_PID_erband 4         // acceptable error band ~ *0.01mm
-#define MotLin_PID_stable 5         // stable time in sec
+#define MotLin_PID_stable 3         // stable time in sec
 #define MotLin_PID_period 0.05f     // timer period
 #define MotLin_PID_kP 162.0f        // proportional component
 #define MotLin_PID_kI 101.3f        // integral component
@@ -184,7 +191,8 @@ extern volatile uint8_t ESP_ID[6];
 
 #define MotRot_AngleRange 240       // overall range (in degrees)
 
-#define MotRot_PID_period 0.01f         // timer period (currently not used)
+#define MotRot_OkRange 20           // +- 0.1(degrees)
+#define MotRot_PID_period 0.01f     // timer period (currently not used)
 #define MotRot_PID_kP 153.0f        // proportional component
 #define MotRot_PID_kI 53.9f         // integral component
 #define MotRot_PID_kD 3.4f          // derivative component

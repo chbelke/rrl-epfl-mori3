@@ -14,5 +14,6 @@ uint8_t Acts_ROT_GetSpeedLimit(uint8_t);
 uint16_t Acts_ROT_GetTarget(uint8_t );
 void Acts_ROT_SetTarget(uint8_t , uint16_t);
 uint16_t Acts_ROT_GetAngle(uint8_t);
+bool Act_ROT_InRange(uint8_t);
 
 #endif	/* ACTS_ROT_H */

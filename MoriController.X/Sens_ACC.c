@@ -1,8 +1,4 @@
 #include "Sens_ACC.h"
-//#include <xc.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <libpic30.h>
 #include "Defs_GLB.h"
 #include "Mnge_RGB.h"
 #include "math.h"

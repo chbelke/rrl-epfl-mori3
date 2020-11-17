@@ -1,7 +1,3 @@
-//#include <xc.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <libpic30.h>
 #include "Defs_GLB.h"
 #include "Defs_MOD.h"
 #include "Mnge_DAC.h"
@@ -16,6 +12,7 @@ uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
 int16_t Spd_Limit[3] = {MotRot_PID_Max, MotRot_PID_Max, MotRot_PID_Max};
 uint8_t DrvInterval[3] = {0, 0, 0};
+volatile bool Flg_InRange_R[3] = {true, true, true};
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9f // output speed factor for non-primary wheels
@@ -92,6 +89,12 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     
     // update motor control output
     Acts_ROT_Out(edge, (int16_t) outf);
+    
+    // in desired range?
+    if ((error > -MotRot_OkRange) && (error < MotRot_OkRange))
+        Flg_InRange_R[edge] = true;
+    else
+        Flg_InRange_R[edge] = false;
 }
 
 /* ******************** EXECUTE WIGGLE ************************************** */
@@ -265,4 +268,11 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 uint16_t Acts_ROT_GetAngle(uint8_t edge) {
     float rawAngle = 10 * Sens_ENC_Get(edge);
     return (uint16_t) map((int16_t)rawAngle, -1800, 1800, 0, 3600);
+}
+
+/* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
+bool Act_ROT_InRange(uint8_t edge){
+    uint16_t diff = abs(Acts_ROT_GetAngle(edge) - Acts_ROT_GetTarget(edge));
+    if (diff <= MotRot_OkRange) return true;
+    else return false;
 }

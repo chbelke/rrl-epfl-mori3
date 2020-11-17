@@ -51,6 +51,7 @@
       <itemPath>Tmrs_CBK.h</itemPath>
       <itemPath>Defs_GLB.h</itemPath>
       <itemPath>Defs_MOD.h</itemPath>
+      <itemPath>Mnge_ERR.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -96,6 +97,7 @@
       <itemPath>Sens_ENC.c</itemPath>
       <itemPath>Mnge_RGB.c</itemPath>
       <itemPath>Tmrs_CBK.c</itemPath>
+      <itemPath>Mnge_ERR.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

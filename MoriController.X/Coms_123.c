@@ -8,6 +8,7 @@
 #include "mcc_generated_files/uart3.h"
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
+#include "Mnge_ERR.h"
 #include "Coms_123.h"
 #include "Acts_CPL.h"
 #include "Acts_LIN.h"
@@ -40,6 +41,7 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
 #define COMS_123_Ackn 0b10001000
 #define COMS_123_IDOk 0b10001100
 #define COMS_123_Idle 0b01100000
+#define COMS_123_Emrg 0b00011111
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9 // output speed factor for non-primary wheels
@@ -113,10 +115,9 @@ void Coms_123_Eval(uint8_t edge) { // called in main
 
         case 1: // EMERGENCY STOP **********************************************
             if (EdgIn == EDG_End) {
+                Mnge_ERR_ActivateStop();
                 char message1 = (char)EdgInAloc[edge];
-                Coms_ESP_Verbose_Write(&message1);                    
-                Flg_EdgeSyn[edge] = false;
-                Flg_EdgeAct[edge] = false;
+                Coms_ESP_Verbose_Write(&message1);
                 EdgInCase[edge] = 0;
             } else {
                 EdgInCase[edge] = 50;
@@ -297,7 +298,8 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         }
         
         // if module ID not verified, send out conn search
-        if(!Flg_ID_check) byte = COMS_123_Conn;
+        if (!Flg_ID_check) byte = COMS_123_Conn;
+        if (FLG_Emergency) byte = COMS_123_Emrg;
 
         if (Flg_Uart_Lock[edge] == false) {
             Flg_Uart_Lock[edge] = true;
