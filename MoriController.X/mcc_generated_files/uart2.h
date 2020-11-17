@@ -483,7 +483,7 @@ UART2_TRANSFER_STATUS __attribute__((deprecated)) UART2_TransferStatusGet (void 
     </code>
  
 */
-uint8_t __attribute__((deprecated)) UART2_Peek(uint16_t offset);
+uint8_t UART2_Peek(uint16_t offset);
 
 /**
   @Summary
@@ -663,7 +663,7 @@ void __attribute__((deprecated)) UART2_Disable(void);
  
 */
 
-unsigned int __attribute__((deprecated)) UART2_ReceiveBufferSizeGet(void);
+unsigned int UART2_ReceiveBufferSizeGet(void);
 
 /**
   @Summary

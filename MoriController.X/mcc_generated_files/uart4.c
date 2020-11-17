@@ -442,7 +442,7 @@ UART4_TRANSFER_STATUS __attribute__((deprecated)) UART4_TransferStatusGet (void 
     return status;
 }
 
-uint8_t __attribute__((deprecated)) UART4_Peek(uint16_t offset)
+uint8_t UART4_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
 
@@ -485,7 +485,7 @@ unsigned int __attribute__((deprecated)) UART4_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int __attribute__((deprecated)) UART4_ReceiveBufferSizeGet(void)
+unsigned int UART4_ReceiveBufferSizeGet(void)
 {
     if(UART4_RxDataAvailable() != 0)
     {

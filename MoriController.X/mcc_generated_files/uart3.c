@@ -442,7 +442,7 @@ UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet (void 
     return status;
 }
 
-uint8_t __attribute__((deprecated)) UART3_Peek(uint16_t offset)
+uint8_t UART3_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
 
@@ -485,7 +485,7 @@ unsigned int __attribute__((deprecated)) UART3_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int __attribute__((deprecated)) UART3_ReceiveBufferSizeGet(void)
+unsigned int UART3_ReceiveBufferSizeGet(void)
 {
     if(UART3_RxDataAvailable() != 0)
     {
