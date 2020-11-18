@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'A' // module name by letter
+#define MODULE 'E' // module name by letter
 
 
 
@@ -49,9 +49,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 10
-#define RGB_Default_Green 10
-#define RGB_Default_Blue 0
+#define RGB_Default_Red 5
+#define RGB_Default_Green 0
+#define RGB_Default_Blue 5
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
