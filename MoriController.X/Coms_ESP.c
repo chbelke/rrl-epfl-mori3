@@ -226,6 +226,11 @@ void Coms_ESP_SendStable(bool flg_stable_state)
     UART4_Write(ESP_End);
 }
 
+void Coms_ESP_TurnOnWifi(void) {
+    UART4_Write(0b10011111);  // 100 = states, 11111 = WiFi On
+    UART4_Write(ESP_End);
+}    
+
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)
 {

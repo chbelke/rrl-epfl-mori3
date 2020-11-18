@@ -262,6 +262,10 @@ void commands(byte* payload, unsigned int len)
       setPicSpeed(payload, len);      
       break;
 
+    case 56:
+      sendEmergencyStop();  
+      break;
+
     default:
       publish("ERR: Command not understood");
   }
@@ -739,4 +743,9 @@ byte extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
   }
   tmp_payload[j] = '\0';
   return (byte)atoi(tmp_payload);
+}
+
+void sendEmergencyStop() {
+  serial_write_one(SET_EMG_STOP);
+  enableWifi();
 }

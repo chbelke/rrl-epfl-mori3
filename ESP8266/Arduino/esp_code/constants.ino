@@ -7,6 +7,7 @@
 
 
 // ------------- Generic Command Definitions ------------- //
+#define SET_EMG_STOP 0b00011111
 #define SET_CMD_WEDGE 0b11011010
 #define REQ_CMD_SHAPE 0b11010100
 #define REQ_CMD_EDGS 0b11010100

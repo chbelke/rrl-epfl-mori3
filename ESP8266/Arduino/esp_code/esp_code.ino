@@ -52,7 +52,7 @@ char *cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "f1f", "f2t", "f2f", "f3t", "f3f", 
                 "f4t", "f4f", "f5t", "f5f", "wiggles",
                 "drcoup", "dlflag", "dlperiod", "cops", "name",
-                "spd"};
+                "spd", "stp"};
 int numCmds;
 
 char stringIP[16];
@@ -359,4 +359,10 @@ void stopInternet()
 {
   WiFi.mode(WIFI_OFF);
   WiFi.forceSleepBegin();  
+}
+
+void enableWifi()
+{
+  if((runState == 10) || (runState == 11))
+    runState = 12;
 }

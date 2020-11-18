@@ -546,6 +546,20 @@ bool stateInfo(byte c)
       alloc = true;
       return true;
       break;
+
+    case 31:
+      if (c == char(END_BYTE))
+      {
+        enableWifi();
+        alloc = true;
+        return true;
+      } else {
+        if(serialErrorHandle(c)) {
+          alloc = true;
+          return true;
+        }
+      }
+      break;
     
     default:
       if(serialErrorHandle(c))
