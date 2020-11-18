@@ -80,7 +80,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
             EdgInAloc[edge] = EdgIn;
             switch ((EdgInAloc[edge] >> 5) & 0x07) {
                 case 0: // xxx == 000, emergency stop
-                    if ((EdgInAloc[edge] & 0x1F) == 37)
+                    if ((EdgInAloc[edge] & 0x1F) == 31)
                         EdgInCase[edge] = 1;
                     break;
                 case 2: // xxx == 010, action command received
@@ -109,8 +109,6 @@ void Coms_123_Eval(uint8_t edge) { // called in main
         case 1: // EMERGENCY STOP **********************************************
             if (EdgIn == EDG_End) {
                 Mnge_ERR_ActivateStop();
-                char message1 = (char)EdgInAloc[edge];
-                Coms_ESP_Verbose_Write(&message1);
                 EdgInCase[edge] = 0;
             } else {
                 EdgInCase[edge] = 50;

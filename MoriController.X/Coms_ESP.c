@@ -65,7 +65,7 @@ void Coms_ESP_Eval() { // called in main
         case 0: // INPUT ALLOCATION ********************************************
             switch ((EspIn >> 5) & 0x07) {
                 case 0: // xxx == 000, emergency stop
-                    if ((EspIn & 0x1F) == 37)
+                    if ((EspIn & 0x1F) == 31)
                         EspInCase = 1;
                     break;
 //                case 2: // xxx == 010, action sync received

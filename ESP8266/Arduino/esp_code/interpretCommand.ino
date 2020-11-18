@@ -747,5 +747,6 @@ byte extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
 
 void sendEmergencyStop() {
   serial_write_one(SET_EMG_STOP);
+  publish("ERR: STOPPING");
   enableWifi();
 }
