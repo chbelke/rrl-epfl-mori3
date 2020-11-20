@@ -3,6 +3,7 @@
 #include "mcc_generated_files/i2c1.h"
 
 float ENC_Data[3] = {1, 2, 3};
+float ENC_DataOld1[3] = {1, 2, 3};
 
 // Encoder AS5048B
 void Sens_ENC_Read(uint8_t edge) {
@@ -63,9 +64,14 @@ void Sens_ENC_Read(uint8_t edge) {
     angleFLT = (angleFLT / AS5048B_Res) * 360.0 - 180;
 
     // output
+    ENC_DataOld1[edge] = ENC_Data[edge];
     ENC_Data[edge] = angleFLT;
 }
 
 float Sens_ENC_Get(uint8_t edge) {
     return ENC_Data[edge];
+}
+
+float Sens_ENC_GetDelt(uint8_t edge) {
+    return (ENC_Data[edge] - ENC_DataOld1[edge]);
 }

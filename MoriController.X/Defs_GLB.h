@@ -189,8 +189,8 @@ extern volatile uint8_t ESP_ID[6];
 
 #define MotRot_AngleRange 240       // overall range (in degrees)
 
-#define MotRot_OkRange 20           // +- 0.1(degrees)
-#define MotRot_PID_period 0.01f     // timer period (currently not used)
+#define MotRot_OkRange 15           // +- 0.1(degrees)
+#define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_kP 153.0f        // proportional component
 #define MotRot_PID_kI 53.9f         // integral component
 #define MotRot_PID_kD 3.4f          // derivative component
@@ -198,6 +198,17 @@ extern volatile uint8_t ESP_ID[6];
 #define MotRot_PID_Dmax 1024
 #define MotRot_PID_Imax 1024
 #define MotRot_PID_Max 1024
+
+//#define MotRot_SPD_kP 1706.7f
+#define MotRot_SPD_kI 1200.0f
+//#define MotRot_SPD_kD 51.2f
+
+#define MotRot_SPD_Dmax 1024
+#define MotRot_SPD_Imax 1024
+#define MotRot_SPD_Max 1024
+
+#define MotRot_SPD255 255           // limit speed at start-up
+#define MotRot_SPD 60.0f            // maximum speed (degrees/second) (60 @tau=149)
 
 #define MotRot_TorqueLimit 149      // /255, 237 stall, 149 GPX safe, 63 backdrive safe
 #define MotRot_WiggleTime 15        // seconds

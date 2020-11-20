@@ -10,41 +10,78 @@
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
-int16_t Spd_Limit[3] = {MotRot_PID_Max, MotRot_PID_Max, MotRot_PID_Max};
+uint8_t Speed_255[3] = {MotRot_SPD255, MotRot_SPD255, MotRot_SPD255};
+float Speed_DEG[3] = {((float)MotRot_SPD255) / 255 * MotRot_SPD * MotRot_PID_period,
+        ((float)MotRot_SPD255) / 255 * MotRot_SPD * MotRot_PID_period,
+        ((float)MotRot_SPD255) / 255 * MotRot_SPD * MotRot_PID_period};
 uint8_t DrvInterval[3] = {0, 0, 0};
-volatile bool Flg_InRange_R[3] = {true, true, true};
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9f // output speed factor for non-primary wheels
 
+#define RampUp 20
+#define RampDown 5
+
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
+    static int16_t oldDuty[3] = {0, 0, 0};
     if (!MODE_MotRot_Active || !FLG_MotRot_Active) duty = 0; // rotary motors off
-    else if (duty > Spd_Limit[edge]) duty = Spd_Limit[edge];
-    else if (duty < -Spd_Limit[edge]) duty = -Spd_Limit[edge];
+//    else if (duty > Speed_255[edge]) duty = Speed_255[edge];
+//    else if (duty < -Speed_255[edge]) duty = -Speed_255[edge];
+    
+    int16_t out = duty;
+//    float delta = Sens_ENC_GetDeltaAvg(edge);
+//    if (delta > (Speed_DEG[edge] * 1.05)) { // too fast, ramp down
+//        if (duty > 0){
+//            out = oldDuty[edge] - RampDown;
+//        } else if (duty < 0){
+//            out = oldDuty[edge] + RampDown;
+//        }
+//    } else if (delta > (Speed_DEG[edge] * 0.95)) { // speed ok, only accept slower
+//        if ((oldDuty[edge] < 0) && (duty > oldDuty[edge]))
+//            out = duty;
+//        else if ((oldDuty[edge] > 0) && (duty < oldDuty[edge]))
+//            out = duty;
+//        else
+//            out = oldDuty[edge];
+//    } else {
+//        // ramp up
+//        if (duty > 0){
+//            if ((duty - oldDuty[edge]) > RampUp) out = oldDuty[edge] + RampUp;
+//            else out = duty;
+//        } else if (duty < 0){
+//            if ((duty - oldDuty[edge]) < RampUp) out = oldDuty[edge] - RampUp;
+//            else out = duty;
+//        }
+//    }
+//    
+//    // limit duty cycle
+//    if (out < -MotRot_PID_Max) out = -MotRot_PID_Max;
+//    else if (out > MotRot_PID_Max) out = MotRot_PID_Max;
     
     switch (edge) {
         case 0:
-            if (duty > 0) ROT_DIR_1 = 1; // direction output
+            if (out > 0) ROT_DIR_1 = 1; // direction output
             else ROT_DIR_1 = 0;
-            PWM_Set(ROT_PWM_1, abs(duty)); // pwm output
+            PWM_Set(ROT_PWM_1, abs(out)); // pwm output
             break;
             
         case 1:
-            if (duty > 0) ROT_DIR_2 = 1;
+            if (out > 0) ROT_DIR_2 = 1;
             else ROT_DIR_2 = 0; // direction output
-            PWM_Set(ROT_PWM_2, abs(duty)); // pwm output
+            PWM_Set(ROT_PWM_2, abs(out)); // pwm output
             break;
             
         case 2:
-            if (duty > 0) ROT_DIR_3 = 1; // direction output
+            if (out > 0) ROT_DIR_3 = 1; // direction output
             else ROT_DIR_3 = 0;
-            PWM_Set(ROT_PWM_3, abs(duty)); // pwm output
+            PWM_Set(ROT_PWM_3, abs(out)); // pwm output
             break;
             
         default:
             break;
     }
+    oldDuty[edge] = out;
 }
 
 /* ******************** ROTARY MOTOR PID ************************************ */
@@ -53,7 +90,7 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     static float rPID_I[3] = {0, 0, 0};
     static float rPID_D[3] = {0, 0, 0};
     
-    float desired = ((float)target) / 10 - 180;
+    float desired = ((float)target) / 10.0 - 180.0;
     
     // avoid bad control inputs
     if (desired < -MotRot_AngleRange / 2) desired = -MotRot_AngleRange / 2;
@@ -73,8 +110,8 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     else if (rPID_I[edge] > MotRot_PID_Imax) rPID_I[edge] = MotRot_PID_Imax;
 
     // calculate derivative component
-    rPID_D[edge] = (error - rPID_eOld[edge]) / MotRot_PID_period;  
-    rPID_eOld[edge] = error; 
+    rPID_D[edge] = (error - rPID_eOld[edge]) / MotRot_PID_period;
+    rPID_eOld[edge] = error;
     
     // limit derivative component
     if (rPID_D[edge] < -MotRot_PID_Dmax) rPID_D[edge] = -MotRot_PID_Dmax;
@@ -87,14 +124,90 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     if (outf < -MotRot_PID_Max) outf = -MotRot_PID_Max;
     else if (outf > MotRot_PID_Max) outf = MotRot_PID_Max;
     
-    // update motor control output
-    Acts_ROT_Out(edge, (int16_t) outf);
+    ////////////////////////////////////////////////////////////////////////////
+    static float outfOld[3] = {0, 0, 0};
+    static float rSPD_I[3] = {0, 0, 0};
+//    if (Speed_255[edge] != 255){
+    float delta = Sens_ENC_GetDelta(edge);
+    float errorD;
+
+    if (outf > 0) errorD = Speed_DEG[edge] - delta;
+    else errorD = - Speed_DEG[edge] - delta;
+
+    // direction change, reset integral
+    if (((outfOld[edge] > 0) && (outf < 0)) || ((outfOld[edge] < 0) && (outf > 0)))
+        rSPD_I[edge] = 0;
+    outfOld[edge] = outf;
+
+    // integral component
+    rSPD_I[edge] += errorD * MotRot_PID_period;
+    if (rSPD_I[edge] < -MotRot_SPD_Imax) rSPD_I[edge] = -MotRot_SPD_Imax;
+    else if (rSPD_I[edge] > MotRot_SPD_Imax) rSPD_I[edge] = MotRot_SPD_Imax;
+
+    float outd = outf*(((float)Speed_255[edge])/255) + rSPD_I[edge] * MotRot_SPD_kI;
+
+    // limit duty cycle
+    if (outd < -MotRot_SPD_Max) outd = -MotRot_SPD_Max;
+    else if (outd > MotRot_SPD_Max) outd = MotRot_SPD_Max;
     
-    // in desired range?
-    if ((error > -MotRot_OkRange) && (error < MotRot_OkRange))
-        Flg_InRange_R[edge] = true;
-    else
-        Flg_InRange_R[edge] = false;
+    float OUT;
+    if (((outf > 0) && (outd > 0)) || ((outf < 0) && (outd < 0))){ 
+        OUT = outd;
+        LED_R = LED_On;
+    } else {
+        OUT = outf;
+        LED_R = LED_Off;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+//    static float rSPD_eOld[3] = {0, 0, 0};
+//    static float rSPD_I[3] = {0, 0, 0};
+//    static float rSPD_D[3] = {0, 0, 0};
+//    
+//    float delta = Sens_ENC_GetDeltaAvg(edge);
+//    float errorD;// = delta - Speed_DEG[edge];
+//    if (outf > 0)
+//        errorD = Speed_DEG[edge] - delta;
+//    else
+//        errorD = delta - Speed_DEG[edge];
+//    
+//    // integral component
+//    rSPD_I[edge] += errorD * MotRot_PID_period;
+//    if (rSPD_I[edge] > MotRot_SPD_Imax) rSPD_I[edge] = MotRot_SPD_Imax;
+//    else if (rSPD_I[edge] > MotRot_SPD_Imax) rSPD_I[edge] = MotRot_SPD_Imax;
+//    
+//    // derivative component
+////    rSPD_D[edge] = (errorD - rSPD_eOld[edge]) / MotRot_PID_period;  
+////    rSPD_eOld[edge] = errorD;
+////    if (rSPD_D[edge] < -MotRot_SPD_Dmax) rSPD_D[edge] = -MotRot_SPD_Dmax;
+////    else if (rSPD_D[edge] > MotRot_SPD_Dmax) rSPD_D[edge] = MotRot_SPD_Dmax;
+//    
+//    float outd = MotRot_SPD_kP * errorD + MotRot_SPD_kI * rSPD_I[edge];// + MotRot_SPD_kD * rSPD_D[edge];
+//    
+//    // limit duty cycle
+//    if (outd < -MotRot_SPD_Max) outd = -MotRot_SPD_Max;
+//    else if (outd > MotRot_SPD_Max) outd = MotRot_SPD_Max;
+    ////////////////////////////////////////////////////////////////////////////
+    
+//    float OUT;
+//    if (outf > 0)
+//        if ((outd < outf) && (outd > 0)){ 
+//            OUT = outd;
+//            LED_R = LED_On;
+//        } else {
+//            OUT = outf;
+//            LED_R = LED_Off;
+//        }
+//    else
+//        if ((outd > outf) && (outd < 0)){
+//            OUT = outd;
+//            LED_R = LED_On;
+//        } else {
+//            OUT = outf;
+//            LED_R = LED_Off;
+//        }
+    
+    // update motor control output
+    Acts_ROT_Out(edge, (int16_t) OUT);
 }
 
 /* ******************** EXECUTE WIGGLE ************************************** */
@@ -245,12 +358,13 @@ void Acts_ROT_SetCurrentLimit(uint8_t edge, uint8_t limit) {
 
 /* ******************** SET ROTARY MOTOR SPEED LIMIT ************************ */
 void Acts_ROT_SetSpeedLimit(uint8_t edge, uint8_t limit) {
-    Spd_Limit[edge] = ((uint16_t) limit)*4;
+    Speed_255[edge] = limit;
+    Speed_DEG[edge] = (((float)limit)/255) * MotRot_SPD * MotRot_PID_period;
 }
 
 /* ******************** RETURN ROTARY MOTOR SPEED LIMIT ********************* */
 uint8_t Acts_ROT_GetSpeedLimit(uint8_t edge) {
-    return Spd_Limit[edge]/4;
+    return Speed_255[edge];
 }
 
 /* ******************** GET DESIRED ANGLE *********************************** */
