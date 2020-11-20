@@ -15,28 +15,24 @@ class StartStop(tk.Frame):
 
     def load(self):
         self.Stop = tk.Button(self.frame)
-        self.Stop["text"] = "Stop MQTT"
+        self.Stop["text"] = "STOP"
         self.Stop["fg"]   = "red"
-        self.Stop["command"] = lambda: self.quitButton()
+        self.Stop["command"] = lambda: self.emergencyStop()
         self.Stop.pack(side="left")
 
         self.Mqtt = tk.Button(self.frame)
-        self.Mqtt["text"] = "Start MQTT"
+        self.Mqtt["text"] = "Preset"
         self.Mqtt["fg"]   = "green"
-        self.Mqtt["command"] = lambda: self.runMqtt()
+        self.Mqtt["command"] = lambda: self.picReset()
         self.Mqtt.pack(side="right")
 
 
-    def quitButton(self):
-        print("Stopping MQTT")
-        self.mqtthost.exit()
+    def emergencyStop(self):
+        print(colored("EMERGENCY STOP", "red"))
+        self.mqtthost.publishGlobal("stp")
 
 
-    def runMqtt(self):
-        if self.mqtthost.getMqttStatus():
-            print("MQTT Already Running")
-        else:
-            print("Starting MQTT")
-            self.mqtthost.run()
+    def picReset(self):
+        self.mqtthost.publishGlobal("pre")
 
 

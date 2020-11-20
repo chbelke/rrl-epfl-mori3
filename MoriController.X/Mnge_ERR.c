@@ -2,6 +2,7 @@
 #include "Defs_GLB.h"
 #include "Defs_MOD.h"
 #include "Mnge_RGB.h"
+#include "Coms_ESP.h"
 
 void Mnge_ERR_ActivateStop(){
     if (!FLG_Emergency){
@@ -24,6 +25,6 @@ void Mnge_ERR_ActivateStop(){
         Mnge_RGB_SetAll(20,0,0);
         LED_R = LED_On;
         
-        // XXX Switch on wifi so that preset can be received
+        Coms_ESP_TurnOnWifi();
     }
 }
