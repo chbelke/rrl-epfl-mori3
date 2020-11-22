@@ -2,10 +2,11 @@
 #include "Sens_ENC.h"
 #include "mcc_generated_files/i2c1.h"
 
+// Encoder AS5048B
 float ENC_Data[3] = {1, 2, 3};
 float ENC_DataOld1[3] = {1, 2, 3};
 
-// Encoder AS5048B
+/* ******************** READ ENCODER **************************************** */
 void Sens_ENC_Read(uint8_t edge) {
     I2C1_MESSAGE_STATUS status;
     I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
@@ -68,10 +69,12 @@ void Sens_ENC_Read(uint8_t edge) {
     ENC_Data[edge] = angleFLT;
 }
 
+/* ******************** GET CURRENT ANGLE *********************************** */
 float Sens_ENC_Get(uint8_t edge) {
     return ENC_Data[edge];
 }
 
-float Sens_ENC_GetDelt(uint8_t edge) {
+/* ******************** GET ANGLE DELTA ************************************* */
+float Sens_ENC_GetDelta(uint8_t edge) {
     return (ENC_Data[edge] - ENC_DataOld1[edge]);
 }

@@ -38,8 +38,7 @@ uint8_t Coms_ESP_Data_Transmission = 0;
 
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
- * It gets called from the ISR each time a byte is received. It first checks
- * whether the first byte is the control value ESP_Beg. It then evaluates the
+ * It gets called from the ISR each time a byte is received. It evaluates the
  * allocation byte, steps through the appropriate cases depending on the
  * allocation byte, and verifies the validity of the incoming date through 
  * the control value ESP_End and the total number of bytes received. If the 
