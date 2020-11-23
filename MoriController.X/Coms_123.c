@@ -21,6 +21,7 @@ volatile uint8_t EdgActCnt[3] = {0, 0, 0}; // no idle byte received counter
 volatile bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 volatile bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready send
+volatile bool Flg_Uart_Lock[3] = {false, false, false};
 
 // Neighbour ID variables
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -298,7 +299,7 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         // if module ID not verified, send out conn search
         if (!Flg_ID_check) byte = COMS_123_Conn;
         if (FLG_Emergency) byte = COMS_123_Emrg;
-
+        
         if (Flg_Uart_Lock[edge] == false) {
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte

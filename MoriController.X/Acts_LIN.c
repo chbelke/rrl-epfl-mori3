@@ -62,9 +62,9 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
 
 /* ******************** LINEAR MOTOR PID ************************************ */
 void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
-    static float lPID_eOld[3] = {0, 0, 0};
-    static float lPID_I[3] = {0, 0, 0};
-    float lPID_D[3] = {0, 0, 0};
+    static float errorOld[3] = {0, 0, 0};
+    static float PID_I[3] = {0, 0, 0};
+    float PID_D = 0;
     static uint8_t Stbl_Count[3] = {0, 0, 0};
     static int16_t Stbl_dOld[3] = {0, 0, 0};
     
@@ -110,24 +110,24 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
 
     // avoid integral build up when far away
     if (abs(error) > 6.5) // if error is >6.32, kp results in max (ignoring kd)
-        lPID_I[edge] += error * MotLin_PID_period; // calculate integral component
+        PID_I[edge] += error * MotLin_PID_period; // calculate integral component
     else
-        lPID_I[edge] = 0;
+        PID_I[edge] = 0;
 
     // limit integral component
-    if (lPID_I[edge] < -MotLin_PID_Imax) lPID_I[edge] = -MotLin_PID_Imax;
-    else if (lPID_I[edge] > MotLin_PID_Imax) lPID_I[edge] = MotLin_PID_Imax;
+    if (PID_I[edge] < -MotLin_PID_Imax) PID_I[edge] = -MotLin_PID_Imax;
+    else if (PID_I[edge] > MotLin_PID_Imax) PID_I[edge] = MotLin_PID_Imax;
     
     // calculate derivative component
-    lPID_D[edge] = (error - lPID_eOld[edge]) / MotLin_PID_period;  
-    lPID_eOld[edge] = error;
+    PID_D = (error - errorOld[edge]) / MotLin_PID_period;  
+    errorOld[edge] = error;
     
     // limit derivative component
-    if (lPID_D[edge] < -MotLin_PID_DMax) lPID_D[edge] = -MotLin_PID_DMax;
-    else if (lPID_D[edge] > MotLin_PID_DMax) lPID_D[edge] = MotLin_PID_DMax;
+    if (PID_D < -MotLin_PID_DMax) PID_D = -MotLin_PID_DMax;
+    else if (PID_D > MotLin_PID_DMax) PID_D = MotLin_PID_DMax;
 
     // calculate PID output
-    float outf = MotLin_PID_kP * error + MotLin_PID_kI * lPID_I[edge] + MotLin_PID_kD * lPID_D[edge];
+    float outf = MotLin_PID_kP * error + MotLin_PID_kI * PID_I[edge] + MotLin_PID_kD * PID_D;
 
     // limit duty cycle
     if (outf < -MotLin_PID_Max) outf = -MotLin_PID_Max;
