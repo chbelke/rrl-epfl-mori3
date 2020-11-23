@@ -107,8 +107,6 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
             SPD_I[edge] = 0;
         outPOld[edge] = outP;
 
-        float OUTcompare = OUT;
-
         // integral component
         SPD_I[edge] += errorSPD * MotRot_SPD_kI;
         float SPD_P = MotRot_SPD_kP * errorSPD;
@@ -133,18 +131,9 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         float outS = OUT + SPD_I[edge] + SPD_P;
         
         // limit speed duty cycle
-        if (outS < -MotRot_SPD_Max) outS = -MotRot_SPD_Max;
-        else if (outS > MotRot_SPD_Max) outS = MotRot_SPD_Max;
-
-        if (((OUTcompare > 0) && (OUTcompare > outS))
-                || (OUTcompare < 0 && (OUTcompare < outS)))
-            LED_R = LED_On;
-        else
-            LED_R = LED_Off;
-
-        // if outP and outS in same direction, use outS
-        //        if (((outP > 0) && (outS > 0)) || ((outP < 0) && (outS < 0)))
-        OUT = outS;
+        if (outS < -MotRot_SPD_Max) OUT = -MotRot_SPD_Max;
+        else if (outS > MotRot_SPD_Max) OUT = MotRot_SPD_Max;
+        else OUT = outS;
     } else { // reset integral
         SPD_I[edge] = 0;
     }

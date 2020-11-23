@@ -20,9 +20,6 @@
 
 /* ******************** MODULE ********************************************** */
 #define MODULE 'C' // module name by letter
-#define MotRot_SPD_kP 60.0f
-#define MotRot_SPD_kI 15.0f         // speed control integral gain
-#define MotRot_SPD_kD 8.0f
 
 /* ******************** NOTES *********************************************** */
 // Timer info
@@ -194,14 +191,16 @@ extern volatile uint8_t ESP_ID[6];
 #define MotRot_OkRange 15           // +- (0.1*degrees) (automatic CMD update)
 
 #define MotRot_PID_period 0.01f     // timer period
-#define MotRot_PID_kP 153.0f        // proportional component
-#define MotRot_PID_kI 53.9f         // integral component
-#define MotRot_PID_kD 3.4f          // derivative component
+#define MotRot_PID_kP 153.0f        // proportional gain
+#define MotRot_PID_kI 53.9f         // integral gain
+#define MotRot_PID_kD 3.4f          // derivative gain
 #define MotRot_PID_Dmax 1024        // derivative limit
 #define MotRot_PID_Imax 1024        // integral limit
 #define MotRot_PID_Max 1024         // duty cycle limit
 
-
+#define MotRot_SPD_kP 60.0f         // speed control proportional gain
+#define MotRot_SPD_kI 15.0f         // speed control integral gain
+#define MotRot_SPD_kD 8.0f          // speed control derivative gain
 #define MotRot_SPD_Imax 1024        // speed integral limit
 #define MotRot_SPD_Max 1024         // speed duty cycle limit
 #define MotRot_SpeedInit 255          // limit speed at start-up (/255)
