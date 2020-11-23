@@ -17,7 +17,7 @@ class PartyFrame():
         self.hi_there = tk.Button(self.frame)
         self.hi_there["text"] = "Party",
         self.hi_there["command"] = lambda: self.say_hi()
-        self.hi_there.pack(side="right",fill=tk.X, padx=5, pady=5, expand=True)
+        self.hi_there.pack(side="right",fill=tk.X, expand=True)
 
     def partyOn(self):
         return base64.b64decode(party).decode('UTF-8')

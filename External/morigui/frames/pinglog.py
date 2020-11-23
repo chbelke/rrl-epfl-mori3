@@ -14,19 +14,20 @@ class PingLog(tk.Frame):
 
 
     def load(self):
+        self.waitButton = tk.Button(self.frame)
+        self.waitButton["text"] = "Sequential"
+        self.waitButton["command"] = lambda: self.toggleWaitForBulk()
+        self.waitButton.pack({"side": "right"})
+
         self.pingButton = tk.Button(self.frame)
         self.pingButton["text"] = "Off"
         self.pingButton["fg"]   = "red"
         self.pingButton["command"] = lambda: self.togglePingLog()
-        self.pingButton.pack({"side": "bottom"})
+        self.pingButton.pack({"side": "right"})
 
         self.listMoriLabel = tk.Label(self.frame, text="Ping Logging:")
-        self.listMoriLabel.pack({"side": "bottom"})
+        self.listMoriLabel.pack({"side": "left"})
 
-        self.waitButton = tk.Button(self.frame)
-        self.waitButton["text"] = "Sequential"
-        self.waitButton["command"] = lambda: self.toggleWaitForBulk()
-        self.waitButton.pack({"side": "bottom"})
 
     def togglePingLog(self):
         if self.pingButton['text'] == "Off":
