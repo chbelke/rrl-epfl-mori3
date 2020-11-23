@@ -432,6 +432,9 @@ class WirelessHost(threading.Thread):
     def disableExternalInput(self):
         self.externalInput = False
 
+    def getExternalInput(self):
+        return self.externalInput
+
 
     def exit(self):
         self.mqttClient.exit()
