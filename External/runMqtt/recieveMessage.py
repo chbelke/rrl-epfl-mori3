@@ -59,6 +59,30 @@ def splitMessageUDP(wifi_host, msg, addr):
          traceback.print_exc()
 
 
+def recieveExternalInput(msg, wifi_host):
+   if not wifi_host.getExternalInput(): #Leave if flag is not set
+      return
+   topic = msg.topic.rsplit('/')
+
+   if len(topic) == 3:
+      espNum = topic[1]
+      publishTopic = topic[2]
+   else:
+      publishTopic = topic[1]
+
+   pyld = msg.payload.decode('UTF-8')
+   
+   if publishTopic == 'l':
+      wifi_host.publishLocal(pyld, espNum)
+   elif publishTopic == 'g':
+      wifi_host.publishGlobal(pyld)
+   else:
+      print(colored("Could not publish message: ", "red"))
+      print(colored(pyld))
+      print(colored("Topic:", "red"), end=" ")
+      print(topic)
+
+
 # The callback for when a PUBLISH message is received from the server.
 def interpretMessage(self, wifi_host, pyld, espNum):
    try:

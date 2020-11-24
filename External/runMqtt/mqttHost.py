@@ -70,6 +70,8 @@ class MqttHost(threading.Thread):
         self.client.subscribe("+/p")
         self.client.publish("esp/rec","mac")
         print("Calling for MAC addresses")
+        self.client.subscribe("Ext/+/l")    #External input (local)
+        self.client.subscribe("Ext/g")    #External input (global)
         self.macCallTime = time.time()
 
 
@@ -81,8 +83,11 @@ class MqttHost(threading.Thread):
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
         try:
-            pyld, espNum = splitMessage(msg)
-            interpretMessage(self, self.wifi_host, pyld, espNum)
+            if msg.topic.rsplit('/')[0] == "Ext":
+                recieveExternalInput(msg, self.wifi_host)
+            else:
+                pyld, espNum = splitMessage(msg)
+                interpretMessage(self, self.wifi_host, pyld, espNum)
         except:
             traceback.print_exc()
 

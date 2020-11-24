@@ -79,6 +79,9 @@ class WirelessHost(threading.Thread):
 
         self.dir = "DataLog/"
         self.dataLogFile=None
+
+        self.externalInput = False
+
         self.mqttClient = MqttHost(self)
         self.udpClient = UDPHost(self)
         self.pingHandler = PingHandler(self)
@@ -421,6 +424,16 @@ class WirelessHost(threading.Thread):
 
     def closeDataLogFile(self):
         self.dataLogFile.close()
+
+
+    def enableExternalInput(self):
+        self.externalInput = True
+
+    def disableExternalInput(self):
+        self.externalInput = False
+
+    def getExternalInput(self):
+        return self.externalInput
 
 
     def exit(self):
