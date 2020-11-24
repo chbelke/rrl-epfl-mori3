@@ -18,13 +18,13 @@ class StartStop(tk.Frame):
         self.Stop["text"] = "STOP"
         self.Stop["fg"]   = "red"
         self.Stop["command"] = lambda: self.emergencyStop()
-        self.Stop.pack(side="left")
+        self.Stop.pack(side="left", fill=tk.X, expand=True)
 
         self.Mqtt = tk.Button(self.frame)
         self.Mqtt["text"] = "Preset"
         self.Mqtt["fg"]   = "green"
         self.Mqtt["command"] = lambda: self.picReset()
-        self.Mqtt.pack(side="right")
+        self.Mqtt.pack(side="left", fill=tk.X, expand=True)
 
 
     def emergencyStop(self):

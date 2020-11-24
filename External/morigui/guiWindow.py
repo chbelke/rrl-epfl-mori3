@@ -20,6 +20,7 @@ from morigui.frames.pubbinary import PublishBinary
 from morigui.frames.datalog import DataLog
 from morigui.frames.pinglog import PingLog
 from morigui.frames.loadfile import LoadFile
+from morigui.frames.inputflag import InputFlag
 
 
 class MoriGui(tk.Frame):
@@ -42,35 +43,26 @@ class MoriGui(tk.Frame):
               
     def createWidgets(self):
         frame1 = tk.Frame(self)
-        frame2 = tk.Frame(self, relief=tk.RAISED, borderwidth=1, 
-            padx=5, pady=5)
-        frame3 = tk.Frame(self)
+        frame2 = tk.Frame(self)
         frame4 = tk.Frame(self)
         frame5 = tk.Frame(self)
-        frame6 = tk.Frame(self)
         frame7 = tk.Frame(self)
         frame8 = tk.Frame(self)
 
-
-        self.frame_datalog = DataLog(frame1, self.wifi_host)
-        self.frame_pinglog = PingLog(frame1, self.wifi_host)
-        self.frame_party = PartyFrame(frame1, self.wifi_host)
-        self.frame_start = StartStop(frame1, self.wifi_host)
-        self.frame_pubg = PublishGlobal(frame2, self.wifi_host)
-        self.frame_publ = PublishLocal(frame3, self, self.wifi_host)
+        self.frame_buttons = self.buttonFrames(frame1)
+        self.frame_publish = self.publishFrames(frame2)
+        self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)    
         self.frame_udp = ListUDP(frame4, self, self.wifi_host)
-        self.frame_pubbulk = PublishBulk(frame5, self.wifi_host)
         self.frame_graph = GraphHost(frame7, self.master, self.wifi_host)
         self.frame_file = LoadFile(frame8, self.wifi_host)
+        
 
-        frame8.pack(side="left", padx=10, pady=10, expand=True)
+        frame8.pack(side="left", padx=15, fill=tk.BOTH, expand=True)
         frame7.pack(side="right", padx=10, pady=10, expand=True)
         frame5.pack(side="right", padx=10, pady=10, expand=True)
         frame1.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
         frame4.pack(side="right", padx=10, pady=10, expand=True)
-        # frame6.pack(side="bottom", padx=10, pady=10, expand=True)
         frame2.pack(side="bottom", padx=10, pady=10, expand=True)
-        frame3.pack(padx = 10)
 
             
     def updateConnected(self): #Updates the number of connected ESPs and the lists
@@ -99,3 +91,43 @@ class MoriGui(tk.Frame):
         self.frame_udp.update_udp()
 
         self.frame_file.checkAutoUpdate()
+
+
+
+
+    def buttonFrames(self, frame):
+        frame_1 = tk.Frame(frame)
+        frame_2 = tk.Frame(frame)
+
+        frame_st = tk.Frame(frame_1)
+        frame_pt = tk.Frame(frame_1)
+        frame_dl = tk.Frame(frame_1)
+        frame_pl = tk.Frame(frame_2)
+        frame_in = tk.Frame(frame_2)
+
+        self.frame_datalog = DataLog(frame_dl, self.wifi_host)
+        self.frame_party = PartyFrame(frame_pt, self.wifi_host)
+        self.frame_start = StartStop(frame_st, self.wifi_host)
+        self.frame_pinglog = PingLog(frame_pl, self.wifi_host)
+        self.frame_input = InputFlag(frame_in, self.wifi_host)
+
+        frame_st.pack(side="left", fill=tk.BOTH, expand=True)
+        frame_pt.pack(side="left", fill=tk.BOTH, expand=True)
+        frame_dl.pack(side="right", fill=tk.BOTH, expand=True)
+
+        frame_pl.pack(side="left", fill=tk.BOTH, expand=True)
+        frame_in.pack(side="right", fill=tk.BOTH, expand=True)
+
+        frame_1.pack(side="top", fill=tk.BOTH, expand=True)
+        frame_2.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
+
+
+    def publishFrames(self, frame):
+        frame_pg = tk.Frame(frame)       
+        frame_pl = tk.Frame(frame)           
+
+        self.frame_pubg = PublishGlobal(frame_pg, self.wifi_host)
+        self.frame_publ = PublishLocal(frame_pl, self, self.wifi_host)    
+
+        frame_pl.pack(side="top", fill=tk.BOTH, expand=True)
+        frame_pg.pack(side="top", fill=tk.BOTH, expand=True, pady=10)
