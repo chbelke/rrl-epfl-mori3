@@ -104,14 +104,16 @@ class guiExampleFrame(tk.Frame):
         angles = self.angle_scale.get()
         angles *= -10
         angles += 1800
-        print("Angles: ", angles)
-        self.mqttClient.publishGlobal(angles)
+        msg = "ang {} {} {}".format(angles, angles, angles)
+        print(msg)
+        self.mqttClient.publishGlobal(msg)
 
 
     def sendEdges(self):
         edges = self.edges_scale.get()
-        print("Angles: ", edges)
-        self.mqttClient.publishGlobal(edges)
+        msg = "ext {} {} {}".format(edges, edges, edges)
+        print(msg)
+        self.mqttClient.publishGlobal(msg)
 
 
     #Every 5 seconds, say hello
