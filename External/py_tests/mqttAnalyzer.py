@@ -1,4 +1,4 @@
-import serial, time
+import time
 import datetime
 import sys, select, os
 from optparse import OptionParser

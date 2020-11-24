@@ -1,4 +1,4 @@
-import serial, time
+import time
 import sys
 
 from Settings import names
