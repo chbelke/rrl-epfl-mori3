@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'C' // module name by letter
+#define MODULE 'E' // module name by letter
 
 /* ******************** NOTES *********************************************** */
 // Timer info
@@ -47,7 +47,7 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 10
+#define RGB_Default_Red 0
 #define RGB_Default_Green 10
 #define RGB_Default_Blue 0
 
@@ -119,6 +119,7 @@ extern volatile uint8_t ESP_ID[6];
 #define ESP_End 14                  // end byte
 #define ESP_Relay 0b00000101
 #define ESP_URT_NUM 3
+#define UART_BUFF_SIZE 1023
 
 
 /* ******************** EDGE COMMUNICATION *********************************** */
