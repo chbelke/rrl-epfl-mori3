@@ -143,7 +143,12 @@ class LoadFile():
         if 'Jump' in self.fileContents[self.iteration]:
             self.jumpToSection()
         for module in self.fileContents[self.iteration]:
-            if module == 'Label':
+            if module.lower() == 'label':
+                continue
+            if module.lower() == "global":
+                for cmd in self.fileContents[self.iteration][module]:
+                    print("Global: ", cmd)
+                    self.wifi_host.publishGlobal(cmd)
                 continue
             for cmd in self.fileContents[self.iteration][module]:
                 if cmd.startswith("ping"):
