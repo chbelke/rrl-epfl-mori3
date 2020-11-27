@@ -92,7 +92,10 @@ class MqttHost(threading.Thread):
 
 
     def publishLocal(self, msg, addr):
-        print("{}/r".format(addr), msg)
+        if isinstance(msg,bytearray):
+            print("{}/r".format(addr), "".join(" {:02x}".format(x) for x in msg))
+        else:
+            print("{}/r".format(addr), msg)
         self.client.publish("{}/r".format(addr), msg)
  
 
