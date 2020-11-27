@@ -6,8 +6,14 @@ from Settings import names
 
 def getVerbose(self, pyld, espNum):
     print(colored(names.idsToName[espNum] + "-", 'yellow'), end="")
+    print(colored(pyld[0], 'yellow'), end=" ")
+    print(colored(int(pyld[2],16), 'yellow'))
+    return
+	
+	
     for i in pyld:
-        print(colored(i, 'yellow'), end=" ")    
+        print(colored(i, 'yellow'))    
+		#print(colored(i, 'yellow'), end=" ")    
     print()
     # print(colored(espNum + "-" + (pyld[2]) + ", " + int(hex(pyld[2])), 'yellow'))    
     # print(pyld[1])

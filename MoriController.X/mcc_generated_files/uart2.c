@@ -52,6 +52,7 @@
 #include "uart2.h"
 #include "../Coms_123.h"
 #include "../Mnge_RGB.h"
+#include "../Defs_GLB.h"
 
 /**
   Section: Data Type Definitions
@@ -82,8 +83,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART2_CONFIG_TX_BYTEQ_LENGTH (1023+1)
-#define UART2_CONFIG_RX_BYTEQ_LENGTH (1023+1)
+#define UART2_CONFIG_TX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
+#define UART2_CONFIG_RX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
 
 /** UART Driver Queue
 
@@ -327,7 +328,7 @@ bool UART2_IsTxDone(void)
 
 *******************************************************************************/
 
-static uint8_t UART2_RxDataAvailable(void)
+static uint16_t UART2_RxDataAvailable(void)
 {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
@@ -341,9 +342,9 @@ static uint8_t UART2_RxDataAvailable(void)
         size = ( (snapshot_rxTail - rxHead));
     }
     
-    if(size > 0xFF)
+    if(size > 0xFFFF)
     {
-        return 0xFF;
+        return 0xFFFF;
     }
     
     return size;
@@ -441,7 +442,7 @@ UART2_TRANSFER_STATUS __attribute__((deprecated)) UART2_TransferStatusGet (void 
     return status;    
 }
 
-uint8_t __attribute__((deprecated)) UART2_Peek(uint16_t offset)
+uint8_t UART2_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
     
@@ -484,7 +485,7 @@ unsigned int __attribute__((deprecated)) UART2_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int __attribute__((deprecated)) UART2_ReceiveBufferSizeGet(void)
+unsigned int UART2_ReceiveBufferSizeGet(void)
 {
     if(UART2_RxDataAvailable() != 0)
     {

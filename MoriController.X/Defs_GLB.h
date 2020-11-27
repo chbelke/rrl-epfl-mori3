@@ -19,8 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'D' // module name by letter
-
+#define MODULE 'C' // module name by letter
 
 /* ******************** NOTES *********************************************** */
 // Timer info
@@ -47,6 +46,10 @@
 #define MODE_MotRot_Active true
 #define MODE_Cplngs_Active true
 
+// RGB LED Default values
+#define RGB_Default_Red 10
+#define RGB_Default_Green 10
+#define RGB_Default_Blue 0
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
@@ -63,6 +66,7 @@ extern volatile bool FLG_WaitAllEdges;
 extern volatile bool FLG_MotLin_Active;
 extern volatile bool FLG_MotRot_Active;
 extern volatile bool FLG_Verbose;
+extern volatile bool FLG_Emergency;
 
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
@@ -79,7 +83,6 @@ extern volatile bool Flg_EdgeReq_Ext[3];
 extern volatile bool Flg_EdgeReq_Cpl[3];
 extern volatile bool Flg_EdgeReq_CplNbrWait[3];
 
-extern volatile bool Flg_Uart_Lock[4];
 extern volatile bool Flg_ID_check;
 
 extern volatile bool Flg_i2c_PWM;
@@ -111,11 +114,12 @@ extern volatile uint8_t ESP_ID[6];
 #define WIFI_LED_ON 1
 #define WIFI_LED_OFF 0
 
+
 /* ******************** ESP COMMUNICATION *********************************** */
-#define ESP_Beg 13                  // start byte
 #define ESP_End 14                  // end byte
 #define ESP_Relay 0b00000101
 #define ESP_URT_NUM 3
+
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte
@@ -125,6 +129,7 @@ extern volatile uint8_t ESP_ID[6];
 #define EDG_ExtNbrRng 5             // current neighbour ext. must be (own +-)
 #define EDG_ExtSlwRng 3             // if nbr <= this >= EDG_ExtNbrRng, slw down
 #define EDG_ExtSlwVal 768           // slow down to this 
+
 
 /* ******************** PWM GENERATOR *************************************** */
 // Duty cycle register
@@ -164,43 +169,54 @@ extern volatile uint8_t ESP_ID[6];
 
 #define MotLin_SlowRegion 50        // slow region near min and max
 #define MotLin_SlowFactor 1.2       // linear slow down factor in slow region
+#define MotLin_OkRange 2            // +- (*0.1mm) (automatic CMD update)
 
 #define MotLin_PID_erband 4         // acceptable error band ~ *0.01mm
-#define MotLin_PID_stable 5         // stable time in sec
+#define MotLin_PID_stable 3         // stable time in sec
 #define MotLin_PID_period 0.05f     // timer period
 #define MotLin_PID_kP 162.0f        // proportional component
 #define MotLin_PID_kI 101.3f        // integral component
 #define MotLin_PID_kD 8.4f          // integral component
+#define MotLin_PID_DMax 1024        // derivative limit
+#define MotLin_PID_Imax 1024        // integral limit
+#define MotLin_PID_Max 1024         // duty cycle limit
 
-#define MotLin_PID_DMax 1024
-#define MotLin_PID_Imax 1024
-#define MotLin_PID_Max 1024
 
 /* ******************** ROTARY MOTORS *************************************** */
 #define ROT_DIR_1 LATCbits.LATC6
 #define ROT_DIR_2 LATCbits.LATC7
 #define ROT_DIR_3 LATAbits.LATA10
 
-#define MotRot_AngleRange 240       // overall range (in degrees)
+#define MotRot_AngleRange 240       // overall range (degrees)
+#define MotRot_OkRange 15           // +- (0.1*degrees) (automatic CMD update)
 
-#define MotRot_PID_period 0.01f         // timer period (currently not used)
-#define MotRot_PID_kP 153.0f        // proportional component
-#define MotRot_PID_kI 53.9f         // integral component
-#define MotRot_PID_kD 3.4f          // derivative component
+#define MotRot_PID_period 0.01f     // timer period
+#define MotRot_PID_kP 153.0f        // proportional gain
+#define MotRot_PID_kI 53.9f         // integral gain
+#define MotRot_PID_kD 3.4f          // derivative gain
+#define MotRot_PID_Dmax 1024        // derivative limit
+#define MotRot_PID_Imax 1024        // integral limit
+#define MotRot_PID_Max 1024         // duty cycle limit
 
-#define MotRot_PID_Dmax 1024
-#define MotRot_PID_Imax 1024
-#define MotRot_PID_Max 1024
+#define MotRot_SPD_kP 60.0f         // speed control proportional gain
+#define MotRot_SPD_kI 15.0f         // speed control integral gain
+#define MotRot_SPD_kD 8.0f          // speed control derivative gain
+#define MotRot_SPD_Imax 1024        // speed integral limit
+#define MotRot_SPD_Max 1024         // speed duty cycle limit
+#define MotRot_SpeedInit 255          // limit speed at start-up (/255)
+#define MotRot_SpeedMax 60.0f         // max speed (degrees/second) (60 @tau=149)
 
-#define MotRot_TorqueLimit 149      // /255, 237 stall, 149 GPX safe, 63 backdrive safe
+// Maxon motor torque limit - 237 stall, 149 GPX safe, 63 backdrive safe
+#define MotRot_TorqueLimit 149      // (/255)
 #define MotRot_WiggleTime 15        // seconds
-#define MotRot_WiggleTorque 80      // wiggle torque limit /255
+#define MotRot_WiggleTorque 80      // wiggle torque limit (/255)
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
 #define MotRot_DrvCplPushInterval 100 // push interval at 20Hz (< SMA_Period_2)
 
+
 /* ******************** I2C ************************************************* */
-#define SLAVE_I2C_GENERIC_RETRY_MAX           5
-#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT      20
+#define SLAVE_I2C_GENERIC_RETRY_MAX 5
+#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT 20
 
 
 /* ******************** ENCODERS AS5048B ************************************ */

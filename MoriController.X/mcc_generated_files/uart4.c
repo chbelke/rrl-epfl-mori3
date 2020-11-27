@@ -51,6 +51,7 @@
 #include "xc.h"
 #include "uart4.h"
 #include "../Coms_ESP.h"
+#include "../Defs_GLB.h"
 
 /**
   Section: Data Type Definitions
@@ -81,8 +82,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART4_CONFIG_TX_BYTEQ_LENGTH (1023+1)
-#define UART4_CONFIG_RX_BYTEQ_LENGTH (1023+1)
+#define UART4_CONFIG_TX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
+#define UART4_CONFIG_RX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
 
 /** UART Driver Queue
 
@@ -327,7 +328,7 @@ bool UART4_IsTxDone(void)
 
  *******************************************************************************/
 
-static uint8_t UART4_RxDataAvailable(void)
+static uint16_t UART4_RxDataAvailable(void)
 {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
@@ -441,7 +442,7 @@ UART4_TRANSFER_STATUS __attribute__((deprecated)) UART4_TransferStatusGet (void 
     return status;
 }
 
-uint8_t __attribute__((deprecated)) UART4_Peek(uint16_t offset)
+uint8_t UART4_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
 
@@ -484,7 +485,7 @@ unsigned int __attribute__((deprecated)) UART4_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int __attribute__((deprecated)) UART4_ReceiveBufferSizeGet(void)
+unsigned int UART4_ReceiveBufferSizeGet(void)
 {
     if(UART4_RxDataAvailable() != 0)
     {

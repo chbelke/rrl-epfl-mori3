@@ -1,4 +1,4 @@
-const int ring_size = 512;
+const int ring_size = 1023;
 
 struct ring_buffer
 {

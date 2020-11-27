@@ -72,6 +72,7 @@ volatile bool FLG_WaitAllEdges = true;
 volatile bool FLG_MotLin_Active = false;
 volatile bool FLG_MotRot_Active = false;
 volatile bool FLG_Verbose = false;
+volatile bool FLG_Emergency = false;
 
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
@@ -90,7 +91,6 @@ volatile bool Flg_EdgeReq_Ext[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Cpl[3] = {false, false, false};
 volatile bool Flg_EdgeReq_CplNbrWait[3] = {true, true, true};
 
-volatile bool Flg_Uart_Lock[4] = {false, false, false, false};
 volatile bool Flg_ID_check = false;
 
 // i2c flags set anywhere, checked and executed in tmr1

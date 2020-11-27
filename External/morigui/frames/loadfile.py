@@ -23,19 +23,31 @@ class LoadFile():
 
     def load(self):
 
-        frame_auto_update = tk.Frame(self.frame)
-        frame_load_display = tk.Frame(self.frame)
-        frame_disp_text = tk.Frame(self.frame)
-        frame_prev_next = tk.Frame(self.frame)
+        frame_1 = tk.Frame(self.frame)
+        frame_2 = tk.Frame(self.frame)
+        frame_3 = tk.Frame(self.frame)
+
+        frame_auto_update = tk.Frame(frame_1)
+        frame_load_display = tk.Frame(frame_1)
+        frame_disp_text = tk.Frame(frame_1)
+        frame_prev_next = tk.Frame(frame_3)
+
+        self.auto_update_button = tk.Button(frame_auto_update)
+        self.auto_update_button["text"] = "Manual"
+        self.auto_update_button["command"] = lambda: self.toggleAutoUpdate()
+        self.auto_update_button.pack({"side": "bottom"})
+
+        self.auto_update_label = tk.Label(frame_auto_update, text="File Progression")
+        self.auto_update_label.pack({"side": "top"})             
 
         load_button = tk.Button(frame_load_display)
         load_button["text"] = "LoadFile",
         load_button["command"] = lambda: self.openFile()
-        load_button.pack({"side": "top"}, fill=tk.X, expand=True)
+        load_button.pack({"side": "top"},expand=True)
 
         self.next_stage = tk.Label(frame_load_display, font='Helvetica 10 bold')
         self.next_stage["text"] = "No File Loaded"
-        self.next_stage.pack({"side": "top"}, fill=tk.X, expand=True)
+        self.next_stage.pack({"side": "bottom"}, fill=tk.X, expand=True)
 
         self.show_json = tk.Label(frame_disp_text, anchor='w')
         self.show_json["text"] = ""
@@ -55,20 +67,17 @@ class LoadFile():
         self.run_button["text"] = "Run",
         self.run_button["fg"]   = "green"
         self.run_button["command"] = lambda: self.runButtonClicked()
-        self.run_button.pack({"side": "right"}, fill=tk.X, expand=True)
-
-        self.auto_update_button = tk.Button(frame_auto_update)
-        self.auto_update_button["text"] = "Manual"
-        self.auto_update_button["command"] = lambda: self.toggleAutoUpdate()
-        self.auto_update_button.pack({"side": "bottom"})
-
-        self.auto_update_label = tk.Label(frame_auto_update, text="File Progression")
-        self.auto_update_label.pack({"side": "top"})               
+        self.run_button.pack({"side": "right"}, fill=tk.X, expand=True)  
 
         frame_auto_update.pack(side="top", expand=True, pady=10)
-        frame_load_display.pack(side="top", expand=True, pady=5)
-        frame_disp_text.pack(side="top", fill=tk.BOTH, expand=True, pady=5)
-        frame_prev_next.pack(side="bottom", expand=True, pady=5)
+        frame_load_display.pack(side="top", expand=True)
+        frame_disp_text.pack(side="top", fill=tk.X, expand=True)
+
+        frame_prev_next.pack(side="bottom", expand=True)
+
+        frame_1.pack(side="top", expand=True, fill=tk.X)
+        frame_2.pack(side="top", expand=True, fill=tk.X)
+        frame_3.pack(side="bottom", pady=10)
 
 
     def openFile(self):
@@ -134,7 +143,12 @@ class LoadFile():
         if 'Jump' in self.fileContents[self.iteration]:
             self.jumpToSection()
         for module in self.fileContents[self.iteration]:
-            if module == 'Label':
+            if module.lower() == 'label':
+                continue
+            if module.lower() == "global":
+                for cmd in self.fileContents[self.iteration][module]:
+                    print("Global: ", cmd)
+                    self.wifi_host.publishGlobal(cmd)
                 continue
             for cmd in self.fileContents[self.iteration][module]:
                 if cmd.startswith("ping"):

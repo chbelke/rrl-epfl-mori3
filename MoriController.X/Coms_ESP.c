@@ -5,6 +5,7 @@
 #include "Acts_CPL.h"
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
+#include "Mnge_ERR.h"
 #include "math.h"
 #include "dsp.h"
 #include "mcc_generated_files/uart4.h"
@@ -37,8 +38,7 @@ uint8_t Coms_ESP_Data_Transmission = 0;
 
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
- * It gets called from the ISR each time a byte is received. It first checks
- * whether the first byte is the control value ESP_Beg. It then evaluates the
+ * It gets called from the ISR each time a byte is received. It evaluates the
  * allocation byte, steps through the appropriate cases depending on the
  * allocation byte, and verifies the validity of the incoming date through 
  * the control value ESP_End and the total number of bytes received. If the 
@@ -58,13 +58,15 @@ void Coms_ESP_Eval() { // called in main
     }
        
     static uint8_t EspInCase = 0;
-     uint8_t EspIn = UART4_Read(); // Incoming byte
+    uint8_t EspIn = 50;
+    if(EspInCase != 7)
+        EspIn = UART4_Read(); // Incoming byte
 //    const char *message = "hello";
     switch (EspInCase) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             switch ((EspIn >> 5) & 0x07) {
                 case 0: // xxx == 000, emergency stop
-                    if ((EspIn & 0x1F) == 37)
+                    if ((EspIn & 0x1F) == 31)
                         EspInCase = 1;
                     break;
 //                case 2: // xxx == 010, action sync received
@@ -82,8 +84,11 @@ void Coms_ESP_Eval() { // called in main
                     EspInCase = 6;
                     break;
                 case 7: // xxx == 111, relay
-                    Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111);
-                    EspInCase = 7;
+                    if(Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111)){
+                        EspInCase = 0;
+                    } else {
+                        EspInCase = 7;
+                    }
                     break;
                     
                 default:
@@ -92,6 +97,12 @@ void Coms_ESP_Eval() { // called in main
             }
             break;   
 
+        case 1:
+            if (EspIn == ESP_End)
+                Mnge_ERR_ActivateStop();
+            EspInCase = 0;
+            break;
+            
         case 5:
             if (Coms_ESP_Handle(EspIn))
                 EspInCase = 0;
@@ -218,6 +229,11 @@ void Coms_ESP_SendStable(bool flg_stable_state)
     UART4_Write(alloc);
     UART4_Write(ESP_End);
 }
+
+void Coms_ESP_TurnOnWifi(void) {
+    UART4_Write(0b10011111);  // 100 = states, 11111 = WiFi On
+    UART4_Write(ESP_End);
+}    
 
 
 void Coms_ESP_LED_State(uint8_t edge, uint8_t state)

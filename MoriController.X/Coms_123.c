@@ -8,6 +8,7 @@
 #include "mcc_generated_files/uart3.h"
 #include "Mnge_PWM.h"
 #include "Mnge_RGB.h"
+#include "Mnge_ERR.h"
 #include "Coms_123.h"
 #include "Acts_CPL.h"
 #include "Acts_LIN.h"
@@ -20,6 +21,7 @@ volatile uint8_t EdgActCnt[3] = {0, 0, 0}; // no idle byte received counter
 volatile bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 volatile bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
 volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready send
+volatile bool Flg_Uart_Lock[3] = {false, false, false};
 
 // Neighbour ID variables
 uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -40,6 +42,7 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
 #define COMS_123_Ackn 0b10001000
 #define COMS_123_IDOk 0b10001100
 #define COMS_123_Idle 0b01100000
+#define COMS_123_Emrg 0b00011111
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9 // output speed factor for non-primary wheels
@@ -69,16 +72,18 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) { // called in main
     static uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
-
+    uint8_t EdgIn = 50;
+    
     if(!Coms_123_Ready(edge)) return; // check if byte received
-    uint8_t EdgIn = Coms_123_Read(edge); // ready incoming byte
+    if(EdgInCase[edge] != 40)   //Only read alloc byte if in relay
+        EdgIn = Coms_123_Read(edge); // ready incoming byte
       
     switch (EdgInCase[edge]) { // select case set by previous byte
         case 0: // INPUT ALLOCATION ********************************************
             EdgInAloc[edge] = EdgIn;
             switch ((EdgInAloc[edge] >> 5) & 0x07) {
                 case 0: // xxx == 000, emergency stop
-                    if ((EdgInAloc[edge] & 0x1F) == 37)
+                    if ((EdgInAloc[edge] & 0x1F) == 31)
                         EdgInCase[edge] = 1;
                     break;
                 case 2: // xxx == 010, action command received
@@ -95,8 +100,13 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                     EdgInCase[edge] = 30;
                     break;
                 case 7: // xxx == 111, relay
-                    Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111);
-                    EdgInCase[edge] = 40;
+                    if (Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111)){
+                        EdgInCase[edge] = 0;
+                    }
+                    else {
+                        EdgInCase[edge] = 40;                        
+                    }
+                    
                     break;
                 default:
                     EdgInCase[edge] = 50;
@@ -106,10 +116,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
 
         case 1: // EMERGENCY STOP **********************************************
             if (EdgIn == EDG_End) {
-                char message1 = (char)EdgInAloc[edge];
-                Coms_ESP_Verbose_Write(&message1);                    
-                Flg_EdgeSyn[edge] = false;
-                Flg_EdgeAct[edge] = false;
+                Mnge_ERR_ActivateStop();
                 EdgInCase[edge] = 0;
             } else {
                 EdgInCase[edge] = 50;
@@ -290,8 +297,9 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         }
         
         // if module ID not verified, send out conn search
-        if(!Flg_ID_check) byte = COMS_123_Conn;
-
+        if (!Flg_ID_check) byte = COMS_123_Conn;
+        if (FLG_Emergency) byte = COMS_123_Emrg;
+        
         if (Flg_Uart_Lock[edge] == false) {
             Flg_Uart_Lock[edge] = true;
             // write byte (ID if in con but no sync) and end byte

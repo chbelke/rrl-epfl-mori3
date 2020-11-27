@@ -17,7 +17,7 @@ to their appropriate values.
 '''
 
 
-import serial, time
+import time
 import datetime
 import sys, select, os
 # import matplotlib.pyplot as plt
