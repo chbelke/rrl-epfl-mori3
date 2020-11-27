@@ -76,6 +76,7 @@ volatile bool FLG_Emergency = false;
 
 volatile bool Flg_BatLow = false;
 volatile bool Flg_Button = false;
+volatile bool Flg_Develop = false;
 
 // driving flags
 volatile bool Flg_Drive[3] = {false, false, false};
