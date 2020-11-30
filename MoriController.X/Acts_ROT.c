@@ -101,10 +101,16 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         // feed forward of output speed (proportional to set speed)
         OUT = outP * (((float) Speed_255[edge]) / 255);
 
-        // if direction change, reset integral
+        // if desired direction change, reset integral and derivative
         if (((outPOld[edge] > 0) && (outP < 0))
-                || ((outPOld[edge] < 0) && (outP > 0)))
+                || ((outPOld[edge] < 0) && (outP > 0))){
             SPD_I[edge] = 0;
+            errorSPDOld5[edge] = 0;
+            errorSPDOld4[edge] = 0;
+            errorSPDOld3[edge] = 0;
+            errorSPDOld2[edge] = 0;
+            errorSPDOld1[edge] = 0;
+        }
         outPOld[edge] = outP;
 
         // integral component
@@ -126,8 +132,14 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         errorSPDOld3[edge] = errorSPDOld2[edge];
         errorSPDOld2[edge] = errorSPDOld1[edge];
         errorSPDOld1[edge] = errorSPD;
-        SPD_I[edge] = SPD_I[edge] + SPD_D * MotRot_SPD_kD / MotRot_PID_period;
-
+        SPD_I[edge] += SPD_D * MotRot_SPD_kD / MotRot_PID_period;
+        
+        // if change in error is less than 20% of desired speed 
+        // and speed error bigger than 80% of desired speed - boost to start
+        if ((fabs(SPD_D) < fabs(0.1*Speed_DEG[edge])) 
+                && (fabs(errorSPD) > fabs(0.9*Speed_DEG[edge])))
+            SPD_I[edge] += sgn(errorSPD)*5;
+        
         float outS = OUT + SPD_I[edge] + SPD_P;
         
         // limit speed duty cycle
@@ -316,4 +328,8 @@ bool Act_ROT_InRange(uint8_t edge) {
     uint16_t diff = abs(Acts_ROT_GetAngle(edge) - Acts_ROT_GetTarget(edge));
     if (diff <= MotRot_OkRange) return true;
     else return false;
+}
+
+int8_t sgn(float value){
+    return (value > 0) - (value < 0);
 }
