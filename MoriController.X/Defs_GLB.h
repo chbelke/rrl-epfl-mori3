@@ -19,7 +19,8 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'C' // module name by letter
+#define MODULE 'F' // module name by letter
+
 
 /* ******************** NOTES *********************************************** */
 // Timer info
@@ -47,9 +48,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 10
-#define RGB_Default_Green 10
-#define RGB_Default_Blue 0
+#define RGB_Default_Red 0
+#define RGB_Default_Green 5
+#define RGB_Default_Blue 5
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
@@ -70,6 +71,7 @@ extern volatile bool FLG_Emergency;
 
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
+extern volatile bool Flg_Develop;
 
 extern volatile bool Flg_Drive[3];
 extern volatile bool Flg_DriveAndCouple[3];
@@ -119,16 +121,17 @@ extern volatile uint8_t ESP_ID[6];
 #define ESP_End 14                  // end byte
 #define ESP_Relay 0b00000101
 #define ESP_URT_NUM 3
+#define UART_BUFF_SIZE 1023
 
 
 /* ******************** EDGE COMMUNICATION *********************************** */
 #define EDG_End 42                  // end byte
 #define EDG_IdlIntrvl 3             // idle check at 5Hz, 5 = 1 sec = con lost
 #define EDG_ConIntrvl 10            // con check at 5Hz, 10 = 2 sec = con lost
-#define EDG_ActIntrvl 2             // act check at 20Hz, 3 = 
-#define EDG_ExtNbrRng 5             // current neighbour ext. must be (own +-)
-#define EDG_ExtSlwRng 3             // if nbr <= this >= EDG_ExtNbrRng, slw down
-#define EDG_ExtSlwVal 768           // slow down to this 
+#define EDG_ActIntrvl 3             // act check at 20Hz, 3 = 
+#define EDG_ExtNbrRng 6             // current neighbour ext. must be (own +-)
+#define EDG_ExtSlwRng 3             // if nbr < this > EDG_ExtNbrRng, slw down
+#define EDG_ExtSlwVal 512           // slow down to this 
 
 
 /* ******************** PWM GENERATOR *************************************** */
@@ -164,7 +167,7 @@ extern volatile uint8_t ESP_ID[6];
 #define LIN_DIR_2 LATBbits.LATB12
 #define LIN_DIR_3 LATBbits.LATB14
 
-#define MotLin_MinInput 0           // linear motor controlled with 0.1mm input
+#define MotLin_MinInput 1           // linear motor controlled with 0.1mm input
 #define MotLin_MaxInput 120         // from 0 to 12 mm -> min: 0, max:120
 
 #define MotLin_SlowRegion 50        // slow region near min and max
@@ -188,7 +191,7 @@ extern volatile uint8_t ESP_ID[6];
 #define ROT_DIR_3 LATAbits.LATA10
 
 #define MotRot_AngleRange 240       // overall range (degrees)
-#define MotRot_OkRange 15           // +- (0.1*degrees) (automatic CMD update)
+#define MotRot_OkRange 20           // +- (0.1*degrees) (automatic CMD update)
 
 #define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_kP 153.0f        // proportional gain

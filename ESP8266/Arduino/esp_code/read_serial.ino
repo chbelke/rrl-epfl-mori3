@@ -1,8 +1,18 @@
 void readSerial()
 {
-  
-  while(Serial.available())
+
+  if(Serial.hasRxError())
   {
+    publish("ERR: RX ERROR");
+    return;
+  }
+  if (Serial.hasOverrun())
+  {
+    publish("ERR: OVERRUN");
+    return;    
+  }
+  while(Serial.available())
+  { 
     static int serial_case = 0;
     static bool alloc = true;    
     
@@ -12,6 +22,8 @@ void readSerial()
     {
       serial_case = ((c >> 5) & 0b00000111);
       alloc = false;
+      if ((c == END_BYTE) || (c == 42))
+        serial_case = 8; //Default
     }        
   
 
@@ -41,7 +53,7 @@ void readSerial()
         break;   
 
       default:
-        if(serialErrorHandle(c)) alloc = true;
+        if(serialErrorHandle(c) || relayErrorHandle(c)) alloc = true;
     }
   }
 }
@@ -370,7 +382,7 @@ bool stateInfo(byte c)
     //Case 15-16 free 
 
     case 17:
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 2))
       {
         clientLetter = char(storage[0]);
         sprintf(publishName, "%c/p", clientLetter);
@@ -390,7 +402,7 @@ bool stateInfo(byte c)
       break;
 
     case 18:    //Neighbour Disconnected
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 2))
       {
         sprintf(serial_packet, "REQ: NO %d", int(storage[0])); 
         publish(serial_packet);
@@ -421,7 +433,7 @@ bool stateInfo(byte c)
       break;
 
     case 20:  //read edges
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 4))
       {
         sprintf(serial_packet, "REQ: EL %d %d %d", storage[0], storage[1], storage[2]);     
         publish(serial_packet);
@@ -442,7 +454,7 @@ bool stateInfo(byte c)
       break;
 
     case 21:  //read angles
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 7))
       {
         sprintf(serial_packet, "REQ: AN %d %d %d", (storage[0]*256+storage[1]), 
                       (storage[2]*256+storage[3]), (storage[4]*256+storage[5]));
@@ -464,7 +476,7 @@ bool stateInfo(byte c)
       break;
 
     case 22:  //read orientation  
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 7))
       {
         sprintf(serial_packet, "REQ: OR %d %d %d", (storage[0]*256+storage[1]), 
                       (storage[2]*256+storage[3]), (storage[4]*256+storage[5]));
@@ -486,7 +498,7 @@ bool stateInfo(byte c)
       break;
 
     case 23:  //read neighbour
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 8))
       {
         sprintf(serial_packet, "REQ: NB %.2x%.2x%.2x%.2x%.2x%.2x%.2x", storage[0], storage[1], 
                             storage[2], storage[3], storage[4], storage[5], storage[6]);     
@@ -509,7 +521,7 @@ bool stateInfo(byte c)
 
 
     case 24:  //read WiFIEDGE
-      if (c == char(END_BYTE))
+      if ((c == char(END_BYTE)) && (count == 2))
       {
         sprintf(serial_packet, "REQ: ED %d", int(storage[0])+1); 
         publish(serial_packet);
@@ -668,7 +680,6 @@ bool relayToComputer(byte c)
     case 6:  //Relay to WiFi Edge
       if ((c == char(42)) && (count == len))
       {
-        // publish("INFO: IN LOOP");
         sprintf(wireless_packet, "REL: ");
         for(int i=0; i<len-3; i++)  
         {
@@ -684,7 +695,7 @@ bool relayToComputer(byte c)
       } else if (count < len) {
         storage[count-2]=c;
       } else {
-        if(serialErrorHandle(c))
+        if(relayErrorHandle(c))
         {
           publish("ERR: Unable to Relay");
           memset(wireless_packet, 0, sizeof(wireless_packet));
@@ -720,9 +731,14 @@ void updateStableState(bool current_stable_state)
 
 bool serialErrorHandle(byte c)
 {
-  if((c == END_BYTE) || c == 42)
-  {
+  if(c == END_BYTE)
     return true;
-  }
+  return false;
+}
+
+bool relayErrorHandle(byte c)
+{
+  if(c == 42)
+    return true;
   return false;
 }
