@@ -15,13 +15,22 @@ import cv2
 import numpy as np
 import threading
 import argparse
+import random as rng
 from termcolor import colored
 
 
-BATTERY_WIDTH_MIN = 20
-BATTERY_WIDTH_MAX = 60
-BATTERY_HEIGHT_MIN = 20
-BATTERY_HEIGHT_MAX = 60
+BATTERY_WIDTH_MIN = 30
+BATTERY_WIDTH_MAX = 120
+BATTERY_HEIGHT_MIN = 10
+BATTERY_HEIGHT_MAX = 40
+
+LOWER_COLOUR = np.array([78, 185, 0], dtype=np.uint8)
+UPPER_COLOUR = np.array([99,255,255], dtype=np.uint8)
+LOWER_COLOUR_SOFT = np.array([50,0,0], dtype=np.uint8)
+UPPER_COLOUR_SOFT = np.array([150,255,255], dtype=np.uint8)
+
+LOWER_COLOUR_SOFT = LOWER_COLOUR
+UPPER_COLOUR_SOFT = UPPER_COLOUR
 
 
 
@@ -41,6 +50,7 @@ def main(args):
         cv2.namedWindow('img')
         cv2.namedWindow('mask')
         cv2.namedWindow('img_colour')
+        cv2.namedWindow('img_contour')
 
 
     else:
@@ -158,44 +168,54 @@ def getMoriPoints(img):
 
 
 def detectBatteries(img):
-    # grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # _, mask = cv2.threshold(grey, 8, 255, cv2.THRESH_BINARY)
 
+    
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #color set from "setHSVThreshold.py"
-    #Currently thresholded around green
-    lower_colour= np.array([28, 40, 0], dtype=np.uint8)
-    upper_colour= np.array([90,255,240], dtype=np.uint8)
+    mask = cv2.inRange(hsv, LOWER_COLOUR, UPPER_COLOUR)
+    img_colour = cv2.bitwise_and(hsv,hsv, mask=mask)    
+    hsv = cv2.blur(img_colour, (3,3))
 
-    mask = cv2.inRange(hsv, lower_colour, upper_colour)
-    # mask = cv2.cvtColor(mask,cv2.COLOR_BGR2GRAY)
-    # ret, mask = cv2.threshold(mask, 00, 255, cv2.THRESH_BINARY)    
-    print(mask[0][0:10:-1])
+    threshold = 100
 
-    img_colour = cv2.bitwise_and(img,img, mask=mask)
+    # kernel = np.ones((3,3), dtype=np.uint8)
+    kernel = np.ones((4,4), dtype=np.uint8)
+    closing = cv2.morphologyEx(hsv, cv2.MORPH_CLOSE, kernel)
 
-    cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]  # Use index [-2] to be compatible to OpenCV 3 and 4
-    for c in cnts:
-        x, y, w, h = cv2.boundingRect(c)
+    canny_output = cv2.Canny(hsv, threshold, threshold * 2)
 
-        #rectangle too smol
-        if w < BATTERY_WIDTH_MIN and h < BATTERY_HEIGHT_MIN:
+    contours, _ = cv2.findContours(canny_output, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    minRect = [None]*len(contours)
+    for i, c in enumerate(contours):
+        minRect[i] = cv2.minAreaRect(c)
+
+    drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
+
+    for rectangle in minRect:
+
+        # rotated rectangle
+        box = cv2.boxPoints(rectangle)
+        box = np.intp(box) #np.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
+        cv2.drawContours(drawing, [box], 0, (255, 255, 255), 1)
+        if not checkRectangleSize(rectangle[1]):
             continue
 
-        #rectangle big chungus
-        if w > BATTERY_WIDTH_MAX and h > BATTERY_HEIGHT_MAX:
-            continue
-        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness = 10)
+        mask = np.zeros((canny_output.shape[0], canny_output.shape[1], 1), dtype=np.uint8)
+        cv2.fillConvexPoly(mask, box, 255)
+        mean_colour = cv2.mean(hsv,mask)[0:3]
+        cv2.drawContours(drawing, [box], 0, mean_colour)
+    
+    cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MIN, BATTERY_HEIGHT_MIN), (0, 0, 255), 2)
+    cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MAX, BATTERY_HEIGHT_MAX), (255, 0, 0), 2)
 
-        #center of image
-        level = img[y+h//2, x+w//2]
-        # define range of blue color in HSV
+    cv2.imshow('img_contour', drawing)
+    cv2.imshow('img_colour', hsv)
 
     print("Done!")
 
     cv2.imshow('img', img)
-    cv2.imshow('mask', mask)
-    cv2.imshow('img_colour', img_colour)
+    cv2.imshow('mask', canny_output)
+    # cv2.imshow('img_colour', img_colour)
 
 
     cv2.waitKey(20)
@@ -207,6 +227,19 @@ def detectBatteries(img):
     detectBatteryContours(img)
     input()
     return
+
+
+def checkRectangleSize(rect_size):
+    rect_size = np.sort(rect_size, axis=0)
+    if rect_size[0] < BATTERY_HEIGHT_MIN:
+        return False
+    if rect_size[0] > BATTERY_HEIGHT_MAX:
+        return False
+    if rect_size[1] < BATTERY_WIDTH_MIN:
+        return False
+    if rect_size[1] > BATTERY_WIDTH_MAX:
+        return False
+    return True
 
 
 def detectBatteryContours(img):
