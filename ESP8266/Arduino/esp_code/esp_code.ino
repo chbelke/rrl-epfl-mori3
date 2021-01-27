@@ -197,7 +197,10 @@ void loop()
       break;
   }
 
-  client.loop();
+  if (client.connected())
+    client.loop();
+  else if (runState == 3)
+    startMQTT();
 }
 
 
@@ -281,6 +284,7 @@ void normalOp()
 
 void startInternet()
 {
+  WiFi.setOutputPower(50);
   WiFi.mode(WIFI_STA);
   delay(100);
   WiFi.begin(brn_ssid, brn_password);

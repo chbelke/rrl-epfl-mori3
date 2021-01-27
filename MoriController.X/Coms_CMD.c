@@ -405,6 +405,7 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte, uint8_t *state) {
 
         case 6: // f5
             // Flag5 = flag_set[edge];
+            Flg_Develop = flag_set[edge];
             break;
 
         default:

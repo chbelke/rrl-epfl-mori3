@@ -52,7 +52,12 @@ print()
 
 #read csv into dict
 pingData = {}
-with open('Data/' +filename + '.csv', 'r',newline='') as f:
+# print(filename[-4:])
+if filename[-4:] == '.csv':
+    fileTitle = 'Data/' + filename
+else:
+    fileTitle = 'Data/' +filename + '.csv'
+with open(fileTitle, 'r',newline='') as f:
     reader = csv.reader(f)
     line_count = 0
     for row in reader:
@@ -75,7 +80,9 @@ for module in pingData:
 # fig, ax = plt.subplots(tight_layout=True)
 fig, ax = plt.subplots()
 
+# print(pingData.keys())
 for esp in pingData.keys():
+    # print(esp)
     # Check how many data corruptions occured
     faultCount = 0
     faultList = []
@@ -140,7 +147,7 @@ for legobj in leg.legendHandles:
 
 ax.set_ylim(0,1.01)
 ax.set_xlim(0,300)
-ax.set_xlim(0,160)
+# ax.set_xlim(0,160)
 # plt.yscale("log")
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)

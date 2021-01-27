@@ -25,6 +25,7 @@ commands = {
    'ROLE:': getRole.getRole,
    'ERR:': getError.getError,
    'INFO:': getInfo.getInfo,
+   'INFO': getInfo.getInfo,
    'ON:': getOn.getOn,
    'SHAPE:': getShape.getShape,
    'CONTROL:': getControl.getControl,

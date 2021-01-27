@@ -22,18 +22,23 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
     if (!MODE_MotLin_Active || !FLG_MotLin_Active) duty = 0; // linear motors off
     int16_t out = 0;
     
+//    // limit max speed
+//    if (duty < -((int16_t)MotLin_PWM_Max[edge])) duty = -((int16_t)MotLin_PWM_Max[edge]);
+//    else if (duty > ((int16_t)MotLin_PWM_Max[edge])) duty = ((int16_t)MotLin_PWM_Max[edge]);
+    
     // ramp up
     if (duty > 0){
         if ((duty - oldDuty[edge]) > RampUp) out = oldDuty[edge] + RampUp;
         else out = duty;
     } else if (duty < 0){
-        if ((duty - oldDuty[edge]) < RampUp) out = oldDuty[edge] - RampUp;
+        if ((duty - oldDuty[edge]) < -RampUp) out = oldDuty[edge] - RampUp;
         else out = duty;
     }
+    oldDuty[edge] = out;
     
     // limit max speed
-    if (duty < -MotLin_PWM_Max[edge]) duty = -MotLin_PWM_Max[edge];
-    else if (duty > MotLin_PWM_Max[edge]) duty = MotLin_PWM_Max[edge];
+    if (out < -((int16_t)MotLin_PWM_Max[edge])) out = -((int16_t)MotLin_PWM_Max[edge]);
+    else if (out > ((int16_t)MotLin_PWM_Max[edge])) out = ((int16_t)MotLin_PWM_Max[edge]);
     
     switch (edge) {
         case 0:
@@ -57,7 +62,6 @@ void Acts_LIN_Out(uint8_t edge, int16_t duty) {
         default:
             break;
     }
-    oldDuty[edge] = out;
 }
 
 /* ******************** LINEAR MOTOR PID ************************************ */
@@ -136,20 +140,20 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     // slow down motors near min/max
     switch (edge) {
         case 0:
-            if ((current < (MotLin_MIN_1 + MotLin_SlowRegion))
-                    || (current > (MotLin_MAX_1 - MotLin_SlowRegion)))
+            if (((current < (MotLin_MIN_1 + MotLin_SlowRegion)) && (outf < 0))
+                    || ((current > (MotLin_MAX_1 - MotLin_SlowRegion)) && (outf > 0)))
                 outf = outf / MotLin_SlowFactor;
             break;
 
         case 1:
-            if ((current < (MotLin_MIN_2 + MotLin_SlowRegion))
-                    || (current > (MotLin_MAX_2 - MotLin_SlowRegion)))
+            if (((current < (MotLin_MIN_2 + MotLin_SlowRegion)) && (outf < 0))
+                    || ((current > (MotLin_MAX_2 - MotLin_SlowRegion)) && (outf > 0)))
                 outf = outf / MotLin_SlowFactor;
             break;
 
         case 2:
-            if ((current < (MotLin_MIN_3 + MotLin_SlowRegion))
-                    || (current > (MotLin_MAX_3 - MotLin_SlowRegion)))
+            if (((current < (MotLin_MIN_3 + MotLin_SlowRegion)) && (outf < 0))
+                    || ((current > (MotLin_MAX_3 - MotLin_SlowRegion)) && (outf > 0)))
                 outf = outf / MotLin_SlowFactor;
             break;
 
