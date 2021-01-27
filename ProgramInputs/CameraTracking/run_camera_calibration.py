@@ -16,9 +16,6 @@ imgpoints = [] # 2d points in image plane.
 num_good = 0
 reject_every_n = 0
 
-# images = glob.glob('*.jpg')
-
-
 cv2.namedWindow("preview")
 vc = cv2.VideoCapture(0)
 
@@ -107,10 +104,3 @@ while rval:
 
 vc.release()
 cv2.destroyAllWindows()
-
-# img = cv2.imread('left12.jpg')
-
-# crop the image
-# x, y, w, h = roi
-# dst = dst[y:y+h, x:x+w]
-# cv2.imwrite('calibresult.png', dst)
