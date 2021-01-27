@@ -23,16 +23,12 @@ BATTERY_WIDTH_MIN = 30
 BATTERY_WIDTH_MAX = 120
 BATTERY_HEIGHT_MIN = 10
 BATTERY_HEIGHT_MAX = 40
+BATTERY_RATIO = 30
 
 LOWER_COLOUR = np.array([78, 185, 0], dtype=np.uint8)
 UPPER_COLOUR = np.array([99,255,255], dtype=np.uint8)
-LOWER_COLOUR_SOFT = np.array([50,0,0], dtype=np.uint8)
-UPPER_COLOUR_SOFT = np.array([150,255,255], dtype=np.uint8)
 
-LOWER_COLOUR_SOFT = LOWER_COLOUR
-UPPER_COLOUR_SOFT = UPPER_COLOUR
-
-
+RECTANGLE_MERGE_BOUND = 10
 
 def main(args):
     if args.mqtt == True:
@@ -66,6 +62,8 @@ def main(args):
 
     while(True):
         img = extractImage(args, vc, camera_params)
+        getMoriPoints(img)
+        continue
         mori_vertices = getMoriPoints(img)
         
 
@@ -159,6 +157,7 @@ def getSavedImage():
 def getMoriPoints(img):
     mori_vertices = []
     batteries = detectBatteries(img)
+    return
     for battery in batteries:
         mask = generateMaskFromBattery(battery)
         leds = findVertexLEDs(mask)
@@ -191,6 +190,8 @@ def detectBatteries(img):
 
     drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
 
+    rectangle_list = []
+
     for rectangle in minRect:
 
         # rotated rectangle
@@ -204,6 +205,40 @@ def detectBatteries(img):
         cv2.fillConvexPoly(mask, box, 255)
         mean_colour = cv2.mean(hsv,mask)[0:3]
         cv2.drawContours(drawing, [box], 0, mean_colour)
+        rectangle_list.append(rectangle)
+
+    purge_list = []
+    new_rectangles = []
+    for i, rectangle in enumerate(rectangle_list):
+        for j, other_rectangle in enumerate(rectangle_list):
+            if rectangle == other_rectangle:
+                continue
+            if getDistanceXY(rectangle[0], other_rectangle[0]) < 10:
+                loc = (np.mean([rectangle[0][0], other_rectangle[0][0]]),
+                        np.mean([rectangle[0][1], other_rectangle[0][1]]))
+                h_w = (np.max([rectangle[1][0], other_rectangle[1][0]]),
+                        np.max([rectangle[1][1], other_rectangle[1][1]]))
+                ang = np.mean([rectangle[2], other_rectangle[2]])
+                tmp = (loc, h_w, ang)
+
+                box = cv2.boxPoints(tmp)
+                box = np.intp(box) #np.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
+                cv2.drawContours(drawing, [box], 0, (0, 0, 255), 1)
+                purge_list.append(i)
+                purge_list.append(j)
+                new_rectangles.append(tmp)
+
+
+    for ele in sorted(set(purge_list), reverse = True):  
+        del rectangle_list[ele] 
+
+    rectangle_list.extend(set(new_rectangles))
+
+    for ele in rectangle_list:
+        box = cv2.boxPoints(ele)
+        box = np.intp(box) #np.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
+        cv2.drawContours(img, [box], 0, (0, 0, 255), 1)        
+
     
     cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MIN, BATTERY_HEIGHT_MIN), (0, 0, 255), 2)
     cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MAX, BATTERY_HEIGHT_MAX), (255, 0, 0), 2)
@@ -211,22 +246,19 @@ def detectBatteries(img):
     cv2.imshow('img_contour', drawing)
     cv2.imshow('img_colour', hsv)
 
-    print("Done!")
-
     cv2.imshow('img', img)
     cv2.imshow('mask', canny_output)
-    # cv2.imshow('img_colour', img_colour)
 
 
     cv2.waitKey(20)
-    input()
-    
+    # input()
 
 
-
-    detectBatteryContours(img)
-    input()
     return
+
+
+def getDistanceXY(point1, point2):
+    return np.sqrt((point2[0]-point1[0])**2 + (point2[1]-point1[1])**2)
 
 
 def checkRectangleSize(rect_size):
@@ -239,6 +271,9 @@ def checkRectangleSize(rect_size):
         return False
     if rect_size[1] > BATTERY_WIDTH_MAX:
         return False
+    if rect_size[1] / rect_size[0] > BATTERY_RATIO:
+        return False
+
     return True
 
 
