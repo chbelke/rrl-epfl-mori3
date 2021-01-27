@@ -50,6 +50,7 @@ class PingHandler(threading.Thread):
         self.waitForBulk = False
         self.randList = list(range(0x01,0xFF))
         self.randList.remove(14)
+        self.randList.remove(32)
         self.randList.remove(42)
         self.sequenIter = 0
         
@@ -85,23 +86,27 @@ class PingHandler(threading.Thread):
                                 continue
                         self.pingCount[esp] -= 1 # decrement
                         if self.pingCount[esp] > 0:
+                            if (self.pingCount[esp] % 50) == 0:
+                                print(colored("Ping count: {}".format(self.pingCount[esp]), 'green'))
                             self.sendPing(esp)
                             self.pingBusy[esp] = True
 
-                    elif time.perf_counter() - self.getTsPingDict(esp) > 2:
+                    # elif time.perf_counter() - self.getTsPingDict(esp) > 1:
+                    elif time.perf_counter() - self.getTsPingDict(esp) > 0.5:
                         print(colored("TIMEOUT: "+ names.idsToName[esp], "red"))
                         self.pingBusy[esp] = False
                         self.addPingResult(esp, np.inf, False)
                         self.pingCount[esp] -= 1 # decrement
 
+
                     if self.pingCount[esp] == 0:
                         print(colored("Ping data for " + esp + " saved!", "green"))
-                        # self.pingCount.pop(esp)
                         self.pingBusy.pop(esp) #remove key
+                        self.pingCount.pop(esp)
             except:
                 print(colored("IN TRACEBACK", 'red'))
                 traceback.print_exc()
-            self.event.wait(0.05)    
+            self.event.wait(.001)    
 
 
 
@@ -149,8 +154,8 @@ class PingHandler(threading.Thread):
     def sendPing(self, number):
         #print("pinging {} with 32 bytes of data...".format(number)) # for debugging
         data = bytearray()
-        # for lv in range(64):  # generate 32 bytes of random data
-        for lv in range(8):  # generate 32 bytes of random data
+        for lv in range(64):  # generate 32 bytes of random data
+        # for lv in range(8):  # generate 32 bytes of random data
             # data.append(random.randint(0x01,0xFF)) # avoid NULL characters
             data.append(random.choice(self.randList)) # avoid NULL characters
         

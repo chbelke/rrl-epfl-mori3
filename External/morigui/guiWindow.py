@@ -84,6 +84,10 @@ class MoriGui(tk.Frame):
                 try:
                     self.moriNumber.append(self.tmpEspIds[espOrder[i]])
                 except KeyError:
+                    print(colored("Err: ESP not found", 'red'))
+                    print("i", i)
+                    print("espOrder", espOrder)
+                    print("tmpEspIds", tmpEspIds)
                     continue
 
             self.frame_publ.update_menu(self.moriNumber)
