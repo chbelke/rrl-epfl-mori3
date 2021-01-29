@@ -19,16 +19,19 @@ import random as rng
 from termcolor import colored
 
 
-BATTERY_WIDTH_MIN = 30
-BATTERY_WIDTH_MAX = 120
-BATTERY_HEIGHT_MIN = 10
-BATTERY_HEIGHT_MAX = 40
+BATTERY_WIDTH_MIN = 7
+BATTERY_WIDTH_MAX = 15
+BATTERY_HEIGHT_MIN = 3
+BATTERY_HEIGHT_MAX = 7
 BATTERY_RATIO = 30
-
-LOWER_COLOUR = np.array([78, 185, 0], dtype=np.uint8)
-UPPER_COLOUR = np.array([99,255,255], dtype=np.uint8)
-
 RECTANGLE_MERGE_BOUND = 10
+
+LOWER_COLOUR = np.array([70, 50, 0], dtype=np.uint8)
+UPPER_COLOUR = np.array([100,255,255], dtype=np.uint8)
+
+LED_RING_SIZE_MIN = 20
+LED_RING_SIZE_MAX = 30
+
 
 def main(args):
     if args.mqtt == True:
@@ -157,39 +160,66 @@ def getSavedImage():
 def getMoriPoints(img):
     mori_vertices = []
     batteries = detectBatteries(img)
-    return
     for battery in batteries:
-        mask = generateMaskFromBattery(battery)
-        leds = findVertexLEDs(mask)
-        vertices = generateMoriVertices(leds)
-        mori_vertices.append(vertices)
+        leds = findVertexLEDs(img, battery)
+        # vertices = generateMoriVertices(leds)
+        # mori_vertices.append(vertices)
+    cv2.waitKey(20)        
+    return
     return mori_vertices
 
 
 def detectBatteries(img):
-
-    
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, LOWER_COLOUR, UPPER_COLOUR)
-    img_colour = cv2.bitwise_and(hsv,hsv, mask=mask)    
-    hsv = cv2.blur(img_colour, (3,3))
-
-    threshold = 100
-
-    # kernel = np.ones((3,3), dtype=np.uint8)
-    kernel = np.ones((4,4), dtype=np.uint8)
-    closing = cv2.morphologyEx(hsv, cv2.MORPH_CLOSE, kernel)
-
-    canny_output = cv2.Canny(hsv, threshold, threshold * 2)
-
+    canny_output = detectCannyEdges(hsv)
     contours, _ = cv2.findContours(canny_output, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    minRect = [None]*len(contours)
-    for i, c in enumerate(contours):
-        minRect[i] = cv2.minAreaRect(c)
 
     drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
 
+    rectangle_list = getRectangleList(drawing, contours, hsv, canny_output)
+
+    rectangle_list = pruneRectangleList(rectangle_list, drawing)
+
+    for ele in rectangle_list:
+        box = cv2.boxPoints(ele)
+        box = np.intp(box) #np.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
+        cv2.drawContours(img, [box], 0, (0, 0, 255), 1)        
+
+    
+    cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MIN, BATTERY_HEIGHT_MIN), (0, 0, 255), 2)
+    cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MAX, BATTERY_HEIGHT_MAX), (255, 0, 0), 2)
+
+    # cv2.imshow('img_colour', hsv)
+
+    cv2.imshow('img_contour', drawing)
+    cv2.imshow('img', img)
+    # cv2.imshow('mask', canny_output)
+
+
+    return rectangle_list
+
+
+def detectCannyEdges(hsv):
+    mask = cv2.inRange(hsv, LOWER_COLOUR, UPPER_COLOUR)
+    img_colour = cv2.bitwise_and(hsv,hsv, mask=mask)    
+    # hsv = cv2.blur(img_colour, (3,3))
+    hsv = cv2.blur(img_colour, (2,2))
+    # hsv = img_colour
+
+    threshold = 100
+
+    kernel = np.ones((3,3), dtype=np.uint8)
+    # kernel = np.ones((4,4), dtype=np.uint8)
+    closing = cv2.morphologyEx(hsv, cv2.MORPH_CLOSE, kernel)
+
+    return cv2.Canny(hsv, threshold, threshold * 2)
+
+
+def getRectangleList(drawing, contours, hsv, canny_output):
+    minRect = [None]*len(contours)
+    for i, c in enumerate(contours):
+        minRect[i] = cv2.minAreaRect(c)
     rectangle_list = []
 
     for rectangle in minRect:
@@ -206,7 +236,10 @@ def detectBatteries(img):
         mean_colour = cv2.mean(hsv,mask)[0:3]
         cv2.drawContours(drawing, [box], 0, mean_colour)
         rectangle_list.append(rectangle)
+    return rectangle_list
 
+
+def pruneRectangleList(rectangle_list, drawing):
     purge_list = []
     new_rectangles = []
     for i, rectangle in enumerate(rectangle_list):
@@ -228,33 +261,13 @@ def detectBatteries(img):
                 purge_list.append(j)
                 new_rectangles.append(tmp)
 
-
     for ele in sorted(set(purge_list), reverse = True):  
         del rectangle_list[ele] 
 
     rectangle_list.extend(set(new_rectangles))
-
-    for ele in rectangle_list:
-        box = cv2.boxPoints(ele)
-        box = np.intp(box) #np.intp: Integer used for indexing (same as C ssize_t; normally either int32 or int64)
-        cv2.drawContours(img, [box], 0, (0, 0, 255), 1)        
-
     
-    cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MIN, BATTERY_HEIGHT_MIN), (0, 0, 255), 2)
-    cv2.rectangle(drawing, (0, 0), (BATTERY_WIDTH_MAX, BATTERY_HEIGHT_MAX), (255, 0, 0), 2)
+    return rectangle_list
 
-    cv2.imshow('img_contour', drawing)
-    cv2.imshow('img_colour', hsv)
-
-    cv2.imshow('img', img)
-    cv2.imshow('mask', canny_output)
-
-
-    cv2.waitKey(20)
-    # input()
-
-
-    return
 
 
 def getDistanceXY(point1, point2):
@@ -277,27 +290,25 @@ def checkRectangleSize(rect_size):
     return True
 
 
-def detectBatteryContours(img):
-    # Convert logical matrix to uint8
-    gray = gray.astype(np.uint8)*255
-
-    # Find contours
-    cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]  # Use index [-2] to be compatible to OpenCV 3 and 4
-
-    # Get contour with maximum area
-    c = max(cnts, key=cv2.contourArea)
-
-    x, y, w, h = cv2.boundingRect(c)
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-    return x, y, w, h
-
-
-def generateMaskFromBattery(battery):
+def findVertexLEDs(img, battery):
+    mask = generateMaskFromBattery(img, battery)
+    leds = findLEDs(img, battery, mask)
     return
 
 
-def findVertexLEDs(mask):
+def generateMaskFromBattery(img, battery):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = np.zeros((img.shape[0], img.shape[1], 1), dtype=np.uint8)
+    cv2.circle(mask, (int(battery[0][0]), int(battery[0][1])), LED_RING_SIZE_MAX, 255, -1)
+    cv2.circle(mask, (int(battery[0][0]), int(battery[0][1])), LED_RING_SIZE_MIN, 0, -1)
+    cv2.imshow('mask', mask)    
+    return mask
+
+
+def findLEDs(img, battery, mask):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    screened_img = cv2.bitwise_and(hsv,hsv, mask=mask)   
+    cv2.imshow('img_colour', screened_img)
     return
 
 
