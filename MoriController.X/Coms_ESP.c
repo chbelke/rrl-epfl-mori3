@@ -376,9 +376,9 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
 {
     uint8_t *neighbour;
     uint8_t i;
-    neighbour = Coms_123_GetNeighbour(edge);
+    neighbour = Coms_123_GetNeighbourIDs();
     
-    if(*(neighbour+edge*6)==0)
+    if(*(neighbour+edge*7)==0)
     {
         Coms_ESP_Neighbour_Disconnected(edge);
         return;
@@ -386,7 +386,7 @@ void Coms_ESP_Request_Neighbour(uint8_t edge)
     
     UART4_Write(0b10010111);
     UART4_Write(edge);
-    for(i=edge*6; i<6+edge*6; i++)
+    for(i=edge*7; i<6+edge*7; i++)
         UART4_Write(*(neighbour+i));
     UART4_Write(ESP_End);
 }

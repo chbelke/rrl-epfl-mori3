@@ -5,6 +5,7 @@
 #include "Acts_ROT.h"
 #include "Mnge_PWM.h"
 #include "Sens_ACC.h"
+#include "Sens_ENC.h"
 #include "Mnge_BAT.h"
 #include "Mnge_BTN.h"
 #include "Mnge_RGB.h"
@@ -57,6 +58,11 @@ void Tmrs_CBK_Timer5_Handle(void) {
     
     Coms_123_ConHandle(); // inter-module connection handler
     Acts_ROT_DrvHandle();
+    
+    for (edge = 0; edge < 3; edge++)
+        if (Flg_EdgeNbr_Offset[edge])
+            Sens_ENC_NbrOffset(edge);
+            
     
     Battery_Check(); // check if LBO has been trigger for interval
     
@@ -152,7 +158,7 @@ void Tmrs_CBK_UpdateStableFlag(bool *flg_stable_state) {
             if (!Act_LIN_InRange(edge))
                 out = false;
         if (Flg_EdgeReq_Ang[edge])
-            if (!Act_ROT_InRange(edge))
+            if (!Acts_ROT_InRange(edge))
                 out = false;
     }
     *flg_stable_state = out;

@@ -5,7 +5,7 @@
 #include "dsp.h"
 
 // Accelerometer MMA8452Q
-int16_t ACC_Data[3] = {0, 0, 0};
+int16_t ACC_Data[3] = {10, 5, 1};
 
 void Sens_ACC_Setup(void) {
     static uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
@@ -103,8 +103,10 @@ void Sens_ACC_Read(void) {
             // add some delay here
             __delay_us(1);
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT)
+            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
                 break; //return (0);
+                Mnge_RGB_SetAll(10,0,5);
+            }
             else
                 slaveTimeOut++;
         }
@@ -113,8 +115,10 @@ void Sens_ACC_Read(void) {
             break;
 
         // check for max retry and skip this byte
-        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX)
+        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX){
             break; //return (0);
+            LED_R = LED_On;
+        }
         else
             timeOut++;
 

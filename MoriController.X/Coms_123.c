@@ -24,8 +24,8 @@ volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready send
 volatile bool Flg_Uart_Lock[3] = {false, false, false};
 
 // Neighbour ID variables
-uint8_t NbrID[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t NbrIDTmp[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t NbrID[21] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // (6 characters plus edge) x3
+uint8_t NbrIDTmp[21] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // (6 characters plus edge) x3
 uint8_t NbrIDCount[3] = {0, 0, 0};
 uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrValExt[3] = {0, 0, 0}; // current extension received by neighbour
@@ -190,21 +190,22 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                 }
             } else if ((EdgInAloc[edge] & 0b00001000)) { // con acknowledged
                 // acknowledge byte followed by ID
-                if (NbrIDCount[edge] < 6) {
+                if (NbrIDCount[edge] < 7) {
                     if ((EdgIn < 48) || ((EdgIn > 57) && (EdgIn < 65)) ||
                             ((EdgIn > 90))) {// Not Ascii (ID)
                         NbrIDCount[edge] = 0;
                         EdgInCase[edge] = 50;
                         break;
                     }
-                    NbrIDTmp[NbrIDCount[edge] + 6 * edge] = EdgIn;
+                    NbrIDTmp[NbrIDCount[edge] + 7 * edge] = EdgIn;
                     NbrIDCount[edge]++;
                 } else {
                     if (EdgIn == EDG_End) {
                         uint8_t i;
-                        for (i = 0 + 6 * edge; i <= 5 + 6 * edge; i++) {
+                        for (i = 0 + 7 * edge; i <= 6 + 7 * edge; i++) {
                             NbrID[i] = NbrIDTmp[i];
                         }
+                        Flg_EdgeNbr_Offset[edge] = true;
                         Flg_IDRcvd[edge] = true; // ID received, tell neighbour
                         Flg_EdgeCon[edge] = true; // make sure flag is set
                         Flg_EdgeSyn[edge] = false; // reset synced
@@ -473,6 +474,7 @@ void Coms_123_WriteID(uint8_t edge) { // called in Coms_123_ConHandle
     for (i = 0; i < 6; i++) { // loop through 6 ID bytes
         Coms_123_Write(edge, (uint8_t) Coms_ESP_ReturnID(i)); // write to edge
     }
+    Coms_123_Write(edge, edge + 48); // 48 ascii protection against 0 in eval case 20
 }
 
 /* ******************** READ BYTE FROM EDGE ********************************* */
@@ -526,6 +528,6 @@ void Coms_123_Disconnected(uint8_t edge) {
     //    Flg_EdgeReq_Cpl[edge] = false;
 }
 
-uint8_t * Coms_123_GetNeighbour(uint8_t edge) {
+uint8_t * Coms_123_GetNeighbourIDs() { // returns ID plus edge
     return NbrID;
 }

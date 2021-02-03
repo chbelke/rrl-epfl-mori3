@@ -52,6 +52,7 @@
       <itemPath>Defs_GLB.h</itemPath>
       <itemPath>Defs_MOD.h</itemPath>
       <itemPath>Mnge_ERR.h</itemPath>
+      <itemPath>Defs_OFF.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

@@ -324,7 +324,7 @@ uint16_t Acts_ROT_GetAngle(uint8_t edge) {
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
-bool Act_ROT_InRange(uint8_t edge) {
+bool Acts_ROT_InRange(uint8_t edge) {
     uint16_t diff = abs(Acts_ROT_GetAngle(edge) - Acts_ROT_GetTarget(edge));
     if (diff <= MotRot_OkRange) return true;
     else return false;

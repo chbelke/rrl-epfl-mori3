@@ -22,7 +22,7 @@ uint8_t Coms_123_Read (uint8_t);
 bool Coms_123_Ready (uint8_t);
 void Coms_123_purge_uart(uint8_t);
 void Coms_123_Disconnected(uint8_t);
-uint8_t * Coms_123_GetNeighbour(uint8_t);
+uint8_t * Coms_123_GetNeighbourIDs();
 
 #endif	/* COMS_123_H */
 

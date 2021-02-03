@@ -7,110 +7,210 @@
 
 #include "Defs_GLB.h"
 
-#ifndef DEFS_MODS_H
-#define	DEFS_MODS_H
+#ifndef DEFS_MOD_H
+#define	DEFS_MOD_H
 
-/* ******************** WIFI ID ********************************************* */
-#if MODULE == 'A' // ascii code for 0AC171
-    #define ID1 48
-    #define ID2 65
-    #define ID3 67
-    #define ID4 49
-    #define ID5 55
-    #define ID6 49
-#elif  MODULE == 'B' // ascii code for 0AC172
-    #define ID1 48
-    #define ID2 65
-    #define ID3 67
-    #define ID4 49
-    #define ID5 55
-    #define ID6 50
-#elif  MODULE == 'C' // ascii code for D00BD5
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 68
-    #define ID6 53
-#elif  MODULE == 'D' // ascii code for 0AC175
-    #define ID1 48
-    #define ID2 65
-    #define ID3 67
-    #define ID4 49
-    #define ID5 55
-    #define ID6 53
-#elif  MODULE == 'E' // ascii code for 0AC170
-    #define ID1 48
-    #define ID2 65
-    #define ID3 67
-    #define ID4 49
-    #define ID5 55
-    #define ID6 48
-#elif  MODULE == 'F' // ascii code for 0AC173
-    #define ID1 48
-    #define ID2 65
-    #define ID3 67
-    #define ID4 49
-    #define ID5 55
-    #define ID6 51
+#define NUM_MODS 14
 
-#elif  MODULE == 'G' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 68
-    #define ID6 50
-#elif  MODULE == 'H' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 68
-    #define ID6 51
-#elif  MODULE == 'I' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 68
-    #define ID6 49
-#elif  MODULE == 'J' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 68
-    #define ID6 48
-#elif  MODULE == 'K' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 67
-    #define ID6 69
-#elif  MODULE == 'L' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 67
-    #define ID6 70
-#elif  MODULE == 'M' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 67
-    #define ID6 68
-#elif  MODULE == 'N' // ascii code for
-    #define ID1 68
-    #define ID2 48
-    #define ID3 48
-    #define ID4 66
-    #define ID5 67
-    #define ID6 65
+/* ******************** WIFI IDs ******************************************** */
+#define ID_A1 48 // ascii code for 0AC171
+#define ID_A2 65
+#define ID_A3 67
+#define ID_A4 49
+#define ID_A5 55
+#define ID_A6 49
 
+#define ID_B1 48 // ascii code for 0AC172
+#define ID_B2 65
+#define ID_B3 67
+#define ID_B4 49
+#define ID_B5 55
+#define ID_B6 50
+
+#define ID_C1 68 // ascii code for D00BD5
+#define ID_C2 48
+#define ID_C3 48
+#define ID_C4 66
+#define ID_C5 68
+#define ID_C6 53
+
+#define ID_D1 48 // ascii code for 0AC175
+#define ID_D2 65
+#define ID_D3 67
+#define ID_D4 49
+#define ID_D5 55
+#define ID_D6 53
+
+#define ID_E1 48 // ascii code for 0AC170
+#define ID_E2 65
+#define ID_E3 67
+#define ID_E4 49
+#define ID_E5 55
+#define ID_E6 48
+
+#define ID_F1 48 // ascii code for 0AC173
+#define ID_F2 65
+#define ID_F3 67
+#define ID_F4 49
+#define ID_F5 55
+#define ID_F6 51
+
+#define ID_G1 68 // ascii code for D00BD2
+#define ID_G2 48
+#define ID_G3 48
+#define ID_G4 66
+#define ID_G5 68
+#define ID_G6 50
+
+#define ID_H1 68 // ascii code for D00BD3
+#define ID_H2 48
+#define ID_H3 48
+#define ID_H4 66
+#define ID_H5 68
+#define ID_H6 51
+
+#define ID_I1 68 // ascii code for D00BD1
+#define ID_I2 48
+#define ID_I3 48
+#define ID_I4 66
+#define ID_I5 68
+#define ID_I6 49
+
+#define ID_J1 68 // ascii code for D00BD0
+#define ID_J2 48
+#define ID_J3 48
+#define ID_J4 66
+#define ID_J5 68
+#define ID_J6 48
+
+#define ID_K1 68 // ascii code for D00BCE
+#define ID_K2 48
+#define ID_K3 48
+#define ID_K4 66
+#define ID_K5 67
+#define ID_K6 69
+
+#define ID_L1 68 // ascii code for D00BCF
+#define ID_L2 48
+#define ID_L3 48
+#define ID_L4 66
+#define ID_L5 67
+#define ID_L6 70
+
+#define ID_M1 68 // ascii code for D00BCD
+#define ID_M2 48
+#define ID_M3 48
+#define ID_M4 66
+#define ID_M5 67
+#define ID_M6 68
+
+#define ID_N1 68 // ascii code for D00BCA
+#define ID_N2 48
+#define ID_N3 48
+#define ID_N4 66
+#define ID_N5 67
+#define ID_N6 65
+
+
+/* ******************** ID SELF ALLOCATION ********************************** */
+#if MODULE == 'A'
+    #define ID1 ID_A1
+    #define ID2 ID_A2
+    #define ID3 ID_A3
+    #define ID4 ID_A4
+    #define ID5 ID_A5
+    #define ID6 ID_A6
+#elif  MODULE == 'B'
+    #define ID1 ID_B1
+    #define ID2 ID_B2
+    #define ID3 ID_B3
+    #define ID4 ID_B4
+    #define ID5 ID_B5
+    #define ID6 ID_B6
+#elif  MODULE == 'C'
+    #define ID1 ID_C1
+    #define ID2 ID_C2
+    #define ID3 ID_C3
+    #define ID4 ID_C4
+    #define ID5 ID_C5
+    #define ID6 ID_C6
+#elif  MODULE == 'D'
+    #define ID1 ID_D1
+    #define ID2 ID_D2
+    #define ID3 ID_D3
+    #define ID4 ID_D4
+    #define ID5 ID_D5
+    #define ID6 ID_D6
+#elif  MODULE == 'E'
+    #define ID1 ID_E1
+    #define ID2 ID_E2
+    #define ID3 ID_E3
+    #define ID4 ID_E4
+    #define ID5 ID_E5
+    #define ID6 ID_E6
+#elif  MODULE == 'F'
+    #define ID1 ID_F1
+    #define ID2 ID_F2
+    #define ID3 ID_F3
+    #define ID4 ID_F4
+    #define ID5 ID_F5
+    #define ID6 ID_F6
+#elif  MODULE == 'G'
+    #define ID1 ID_G1
+    #define ID2 ID_G2
+    #define ID3 ID_G3
+    #define ID4 ID_G4
+    #define ID5 ID_G5
+    #define ID6 ID_G6
+#elif  MODULE == 'H'
+    #define ID1 ID_H1
+    #define ID2 ID_H2
+    #define ID3 ID_H3
+    #define ID4 ID_H4
+    #define ID5 ID_H5
+    #define ID6 ID_H6
+#elif  MODULE == 'I'
+    #define ID1 ID_I1
+    #define ID2 ID_I2
+    #define ID3 ID_I3
+    #define ID4 ID_I4
+    #define ID5 ID_I5
+    #define ID6 ID_I6
+#elif  MODULE == 'J'
+    #define ID1 ID_J1
+    #define ID2 ID_J2
+    #define ID3 ID_J3
+    #define ID4 ID_J4
+    #define ID5 ID_J5
+    #define ID6 ID_J6
+#elif  MODULE == 'K'
+    #define ID1 ID_K1
+    #define ID2 ID_K2
+    #define ID3 ID_K3
+    #define ID4 ID_K4
+    #define ID5 ID_K5
+    #define ID6 ID_K6
+#elif  MODULE == 'L'
+    #define ID1 ID_L1
+    #define ID2 ID_L2
+    #define ID3 ID_L3
+    #define ID4 ID_L4
+    #define ID5 ID_L5
+    #define ID6 ID_L6
+#elif  MODULE == 'M'
+    #define ID1 ID_M1
+    #define ID2 ID_M2
+    #define ID3 ID_M3
+    #define ID4 ID_M4
+    #define ID5 ID_M5
+    #define ID6 ID_M6
+#elif  MODULE == 'N'
+    #define ID1 ID_N1
+    #define ID2 ID_N2
+    #define ID3 ID_N3
+    #define ID4 ID_N4
+    #define ID5 ID_N5
+    #define ID6 ID_N6
 #else // safe values
     #define ID1 1
     #define ID2 2
@@ -121,35 +221,35 @@
 #endif
 
 /* ******************** LINEAR MOTORS LIMITS ******************************** */
-#if MODULE == 'XA' // MINs verified
+#if MODULE == 'A'
     #define MotLin_MIN_1 68
     #define MotLin_MAX_1 990
     #define MotLin_MIN_2 75
     #define MotLin_MAX_2 996
     #define MotLin_MIN_3 77
     #define MotLin_MAX_3 993
-#elif  MODULE == 'B' // MINs verified
+#elif  MODULE == 'B'
     #define MotLin_MIN_1 72
     #define MotLin_MAX_1 985
     #define MotLin_MIN_2 79
     #define MotLin_MAX_2 1003
     #define MotLin_MIN_3 76
     #define MotLin_MAX_3 992
-#elif  MODULE == 'C' // MINs verified
+#elif  MODULE == 'C'
     #define MotLin_MIN_1 70
     #define MotLin_MAX_1 988
     #define MotLin_MIN_2 78
     #define MotLin_MAX_2 996
     #define MotLin_MIN_3 79
     #define MotLin_MAX_3 995
-#elif  MODULE == 'D' // MINs verified
+#elif  MODULE == 'D'
     #define MotLin_MIN_1 79
     #define MotLin_MAX_1 999
     #define MotLin_MIN_2 75
     #define MotLin_MAX_2 994
     #define MotLin_MIN_3 74
     #define MotLin_MAX_3 995
-#elif  MODULE == 'E' // MINs verified
+#elif  MODULE == 'E'
     #define MotLin_MIN_1 79
     #define MotLin_MAX_1 1000
     #define MotLin_MIN_2 69
@@ -163,7 +263,6 @@
     #define MotLin_MAX_2 1000
     #define MotLin_MIN_3 71
     #define MotLin_MAX_3 995
-
 #elif  MODULE == 'G'
     #define MotLin_MIN_1 80
     #define MotLin_MAX_1 999
@@ -220,7 +319,6 @@
     #define MotLin_MAX_2 995
     #define MotLin_MIN_3 96
     #define MotLin_MAX_3 1015
-
 #else // safe values
     #define MotLin_MIN_1 200
     #define MotLin_MAX_1 800
@@ -230,5 +328,138 @@
     #define MotLin_MAX_3 800
 #endif
 
+/* ******************** LINEAR MOTORS LIMITS ******************************** */
+#if MODULE == 'A' // MINs verified
+    #define Off1_A1 0
+    #define Off1_A2 0
+    #define Off1_A3 0
+    #define Off1_B1 0
+    #define Off1_B2 0
+    #define Off1_B3 0
+    #define Off1_C1 0
+    #define Off1_C2 0
+    #define Off1_C3 0
+    #define Off1_D1 0
+    #define Off1_D2 0
+    #define Off1_D3 0
+    #define Off1_E1 0
+    #define Off1_E2 0
+    #define Off1_E3 0
+    #define Off1_F1 0
+    #define Off1_F2 0
+    #define Off1_F3 0
+    #define Off1_G1 0
+    #define Off1_G2 0
+    #define Off1_G3 0
+    #define Off1_H1 0
+    #define Off1_H2 0
+    #define Off1_H3 0
+    #define Off1_I1 0
+    #define Off1_I2 0
+    #define Off1_I3 0
+    #define Off1_J1 0
+    #define Off1_J2 0
+    #define Off1_J3 0
+    #define Off1_K1 0
+    #define Off1_K2 0
+    #define Off1_K3 0
+    #define Off1_L1 0
+    #define Off1_L2 0
+    #define Off1_L3 0
+    #define Off1_M1 0
+    #define Off1_M2 0
+    #define Off1_M3 0
+    #define Off1_N1 0
+    #define Off1_N2 0
+    #define Off1_N3 0
+
+    #define Off2_A1 0
+    #define Off2_A2 0
+    #define Off2_A3 0
+    #define Off2_B1 0
+    #define Off2_B2 0
+    #define Off2_B3 0
+    #define Off2_C1 0
+    #define Off2_C2 0
+    #define Off2_C3 0
+    #define Off2_D1 0
+    #define Off2_D2 0
+    #define Off2_D3 0
+    #define Off2_E1 0
+    #define Off2_E2 0
+    #define Off2_E3 0
+    #define Off2_F1 0
+    #define Off2_F2 0
+    #define Off2_F3 0
+    #define Off2_G1 0
+    #define Off2_G2 0
+    #define Off2_G3 0
+    #define Off2_H1 0
+    #define Off2_H2 0
+    #define Off2_H3 0
+    #define Off2_I1 0
+    #define Off2_I2 0
+    #define Off2_I3 0
+    #define Off2_J1 0
+    #define Off2_J2 0
+    #define Off2_J3 0
+    #define Off2_K1 0
+    #define Off2_K2 0
+    #define Off2_K3 0
+    #define Off2_L1 0
+    #define Off2_L2 0
+    #define Off2_L3 0
+    #define Off2_M1 0
+    #define Off2_M2 0
+    #define Off2_M3 0
+    #define Off2_N1 0
+    #define Off2_N2 0
+    #define Off2_N3 0
+
+    #define Off3_A1 0
+    #define Off3_A2 0
+    #define Off3_A3 0
+    #define Off3_B1 0
+    #define Off3_B2 0
+    #define Off3_B3 0
+    #define Off3_C1 0
+    #define Off3_C2 0
+    #define Off3_C3 0
+    #define Off3_D1 0
+    #define Off3_D2 0
+    #define Off3_D3 0
+    #define Off3_E1 0
+    #define Off3_E2 0
+    #define Off3_E3 0
+    #define Off3_F1 0
+    #define Off3_F2 0
+    #define Off3_F3 0
+    #define Off3_G1 0
+    #define Off3_G2 0
+    #define Off3_G3 0
+    #define Off3_H1 0
+    #define Off3_H2 0
+    #define Off3_H3 0
+    #define Off3_I1 0
+    #define Off3_I2 0
+    #define Off3_I3 0
+    #define Off3_J1 0
+    #define Off3_J2 0
+    #define Off3_J3 0
+    #define Off3_K1 0
+    #define Off3_K2 0
+    #define Off3_K3 0
+    #define Off3_L1 0
+    #define Off3_L2 0
+    #define Off3_L3 0
+    #define Off3_M1 0
+    #define Off3_M2 0
+    #define Off3_M3 0
+    #define Off3_N1 0
+    #define Off3_N2 0
+    #define Off3_N3 0
+
+#elif  MODULE == 'B' // MINs verified
+#endif
 
 #endif	/* DEFS_MODS_H */

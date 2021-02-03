@@ -6,8 +6,8 @@
 /* ************************************************************************** */
 /* ************************************************************************** */
 
-#ifndef DEFS_H
-#define	DEFS_H
+#ifndef DEFS_GLB_H
+#define	DEFS_GLB_H
 
 #define FCY 3686400UL               // cycle frequency
 
@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'I' // module name by letter
+#define MODULE 'G' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -84,6 +84,7 @@ extern volatile bool Flg_EdgeReq_Ang[3];
 extern volatile bool Flg_EdgeReq_Ext[3];
 extern volatile bool Flg_EdgeReq_Cpl[3];
 extern volatile bool Flg_EdgeReq_CplNbrWait[3];
+extern volatile bool Flg_EdgeNbr_Offset[3];
 
 extern volatile bool Flg_ID_check;
 
@@ -255,4 +256,4 @@ extern volatile uint8_t ESP_ID[6];
 #define SMA_Duty_1 130 // 150 // 8-bit PWM value for first phase
 #define SMA_Duty_2 65 // 8-bit PWM value for second phase
 
-#endif	/* DEFS_H */
+#endif	/* DEFS_GLBH */
