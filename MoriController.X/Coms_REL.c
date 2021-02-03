@@ -38,8 +38,8 @@ bool Coms_REL_Handle(uint8_t inEdge, uint8_t byte) {
                     < (RelBytExp[inEdge]-2))
                 return false;
             if(!Coms_REL_Ready(inEdge)) return false;
-
             if (Coms_REL_Peek_Buffer(inEdge, (RelBytExp[inEdge]-3)) == EDG_End) {
+                if(!Coms_REL_Ready(inEdge)) return false;
                 Coms_REL_Relay(inEdge, RelOutEdg[inEdge]);
                 RelSwitch[inEdge] = 0;
                 return true;
