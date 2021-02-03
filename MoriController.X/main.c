@@ -104,7 +104,6 @@ volatile bool Flg_Tmr3 = true;
 volatile bool Flg_Tmr5 = true;
 
 // Determines the frequency that the PIC updates ESP (10s of ms)
-volatile uint8_t ESP_Update_Delay = 100;
 volatile uint8_t ESP_DataLog_Time_Elapsed = 0;
 volatile uint8_t ESP_ID[6] = {0, 0, 0, 0, 0, 0};
 

@@ -21,9 +21,9 @@ END_BYTE = 14
 
 class PublishBulk():
 
-    def __init__(self, frame, mqtthost):
+    def __init__(self, frame, wifi_host):
         self.frame = frame
-        self.mqtthost = mqtthost
+        self.wifi_host = wifi_host
         self.load()
 
 
@@ -50,23 +50,26 @@ class PublishBulk():
         text = json.loads(text, object_pairs_hook=self.value_resolver)
         for esp in text:
             for cmd in text[esp]:
-                if type(cmd) is dict:
+                if 'global' in esp.lower():
+                    print("Global: ", cmd)
+                    self.wifi_host.publishGlobal(cmd)                    
+                elif type(cmd) is dict:
                     for key in cmd:
                         if key.lower() == 'shape':
                             self.InterpretShape(text, key, esp)
                         elif key.lower() == 'wifiedge':
                             self.SetEdge(text, key, esp)
                         elif type(text[esp][key]) is str:
-                            self.mqtthost.publishLocal(cmd, names.checkName(esp))                    
+                            self.wifi_host.publishLocal(cmd, names.checkName(esp))                    
                 elif type(cmd) is str:
                     if cmd.startswith("ping"):
                         num = 1
                         splitText = cmd.split("ping",1)
                         if (splitText[1].strip().isnumeric()):
                             num = int(splitText[1])
-                        self.mqtthost.pingHandler.setPingCount(names.checkName(esp), num)
+                        self.wifi_host.pingHandler.setPingCount(names.checkName(esp), num)
                         continue
-                    self.mqtthost.publishLocal(cmd, names.checkName(esp))
+                    self.wifi_host.publishLocal(cmd, names.checkName(esp))
 
     def ClearBulk(self):
         self.pub_cmd.delete("1.0", 'end')
@@ -80,7 +83,7 @@ class PublishBulk():
         message.append(int(edge))
         message.append(END_BYTE)
 
-        self.mqtthost.publishLocal(message, names.checkName(esp))
+        self.wifi_host.publishLocal(message, names.checkName(esp))
 
 
     def InterpretShape (self, text, key, esp):
@@ -114,7 +117,7 @@ class PublishBulk():
                 message.extend(cmd_bytes.to_bytes(numbytes, byteorder='big'))
             message.append(END_BYTE)
             print(message)
-            self.mqtthost.publishLocal(message, names.checkName(esp))
+            self.wifi_host.publishLocal(message, names.checkName(esp))
 
 
         if 'coup' in cmds or 'led' in cmds:
@@ -143,7 +146,7 @@ class PublishBulk():
                 message.extend(cmd_bytes.to_bytes(1, byteorder='big'))
             message.append(END_BYTE)
             print(message)
-            self.mqtthost.publishLocal(message, names.checkName(esp))
+            self.wifi_host.publishLocal(message, names.checkName(esp))
         
 
         if 'drive' in cmds:

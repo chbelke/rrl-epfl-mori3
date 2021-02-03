@@ -31,8 +31,8 @@ rectObs = []
 
 GOAL_RADIUS = 10
 MIN_DISTANCE_TO_ADD = 1.0
-NUMNODES = 1000
-delta = 35.0
+NUMNODES = 500
+delta = 30.0
 
 
 white = 255, 255, 255
@@ -69,6 +69,9 @@ def main():
     while(True):
         img = np.ones((h, w, 3), dtype=np.uint8) * 255
         drawMoriLocations(img, mori_list)
+        cv2.imshow('img', img)
+        cv2.waitKey(20)  
+        input()
         calculateGoals(img, mori_list)
         cv2.imshow('img', img)
         cv2.waitKey(20)  
@@ -169,7 +172,8 @@ def runRRT_Star(img, mori_list):
                 goalNode = nodes[len(nodes)-1]
                 print("GOAL!")
 
-        elif currentState == 'goalFound':
+    while(True):
+        if currentState == 'goalFound':
             currNode = goalNode.parent
             # print("Goal Reached")           
             while currNode.parent != None:

@@ -36,6 +36,10 @@ uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
 uint8_t WIFI_LED_BLINK_DES[3] = {0, 0, 0};
 uint8_t Coms_ESP_Data_Transmission = 0;
 
+uint8_t ESP_Update_Delay_Angle = 100;
+uint8_t ESP_Update_Delay_Edge = 100;
+uint8_t ESP_Update_Delay_Orient = 100;
+
 
 /* This function evaluates the incoming bytes from the ESP module via UART4. 
  * It gets called from the ISR each time a byte is received. It evaluates the
@@ -427,28 +431,50 @@ bool Coms_ESP_VerifyID() {
 
 void Coms_ESP_StateUpdate(void) {
     // Only updates every N ms
-    if (ESP_DataLog_Time_Elapsed < ESP_Update_Delay) return;
+    static uint8_t ESP_DataLog_Time_Angle;
+    static uint8_t ESP_DataLog_Time_Edge;
+    static uint8_t ESP_DataLog_Time_Orient;
+    
+    //Updates elapsed time only if we are logging the field
+    //Otherwise time never updates and never transmits
+    if (Coms_ESP_Data_Transmission & 0b00000001)
+        ESP_DataLog_Time_Angle += ESP_DataLog_Time_Elapsed;
+    if (Coms_ESP_Data_Transmission & 0b00000010)
+        ESP_DataLog_Time_Edge += ESP_DataLog_Time_Elapsed;
+    if (Coms_ESP_Data_Transmission & 0b00000100)
+        ESP_DataLog_Time_Orient += ESP_DataLog_Time_Elapsed;
     
     ESP_DataLog_Time_Elapsed = 0;
     
-    if ((Coms_ESP_Data_Transmission &0b00000111) == 0) return;
+    //Checks if time has surpassed the time we set
+    uint8_t ESP_Update_Reset_Trigger = 0;    
+    if (ESP_DataLog_Time_Angle >= ESP_Update_Delay_Angle) {
+        ESP_Update_Reset_Trigger |= 0b00000001;
+        ESP_DataLog_Time_Angle = 0;
+    }
+    if (ESP_DataLog_Time_Edge >= ESP_Update_Delay_Edge) {
+        ESP_Update_Reset_Trigger |= 0b00000010;
+        ESP_DataLog_Time_Edge = 0;
+    }
+    if (ESP_DataLog_Time_Orient >= ESP_Update_Delay_Orient) {
+        ESP_Update_Reset_Trigger |= 0b00000100;
+        ESP_DataLog_Time_Orient = 0;
+    }
+
+    // If no fields need update
+    if ((ESP_Update_Reset_Trigger & 0b00000111) == 0) return;
     
-    UART4_Write((0b11000000 | Coms_ESP_Data_Transmission)); //New alloc byte
-//    UART4_Write(time - prevTime);
-//    UART4_Write(Coms_ESP_Data_Transmission);
+    UART4_Write((0b11000000 | ESP_Update_Reset_Trigger)); //New alloc byte
     
-    if (Coms_ESP_Data_Transmission & 0b00000001)
+    if (ESP_Update_Reset_Trigger & 0b00000001)
         Coms_ESP_Write_Angles();
-    
-    if (Coms_ESP_Data_Transmission & 0b00000010)
+        
+    if (ESP_Update_Reset_Trigger & 0b00000010)
         Coms_ESP_Write_Edges();
-    
-    if (Coms_ESP_Data_Transmission & 0b00000100)
+
+    if (ESP_Update_Reset_Trigger & 0b00000100)
         Coms_ESP_Write_Orient();    
     
-    if (Coms_ESP_Data_Transmission & 0b00001000) {
-        //To add neighbour transmission if time holds
-    }
     UART4_Write(ESP_End);
 }
 
@@ -474,18 +500,37 @@ bool Coms_ESP_SetDatalogFlags(uint8_t byte) {
 bool Coms_ESP_SetDatalogPeriod(uint8_t byte) {
     static uint8_t count = 0;
     static uint8_t period;
-    if (count >= 1) {
+    static uint8_t requested_data;
+    if (count >= 2) {
         if (byte == ESP_End) {
-            ESP_Update_Delay = period;
+            if (requested_data & 0b00000001) {
+                ESP_Update_Delay_Angle = period;
+            }
+            else if (requested_data & 0b00000010) {
+                ESP_Update_Delay_Edge = period;
+            }
+            else if (requested_data & 0b00000100) {
+                ESP_Update_Delay_Orient = period;
+            }
+            else {
+                ESP_Update_Delay_Angle = period;
+                ESP_Update_Delay_Edge = period;
+                ESP_Update_Delay_Orient = period;                
+            }
         } else {
             Coms_ESP_OverflowError();
         }
         count = 0;
+        requested_data = 0;
         return true;
-    } else {
-        period = byte;
-        count++;
     }
+    else if (count == 0) {
+        requested_data = byte;
+    }
+    else {
+        period = byte;
+    }
+    count++;
     return false;    
 }
 
