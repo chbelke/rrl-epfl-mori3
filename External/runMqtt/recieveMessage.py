@@ -65,7 +65,7 @@ def recieveExternalInput(msg, wifi_host):
    topic = msg.topic.rsplit('/')
 
    if len(topic) == 3:
-      espNum = topic[1]
+      espNum = names.convertFromLetter(topic[1])
       publishTopic = topic[2]
    else:
       publishTopic = topic[1]
