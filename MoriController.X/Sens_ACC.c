@@ -10,7 +10,6 @@ const float smol_PI = 3.141592;
 const float inv_Pi_times_180 = 57.2957795;
 const float epsilon = 1e-10;
 
-
 void Sens_ACC_Setup(void) {
     static uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
     static uint8_t MMAinitReg2[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_ACTV};
