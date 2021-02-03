@@ -698,7 +698,7 @@ void wiggleCoupling(byte* payload, unsigned int len)
 void setDatalogFlag(byte* payload, unsigned int len) 
 {
   bool successFlag = true;
-  byte flag = extractFollowingNumber(payload, len, &successFlag);
+  byte flag = (byte)extractFollowingNumber(payload, len, &successFlag);
   if(successFlag)
     serial_write_two(DLG_CMD_FLAG_SET, flag);
 }
@@ -706,14 +706,33 @@ void setDatalogFlag(byte* payload, unsigned int len)
 
 void setDatalogPeriod(byte* payload, unsigned int len) 
 {
+  int byte_count = 0;
+  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count += 1;
+  char request = payload[byte_count];
   bool successFlag = true;
-  byte freq = extractFollowingNumber(payload, len, &successFlag);
+  int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag);
+  byte freq = (byte)(tmp/20);
   if(successFlag)
-    serial_write_two(DLG_CMD_PERD_SET, freq);
+  {
+    char r_data = 0;
+    if(request == 'a')
+      r_data = 0b00000001;
+    if(request == 'e')
+      r_data = 0b00000010;
+    if(request == 'o')
+      r_data = 0b00000100;
+    
+    char buff[50];
+    sprintf(buff, "INFO: DLP %d %d", r_data, freq);
+    publish(buff);  
+
+    serial_write_three(DLG_CMD_PERD_SET, r_data, freq);
+  }
 }
 
 
-byte extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
+int extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
 {
   int byte_count = 0;
   char tmp_payload[5];
@@ -742,7 +761,7 @@ byte extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
     tmp_payload[j] = char(payload[pre_count+j]);
   }
   tmp_payload[j] = '\0';
-  return (byte)atoi(tmp_payload);
+  return atoi(tmp_payload);
 }
 
 void sendEmergencyStop() {
