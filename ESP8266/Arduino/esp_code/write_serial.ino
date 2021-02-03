@@ -81,6 +81,14 @@ void serial_write_two(byte alloc, byte message)
   write_to_buffer(END_BYTE);
 }
 
+void serial_write_three(byte alloc, byte message1, byte message2)
+{  
+  write_to_buffer(alloc);
+  write_to_buffer(message1);
+  write_to_buffer(message2);
+  write_to_buffer(END_BYTE);
+}
+
 
 void serial_write_flags(byte message)
 {  
