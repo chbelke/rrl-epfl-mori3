@@ -48,9 +48,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 0
+#define RGB_Default_Red 10
 #define RGB_Default_Green 5
-#define RGB_Default_Blue 5
+#define RGB_Default_Blue 0
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
@@ -96,7 +96,6 @@ extern volatile bool Flg_Tmr3;
 extern volatile bool Flg_Tmr5;
 
 /* ******************** STATE INFO ****************************************** */
-extern volatile uint8_t ESP_Update_Delay;
 extern volatile uint8_t ESP_DataLog_Time_Elapsed;
 extern volatile uint8_t ESP_ID[6];
 
