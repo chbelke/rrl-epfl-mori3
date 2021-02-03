@@ -5,7 +5,10 @@
 #include "dsp.h"
 
 // Accelerometer MMA8452Q
-int16_t ACC_Data[3] = {10, 5, 1};
+int16_t ACC_Data[3] = {0, 0, 0};
+const float smol_PI = 3.141592;
+const float inv_Pi_times_180 = 57.2957795;
+const float epsilon = 1e-10;
 
 void Sens_ACC_Setup(void) {
     static uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
