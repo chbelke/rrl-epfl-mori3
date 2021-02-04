@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'K' // module name by letter
+#define MODULE 'M' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */

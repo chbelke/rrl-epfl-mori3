@@ -319,8 +319,8 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
 uint16_t Acts_ROT_GetAngle(uint8_t edge) {
-    float rawAngle = 10 * Sens_ENC_Get(edge);
-    return (uint16_t) map((int16_t) rawAngle, -1800, 1800, 0, 3600);
+    int16_t rawAngle = (int16_t)(10*Sens_ENC_Get(edge));
+    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
