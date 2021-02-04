@@ -2,9 +2,10 @@ import os
 
 from termcolor import colored
 import tkinter as tk
-from tkinter import filedialog
 import json
 import time
+from tkinter import filedialog
+from collections import OrderedDict
 
 from Settings import names
 
@@ -163,7 +164,7 @@ class LoadFile():
 
 
     def value_resolver(self, pairs):
-        unique_modules = set([i[0] for i in pairs])
+        unique_modules = list(OrderedDict.fromkeys([i[0] for i in pairs]))
         new_dict = {}
         for module in unique_modules:
             values = [v for k, v in pairs if k == module]
