@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'G' // module name by letter
+#define MODULE 'J' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -48,8 +48,8 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 5
-#define RGB_Default_Green 5
+#define RGB_Default_Red 0
+#define RGB_Default_Green 10
 #define RGB_Default_Blue 0
 
 /* ******************** BATTERY ********************************************* */

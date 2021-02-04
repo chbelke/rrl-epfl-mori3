@@ -334,7 +334,7 @@ bool Coms_CMD_SetRotCurrentLimit(uint8_t byte, uint8_t *state) {
         if (byte == ESP_End) {
             uint8_t i=0;
             if (flags & 0b00000001){
-                Acts_ROT_SetCurrentLimit(0, storage[i]);
+                Acts_ROT_SetCurrentLimit(2, storage[i]);
                 i++;
             }
             if (flags & 0b00000010) {
@@ -342,7 +342,7 @@ bool Coms_CMD_SetRotCurrentLimit(uint8_t byte, uint8_t *state) {
                 i++;                    
             }
             if (flags & 0b00000100) {
-                Acts_ROT_SetCurrentLimit(2, storage[i]);
+                Acts_ROT_SetCurrentLimit(0, storage[i]);
                 i++;                    
             }
             count = 0;
