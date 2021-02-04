@@ -266,6 +266,10 @@ void commands(byte* payload, unsigned int len)
       sendEmergencyStop();  
       break;
 
+    case 57:  //torque
+      setRotTorque(payload, len);  
+      break;
+
     default:
       publish("ERR: Command not understood");
   }
@@ -768,4 +772,23 @@ void sendEmergencyStop() {
   serial_write_one(SET_EMG_STOP);
   publish("ERR: STOPPING");
   enableWifi();
+}
+
+void setRotTorque(byte* payload, unsigned int len) {
+  byte alloc2 = 0;
+  byte alloc_mask = SET_CMD_TORQUE_MASK;
+  byte num_following = 0;
+  byte values[6];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc2, &num_following, values, false)) {
+    return;
+  }
+
+  write_to_buffer(SET_CMD_TORQUE_ALLOC);
+  write_to_buffer(alloc2);
+  for(byte i=0; i< num_following; i++)
+  {
+    write_to_buffer(values[i]);
+  }
+  write_to_buffer(END_BYTE);
 }

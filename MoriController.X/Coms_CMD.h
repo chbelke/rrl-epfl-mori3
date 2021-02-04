@@ -22,6 +22,7 @@ bool Coms_CMD_Set_PARTYMODE(uint8_t, uint8_t*);
 bool Coms_CMD_Set_ID(uint8_t, uint8_t*);
 bool Coms_CMD_SetMotRotOn(uint8_t, uint8_t*);
 bool Coms_CMD_SetMotRotOff(uint8_t, uint8_t*);
+bool Coms_CMD_SetRotCurrentLimit(uint8_t, uint8_t*);
 bool Coms_CMD_SetMotLinOn(uint8_t, uint8_t*);
 bool Coms_CMD_SetMotLinOff(uint8_t, uint8_t*);
 bool Coms_CMD_SetFlags(uint8_t, uint8_t, uint8_t*);

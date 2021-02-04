@@ -52,7 +52,7 @@ char *cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "f1f", "f2t", "f2f", "f3t", "f3f", 
                 "f4t", "f4f", "f5t", "f5f", "wiggles",
                 "drcoup", "dlflag", "dlperiod", "cops", "name",
-                "spd", "stp"};
+                "spd", "stp", "torque"};
 int numCmds;
 
 char stringIP[16];

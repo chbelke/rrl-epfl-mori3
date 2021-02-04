@@ -28,6 +28,11 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
+        case 12:
+            if (Coms_CMD_SetRotCurrentLimit(byte, &state[edge]))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+
         case 13:
             if (Coms_CMD_Shape(edge, byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -309,6 +314,45 @@ bool Coms_CMD_SetMotRotOff(uint8_t byte, uint8_t *state) {
     }
     return true;
 }
+
+
+bool Coms_CMD_SetRotCurrentLimit(uint8_t byte, uint8_t *state) {
+    static uint8_t count = 0;
+    static uint8_t flags;
+    static uint8_t storage[3] = {0, 0, 0};
+    static uint8_t len;
+    if (count == 0) {
+        flags = byte;
+        len = 0;
+        len += (flags & 0b00000001);
+        len += ((flags & 0b00000010) >> 1);
+        len += ((flags & 0b00000100) >> 2);
+    }
+    else if (count < len+1){
+        storage[len] = byte;
+    } else {
+        if (byte == ESP_End) {
+            uint8_t i=0;
+            if (flags & 0b00000001){
+                Acts_ROT_SetCurrentLimit(0, storage[i]);
+                i++;    
+            } else if (flags & 0b00000010) {
+                Acts_ROT_SetCurrentLimit(1, storage[i]);
+                i++;                    
+            } else if (flags & 0b00000100) {
+                Acts_ROT_SetCurrentLimit(2, storage[i]);
+                i++;                    
+            }
+            count = 0;
+            return true;
+        } else {
+            Coms_CMD_OverflowError(state);
+        }
+    }
+    count++;
+    return false;    
+}
+
 
 // Depricated
 bool Coms_CMD_SetMotLinOn(uint8_t byte, uint8_t *state) {

@@ -7,18 +7,22 @@
 
 
 // ------------- Generic Command Definitions ------------- //
-#define SET_EMG_STOP 0b00011111
-#define SET_CMD_WEDGE 0b11011010
-#define REQ_CMD_SHAPE 0b11010100
-#define REQ_CMD_EDGS 0b11010100
-#define REQ_CMD_ANGS 0b11010101
-#define REQ_CMD_ORNT 0b11010110
-#define REQ_CMD_WEDGE 0b11011000
-#define REQ_CMD_NBR 0b11010111
-#define SET_PARTY_HYPE 0b11010010
-#define ITS_THE_POPO 0b11001111
+#define SET_EMG_STOP    0b00011111
+#define SET_CMD_WEDGE   0b11011010
+#define REQ_CMD_SHAPE   0b11010100
+#define REQ_CMD_EDGS    0b11010100
+#define REQ_CMD_ANGS    0b11010101
+#define REQ_CMD_ORNT    0b11010110
+#define REQ_CMD_WEDGE   0b11011000
+#define REQ_CMD_NBR     0b11010111
+#define SET_PARTY_HYPE  0b11010010
+#define ITS_THE_POPO    0b11001111
 #define RUN_COUP_WIGGLE 0b11010000
 #define RUN_PIC_RESTART 0b11011111
+
+
+#define SET_CMD_TORQUE_ALLOC 0b11001100
+#define SET_CMD_TORQUE_MASK 0b00000100
 
 
 // ------------- Shape Command Definitions ------------- //
