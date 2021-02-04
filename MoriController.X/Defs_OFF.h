@@ -1227,7 +1227,7 @@
     #define Off2_J2 0
     #define Off2_J3 0
     #define Off2_K1 0
-    #define Off2_K2 -24
+    #define Off2_K2 0
     #define Off2_K3 0
     #define Off2_L1 -4
     #define Off2_L2 -7
@@ -1351,7 +1351,7 @@
     #define Off2_I2 0
     #define Off2_I3 0
     #define Off2_J1 0
-    #define Off2_J2 2
+    #define Off2_J2 -29
     #define Off2_J3 0
     #define Off2_K1 0
     #define Off2_K2 0

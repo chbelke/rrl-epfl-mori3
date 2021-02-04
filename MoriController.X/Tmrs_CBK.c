@@ -60,8 +60,10 @@ void Tmrs_CBK_Timer5_Handle(void) {
     Acts_ROT_DrvHandle();
     
     for (edge = 0; edge < 3; edge++)
-        if (Flg_EdgeNbr_Offset[edge])
+        if (Flg_EdgeNbr_Offset[edge]){
             Sens_ENC_NbrOffset(edge);
+            Flg_EdgeNbr_Offset[edge] = false;
+        }
             
     
     Battery_Check(); // check if LBO has been trigger for interval
