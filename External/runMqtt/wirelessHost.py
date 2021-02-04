@@ -73,7 +73,7 @@ class WirelessHost(threading.Thread):
         self.wifiEdge = {}
         self.stableState = {}
 
-        self.version = 0.50
+        self.version = 1.0
 
         self.connMatrix = {}
 

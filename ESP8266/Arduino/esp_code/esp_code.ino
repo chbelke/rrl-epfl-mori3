@@ -39,12 +39,12 @@ char publishName[36];
 char recieveName[36];
 char clientLetter = 255;
 
-const float softwareVersion = 0.5;
+const float softwareVersion = 1.0;
 
 char *cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "g_shape", "udp", "noudp", "verb", "noverb",
                 "rel", "cont", "nocon", "rled", "gled",
-                "bled", "wedge", "rshape", "redge","rang",
+                "bled", "wedge", "rshape", "rext","rang",
                 "rorient", "rwedge", "rneigh", "nowifi", "wifi",
                 "reset", "preset", "png", "led", "coup", 
                 "extension", "angle", "party", "hub", "nohub",
