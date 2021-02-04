@@ -442,7 +442,7 @@ bool stateInfo(byte c)
         count = 0;
         alloc = true;
         return true;
-      } else if (count < 5) {
+      } else if (count < 4) {
         storage[count-1]=c;
         count++;
       } else {
@@ -464,7 +464,7 @@ bool stateInfo(byte c)
         count = 0;
         alloc = true;
         return true;
-      } else if (count < 8) {
+      } else if (count < 7) {
         storage[count-1]=c;
         count++;
       } else {
@@ -486,7 +486,7 @@ bool stateInfo(byte c)
         count = 0;
         alloc = true;
         return true;
-      } else if (count < 8) {
+      } else if (count < 7) {
         storage[count-1]=c;
         count++;
       } else {
