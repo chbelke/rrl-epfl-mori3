@@ -89,7 +89,9 @@ void Sens_ENC_Read(uint8_t edge) {
     
     // convert to float
     angleFLT = (float)(0b11111111111111 - angleINT);
-    angleFLT = (angleFLT / AS5048B_Res) * 360.0 - 180;
+    if (angleFLT < 0) angleFLT = 0;
+    else if (angleFLT > AS5048B_Res) angleFLT = AS5048B_Res;
+    angleFLT = (angleFLT / AS5048B_Res) * 360.0 - 180.0;
 
     // output
     ENC_DataOld1[edge] = ENC_Data[edge];

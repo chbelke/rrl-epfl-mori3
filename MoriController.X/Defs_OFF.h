@@ -199,7 +199,7 @@
     #define Off2_F2 0
     #define Off2_F3 0
     #define Off2_G1 0
-    #define Off2_G2 0
+    #define Off2_G2 75
     #define Off2_G3 0
     #define Off2_H1 0
     #define Off2_H2 0
@@ -819,7 +819,7 @@
     #define Off2_A2 0
     #define Off2_A3 0
     #define Off2_B1 0
-    #define Off2_B2 0
+    #define Off2_B2 -12
     #define Off2_B3 0
     #define Off2_C1 0
     #define Off2_C2 0
