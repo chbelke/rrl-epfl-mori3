@@ -9,6 +9,7 @@
 #include "dsp.h"
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
+int8_t Ang_LiveOffset[3]  = {0, 0, 0};
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
 uint8_t Speed_255[3] = {MotRot_SpeedInit, MotRot_SpeedInit, MotRot_SpeedInit};
 float Speed_DEG[3] = {(((float) MotRot_SpeedInit) / 255) * MotRot_SpeedMax * MotRot_PID_period,
@@ -320,7 +321,7 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
 uint16_t Acts_ROT_GetAngle(uint8_t edge) {
     int16_t rawAngle = (int16_t)(10*Sens_ENC_Get(edge));
-    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
+    return (uint16_t) map(rawAngle - Ang_LiveOffset[edge], -1800, 1800, 0, 3600);
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
@@ -332,4 +333,8 @@ bool Acts_ROT_InRange(uint8_t edge) {
 
 int8_t sgn(float value){
     return (value > 0) - (value < 0);
+}
+
+void Acts_ROT_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
+    Ang_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge)) - ((int16_t)nbrAngVal))/2);
 }

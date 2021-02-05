@@ -4,12 +4,14 @@
 #include "Defs_OFF.h"
 #include "Sens_ENC.h"
 #include "Coms_123.h"
+#include "Acts_ROT.h"
 #include "mcc_generated_files/i2c1.h"
 
 // Encoder AS5048B
 float ENC_Data[3] = {1, 2, 3};
 float ENC_DataOld1[3] = {1, 2, 3};
-int8_t ENC_Offset[3] = {0, 0, 0};
+int8_t ENC_GlobOffset[3] = {0, 0, 0};
+int8_t ENC_LiveOffset[3] = {0, 0, 0};
 
 const int8_t ModuleOffsetData[3][NUM_MODS*3] = {
     {Off1_A1, Off1_A2, Off1_A3, Off1_B1, Off1_B2, Off1_B3, Off1_C1, Off1_C2, Off1_C3, Off1_D1, Off1_D2, Off1_D3, Off1_E1, Off1_E2, Off1_E3, Off1_F1, Off1_F2, Off1_F3, Off1_G1, Off1_G2, Off1_G3, Off1_H1, Off1_H2, Off1_H3, Off1_I1, Off1_I2, Off1_I3, Off1_J1, Off1_J2, Off1_J3, Off1_K1, Off1_K2, Off1_K3, Off1_L1, Off1_L2, Off1_L3, Off1_M1, Off1_M2, Off1_M3, Off1_N1, Off1_N2, Off1_N3},
@@ -100,7 +102,8 @@ void Sens_ENC_Read(uint8_t edge) {
 
 /* ******************** GET CURRENT ANGLE *********************************** */
 float Sens_ENC_Get(uint8_t edge) {
-    return ENC_Data[edge] - ((float)ENC_Offset[edge])*0.1;
+//    return ENC_Data[edge] - ((float)ENC_LiveOffset[edge])*0.1 - ((float)ENC_GlobOffset[edge])*0.1;
+    return ENC_Data[edge] - ((float)ENC_GlobOffset[edge])*0.1;
 }
 
 /* ******************** GET ANGLE DELTA ************************************* */
@@ -109,15 +112,19 @@ float Sens_ENC_GetDelta(uint8_t edge) {
 }
 
 /* ******************** UPDATE ANGLE OFFSET BY NEIGHBOUR ******************** */
-void Sens_ENC_NbrOffset(uint8_t edge){
+void Sens_ENC_SetGlobalOffset(uint8_t edge){
     uint8_t *neighbours;
     uint8_t i;
     neighbours = Coms_123_GetNeighbourIDs();
     for (i = 0; i < NUM_MODS; i++){
         if (!memcmp(neighbours+edge*7, ModuleIDs[i], 6)){
-            ENC_Offset[edge] = ModuleOffsetData[edge][i*3+(*(neighbours+6+7*edge)-48)];
+            ENC_GlobOffset[edge] = ModuleOffsetData[edge][i*3+(*(neighbours+6+7*edge)-48)];
             // 48 is ascii protection against 0 in Coms_123
             break;
         }
     }
 }
+//
+//void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
+//    ENC_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge)) - ((int16_t)nbrAngVal))/2);
+//}

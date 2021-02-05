@@ -13,6 +13,7 @@
 #include "Acts_CPL.h"
 #include "Acts_LIN.h"
 #include "Acts_ROT.h"
+#include "Sens_ENC.h"
 
 uint8_t EdgInAloc[3] = {0, 0, 0}; // incoming allocation byte (explained below)
 volatile uint8_t EdgIdlCnt[3] = {0, 0, 0}; // no idle byte received counter
@@ -31,6 +32,7 @@ uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrValExt[3] = {0, 0, 0}; // current extension received by neighbour
 uint8_t NbrValSpd[3] = {0, 0, 0}; // speed value received by neighbour
 uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
+uint16_t NbrValAng[3] = {0, 0, 0}; // angle reading by neighbour used for averaging
 volatile bool NbrCmdMatch[3] = {false, false, false};
 volatile bool NbrEdgesRdy[3] = {false, false, false};
 
@@ -72,6 +74,7 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
 void Coms_123_Eval(uint8_t edge) { // called in main
     static uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
+    static uint8_t EdgInIdleBytes[3] = {0, 0, 0};
     uint8_t EdgIn = 50;
 
     if (!Coms_123_Ready(edge)) return; // check if byte received
@@ -166,13 +169,23 @@ void Coms_123_Eval(uint8_t edge) { // called in main
 
         case 10: // IDLE MODE **************************************************
             Coms_123_ResetIntervals(edge);
-            if (EdgIn == EDG_End) {
-                if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge]) {
-                    Flg_EdgeSyn[edge] = true;
-                }
-                EdgInCase[edge] = 0;
+            if (EdgInIdleBytes[edge] == 0){
+                NbrValAng[edge] = ((((uint16_t)EdgIn) << 8) & 0xFF00);
+                EdgInIdleBytes[edge]++;
+            } else if (EdgInIdleBytes[edge] == 1){
+                NbrValAng[edge] = (NbrValAng[edge] | (((uint16_t)EdgIn) & 0x00FF));
+                EdgInIdleBytes[edge]++;
             } else {
-                EdgInCase[edge] = 50;
+                if (EdgIn == EDG_End) {
+                    if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge]) {
+                        Flg_EdgeSyn[edge] = true;
+                    }
+                    Acts_ROT_SetLiveOffset(edge, NbrValAng[edge]);
+                    EdgInCase[edge] = 0;
+                } else {
+                    EdgInCase[edge] = 50;
+                }
+                EdgInIdleBytes[edge] = 0;
             }
             break;
 
@@ -306,6 +319,12 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_123_Write(edge, byte);
             if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
                 Coms_123_WriteID(edge);
+            if (byte == COMS_123_Idle){
+                // send angle reading for averagivng
+                uint16_t selfAngle = (uint16_t) map((int16_t)(10*Sens_ENC_Get(edge)), -1800, 1800, 0, 3600);
+                Coms_123_Write(edge, (uint8_t)((selfAngle >> 8) & 0x00FF));
+                Coms_123_Write(edge, (uint8_t)(selfAngle & 0x00FF));
+            }
             Coms_123_Write(edge, EDG_End);
             Flg_Uart_Lock[edge] = false;
         }
