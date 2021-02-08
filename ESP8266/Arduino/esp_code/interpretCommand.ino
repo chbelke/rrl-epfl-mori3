@@ -716,7 +716,7 @@ void setDatalogPeriod(byte* payload, unsigned int len)
   char request = payload[byte_count];
   bool successFlag = true;
   int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag);
-  byte freq = (byte)(tmp/20);
+  byte freq = (byte)(tmp/10);
   if(successFlag)
   {
     char r_data = 0;
