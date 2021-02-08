@@ -16,7 +16,7 @@ void readSerial()
     static int serial_case = 0;
     static bool alloc = true;    
     
-    byte c = Serial.read();
+    uint8_t c = Serial.read();
     bytes_read++;
 
     if (alloc)
@@ -60,12 +60,12 @@ void readSerial()
 }
 
 
-bool readVerbose(byte c)
+bool readVerbose(uint8_t c)
 {
   static char serial_packet[100];
-  static byte serial_buf_loc = 0;
-  static byte serial_len;
-  static byte readCase = 0;
+  static uint8_t serial_buf_loc = 0;
+  static uint8_t serial_len;
+  static uint8_t readCase = 0;
   static bool error = false;
 
   // char nuff[50];
@@ -134,15 +134,15 @@ bool readVerbose(byte c)
 }
 
 
-bool setLEDs(byte d)
+bool setLEDs(uint8_t d)
 {
-  static byte readCase = 0;
-  static byte LED = 0;
-  static byte byteCount = 0;
-  static byte serial_len;
-  static byte packet;
+  static uint8_t readCase = 0;
+  static uint8_t LED = 0;
+  static uint8_t byteCount = 0;
+  static uint8_t serial_len;
+  static uint8_t packet;
 
-  byte c = d;
+  uint8_t c = d;
 
 
   if(LED == 0)
@@ -288,12 +288,12 @@ bool setLEDs(byte d)
 
 
 
-bool readInterpret(byte c)
+bool readInterpret(uint8_t c)
 {
-  static byte serial_packet[100];
-  static byte serial_buf_loc = 0;
-  static byte serial_len;
-  static byte readCase = 0;
+  static uint8_t serial_packet[100];
+  static uint8_t serial_buf_loc = 0;
+  static uint8_t serial_len;
+  static uint8_t readCase = 0;
   
   switch(readCase){
     case 0: 
@@ -346,12 +346,12 @@ bool readInterpret(byte c)
 
 
 
-bool stateInfo(byte c)
+bool stateInfo(uint8_t c)
 {
-  static byte readCase = 0;
-  static byte state;
-  static byte count;
-  static byte storage[10];
+  static uint8_t readCase = 0;
+  static uint8_t state;
+  static uint8_t count;
+  static uint8_t storage[10];
   static bool alloc = true;
   static char serial_packet[100];
 
@@ -597,12 +597,12 @@ bool stateInfo(byte c)
 }
 
 
-bool dataLog(byte c) 
+bool dataLog(uint8_t c) 
 {
   static bool alloc = true;
-  static byte count;
-  static byte len;
-  static byte storage[PACKET_SIZE];
+  static uint8_t count;
+  static uint8_t len;
+  static uint8_t storage[PACKET_SIZE];
   long time = 0;
 
   if (alloc) {
@@ -649,22 +649,22 @@ bool dataLog(byte c)
 }
 
 
-byte dataLogCalcLen(byte alloc_byte)
+uint8_t dataLogCalcLen(uint8_t alloc_byte)
 {
-  byte len = 1; // alloc
+  uint8_t len = 1; // alloc
   if(alloc_byte & 0b00000001) len += 6; //angles = 3*16
   if(alloc_byte & 0b00000010) len += 3; //edges = 3*8
   if(alloc_byte & 0b00000100) len += 6; //Orient = 3*16
   return len;
 }
 
-bool relayToComputer(byte c)
+bool relayToComputer(uint8_t c)
 {
-  static byte readCase = 0;
-  static byte state;
-  static byte count;
-  static byte len;
-  static byte storage[PACKET_SIZE];
+  static uint8_t readCase = 0;
+  static uint8_t state;
+  static uint8_t count;
+  static uint8_t len;
+  static uint8_t storage[PACKET_SIZE];
   static bool alloc = true;
   static char wireless_packet[100];
 
@@ -737,14 +737,14 @@ void updateStableState(bool current_stable_state)
 }
 
 
-bool serialErrorHandle(byte c)
+bool serialErrorHandle(uint8_t c)
 {
   if(c == END_BYTE)
     return true;
   return false;
 }
 
-bool relayErrorHandle(byte c)
+bool relayErrorHandle(uint8_t c)
 {
   if(c == 42)
     return true;

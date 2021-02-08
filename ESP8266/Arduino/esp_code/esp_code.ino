@@ -78,8 +78,8 @@ unsigned long lastMacPub = millis();
 unsigned long led_sel_time = millis();
 unsigned long lastStabPub = millis();
 
-byte wifi_edge = 255; //Stored as 0-2, but publishes as 1-3
-byte stable_status = 0;
+uint8_t wifi_edge = 255; //Stored as 0-2, but publishes as 1-3
+uint8_t stable_status = 0;
 
 Led wifi_ind_led(4);
 Led led_red(14);

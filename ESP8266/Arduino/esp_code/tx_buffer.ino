@@ -2,7 +2,7 @@ const int ring_size = 1023;
 
 struct ring_buffer
 {
-  byte buffer[ring_size];
+  uint8_t buffer[ring_size];
   unsigned int head;
   unsigned int tail;
 };
@@ -16,7 +16,7 @@ void initializeBuffer()
 }
 
 
-void write_to_buffer(byte packet)
+void write_to_buffer(uint8_t packet)
 {
   if ((tx_buffer.head-tx_buffer.tail % ring_size) == -1) {  //tail caught head (overflow)
     tx_buffer_overflow();

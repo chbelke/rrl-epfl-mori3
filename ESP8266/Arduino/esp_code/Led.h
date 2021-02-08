@@ -63,7 +63,7 @@ bool Led::getBlinkFlag()
   return flg_blink;
 }
 
-void Led::setBlinkFreq(byte input)
+void Led::setBlinkFreq(uint8_t input)
 {
   freq_blink = (unsigned int)(input*4);
 }
