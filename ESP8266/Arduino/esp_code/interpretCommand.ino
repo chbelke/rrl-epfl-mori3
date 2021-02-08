@@ -282,7 +282,7 @@ void setWifiEdge(byte* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len){
     publish("ERR: payload has no space");
     return;
@@ -348,7 +348,7 @@ void requestNeighbour(byte* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len){
     publish("ERR: payload has no space");
     return;
@@ -408,7 +408,7 @@ void setCouplingShapeCommand(byte *payload, unsigned int len, byte alloc_mask, b
 {
   char tmp_payload[5];
   
-  byte byte_count = detectSpaceChar(payload, byte_count, len);
+  byte byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len) {
     byte_count = len;
   }
@@ -464,18 +464,48 @@ void setShapeCommand(byte *payload, unsigned int len, byte alloc_mask,
 {
   byte num_following = 0;
   byte values[6];
+  byte cmd_id = 0;
   
+  // Ext and ang commands mask is 0b00000000
+  if((alloc & 0b11000000) == 0){
+    bool successFlag = true;
+    cmd_id = extractCommandID(payload, len, &successFlag);
+    if ((successFlag == false)) 
+      return;
+  }
+
   if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, values, flg_two_bytes)) {
     return;
   }
 
   write_to_buffer(SHAPE_COMMAND_ALLOC); //205
   write_to_buffer(alloc);
-  for(byte i=0; i< num_following; i++)
-  {
+  for(byte i=0; i< num_following; i++) {
     write_to_buffer(values[i]);
   }
+  if((alloc & 0b11000000) == 0) {
+    write_to_buffer(cmd_id);
+  }
   write_to_buffer(END_BYTE);
+}
+
+
+byte extractCommandID(byte* payload, unsigned int len, bool *successFlag) 
+{  
+  byte byte_count = 0;
+  byte_count = detectChar(payload, byte_count, len, "/");
+  if(byte_count > len){
+    *successFlag = false;
+    publish("ERR: payload has no slash");
+    return 0;
+  }
+  byte cmd_id = (byte)extractFollowingNumber(payload+byte_count, len-byte_count, successFlag, "/");
+  if (cmd_id == 0) {
+    *successFlag = false;
+    publish("ERR: no number following");
+  }
+
+  return cmd_id;
 }
 
 
@@ -487,13 +517,13 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask,
   byte pre_count = 0;
   char tmp_payload[5];
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   byte_count++;
   for(byte i=0; i<3; i++){ //For the 3 Edges
     bool jumpFlag = false;
     pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
     
-    byte_count = detectSpaceChar(payload, byte_count, len);
+    byte_count = detectChar(payload, byte_count, len, " ");
 
     if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
       byte_count = len;
@@ -554,10 +584,9 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask,
 }
 
 
-
-byte detectSpaceChar(byte* payload, int byte_count, unsigned int max_len)
+byte detectChar(byte* payload, int byte_count, unsigned int max_len, const char *ascii_char)
 {
-  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
+  while(payload[byte_count] != *ascii_char)   //0b00101111 = /
   {
     byte_count++;
     if(byte_count > max_len) {
@@ -681,7 +710,7 @@ void wiggleCoupling(byte* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len){
     publish("ERR: payload has no space");
     return;
@@ -702,7 +731,7 @@ void wiggleCoupling(byte* payload, unsigned int len)
 void setDatalogFlag(byte* payload, unsigned int len) 
 {
   bool successFlag = true;
-  byte flag = (byte)extractFollowingNumber(payload, len, &successFlag);
+  byte flag = (byte)extractFollowingNumber(payload, len, &successFlag, " ");
   if(successFlag)
     serial_write_two(DLG_CMD_FLAG_SET, flag);
 }
@@ -711,11 +740,11 @@ void setDatalogFlag(byte* payload, unsigned int len)
 void setDatalogPeriod(byte* payload, unsigned int len) 
 {
   int byte_count = 0;
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   byte_count += 1;
   char request = payload[byte_count];
   bool successFlag = true;
-  int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag);
+  int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag, " ");
   byte freq = (byte)(tmp/10);
   if(successFlag)
   {
@@ -736,12 +765,12 @@ void setDatalogPeriod(byte* payload, unsigned int len)
 }
 
 
-int extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
+int extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag, const char *character)
 {
   int byte_count = 0;
   char tmp_payload[5];
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, character);
   if(byte_count > len){
     *successFlag = false;
     publish("ERR: payload has no space");
@@ -749,7 +778,7 @@ int extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
   }
   byte_count++;
   int pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
 
   if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
     byte_count = len;
