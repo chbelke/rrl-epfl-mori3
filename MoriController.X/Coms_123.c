@@ -180,7 +180,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                     if (!Flg_EdgeSyn[edge] && Flg_IDRcvd[edge]) {
                         Flg_EdgeSyn[edge] = true;
                     }
-                    Acts_ROT_SetLiveOffset(edge, NbrValAng[edge]);
+                    Sens_ENC_SetLiveOffset(edge, NbrValAng[edge]);
                     EdgInCase[edge] = 0;
                 } else {
                     EdgInCase[edge] = 50;
@@ -321,7 +321,8 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
                 Coms_123_WriteID(edge);
             if (byte == COMS_123_Idle){
                 // send angle reading for averagivng
-                uint16_t selfAngle = (uint16_t) map((int16_t)(10*Sens_ENC_Get(edge)), -1800, 1800, 0, 3600);
+//                uint16_t selfAngle = (uint16_t) map((int16_t)(10*Sens_ENC_Get(edge)), -1800, 1800, 0, 3600);
+                uint16_t selfAngle = Acts_ROT_GetAngle(edge, false);
                 Coms_123_Write(edge, (uint8_t)((selfAngle >> 8) & 0x00FF));
                 Coms_123_Write(edge, (uint8_t)(selfAngle & 0x00FF));
             }

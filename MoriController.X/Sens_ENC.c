@@ -101,9 +101,12 @@ void Sens_ENC_Read(uint8_t edge) {
 }
 
 /* ******************** GET CURRENT ANGLE *********************************** */
-float Sens_ENC_Get(uint8_t edge) {
+float Sens_ENC_Get(uint8_t edge, bool WithLiveOffset) {
 //    return ENC_Data[edge] - ((float)ENC_LiveOffset[edge])*0.1 - ((float)ENC_GlobOffset[edge])*0.1;
-    return ENC_Data[edge] - ((float)ENC_GlobOffset[edge])*0.1;
+    if (WithLiveOffset)
+        return ENC_Data[edge] - ((float)ENC_LiveOffset[edge])*0.1 - ((float)ENC_GlobOffset[edge])*0.1;
+    else
+        return ENC_Data[edge] - ((float)ENC_GlobOffset[edge])*0.1;
 }
 
 /* ******************** GET ANGLE DELTA ************************************* */
@@ -124,7 +127,11 @@ void Sens_ENC_SetGlobalOffset(uint8_t edge){
         }
     }
 }
+
+void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
+    ENC_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge, false)) - ((int16_t)nbrAngVal))/2);
+}
 //
-//void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
-//    ENC_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge)) - ((int16_t)nbrAngVal))/2);
+//void Acts_ROT_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
+//    Ang_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge)) - ((int16_t)nbrAngVal))/2);
 //}

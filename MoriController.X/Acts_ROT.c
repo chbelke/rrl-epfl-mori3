@@ -319,14 +319,14 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 }
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
-uint16_t Acts_ROT_GetAngle(uint8_t edge) {
-    int16_t rawAngle = (int16_t)(10*Sens_ENC_Get(edge));
-    return (uint16_t) map(rawAngle - Ang_LiveOffset[edge], -1800, 1800, 0, 3600);
+uint16_t Acts_ROT_GetAngle(uint8_t edge, bool WithLiveOffset) {
+    int16_t rawAngle = (int16_t)(10*Sens_ENC_Get(edge, WithLiveOffset));
+    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
 bool Acts_ROT_InRange(uint8_t edge) {
-    uint16_t diff = abs(Acts_ROT_GetAngle(edge) - Acts_ROT_GetTarget(edge));
+    uint16_t diff = abs(Acts_ROT_GetAngle(edge, true) - Acts_ROT_GetTarget(edge));
     if (diff <= MotRot_OkRange) return true;
     else return false;
 }
@@ -335,6 +335,6 @@ int8_t sgn(float value){
     return (value > 0) - (value < 0);
 }
 
-void Acts_ROT_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
-    Ang_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge)) - ((int16_t)nbrAngVal))/2);
-}
+//void Acts_ROT_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
+//    Ang_LiveOffset[edge] = (int8_t)((((int16_t)Acts_ROT_GetAngle(edge)) - ((int16_t)nbrAngVal))/2);
+//}

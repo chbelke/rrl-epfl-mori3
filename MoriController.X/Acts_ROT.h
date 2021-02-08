@@ -13,8 +13,8 @@ void Acts_ROT_SetSpeedLimit(uint8_t, uint8_t);
 uint8_t Acts_ROT_GetSpeedLimit(uint8_t);
 uint16_t Acts_ROT_GetTarget(uint8_t );
 void Acts_ROT_SetTarget(uint8_t , uint16_t);
-uint16_t Acts_ROT_GetAngle(uint8_t);
+uint16_t Acts_ROT_GetAngle(uint8_t, bool);
 bool Acts_ROT_InRange(uint8_t);
 int8_t sgn(float);
-void Acts_ROT_SetLiveOffset(uint8_t, uint16_t);
+//void Acts_ROT_SetLiveOffset(uint8_t, uint16_t);
 #endif	/* ACTS_ROT_H */
