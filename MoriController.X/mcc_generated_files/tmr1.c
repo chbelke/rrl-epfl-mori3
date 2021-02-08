@@ -198,7 +198,7 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         if (Flg_EdgeWig[edge]) // wiggle is always ok, check first
             Acts_ROT_Wiggle(edge);
         else if (MODE_ENC_CON && Flg_EdgeReq_Ang[edge] && Flg_EdgeAct[edge])
-            Acts_ROT_PID(edge, Sens_ENC_Get(edge), Acts_ROT_GetTarget(edge));
+            Acts_ROT_PID(edge, Sens_ENC_Get(edge, true), Acts_ROT_GetTarget(edge));
         else
             if (!MODE_LED_PARTY && !Flg_Drive[edge])
                 Acts_ROT_Out(edge, 0);// make sure motors are off

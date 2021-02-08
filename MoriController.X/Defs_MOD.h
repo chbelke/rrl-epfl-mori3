@@ -66,8 +66,8 @@
 #define ID_H2 48
 #define ID_H3 48
 #define ID_H4 66
-#define ID_H5 68
-#define ID_H6 51
+#define ID_H5 67
+#define ID_H6 66
 
 #define ID_I1 68 // ascii code for D00BD1
 #define ID_I2 48
