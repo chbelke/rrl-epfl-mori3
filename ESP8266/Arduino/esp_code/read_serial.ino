@@ -1,6 +1,6 @@
 void readSerial()
 {
-
+  uint8_t bytes_read = 0;
   if(Serial.hasRxError())
   {
     publish("ERR: RX ERROR");
@@ -11,12 +11,13 @@ void readSerial()
     publish("ERR: OVERRUN");
     return;    
   }
-  while(Serial.available())
+  while(Serial.available() && (bytes_read < 32))
   { 
     static int serial_case = 0;
     static bool alloc = true;    
     
     byte c = Serial.read();
+    bytes_read++;
 
     if (alloc)
     {
@@ -65,16 +66,25 @@ bool readVerbose(byte c)
   static byte serial_buf_loc = 0;
   static byte serial_len;
   static byte readCase = 0;
+  static bool error = false;
 
   // char nuff[50];
   // sprintf(nuff, "INFO: char = %d", int(c));
   // publish(nuff);
   if(serial_buf_loc  > 16)
   {
-    purgeSerial();
-    serial_buf_loc = 0;
-    readCase = 0;
-    return true;
+    if (!error) {
+      purgeSerial();
+      error = true;
+    }
+    else{
+      if(serialErrorHandle(c))
+        serial_buf_loc = 0;
+        readCase = 0;
+        error = false;      
+      return true;
+    }
+    return false;
   }
   
   switch(readCase){
@@ -296,7 +306,7 @@ bool readInterpret(byte c)
       break;
 
     case 2:
-      serial_packet[serial_buf_loc] = byte(c);   
+      serial_packet[serial_buf_loc] = c;   
 
       if ((c == char(END_BYTE)) && (serial_buf_loc == serial_len))
       {
@@ -315,14 +325,18 @@ bool readInterpret(byte c)
           sprintf(buff, "INFO: buf = %d, ser = %d", int(serial_buf_loc), int(serial_len));
           publish(buff);
 
+          char tmp[100];
+          memcpy(tmp, serial_packet, serial_len);
+
           char duff[50];
-          sprintf(duff, "INFO: packet = %s", serial_packet);  
+          sprintf(duff, "INFO: packet = %s", tmp);  
           publish(duff);
 
           serial_buf_loc = 0;
           readCase = 0;
           return true;      
         }
+        break;
       }
       serial_buf_loc++;
       break;
@@ -604,13 +618,10 @@ bool dataLog(byte c)
     return false;
   }
 
-  if (count == 1) {
-    storage[5] = c;
+   if (count < len) {
+    storage[count+4]=c;
     count++;
-    return false;
-  }
-
-  if ((c == END_BYTE) && (count == len)) {
+  } else if ((c == END_BYTE) && (count == len)) {
     char buff[50];
     sprintf(buff, "DLG: ");
     for(int i=0; i<len+4; i++)  
@@ -623,9 +634,6 @@ bool dataLog(byte c)
     alloc = true;
     len = 0;
     return true;
-  } else if (count < len) {
-    storage[count+4]=c;
-    count++;
   } else {
     if(serialErrorHandle(c))
     {
@@ -643,7 +651,7 @@ bool dataLog(byte c)
 
 byte dataLogCalcLen(byte alloc_byte)
 {
-  byte len = 2; // alloc +  end byte
+  byte len = 1; // alloc
   if(alloc_byte & 0b00000001) len += 6; //angles = 3*16
   if(alloc_byte & 0b00000010) len += 3; //edges = 3*8
   if(alloc_byte & 0b00000100) len += 6; //Orient = 3*16
