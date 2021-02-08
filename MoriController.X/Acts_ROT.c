@@ -315,6 +315,7 @@ uint16_t Acts_ROT_GetTarget(uint8_t edge) {
 /* ******************** SET DESIRED ANGLE *********************************** */
 void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
     Ang_Desired[edge] = desired;
+    Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ang[edge] = true;
 }
 

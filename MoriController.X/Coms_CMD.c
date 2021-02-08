@@ -10,6 +10,7 @@
 
 uint8_t CmdExtTemp[4][3]; // incoming extension value (temporary)
 uint16_t CmdAngTemp[4][3]; // incoming angle value (temporary)
+uint8_t CmdIDnTemp = 0;
 
 /* ******************** COMMAND HANDLER************************************** */
 bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
@@ -564,72 +565,79 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte, uint8_t *state) {
             if (alloc[edge] & 0b00100000) {
                 CmdExtTemp[edge][0] = byte;
                 EspInByts[edge] = EspInByts[edge] + 1;
+                EspInCase[edge] = 3;
+                break;
+            }
+        case 3:
+            if (alloc[edge] & 0b00010000) {
+                CmdExtTemp[edge][1] = byte;
+                EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 4;
                 break;
             }
         case 4:
-            if (alloc[edge] & 0b00010000) {
-                CmdExtTemp[edge][1] = byte;
+            if (alloc[edge] & 0b00001000) {
+                CmdExtTemp[edge][2] = byte;
+                EspInByts[edge] = EspInByts[edge] + 1;
+                EspInCase[edge] = 5;
+                break;
+            }
+
+        case 5: // ANGLE INPUTS ************************************************
+            /* cases 8 to 13, two bytes per motor input */
+            if (alloc[edge] & 0b00000100) {
+                CmdAngTemp[edge][0] = 0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 6;
                 break;
             }
         case 6:
-            if (alloc[edge] & 0b00001000) {
-                CmdExtTemp[edge][2] = byte;
+            if (alloc[edge] & 0b00000100) {
+                CmdAngTemp[edge][0] = CmdAngTemp[edge][0] | (uint16_t) byte;
+                EspInByts[edge] = EspInByts[edge] + 1;
+                EspInCase[edge] = 7;
+                break;
+            }
+        case 7:
+            if (alloc[edge] & 0b00000010) {
+                CmdAngTemp[edge][1] = 0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 8;
                 break;
             }
-
-        case 8: // ANGLE INPUTS ************************************************
-            /* cases 8 to 13, two bytes per motor input */
-            if (alloc[edge] & 0b00000100) {
-                CmdAngTemp[edge][0] = 0xFF00 & ((uint16_t) (byte) << 8);
+        case 8:
+            if (alloc[edge] & 0b00000010) {
+                CmdAngTemp[edge][1] = CmdAngTemp[edge][1] | (uint16_t) byte;
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 9;
                 break;
             }
         case 9:
-            if (alloc[edge] & 0b00000100) {
-                CmdAngTemp[edge][0] = CmdAngTemp[edge][0] | (uint16_t) byte;
+            if (alloc[edge] & 0b00000001) {
+                CmdAngTemp[edge][2] = 0xFF00 & ((uint16_t) (byte) << 8);
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 10;
                 break;
             }
         case 10:
-            if (alloc[edge] & 0b00000010) {
-                CmdAngTemp[edge][1] = 0xFF00 & ((uint16_t) (byte) << 8);
+            if (alloc[edge] & 0b00000001) {
+                CmdAngTemp[edge][2] = CmdAngTemp[edge][2] | (uint16_t) byte;
                 EspInByts[edge] = EspInByts[edge] + 1;
                 EspInCase[edge] = 11;
                 break;
             }
         case 11:
-            if (alloc[edge] & 0b00000010) {
-                CmdAngTemp[edge][1] = CmdAngTemp[edge][1] | (uint16_t) byte;
-                EspInByts[edge] = EspInByts[edge] + 1;
-                EspInCase[edge] = 12;
-                break;
-            }
-        case 12:
-            if (alloc[edge] & 0b00000001) {
-                CmdAngTemp[edge][2] = 0xFF00 & ((uint16_t) (byte) << 8);
-                EspInByts[edge] = EspInByts[edge] + 1;
-                EspInCase[edge] = 13;
-                break;
-            }
-        case 13:
-            if (alloc[edge] & 0b00000001) {
-                CmdAngTemp[edge][2] = CmdAngTemp[edge][2] | (uint16_t) byte;
-                EspInByts[edge] = EspInByts[edge] + 1;
-                EspInCase[edge] = 14;
-                break;
-            }
+            CmdIDnTemp = byte;
+            EspInCase[edge] = 12;
+            EspInByts[edge] = EspInByts[edge] + 1;
+            break;
 
-        case 14: // verify motor inputs
+        case 12: // verify motor inputs
             if (byte == ESP_End) {
-                if (EspInByts[edge] == (2 + EspInBits[edge] + EspInBits2[edge])) {
+                if ((EspInByts[edge] == (3 + EspInBits[edge] + EspInBits2[edge]))
+                        && (CmdIDnTemp != 0)){
                     Coms_CMD_SetEdge(edge, alloc[edge]); // implement command
+                    CMD_ID = CmdIDnTemp;
                 } else {
                     EspInLost[edge] = EspInLost[edge] + 1; // data lost
                 }
@@ -834,7 +842,7 @@ void Coms_CMD_SetEdge(uint8_t inEdge, uint8_t byte) {
 
     // Set angles
     for (k = 1; k <= 3; k++) {
-        if ((byte >> (2 - (k - 1))) & 0x01) {
+        if (((byte >> (2 - (k - 1))) & 0x01) && (Flg_EdgeCon[k - 1])) {
             Acts_ROT_SetTarget(k - 1, CmdAngTemp[inEdge][k - 1]);
         }
     }
