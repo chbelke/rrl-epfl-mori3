@@ -6,6 +6,8 @@
 ##      Open CV and Numpy integration        ##
 ###############################################
 
+#only use python 3.7
+
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -14,12 +16,21 @@ import cv2
 pipeline = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+# config.enable_stream(rs.stream.color, int(1920/2), int(1080/2), rs.format.bgr8, 30)
 config.enable_stream(rs.stream.color, 1920, 1080, rs.format.bgr8, 30)
 cv2.namedWindow('depth', cv2.WINDOW_AUTOSIZE)
 cv2.namedWindow('camera', cv2.WINDOW_AUTOSIZE)
 
+
+
 # Start streaming
 pipeline.start(config)
+
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# out = cv2.VideoWriter('output.avi',fourcc, 30.0, (int(1920/2), int(1080/2)))
+out = cv2.VideoWriter('output.avi',fourcc, 30.0, (1920, 1080))
+
+img_array = []
 
 try:
     while True:
@@ -43,11 +54,21 @@ try:
 
         # Show images
         
+        out.write(color_image)
         cv2.imshow('depth', depth_colormap)
         cv2.imshow('camera', color_image)
-        cv2.waitKey(1)
+        # img_array.append(color_image)
+        key = cv2.waitKey(1)
+        if key == 27: # exit on ESC
+            break
+
 
 finally:
 
     # Stop streaming
     pipeline.stop()
+    out.release()
+    cv2.destroyAllWindows()
+    print("EHRES")
+
+
