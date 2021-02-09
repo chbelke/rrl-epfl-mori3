@@ -1,4 +1,4 @@
-void relay(byte* payload, unsigned int len)
+void relay(uint8_t* payload, unsigned int len)
 {
   verbose_println();
   int byte_count = 0;
@@ -19,7 +19,7 @@ void relay(byte* payload, unsigned int len)
   {
     for (int j = byte_count; j < len; j++)
     {
-      byte val = payload[j];
+      uint8_t val = payload[j];
       for (int k = 0; k < 8; k++)
       {
           bool b = val & 0x80;
@@ -41,7 +41,7 @@ void relay(byte* payload, unsigned int len)
 }
 
 
-void serial_write_one(byte alloc)
+void serial_write_one(uint8_t alloc)
 {  
   write_to_buffer(alloc);
   write_to_buffer(END_BYTE);
@@ -49,7 +49,7 @@ void serial_write_one(byte alloc)
 
   if(verbose_flag)
   {
-    byte val = alloc;
+    uint8_t val = alloc;
     for (int k = 0; k < 8; k++)
     {
         bool b = val & 0x80;
@@ -61,7 +61,7 @@ void serial_write_one(byte alloc)
 
   if(verbose_flag)
   {
-    byte val = END_BYTE;
+    uint8_t val = END_BYTE;
     for (int k = 0; k < 8; k++)
     {
         bool b = val & 0x80;
@@ -74,14 +74,14 @@ void serial_write_one(byte alloc)
 }
 
 
-void serial_write_two(byte alloc, byte message)
+void serial_write_two(uint8_t alloc, uint8_t message)
 {  
   write_to_buffer(alloc);
   write_to_buffer(message);
   write_to_buffer(END_BYTE);
 }
 
-void serial_write_three(byte alloc, byte message1, byte message2)
+void serial_write_three(uint8_t alloc, uint8_t message1, uint8_t message2)
 {  
   write_to_buffer(alloc);
   write_to_buffer(message1);
@@ -90,7 +90,7 @@ void serial_write_three(byte alloc, byte message1, byte message2)
 }
 
 
-void serial_write_flags(byte message)
+void serial_write_flags(uint8_t message)
 {  
   write_to_buffer(0b11010001);
   write_to_buffer(message);
@@ -101,14 +101,14 @@ void serial_write_flags(byte message)
 void serial_write_to_hub(char* buff)
 {
   // client.publish(publishName, "INFO: WHAT THE HELL");
-  byte len = strlen(buff);
+  uint8_t len = strlen(buff);
 
   write_to_buffer(0b11100110); //Relay to Wifi Edge
   
   if (clientLetter == 255)
   {
     write_to_buffer(byte(len+11));
-    for (byte i=1; i<8; i++)
+    for (uint8_t i=1; i<8; i++)
     {
       write_to_buffer(clientName[i]);
     }
@@ -120,7 +120,7 @@ void serial_write_to_hub(char* buff)
 
   }
 
-  for (byte i=0; i<len; i++)
+  for (uint8_t i=0; i<len; i++)
   {
     write_to_buffer(buff[i]);
   }
@@ -133,7 +133,7 @@ void serial_write_to_hub(char* buff)
   // tmp[0] = (0b11100110); //Relay to Wifi Edge
   // tmp[1] = len+8;
 
-  // byte i;
+  // uint8_t i;
   // for (i=2; i<8; i++)
   // {
   //   tmp[i] = (clientName[i]);
@@ -157,7 +157,7 @@ void serial_write_to_hub(char* buff)
 void serial_write_id()
 {
   write_to_buffer(0b11010011);
-  for(byte i=2; i < 8; i++)
+  for(uint8_t i=2; i < 8; i++)
     write_to_buffer(clientName[i]);
   write_to_buffer(END_BYTE);
 }

@@ -10,8 +10,8 @@ bool ip_flag = false;
 
 WiFiUDP UDP;
 
-byte udpInBuff[PACKET_SIZE];
-byte udpOutBuff[PACKET_SIZE];
+uint8_t udpInBuff[PACKET_SIZE];
+uint8_t udpOutBuff[PACKET_SIZE];
 
 unsigned long lastIpCall = millis();
 

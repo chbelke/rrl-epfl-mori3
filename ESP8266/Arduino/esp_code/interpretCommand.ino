@@ -1,5 +1,5 @@
 //----------------------- Recieved Message --------------------------//
-void commands(byte* payload, unsigned int len)
+void commands(uint8_t* payload, unsigned int len)
 {
   for(int i=0; i<len; i++)
   {
@@ -278,18 +278,18 @@ void commands(byte* payload, unsigned int len)
 }
 
 
-void setWifiEdge(byte* payload, unsigned int len)
+void setWifiEdge(uint8_t* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len){
     publish("ERR: payload has no space");
     return;
   }
   byte_count++;
 
-  byte tmp_wifi_edge = payload[byte_count]-48-1;   //-48 = ascii to int conversion
+  uint8_t tmp_wifi_edge = payload[byte_count]-48-1;   //-48 = ascii to int conversion
 
   if (tmp_wifi_edge > 3) {
     publish("ERR: Wifi edge > 4");
@@ -344,18 +344,18 @@ void requestWifiEdge()
 }
 
 
-void requestNeighbour(byte* payload, unsigned int len)
+void requestNeighbour(uint8_t* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len){
     publish("ERR: payload has no space");
     return;
   }
   byte_count++;
 
-  byte neighbour = payload[byte_count]-48;   //-48 = ascii to int conversion
+  uint8_t neighbour = payload[byte_count]-48;   //-48 = ascii to int conversion
 
   serial_write_two(REQ_CMD_NBR, neighbour);
 }
@@ -374,7 +374,7 @@ void disableWifi()
 }
 
 
-void echoPing(byte* payload, unsigned int len)
+void echoPing(uint8_t* payload, unsigned int len)
 {
   // Echo the message back to the external computer
   char buff[85];// = "PNG: 12345678901234567890123456789012";
@@ -392,23 +392,23 @@ void echoPing(byte* payload, unsigned int len)
 }
 
 
-void openPicCouplings(byte* payload, unsigned int len)
+void openPicCouplings(uint8_t* payload, unsigned int len)
 {
   setCouplingShapeCommand(payload, len, SHAPE_CMD_COUP_MASK, SHAPE_CMD_COUP_ALLOC);
 }
 
 
-void driveAndCouple(byte *payload, unsigned int len)
+void driveAndCouple(uint8_t *payload, unsigned int len)
 {
   setCouplingShapeCommand(payload, len, SHAPE_CMD_DRVE_MASK, SHAPE_CMD_DRVE_ALLOC);
 }
 
 
-void setCouplingShapeCommand(byte *payload, unsigned int len, byte alloc_mask, byte alloc)
+void setCouplingShapeCommand(uint8_t *payload, unsigned int len, uint8_t alloc_mask, uint8_t alloc)
 {
   char tmp_payload[5];
   
-  byte byte_count = detectSpaceChar(payload, byte_count, len);
+  uint8_t byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len) {
     byte_count = len;
   }
@@ -416,7 +416,7 @@ void setCouplingShapeCommand(byte *payload, unsigned int len, byte alloc_mask, b
   tmp_payload[0] = payload[byte_count];
   tmp_payload[1] = '\0';
   
-  byte value = byte(atoi(tmp_payload))-1;
+  uint8_t value = byte(atoi(tmp_payload))-1;
 
   if(value > 3) {
     publish("ERR: Can\'t open coupling > 3");
@@ -435,65 +435,95 @@ void setCouplingShapeCommand(byte *payload, unsigned int len, byte alloc_mask, b
 }
 
 
-void setPicLED(byte *payload, unsigned int len)
+void setPicLED(uint8_t *payload, unsigned int len)
 {
   setShapeCommand(payload, len, SHAPE_CMD_LEDS_MASK, SHAPE_CMD_LEDS_ALLOC, false);
 }
 
 
-void setPicEdges(byte *payload, unsigned int len)
+void setPicEdges(uint8_t *payload, unsigned int len)
 {
   setShapeCommand(payload, len, SHAPE_CMD_EDGS_MASK, SHAPE_CMD_EDGS_ALLOC, false);
 }
 
 
-void setPicSpeed(byte *payload, unsigned int len)
+void setPicSpeed(uint8_t *payload, unsigned int len)
 {
   setShapeCommand(payload, len, SHAPE_CMD_SPDS_MASK, SHAPE_CMD_SPDS_ALLOC, false);
 }
 
 
-void setPicAngles(byte *payload, unsigned int len)
+void setPicAngles(uint8_t *payload, unsigned int len)
 {
   setShapeCommand(payload, len, SHAPE_CMD_ANGS_MASK, SHAPE_CMD_ANGS_ALLOC, true);
 }
 
 
-void setShapeCommand(byte *payload, unsigned int len, byte alloc_mask, 
-          byte alloc, bool flg_two_bytes)
+void setShapeCommand(uint8_t *payload, unsigned int len, uint8_t alloc_mask, 
+          uint8_t alloc, bool flg_two_bytes)
 {
-  byte num_following = 0;
-  byte values[6];
+  uint8_t num_following = 0;
+  uint8_t values[6];
+  uint8_t cmd_id = 0;
   
+  // Ext and ang commands mask is 0b00000000
+  if((alloc & 0b11000000) == 0){
+    bool successFlag = true;
+    cmd_id = extractCommandID(payload, len, &successFlag);
+    if ((successFlag == false)) 
+      return;
+  }
+
   if(!extractValuesForShape(payload, len, alloc_mask, &alloc, &num_following, values, flg_two_bytes)) {
     return;
   }
 
   write_to_buffer(SHAPE_COMMAND_ALLOC); //205
   write_to_buffer(alloc);
-  for(byte i=0; i< num_following; i++)
-  {
+  for(uint8_t i=0; i< num_following; i++) {
     write_to_buffer(values[i]);
+  }
+  if((alloc & 0b11000000) == 0) {
+    write_to_buffer(cmd_id);
   }
   write_to_buffer(END_BYTE);
 }
 
 
+uint8_t extractCommandID(uint8_t* payload, unsigned int len, bool *successFlag) 
+{  
+  uint8_t byte_count = 0;
+  byte_count = detectChar(payload, byte_count, len, "/");
+  if(byte_count > len){
+    *successFlag = false;
+    publish("ERR: payload has no slash");
+    return 0;
+  }
+  uint8_t cmd_id = (byte)extractFollowingNumber(payload+byte_count, len-byte_count, successFlag, "/");
+  if (cmd_id == 0) {
+    *successFlag = false;
+    publish("ERR: no number following");
+  }
+
+  return cmd_id;
+}
+
+
 //Used in setPicEdges setPicLED, and setPicAngles
-bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask, 
-          byte *alloc, byte *num_following, byte *values, bool flg_two_bytes)
+bool extractValuesForShape(uint8_t* payload, unsigned int len, uint8_t alloc_mask, 
+          uint8_t *alloc, uint8_t *num_following, uint8_t *values, bool flg_two_bytes)
 {
-  byte byte_count = 0;
-  byte pre_count = 0;
+  uint8_t byte_count = 0;
+  uint8_t pre_count = 0;
   char tmp_payload[5];
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   byte_count++;
-  for(byte i=0; i<3; i++){ //For the 3 Edges
+  for(uint8_t i=0; i<3; i++){ //For the 3 Edges
     bool jumpFlag = false;
     pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
     
-    byte_count = detectSpaceChar(payload, byte_count, len);
+    byte_count = detectChar(payload, byte_count, len, " ");
 
     if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
       byte_count = len;
@@ -516,7 +546,7 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask,
       }
     }
 
-    byte j;
+    uint8_t j;
     for(j=0; j<byte_count-pre_count; j++) {
       if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
         jumpFlag = true;
@@ -554,10 +584,9 @@ bool extractValuesForShape(byte* payload, unsigned int len, byte alloc_mask,
 }
 
 
-
-byte detectSpaceChar(byte* payload, int byte_count, unsigned int max_len)
+uint8_t detectChar(uint8_t* payload, int byte_count, unsigned int max_len, const char *ascii_char)
 {
-  while(payload[byte_count] != 0b00100000)   //0b00100000 = whitespace
+  while(payload[byte_count] != *ascii_char)   //0b00101111 = /
   {
     byte_count++;
     if(byte_count > max_len) {
@@ -677,18 +706,18 @@ void disableFlag5() {
   return;
 }
 
-void wiggleCoupling(byte* payload, unsigned int len)
+void wiggleCoupling(uint8_t* payload, unsigned int len)
 {
   int byte_count = 0;
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   if(byte_count > len){
     publish("ERR: payload has no space");
     return;
   }
   byte_count++;
 
-  byte coupling = payload[byte_count]-48-1;   //-48 == ascii to int conversion
+  uint8_t coupling = payload[byte_count]-48-1;   //-48 == ascii to int conversion
 
   if (coupling > 3) { //0-2 == couplings, 3 == all couplings
     publish("ERR: Wifi edge > 4");
@@ -699,24 +728,24 @@ void wiggleCoupling(byte* payload, unsigned int len)
 }
 
 
-void setDatalogFlag(byte* payload, unsigned int len) 
+void setDatalogFlag(uint8_t* payload, unsigned int len) 
 {
   bool successFlag = true;
-  byte flag = (byte)extractFollowingNumber(payload, len, &successFlag);
+  uint8_t flag = (byte)extractFollowingNumber(payload, len, &successFlag, " ");
   if(successFlag)
     serial_write_two(DLG_CMD_FLAG_SET, flag);
 }
 
 
-void setDatalogPeriod(byte* payload, unsigned int len) 
+void setDatalogPeriod(uint8_t* payload, unsigned int len) 
 {
   int byte_count = 0;
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
   byte_count += 1;
   char request = payload[byte_count];
   bool successFlag = true;
-  int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag);
-  byte freq = (byte)(tmp/20);
+  int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag, " ");
+  uint8_t freq = (byte)(tmp/10);
   if(successFlag)
   {
     char r_data = 0;
@@ -736,12 +765,12 @@ void setDatalogPeriod(byte* payload, unsigned int len)
 }
 
 
-int extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
+int extractFollowingNumber(uint8_t* payload, unsigned int len, bool *successFlag, const char *character)
 {
   int byte_count = 0;
   char tmp_payload[5];
 
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, character);
   if(byte_count > len){
     *successFlag = false;
     publish("ERR: payload has no space");
@@ -749,13 +778,13 @@ int extractFollowingNumber(byte* payload, unsigned int len, bool *successFlag)
   }
   byte_count++;
   int pre_count = byte_count; //count between whitespace ("led 255" -> "255", len 3)
-  byte_count = detectSpaceChar(payload, byte_count, len);
+  byte_count = detectChar(payload, byte_count, len, " ");
 
   if(byte_count > len) { // no space at the end of the command (e.g., "led 10 10 10")
     byte_count = len;
   }
 
-  byte j;
+  uint8_t j;
   for(j=0; j<byte_count-pre_count; j++) {
     if((payload[pre_count+j] < 48) || (payload[pre_count+j] > 57)) {  //not ascii number - byte(48) = "0"
       *successFlag = false;
@@ -774,11 +803,11 @@ void sendEmergencyStop() {
   enableWifi();
 }
 
-void setRotTorque(byte* payload, unsigned int len) {
-  byte alloc2 = 0;
-  byte alloc_mask = SET_CMD_TORQUE_MASK;
-  byte num_following = 0;
-  byte values[6];
+void setRotTorque(uint8_t* payload, unsigned int len) {
+  uint8_t alloc2 = 0;
+  uint8_t alloc_mask = SET_CMD_TORQUE_MASK;
+  uint8_t num_following = 0;
+  uint8_t values[6];
   
   if(!extractValuesForShape(payload, len, alloc_mask, &alloc2, &num_following, values, false)) {
     return;
@@ -786,7 +815,7 @@ void setRotTorque(byte* payload, unsigned int len) {
 
   write_to_buffer(SET_CMD_TORQUE_ALLOC);
   write_to_buffer(alloc2);
-  for(byte i=0; i< num_following; i++)
+  for(uint8_t i=0; i< num_following; i++)
   {
     write_to_buffer(values[i]);
   }

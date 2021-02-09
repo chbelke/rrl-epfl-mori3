@@ -1,5 +1,5 @@
 //----------------------- Recieved Message --------------------------//
-void callback(char* topic, byte* payload, unsigned int len)
+void callback(char* topic, uint8_t* payload, unsigned int len)
 {
   if(verbose_flag)
   {
@@ -14,7 +14,7 @@ void callback(char* topic, byte* payload, unsigned int len)
     verbose_println();
   }
 
-  byte msg[len];
+  uint8_t msg[len];
   for (int i = 0; i < len; i++) {
     msg[i] = payload[i];
   }

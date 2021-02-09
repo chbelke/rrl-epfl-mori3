@@ -1,4 +1,4 @@
 struct module_status
 {
-  byte stable_status;
+  uint8_t stable_status;
 };

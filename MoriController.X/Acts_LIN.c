@@ -180,6 +180,7 @@ uint8_t Acts_LIN_GetTarget(uint8_t edge) {
 /* ******************** SET DESIRED EXTENSION ******************************* */
 void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
     Ext_Desired[edge] = desired;
+    Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ext[edge] = true; //  relevant when coupled
 }
 

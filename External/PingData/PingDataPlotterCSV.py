@@ -14,6 +14,18 @@ colors = ['xkcd:light navy',
             'xkcd:gold',
             'xkcd:crimson',
             'xkcd:dark beige',
+            'xkcd:lavender',
+            'xkcd:light navy',
+            'xkcd:green',
+            'xkcd:gold',
+            'xkcd:crimson',
+            'xkcd:dark beige',
+            'xkcd:lavender',
+            'xkcd:light navy',
+            'xkcd:green',
+            'xkcd:gold',
+            'xkcd:crimson',
+            'xkcd:dark beige',
             'xkcd:lavender']          
 
 color_iter = 0
@@ -38,7 +50,7 @@ order_dict =  {
     "2 Away": 2
 }
 
-pltNum = [None]*6
+pltNum = [None]*18
 
 def checkName(name):
     try:
@@ -107,6 +119,8 @@ for esp in pingData.keys():
     pingDataTime = np.delete(pingData[esp]['time'], faultList) # Remove faulty data
 
     data_size=len(pingDataTime)
+    if data_size == 0:
+        continue
     data_set=sorted(set(pingDataTime))
     bins=np.append(data_set, data_set[-1]+1)
     counts, bin_edges = np.histogram(pingDataTime, bins=bins, density=False)
