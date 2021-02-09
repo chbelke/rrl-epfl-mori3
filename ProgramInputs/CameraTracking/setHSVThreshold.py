@@ -1,16 +1,24 @@
 import cv2
 import sys
 import numpy as np
+import pyrealsense2 as rs
+
+camera_w = int(1920/2)
+camera_h = int(1080/2)
 
 def nothing(x):
     pass
 
-vc = cv2.VideoCapture(0)
+pipeline = rs.pipeline()
+config = rs.config()        
+config.enable_stream(rs.stream.color, camera_w, camera_h, rs.format.bgr8, 30)
+pipeline.start(config)
 
-if vc.isOpened(): # try to get the first frame
-    rval, image = vc.read()
-else:
-    rval = False
+frames = pipeline.wait_for_frames()
+
+color_frame = frames.get_color_frame()    
+
+image = np.asanyarray(color_frame.get_data())
 
 # Create a window
 cv2.namedWindow('image')
@@ -36,7 +44,7 @@ phMin = psMin = pvMin = phMax = psMax = pvMax = 0
 output = image
 wait_time = 33
 
-while(rval):
+while(True):
 
     # get current positions of all trackbars
     hMin = cv2.getTrackbarPos('HMin','image')
@@ -73,6 +81,8 @@ while(rval):
     # Wait longer to prevent freeze for videos.
     if cv2.waitKey(wait_time) & 0xFF == ord('q'):
         break
-    rval, image = vc.read()
+    frames = pipeline.wait_for_frames()
+    color_frame = frames.get_color_frame()   
+    image = np.asanyarray(color_frame.get_data())
 
 cv2.destroyAllWindows()
