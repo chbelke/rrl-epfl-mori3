@@ -356,7 +356,7 @@ void Coms_ESP_Request_Angles() {
 void Coms_ESP_Write_Angles() {
     uint8_t i;
     for (i = 0; i < 3; i++) {
-        UART4_Write16(Acts_ROT_GetAngle(i));
+        UART4_Write16(Acts_ROT_GetAngle(i, true));
     }
 }
 
@@ -464,7 +464,7 @@ void Coms_ESP_StateUpdate(void) {
     // If no fields need update
     if ((ESP_Update_Reset_Trigger & 0b00000111) == 0) return;
     
-    UART4_Write((0b11000000 | ESP_Update_Reset_Trigger)); //New alloc byte
+    UART4_Write((0b11000000 | (ESP_Update_Reset_Trigger & 0b00000111))); //New alloc byte
     
     if (ESP_Update_Reset_Trigger & 0b00000001)
         Coms_ESP_Write_Angles();

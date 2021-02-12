@@ -18,19 +18,43 @@ import argparse
 import random as rng
 from termcolor import colored
 
+import pyrealsense2 as rs
+
 
 BATTERY_WIDTH_MIN = 7
 BATTERY_WIDTH_MAX = 15
 BATTERY_HEIGHT_MIN = 3
 BATTERY_HEIGHT_MAX = 7
+
+BATTERY_WIDTH_MIN = 20
+BATTERY_WIDTH_MAX = 30
+BATTERY_HEIGHT_MIN = 12
+BATTERY_HEIGHT_MAX = 18
+
 BATTERY_RATIO = 30
-RECTANGLE_MERGE_BOUND = 10
+RECTANGLE_MERGE_BOUND = 20
 
 LOWER_COLOUR = np.array([70, 50, 0], dtype=np.uint8)
-UPPER_COLOUR = np.array([100,255,255], dtype=np.uint8)
+UPPER_COLOUR = np.array([85,255,255], dtype=np.uint8)
 
 LED_RING_SIZE_MIN = 20
 LED_RING_SIZE_MAX = 30
+
+camera_w = 1920
+camera_h = 1080
+
+camera_w = int(1920)
+camera_h = int(1080)
+
+scale_percent = 75
+
+BATTERY_WIDTH_MIN = int(BATTERY_WIDTH_MIN * scale_percent / 100)
+BATTERY_WIDTH_MAX = int(BATTERY_WIDTH_MAX * scale_percent / 100)
+BATTERY_HEIGHT_MIN = int(BATTERY_HEIGHT_MIN * scale_percent / 100)
+BATTERY_HEIGHT_MAX = int(BATTERY_HEIGHT_MAX * scale_percent / 100)
+
+LED_RING_SIZE_MIN = int(LED_RING_SIZE_MIN * scale_percent / 100)
+LED_RING_SIZE_MAX = int(LED_RING_SIZE_MAX * scale_percent / 100)
 
 
 def main(args):
@@ -51,6 +75,12 @@ def main(args):
         cv2.namedWindow('img_colour')
         cv2.namedWindow('img_contour')
 
+    if args.realsense == True:
+        vc = rs.pipeline()
+        config = rs.config()        
+        config.enable_stream(rs.stream.color, camera_w, camera_h, rs.format.bgr8, 30)
+        vc.start(config)
+        camera_params = None
 
     else:
         vc = None
@@ -93,7 +123,8 @@ def getWhichModulesToConnect():
 def extractImage(args, vc, camera_params):
     if args.camera == True:
         img = getCameraImage(vc, camera_params)
-
+    elif args.realsense == True:
+        img = getRealsenseImage(vc, camera_params)
     else:
         img = getSavedImage()
     return img
@@ -114,6 +145,26 @@ def getCameraImage(vc, camera_params):
     # key = cv2.waitKey(20)
     # input()
     return img
+
+
+def getRealsenseImage(vc, camera_params):
+    while True:
+        frames = vc.wait_for_frames()
+        # depth_frame = frames.get_depth_frame()
+        color_frame = frames.get_color_frame()    
+        if color_frame:
+            break
+    img = np.asanyarray(color_frame.get_data())
+
+    w = int(img.shape[1] * scale_percent / 100)
+    h = int(img.shape[0] * scale_percent / 100)
+    dim = (w, h)
+      
+    # resize image
+    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)    
+
+    return img
+
 
 
 def undistortImage(img, camera_params):
@@ -332,8 +383,11 @@ if __name__ == '__main__':
         help='runs with mqtt',
         action='store_true')
     parser.add_argument('-c', '--camera',
-        help='connects to a camera',
+        help='connects to a pseye',
         action='store_true')
+    parser.add_argument('-r', '--realsense',
+        help='connects to a realsense',
+        action='store_true')    
     parser.add_argument('-t', '--target',
         help='defines if a single module needs to connect to a target')
     args = parser.parse_args()    

@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'G' // module name by letter
+#define MODULE 'H' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -48,8 +48,8 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 5
-#define RGB_Default_Green 5
+#define RGB_Default_Red 0
+#define RGB_Default_Green 10
 #define RGB_Default_Blue 0
 
 /* ******************** BATTERY ********************************************* */
@@ -98,6 +98,7 @@ extern volatile bool Flg_Tmr5;
 /* ******************** STATE INFO ****************************************** */
 extern volatile uint8_t ESP_DataLog_Time_Elapsed;
 extern volatile uint8_t ESP_ID[6];
+extern volatile uint8_t CMD_ID;
 
 
 /* ******************** PERIPHERALS ***************************************** */
@@ -191,7 +192,7 @@ extern volatile uint8_t ESP_ID[6];
 #define ROT_DIR_3 LATAbits.LATA10
 
 #define MotRot_AngleRange 240       // overall range (degrees)
-#define MotRot_OkRange 20           // +- (0.1*degrees) (automatic CMD update)
+#define MotRot_OkRange 15           // +- (0.1*degrees) (automatic CMD update)
 
 #define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_kP 153.0f        // proportional gain

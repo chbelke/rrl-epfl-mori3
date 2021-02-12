@@ -3,17 +3,15 @@
 #include "Defs_MOD.h"
 #include "Mnge_RGB.h"
 #include "Coms_ESP.h"
+#include "Coms_123.h"
 
 void Mnge_ERR_ActivateStop(){
     if (!FLG_Emergency){
         FLG_Emergency = true;
         uint8_t e;
-        for (e = 0; e < 3; e++){
-            Flg_EdgeSyn[e] = false;
-            Flg_EdgeAct[e] = false;
-            Flg_EdgeReq_Ext[e] = false;
-            Flg_EdgeReq_Ang[e] = false;
-        }
+        for (e = 0; e < 3; e++)
+            Coms_123_Disconnected(e);
+        
         FLG_MotLin_Active = false;
         FLG_MotRot_Active = false;
         
