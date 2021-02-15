@@ -31,6 +31,10 @@ def getDataLog(self, pyld, espNum):
         if values[0] & 0b00000100:    #orient
             for j in range(0,3):
                 orient[j] = values[i]*256 + values[i+1]
+                if orient[j] >= 32768:
+                    orient[j] -= 65536 
+
+                # orient[j] = values[i]*256 + values[i+1]
                 i += 2                
         cscString = [espNum, str(time), str(angles).strip('[]'), str(edges).strip('[]'), str(orient).strip('[]') + '\n']
         self.writeDataLogFile(','.join(cscString))
