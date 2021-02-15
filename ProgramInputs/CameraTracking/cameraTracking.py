@@ -19,6 +19,7 @@ import random as rng
 from termcolor import colored
 
 import pyrealsense2 as rs
+# from pykalman import KalmanFilter
 
 
 BATTERY_WIDTH_MIN = 7
@@ -39,6 +40,8 @@ UPPER_COLOUR = np.array([85,255,255], dtype=np.uint8)
 
 LED_RING_SIZE_MIN = 20
 LED_RING_SIZE_MAX = 30
+
+INIT_STEPS = 25
 
 camera_w = 1920
 camera_h = 1080
@@ -87,17 +90,33 @@ def main(args):
 
 
     startTime = time.time()
+    tracked_modules = {}
 
     if args.mqtt == True:
         mqttClient = MqttHost()
         mqttClient.run()
 
 
+    # for i in range(INIT_STEPS):
     while(True):
         img = extractImage(args, vc, camera_params)
-        getMoriPoints(img)
-        continue
+        batteries = getMoriPoints(img)
+        tracked_modules = runKalmanOnBatteries(img, batteries, tracked_modules)
+        key = cv2.waitKey(20)
+        if key == 27: # exit on ESC
+            break
+
+    print("Done!")
+    while(True):
+        key = cv2.waitKey(20)
+        if key == 27: # exit on ESC
+            break
+
+
+    while(True):
+        img = extractImage(args, vc, camera_params)
         mori_vertices = getMoriPoints(img)
+        continue
         
 
         if selected_mori is not None:
@@ -216,7 +235,7 @@ def getMoriPoints(img):
         # vertices = generateMoriVertices(leds)
         # mori_vertices.append(vertices)
     cv2.waitKey(20)        
-    return
+    return batteries
     return mori_vertices
 
 
@@ -244,7 +263,7 @@ def detectBatteries(img):
     # cv2.imshow('img_colour', hsv)
 
     cv2.imshow('img_contour', drawing)
-    cv2.imshow('img', img)
+    # cv2.imshow('img', img)
     # cv2.imshow('mask', canny_output)
 
 
@@ -318,6 +337,83 @@ def pruneRectangleList(rectangle_list, drawing):
     rectangle_list.extend(set(new_rectangles))
     
     return rectangle_list
+
+
+def runKalmanOnBatteries(img, batteries, tracked_modules):
+    tracked_modules = updateTracked_modules(batteries, tracked_modules)
+    for module in tracked_modules:
+        print(tracked_modules[module]["battery_position"])
+        pos_x = int(tracked_modules[module]["battery_position"][0][0])
+        pos_y = int(tracked_modules[module]["battery_position"][0][1])
+        cv2.putText(img, str(module), (pos_x, pos_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+    cv2.imshow('img', img)
+    return tracked_modules
+
+
+def updateTracked_modules(batteries, tracked_modules):
+    if len(batteries) == 0:# and len(tracked_modules) == 0:
+        return tracked_modules
+
+    err_matrix = np.ones((len(tracked_modules), len(batteries)))*1000
+    
+    for i in range(len(tracked_modules)):
+        if "battery_position" not in tracked_modules[i].keys():
+            continue
+        pos = tracked_modules[i]["battery_position"]
+        for j, battery in enumerate(batteries):
+            err_pos = getDistanceXY(pos[0], battery[0])
+            err_size = getDistanceXY(pos[1], battery[1])
+            err_rot = np.abs(pos[2] - battery[2])
+            err_matrix[i, j] = err_pos + err_size + err_rot
+
+    print(err_matrix)
+
+    closest_batteries = [None]*len(tracked_modules)
+    purge_tracked = []
+    for i in range(len(tracked_modules)):
+        tmp_smallest = (-1, 1000) # [ID, value]
+        for j, battery in enumerate(batteries):
+            if err_matrix[i,j] < 10.0:
+                if err_matrix[i,j] < tmp_smallest[1]:
+                    tmp_smallest = (j, err_matrix[i,j])
+        for key, value in tracked_modules[i].items():
+            if "battery_position" not in tracked_modules[i].keys():
+                continue
+        if tmp_smallest[0] == -1:
+            purge_tracked.append(i)
+        else:
+            closest_batteries[i] = tmp_smallest[0]
+            tracked_modules[i]["battery_pos_old"] = tracked_modules[i]["battery_position"]
+            tracked_modules[i]["battery_position"] = batteries[tmp_smallest[0]]
+            tracked_modules[i]["error"] = tmp_smallest[1]
+
+    print(closest_batteries)
+
+    used_batteries = [bat for bat in set(closest_batteries)]
+    unused_batteries = [bat for bat in range(len(batteries)) if bat not in used_batteries]
+
+    print("used, unused")
+    print(used_batteries,unused_batteries)
+    print("tracked before", tracked_modules)
+    # print("batteries", batteries)
+
+    for purge in purge_tracked:
+        del tracked_modules[purge]
+
+    for i in range(len(batteries)):
+        if i not in tracked_modules:
+            tracked_modules[i] = {}        
+            tracked_modules[i]["battery_position"] = batteries[unused_batteries.pop(0)]
+            print(tracked_modules[i]["battery_position"])
+            tracked_modules[i]["confirmed"] = False
+
+    # for i in range(len(tracked_modules)):
+    #     if "battery_position" in tracked_modules[i].keys():
+    #         continue
+
+    print("tracked after", tracked_modules)
+
+    return tracked_modules
 
 
 
