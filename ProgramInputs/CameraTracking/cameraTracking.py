@@ -19,7 +19,7 @@ import random as rng
 from termcolor import colored
 
 import pyrealsense2 as rs
-# from pykalman import KalmanFilter
+from pykalman import KalmanFilter
 
 
 BATTERY_WIDTH_MIN = 7
@@ -37,6 +37,7 @@ RECTANGLE_MERGE_BOUND = 20
 
 LOWER_COLOUR = np.array([70, 50, 0], dtype=np.uint8)
 UPPER_COLOUR = np.array([85,255,255], dtype=np.uint8)
+UPPER_COLOUR = np.array([90,255,255], dtype=np.uint8)
 
 LED_RING_SIZE_MIN = 20
 LED_RING_SIZE_MAX = 30
@@ -59,6 +60,7 @@ BATTERY_HEIGHT_MAX = int(BATTERY_HEIGHT_MAX * scale_percent / 100)
 LED_RING_SIZE_MIN = int(LED_RING_SIZE_MIN * scale_percent / 100)
 LED_RING_SIZE_MAX = int(LED_RING_SIZE_MAX * scale_percent / 100)
 
+KALMAN_DT = 0.1
 
 def main(args):
     if args.mqtt == True:
@@ -341,11 +343,85 @@ def pruneRectangleList(rectangle_list, drawing):
 
 def runKalmanOnBatteries(img, batteries, tracked_modules):
     tracked_modules = updateTracked_modules(batteries, tracked_modules)
+
+    purge_tracked = []
     for module in tracked_modules:
-        print(tracked_modules[module]["battery_position"])
-        pos_x = int(tracked_modules[module]["battery_position"][0][0])
-        pos_y = int(tracked_modules[module]["battery_position"][0][1])
-        cv2.putText(img, str(module), (pos_x, pos_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        pos = tracked_modules[module]["battery_position"]
+        print(module)
+        if "KF" not in tracked_modules[module].keys():
+            print(tracked_modules[module])
+            
+            transition_matrix = np.matrix([
+                [1.,0.,KALMAN_DT,0],
+                [0.,1.,0.,KALMAN_DT],
+                [0.,0.,1.,0.],
+                [0.,0.,0.,1.]])
+            measurement_matrix = np.array([1., 1., 0., 0.,])     
+            init_state = np.array([pos[0][0], pos[0][1], 0, 0]) 
+            print(init_state)
+            init_cov = 1e-3*np.eye(4)
+            transistion_cov=1.0e-4*np.eye(4)
+            observation_cov=1.0e-1
+            tracked_modules[module]["KF"] = KalmanFilter(
+                transition_matrices=transition_matrix,
+                observation_matrices =measurement_matrix,
+                initial_state_mean=init_state,
+                initial_state_covariance=init_cov,
+                transition_covariance=transistion_cov,
+                observation_covariance=observation_cov)
+            # tracked_modules["KF"] = KalmanFilter(initial_state_mean=0, n_dim_obs=3)
+            # tracked_modules[module]["KF"] = cv2.TrackerKCF_create()
+            # tracked_modules[module]["KF"].init(img, bbox)
+        else:
+            if "new_data" in tracked_modules[module].keys() and tracked_modules[module]["new_data"] == True:
+                meas = tracked_modules[module]["new_measurement"]
+                meas = np.ma.masked_array([meas[0][0], meas[0][1]], mask=[0, 0])
+                print("YAS")
+            else:
+                meas = np.ma.masked_array([1., 1.], mask=[1, 1])
+
+
+            # tracked_modules[module]["KF"].filter([pos[0][0], pos[0][1], 0, 0])
+            (kf_means, kf_cov) = tracked_modules[module]["KF"].filter(meas)
+            new_mean = (kf_means[0][0], kf_means[0][1])
+            
+            new_pos = [new_mean, pos[1], pos[2]]
+            tracked_modules[module]["battery_position"] = new_pos
+
+            print(kf_cov)
+            print(np.max(kf_cov - 1e-3*np.eye(4)))
+            if np.max(kf_cov - 1e-3*np.eye(4)) >= 1e-4:
+                print("PURGED")
+                purge_tracked.append(module)
+
+            print()
+
+
+        # else: 
+        #     meas = ma.masked_array(
+        #     (kf_means, kf_cov) = tracked_modules[module]["KF"].filter()
+        #     new_mean = (kf_means[0][0], kf_means[0][1])
+            
+        #     new_pos = [new_mean, pos[1], pos[2]]
+        #     tracked_modules[module]["battery_position"] = new_pos
+
+        #     print(kf_cov)
+        #     print(np.max(cov))
+        #     if np.max(cov) > 1e-3:
+        #         purge_tracked.append(i)            
+
+    for purge in purge_tracked:
+        del tracked_modules[purge]
+
+    for module in tracked_modules:
+        pos = tracked_modules[module]["battery_position"]        
+
+        cv2.putText(img, "K_{}".format(module), (int(pos[0][0]), int(pos[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,0),2)
+            # tracked_modules = updateKalman(img, tracked_modules)
+        # print(tracked_modules[module]["battery_position"])
+        # pos_x = int(tracked_modules[module]["battery_position"][0][0])
+        # pos_y = int(tracked_modules[module]["battery_position"][0][1])
+        # cv2.putText(img, str(module), (pos_x, pos_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
     cv2.imshow('img', img)
     return tracked_modules
 
@@ -354,67 +430,84 @@ def updateTracked_modules(batteries, tracked_modules):
     if len(batteries) == 0:# and len(tracked_modules) == 0:
         return tracked_modules
 
-    err_matrix = np.ones((len(tracked_modules), len(batteries)))*1000
+    err_matrix = {}
     
-    for i in range(len(tracked_modules)):
+    for i in tracked_modules:
         if "battery_position" not in tracked_modules[i].keys():
             continue
+
         pos = tracked_modules[i]["battery_position"]
         for j, battery in enumerate(batteries):
             err_pos = getDistanceXY(pos[0], battery[0])
             err_size = getDistanceXY(pos[1], battery[1])
             err_rot = np.abs(pos[2] - battery[2])
-            err_matrix[i, j] = err_pos + err_size + err_rot
+            if i not in err_matrix:
+                err_matrix[i] = {}
+            err_matrix[i][j] = (err_pos + err_size + err_rot)
 
-    print(err_matrix)
-
-    closest_batteries = [None]*len(tracked_modules)
+    closest_batteries = {}
     purge_tracked = []
-    for i in range(len(tracked_modules)):
+    for i in tracked_modules:
+        if "battery_position" not in tracked_modules[i].keys():
+            continue
         tmp_smallest = (-1, 1000) # [ID, value]
         for j, battery in enumerate(batteries):
-            if err_matrix[i,j] < 10.0:
-                if err_matrix[i,j] < tmp_smallest[1]:
-                    tmp_smallest = (j, err_matrix[i,j])
-        for key, value in tracked_modules[i].items():
-            if "battery_position" not in tracked_modules[i].keys():
-                continue
+            if err_matrix[i][j] < 10.0:
+                if err_matrix[i][j] < tmp_smallest[1]:
+                    tmp_smallest = (j, err_matrix[i][j])
         if tmp_smallest[0] == -1:
-            purge_tracked.append(i)
+            #Eventually remove this when Kalman tuned
+            # purge_tracked.append(i)
+            continue
         else:
             closest_batteries[i] = tmp_smallest[0]
             tracked_modules[i]["battery_pos_old"] = tracked_modules[i]["battery_position"]
-            tracked_modules[i]["battery_position"] = batteries[tmp_smallest[0]]
+            tracked_modules[i]["new_measurement"] = batteries[tmp_smallest[0]]
             tracked_modules[i]["error"] = tmp_smallest[1]
+            tracked_modules[i]["confirmed"] = True
+            tracked_modules[i]["new_data"] = True
 
-    print(closest_batteries)
+    seen = {}
+    dupes = []
 
-    used_batteries = [bat for bat in set(closest_batteries)]
+    for x in closest_batteries:
+        if x not in seen:
+            seen[x] = 1
+        else:
+            if seen[x] == 1:
+                dupes.append(x)
+            seen[x] += 1
+
+    if len(dupes) > 0:
+        print("PAAAAAAAAAANNNNNNNNNNNNIIIIIIIIIIKKKKKKKK")
+
+    used_batteries = [bat for bat in set(closest_batteries.values()) if bat != None]
+
+    # for purge in purge_tracked:
+    #     del tracked_modules[purge]
+        # del used_batteries[purge]
+
     unused_batteries = [bat for bat in range(len(batteries)) if bat not in used_batteries]
 
-    print("used, unused")
-    print(used_batteries,unused_batteries)
-    print("tracked before", tracked_modules)
-    # print("batteries", batteries)
-
-    for purge in purge_tracked:
-        del tracked_modules[purge]
-
     for i in range(len(batteries)):
+        #Will always set tracked values to count from 0, 1, 2
+        if len(unused_batteries) == 0:
+            break
         if i not in tracked_modules:
             tracked_modules[i] = {}        
             tracked_modules[i]["battery_position"] = batteries[unused_batteries.pop(0)]
-            print(tracked_modules[i]["battery_position"])
             tracked_modules[i]["confirmed"] = False
 
     # for i in range(len(tracked_modules)):
     #     if "battery_position" in tracked_modules[i].keys():
     #         continue
 
-    print("tracked after", tracked_modules)
-
     return tracked_modules
 
+
+def updateKalman(img, tracked_modules):
+
+    return tracked_modules
 
 
 def getDistanceXY(point1, point2):
