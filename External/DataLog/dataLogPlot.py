@@ -75,7 +75,7 @@ fig, ax = plt.subplots()
 print([checkName(esp) for esp in logData.keys()])
 print("Count: {}".format(len(logData.keys())))
 
-print("".rjust(10) + "Angle".rjust(5) + "Ext".rjust(10) + "Orient".rjust(10) + "Count".rjust(10))
+print("".rjust(10) + "1st".rjust(5) + "2nd".rjust(10) + "3rd".rjust(10) + "Count1".rjust(10) + "Count2".rjust(10) + "Count3".rjust(10))
 for esp in logData.keys():
     init = int(init_time[esp])
     time_ang = []
@@ -112,23 +112,44 @@ for esp in logData.keys():
             orient3.append(int(row[10]))            
 
 
-    deltas = [j-i for i,j in zip(time_ang, time_ang[1:])]
-    avg_ang = int(np.mean(deltas))
+    try:
+        deltas = [j-i for i,j in zip(time_ang, time_ang[1:])]
+        if len(deltas) == 0:
+            avg_ang = 0
+        else:       
+            avg_ang = int(np.mean(deltas))
+    except ValueError:
+        avg_ang = 0
 
+    
     # print(checkName(esp).ljust(10)+ "{}".format(avg_ang).rjust(5))
-
-    deltas = [j-i for i,j in zip(time_ext, time_ext[1:])]
-    avg_ext = int(np.mean(deltas))
-
-    deltas = [j-i for i,j in zip(time_orient, time_orient[1:])]
-    avg_orient = int(np.mean(deltas))
+    try:
+        deltas = [j-i for i,j in zip(time_ext, time_ext[1:])]
+        if len(deltas) == 0:
+            avg_ext = 0
+        else:
+            avg_ext = int(np.mean(deltas))
+    except ValueError:
+        avg_ext = 0
+    
+    try:
+        deltas = [j-i for i,j in zip(time_orient, time_orient[1:])]
+        if len(deltas) == 0:
+            avg_orient = 0
+        else:
+            avg_orient = int(np.mean(deltas))
+    except ValueError:
+        print("No readings")
+        avg_orient = 0
     
 
     print(checkName(esp).ljust(10)+ "{}".format(avg_ang).rjust(5) + 
         "{}".format(avg_ext).rjust(10) + "{}".format(avg_orient).rjust(10) +
-        "{}".format(len(time_ang)).rjust(10))
+        "{}".format(len(time_ang)).rjust(10), "{}".format(len(time_ext)).rjust(10), "{}".format(len(time_orient)).rjust(10))
     # print(time_orient)
     # print(deltas)
+    
+
 
 
 

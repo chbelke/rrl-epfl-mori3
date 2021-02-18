@@ -113,7 +113,7 @@ void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
         Stbl_Count[edge] = 0;
 
     // avoid integral build up when far away
-    if (abs(error) > 6.5) // if error is >6.32, kp results in max (ignoring kd)
+    if (abs(error) < 6.5) // if error is >6.32, kp results in max (ignoring kd)
         PID_I[edge] += error * MotLin_PID_period; // calculate integral component
     else
         PID_I[edge] = 0;
@@ -226,5 +226,5 @@ bool Act_LIN_IsStable(){
 bool Act_LIN_InRange(uint8_t edge){
     uint8_t diff = abs(Acts_LIN_GetCurrent(edge) - Acts_LIN_GetTarget(edge));
     if (diff <= MotLin_OkRange) return true;
-    else return false;
+    return false;
 }

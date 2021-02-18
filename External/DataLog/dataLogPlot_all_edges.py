@@ -120,14 +120,10 @@ for esp in logData.keys():
     # deltas = [j-i for i,j in zip(time_ext, time_ext[1:])]
     # avg_ext = int(np.mean(deltas))
 
-    deltas = [j-i for i,j in zip(time_orient, time_orient[1:])]
-    avg_orient = int(np.mean(deltas))
+    #deltas = [j-i for i,j in zip(time_orient, time_orient[1:])]
+    #avg_orient = int(np.mean(deltas))
 
-    print(esp)
-    print("average values")
-    print(np.mean(orient1))
-    print(np.mean(orient2))
-    print(np.mean(orient3))
+
     
 
     # print(checkName(esp).ljust(10)+ "{}".format(avg_ang).rjust(5) + 
@@ -140,7 +136,9 @@ for esp in logData.keys():
 
 
     plt.figure(1)
-    plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="ang "+esp)  
+    plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="ang1 "+esp)
+    plt.plot(time_ang, ang2, linestyle='-', linewidth=2, label="ang2 "+esp)
+    plt.plot(time_ang, ang3, linestyle='-', linewidth=2, label="ang3 "+esp)
     plt.figure(2)
     plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label="P "+esp)  
     plt.plot(time_orient, orient2, linestyle='-', linewidth=2, label="I "+esp)  
@@ -149,7 +147,12 @@ for esp in logData.keys():
     # plt.plot(time_ang, ext3, linestyle='-', linewidth=2, label=esp)  
     # plt.plot(time_ext, ext1, linestyle='-', linewidth=2, label=esp)  
     # plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label=checkName(esp))  
-
+	
+    print(esp)
+    print("average values")
+    print(np.mean(orient1))
+    print(np.mean(orient2))
+    print(np.mean(orient3))
 
 
 # # labels = [checkName(x) for x in pingData.keys()]

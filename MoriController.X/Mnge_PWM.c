@@ -18,7 +18,7 @@ void Mnge_PWM_Setup(void) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
     static uint8_t *pWrite, writeBuffer[2], nCount, iCount;
-    static uint16_t timeOut, slaveTimeOut;
+    uint8_t timeOut = 0, slaveTimeOut = 0; 
 
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
@@ -44,32 +44,25 @@ void Mnge_PWM_Setup(void) {
     // build second TRB for writing
     I2C1_MasterWriteTRBBuild(&TRB[2], pWrite, nCount, TLC59208_ADDRESS);
 
-    timeOut = 0;
-    slaveTimeOut = 0;
-
     while (status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
         I2C1_MasterTRBInsert(3, TRB, &status);
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
-            // add some delay here
-            __delay_us(1);
+            __delay_us(1); // add some delay here
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT)
-                break; //return (0);
-            else
-                slaveTimeOut++;
+            if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
+                slaveTimeOut = 0;
+                break;
+            } else slaveTimeOut++;
         }
 
-        if (status == I2C1_MESSAGE_COMPLETE)
-            break;
+        if (status == I2C1_MESSAGE_COMPLETE) break;
 
         // check for max retry and skip this byte
-        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX)
-            break; //return (0);
-        else
-            timeOut++;
+        if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
+        else timeOut++;
 
         __delay_us(10);
     }
@@ -82,7 +75,7 @@ void Mnge_PWM_Write(void) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB;
     static uint8_t *pWrite, writeBuffer[9], nCount = 9, iCount;
-    static uint16_t timeOut, slaveTimeOut;
+    uint8_t timeOut = 0, slaveTimeOut = 0;
 
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
@@ -97,33 +90,25 @@ void Mnge_PWM_Write(void) {
     // build TRB for writing
     I2C1_MasterWriteTRBBuild(&TRB, pWrite, nCount, TLC59208_ADDRESS);
 
-    timeOut = 0;
-    slaveTimeOut = 0;
-
     while (status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
         I2C1_MasterTRBInsert(1, &TRB, &status);
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
-            // add some delay here
-            __delay_us(1);
+            __delay_us(1); // add some delay here
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
-                break; //return (0);
-            } else {
-                slaveTimeOut++;
-            }
+            if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
+                slaveTimeOut = 0;
+                break;
+            } else slaveTimeOut++;
         }
 
-        if (status == I2C1_MESSAGE_COMPLETE)
-            break;
+        if (status == I2C1_MESSAGE_COMPLETE) break;
 
         // check for max retry and skip this byte
-        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX)
-            break; //return (0);
-        else
-            timeOut++;
+        if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
+        else timeOut++;
 
         __delay_us(10);
     }

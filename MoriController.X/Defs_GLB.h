@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'H' // module name by letter
+#define MODULE 'M' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -40,7 +40,7 @@
 
 /* ******************** MODE SELECTION ************************************** */
 //#define MODE_DEBUG false
-#define MODE_ENC_CON true
+//#define MODE_ENC_CON true
 #define MODE_ACC_CON true
 
 #define MODE_MotLin_Active true
@@ -49,8 +49,15 @@
 
 // RGB LED Default values
 #define RGB_Default_Red 0
-#define RGB_Default_Green 10
-#define RGB_Default_Blue 0
+#define RGB_Default_Green 5
+#define RGB_Default_Blue 10
+
+/* ******************** ERROR CODES ***************************************** */
+#define ERR_NeighbourLost 1
+#define ERR_NeighbourToldMe 2
+#define ERR_NeighbourConAfterAct 3
+#define ERR_I2CAngleFailed 4
+#define ERR_ESPToldMe 5
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
@@ -144,6 +151,7 @@ extern volatile uint8_t CMD_ID;
 #define LIN_PWM_DutyReg_2 SDC2      // generator 2, secondary
 #define LIN_PWM_DutyReg_3 SDC1      // generator 1, secondary
 // ROT PWM full range 1024 (SPHASEx, PHASEx)
+// UPDATED ROT PWM RANGE TO 180 FOR CURRENT CHOPPING FREQUENCY MATCH
 // LIN PWM limited to 1024 (SPHASEx)
 
 // Duty cycle selector
@@ -191,29 +199,35 @@ extern volatile uint8_t CMD_ID;
 #define ROT_DIR_2 LATCbits.LATC7
 #define ROT_DIR_3 LATAbits.LATA10
 
-#define MotRot_AngleRange 240       // overall range (degrees)
+#define MotRot_AngleIntMIN 600      // minimum input range in degrees *10 (uint16_t)
+#define MotRot_AngleIntMAX 3000      // maximum input range in degrees *10 (uint16_t)
 #define MotRot_OkRange 15           // +- (0.1*degrees) (automatic CMD update)
 
 #define MotRot_PID_period 0.01f     // timer period
-#define MotRot_PID_kP 153.0f        // proportional gain
-#define MotRot_PID_kI 53.9f         // integral gain
-#define MotRot_PID_kD 3.4f          // derivative gain
-#define MotRot_PID_Dmax 1024        // derivative limit
-#define MotRot_PID_Imax 1024        // integral limit
-#define MotRot_PID_Max 1024         // duty cycle limit
+#define MotRot_PID_freq 100.0f      // timer period
+#define MotRot_PID_kP 26.9f        // proportional gain (was 153)
+#define MotRot_PID_kI 9.5f         // integral gain (was 53.9)
+#define MotRot_PID_kD 0.6f          // derivative gain (was 3.4))
+#define MotRot_PID_Dmax 180.0f      // derivative limit (was 1024)
+#define MotRot_PID_Imax 180.0f      // integral limit (was 1024)
+#define MotRot_PID_Max 180.0f       // duty cycle limit (was 1024)
+#define MotRot_PID_OneOverMax 0.0055556f
 
-#define MotRot_SPD_kP 60.0f         // speed control proportional gain
-#define MotRot_SPD_kI 15.0f         // speed control integral gain
-#define MotRot_SPD_kD 8.0f          // speed control derivative gain
-#define MotRot_SPD_Imax 1024        // speed integral limit
-#define MotRot_SPD_Max 1024         // speed duty cycle limit
-#define MotRot_SpeedInit 255          // limit speed at start-up (/255)
-#define MotRot_SpeedMax 60.0f         // max speed (degrees/second) (60 @tau=149)
+//#define MotRot_SPD_kP 60.0f         // speed control proportional gain
+//#define MotRot_SPD_kI 15.0f         // speed control integral gain
+//#define MotRot_SPD_kD 8.0f          // speed control derivative gain
+#define MotRot_SPD_Pmax 180.0f        // speed integral limit
+#define MotRot_SPD_Imax 180.0f        // speed integral limit
+#define MotRot_SPD_Dmax 180.0f        // speed integral limit
+#define MotRot_SPD_Max 180.0f         // speed duty cycle limit
+#define MotRot_SPD_OneOverMax 0.0055556f
+#define MotRot_SpeedInit 100          // limit speed at start-up (/100)
+#define MotRot_SpeedMax 58.3f         // max speed (degrees/second) (@tau=149)
 
 // Maxon motor torque limit - 237 stall, 149 GPX safe, 63 backdrive safe
 #define MotRot_TorqueLimit 149      // (/255)
 #define MotRot_WiggleTime 15        // seconds
-#define MotRot_WiggleTorque 80      // wiggle torque limit (/255)
+#define MotRot_WiggleTorque 40      // wiggle torque limit (/255)
 #define MotRot_DefaultDrvInterval 5 // drv commands hold for 1 second by default
 #define MotRot_DrvCplPushInterval 100 // push interval at 20Hz (< SMA_Period_2)
 
@@ -221,12 +235,13 @@ extern volatile uint8_t CMD_ID;
 /* ******************** I2C ************************************************* */
 #define SLAVE_I2C_GENERIC_RETRY_MAX 5
 #define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT 20
-
+// IF > 255 must change timeouts to uint16_t in all i2c
 
 /* ******************** ENCODERS AS5048B ************************************ */
 #define AS5048B_Address 0x40
 #define AS5048B_Reg_AngleMSB 0xFE
-#define AS5048B_Res 16384.0
+#define AS5048B_Res 16384.0f
+#define AS5048B_360OverRes 0.02197265625f
 
 
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */

@@ -4,10 +4,10 @@ volatile bool DAC_Flag[3] = {false, false, false};
 volatile uint8_t DAC_Value[3] = {0, 0, 0};
 
 void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
-    I2C1_MESSAGE_STATUS status;
-    I2C1_TRANSACTION_REQUEST_BLOCK TRB;
-    uint8_t *pWrite, writeBuffer[3], nCount = 3;
-    uint16_t timeOut, slaveTimeOut;
+    static I2C1_MESSAGE_STATUS status;
+    static I2C1_TRANSACTION_REQUEST_BLOCK TRB;
+    static uint8_t *pWrite, writeBuffer[3], nCount = 3;
+    uint8_t timeOut = 0, slaveTimeOut = 0;
     
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
@@ -20,9 +20,6 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
     
     // build TRB for writing
     I2C1_MasterWriteTRBBuild(&TRB, pWrite, nCount, DAC5574_ADDRESS);
-    
-    timeOut = 0;
-    slaveTimeOut = 0;
 
     while (status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
@@ -30,23 +27,19 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
 
         // wait for the message to be sent or status has changed.
         while(status == I2C1_MESSAGE_PENDING) {
-            // add some delay here
-            __delay_us(1);
+            __delay_us(1); // add some delay here
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT)
-                break;//return (0);
-            else
-                slaveTimeOut++;
+            if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
+                slaveTimeOut = 0;
+                break;
+            } else slaveTimeOut++;
         }
 
-        if (status == I2C1_MESSAGE_COMPLETE)
-            break;
+        if (status == I2C1_MESSAGE_COMPLETE) break;
 
         // check for max retry and skip this byte
-        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX)
-            break;//return (0);
-        else
-            timeOut++;
+        if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
+        else timeOut++;
         
         __delay_us(1);
     }
