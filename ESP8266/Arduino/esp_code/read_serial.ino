@@ -11,7 +11,7 @@ void readSerial()
     publish("ERR: OVERRUN");
     return;    
   }
-  while(Serial.available() && (bytes_read < 32))
+  while(Serial.available() && (bytes_read < 64))
   { 
     static int serial_case = 0;
     static bool alloc = true;    
@@ -364,6 +364,27 @@ bool stateInfo(uint8_t c)
   }  
 
   switch (state) {  //request
+    case 0:
+      if ((c == char(END_BYTE)) && (count == 2))
+      {
+        sprintf(serial_packet, "ERR: Code = %d", int(storage[0])); 
+        publish(serial_packet);
+        sprintf(publishName, "%c/p", clientLetter);
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;          
+      } else if (count == 1) {
+        storage[0]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 17");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
 
     case 12:
       if (c == char(END_BYTE))

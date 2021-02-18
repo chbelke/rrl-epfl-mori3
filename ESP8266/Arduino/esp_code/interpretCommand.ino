@@ -270,6 +270,10 @@ void commands(uint8_t* payload, unsigned int len)
       setRotTorque(payload, len);  
       break;
 
+    case 58:  //rer
+      requestErrorCode();  
+      break;      
+
     default:
       publish("ERR: Command not understood");
   }
@@ -341,6 +345,11 @@ void requestOrientation()
 void requestWifiEdge()
 {
   serial_write_one(REQ_CMD_WEDGE);
+}
+
+void requestErrorCode()
+{
+  serial_write_one(REQ_CMD_ERROR);
 }
 
 
