@@ -6,7 +6,7 @@
 #include "Acts_CPL.h"
 #include "Mnge_PWM.h"
 
-volatile int k = 0;
+//volatile int k = 0;
 void Button_Eval() {
     Flg_Button = false;
 //    k = k + 1;
@@ -32,6 +32,6 @@ void Button_Eval() {
 //    }
 }
 
-int Button_ReturnState() {
-    return k;
-}
+//int Button_ReturnState() {
+////    return k;
+//}

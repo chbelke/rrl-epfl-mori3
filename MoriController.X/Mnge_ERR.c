@@ -5,9 +5,13 @@
 #include "Coms_ESP.h"
 #include "Coms_123.h"
 
-void Mnge_ERR_ActivateStop(){
+uint8_t errCode = 0;
+
+void Mnge_ERR_ActivateStop(uint8_t code){
     if (!FLG_Emergency){
         FLG_Emergency = true;
+        errCode = code;
+        
         uint8_t e;
         for (e = 0; e < 3; e++)
             Coms_123_Disconnected(e);
@@ -25,4 +29,8 @@ void Mnge_ERR_ActivateStop(){
         
         Coms_ESP_TurnOnWifi();
     }
+}
+
+uint8_t Mnge_ERR_GetErrorCode(){
+    return errCode;
 }

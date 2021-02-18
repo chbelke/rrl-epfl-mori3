@@ -10,7 +10,8 @@
 
 #include "mcc_generated_files/system.h"
 
-void Mnge_ERR_ActivateStop();
+void Mnge_ERR_ActivateStop(uint8_t);
+uint8_t Mnge_ERR_GetErrorCode();
 
 #endif	/* MNGE_ERR_H */
 

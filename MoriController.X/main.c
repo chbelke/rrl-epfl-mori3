@@ -156,11 +156,11 @@ int main(void) {
 
     while (1){
         Tmrs_CBK_Evaluate_Timers();
-        Coms_123_Eval(0);
+        Coms_123_Eval(2);
         Tmrs_CBK_Evaluate_Timers();
         Coms_123_Eval(1);
         Tmrs_CBK_Evaluate_Timers();
-        Coms_123_Eval(2);
+        Coms_123_Eval(0);
         Tmrs_CBK_Evaluate_Timers();
         Coms_ESP_Eval();
         Tmrs_CBK_Evaluate_Timers();

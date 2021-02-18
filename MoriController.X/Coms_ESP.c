@@ -103,7 +103,7 @@ void Coms_ESP_Eval() { // called in main
 
         case 1:
             if (EspIn == ESP_End)
-                Mnge_ERR_ActivateStop();
+                Mnge_ERR_ActivateStop(ERR_ESPToldMe);
             EspInCase = 0;
             break;
             
@@ -147,6 +147,10 @@ bool Coms_ESP_Handle(uint8_t byte) {
     
     //Note: can use Coms_CMD_Reset; using pointers to local variables
     switch (state) {
+        case 0:
+            if (Coms_ESP_SendErrorCode(byte))
+                return Coms_CMD_Reset(&state, &alloc); 
+            break;
         case 1:
             if (Coms_ESP_SetDatalogFlags(byte))
                 return Coms_CMD_Reset(&state, &alloc); 
@@ -371,7 +375,8 @@ void Coms_ESP_Request_Orient() {
 void Coms_ESP_Write_Orient() {
     uint8_t i;
     for (i = 0; i < 3; i++) {    
-        UART4_Write16(Sens_ACC_GetAngle(i));
+//        UART4_Write16(Sens_ACC_GetAngle(i));
+        UART4_Write16(Acts_ROT_TempSPDMonitor(i));
     }
 }
 
@@ -450,15 +455,18 @@ void Coms_ESP_StateUpdate(void) {
     uint8_t ESP_Update_Reset_Trigger = 0;    
     if (ESP_DataLog_Time_Angle >= ESP_Update_Delay_Angle) {
         ESP_Update_Reset_Trigger |= 0b00000001;
-        ESP_DataLog_Time_Angle -= ESP_Update_Delay_Angle;
+//        ESP_DataLog_Time_Angle %= ESP_Update_Delay_Angle;
+        ESP_DataLog_Time_Angle = 0;
     }
     if (ESP_DataLog_Time_Edge >= ESP_Update_Delay_Edge) {
         ESP_Update_Reset_Trigger |= 0b00000010;
-        ESP_DataLog_Time_Edge -= ESP_Update_Delay_Edge;
+//        ESP_DataLog_Time_Edge %= ESP_Update_Delay_Edge;
+        ESP_DataLog_Time_Edge = 0;
     }
     if (ESP_DataLog_Time_Orient >= ESP_Update_Delay_Orient) {
         ESP_Update_Reset_Trigger |= 0b00000100;
-        ESP_DataLog_Time_Orient -= ESP_Update_Delay_Orient;
+//        ESP_DataLog_Time_Orient %= ESP_Update_Delay_Orient;
+        ESP_DataLog_Time_Orient = 0;
     }
 
     // If no fields need update
@@ -544,4 +552,15 @@ bool Coms_ESP_SetClientLetter(uint8_t byte) {
         Coms_ESP_OverflowError();
     }
     return true;
+}
+
+bool Coms_ESP_SendErrorCode(uint8_t byte){
+    if (byte == ESP_End) {
+        UART4_Write(0b10000000);
+        UART4_Write(Mnge_ERR_GetErrorCode());
+        UART4_Write(ESP_End);
+    } else {
+        Coms_ESP_OverflowError();
+    }
+    return true;    
 }

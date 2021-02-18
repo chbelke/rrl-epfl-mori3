@@ -5,20 +5,20 @@
 #include "dsp.h"
 
 // Accelerometer MMA8452Q
-int16_t ACC_Data[3] = {0, 0, 0};
+volatile int16_t ACC_Data[3] = {0, 0, 0};
 const float smol_PI = 3.141592;
 const float inv_Pi_times_180 = 57.2957795;
 const float epsilon = 1e-10;
 
 void Sens_ACC_Setup(void) {
-    static uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
-    static uint8_t MMAinitReg2[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_ACTV};
-    static uint8_t MMAinitReg3[2] = {MMA8452Q_CTRL_REG2_ADDR, MMA8452Q_CTRL_REG2_RNGE};
+    uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
+    uint8_t MMAinitReg2[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_ACTV};
+    uint8_t MMAinitReg3[2] = {MMA8452Q_CTRL_REG2_ADDR, MMA8452Q_CTRL_REG2_RNGE};
     
-    I2C1_MESSAGE_STATUS status;
-    I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
-    uint8_t *pWrite, writeBuffer[2], nCount, iCount;
-    uint16_t timeOut, slaveTimeOut;
+    static I2C1_MESSAGE_STATUS status;
+    static I2C1_TRANSACTION_REQUEST_BLOCK TRB[3];
+    static uint8_t *pWrite, writeBuffer[2], nCount, iCount;
+    uint8_t timeOut = 0, slaveTimeOut = 0;
 
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
@@ -44,32 +44,25 @@ void Sens_ACC_Setup(void) {
     // build second TRB for writing
     I2C1_MasterWriteTRBBuild(&TRB[2], pWrite, nCount, MMA8452Q_Address);
 
-    timeOut = 0;
-    slaveTimeOut = 0;
-
     while (status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
         I2C1_MasterTRBInsert(3, TRB, &status);
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
-            // add some delay here
-            __delay_us(1);
+            __delay_us(1); // add some delay here
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT)
-                break; //return (0);
-            else
-                slaveTimeOut++;
+            if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
+                slaveTimeOut = 0;
+                break;
+            } else slaveTimeOut++;
         }
 
-        if (status == I2C1_MESSAGE_COMPLETE)
-            break;
+        if (status == I2C1_MESSAGE_COMPLETE) break;
 
         // check for max retry and skip this byte
-        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX)
-            break; //return (0);
-        else
-            timeOut++;
+        if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
+        else timeOut++;
 
         __delay_us(1);
     }
@@ -80,7 +73,7 @@ void Sens_ACC_Read(void) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
     static uint8_t writeBuffer, readBuffer[6], *pWrite, *pRead;
-    static uint16_t timeOut, slaveTimeOut;
+    uint8_t timeOut = 0, slaveTimeOut = 0;
 
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
@@ -94,32 +87,25 @@ void Sens_ACC_Read(void) {
     I2C1_MasterWriteTRBBuild(&TRB[0], pWrite, 1, MMA8452Q_Address);
     I2C1_MasterReadTRBBuild(&TRB[1], pRead, 6, MMA8452Q_Address);
 
-    timeOut = 0;
-    slaveTimeOut = 0;
-
     while (status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
         I2C1_MasterTRBInsert(2, TRB, &status);
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
-            // add some delay here
-            __delay_us(1);
+            __delay_us(1); // add some delay here
             // timeout checking
-            if (slaveTimeOut == SLAVE_I2C_GENERIC_DEVICE_TIMEOUT)
-                break; //return (0);
-            else
-                slaveTimeOut++;
+            if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
+                slaveTimeOut = 0;
+                break;
+            } else slaveTimeOut++;
         }
 
-        if (status == I2C1_MESSAGE_COMPLETE)
-            break;
+        if (status == I2C1_MESSAGE_COMPLETE) break;
 
         // check for max retry and skip this byte
-        if (timeOut == SLAVE_I2C_GENERIC_RETRY_MAX)
-            break; //return (0);
-        else
-            timeOut++;
+        if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
+        else timeOut++;
 
         __delay_us(1);
     }
@@ -142,12 +128,14 @@ uint16_t Sens_ACC_GetAngle(uint8_t angle){
          
     // 0 = alpha (about x), 1 = beta (about y), 2 = gamma (about z); right hand rule
     if (angle == 0){
-        float sqrt_denom = fast_sqrt(accX*accX + accZ*accZ);
+//        float sqrt_denom = fast_sqrt(accX*accX + accZ*accZ);
+        float sqrt_denom = sqrt(accX*accX + accZ*accZ);
         if(sqrt_denom < epsilon)
             return (uint16_t) 0;
         return (uint16_t) 10.f*((atan2_approximation1(accY, sqrt_denom)*inv_Pi_times_180) + 180.f);
     } else if (angle == 1) {
-        float sqrt_denom = fast_sqrt(accY*accY + accZ*accZ);
+//        float sqrt_denom = fast_sqrt(accY*accY + accZ*accZ);
+        float sqrt_denom = sqrt(accY*accY + accZ*accZ);
         if(sqrt_denom < epsilon)
             return (uint16_t) 0;
         return (uint16_t) 10.f*(-(atan2_approximation1(accX, sqrt_denom)*inv_Pi_times_180) + 180.f);
@@ -189,18 +177,18 @@ float atan2_approximation1(float y, float x)
 }
 
 // From below:
-// https://codegolf.stackexchange.com/questions/85555/the-fastest-square-root-calculator
-float fast_sqrt(float n) {
-    n = 1.0f / n;
-    long i;
-    float x, y;
-
-    x = n * 0.5f;
-    y = n;
-    i = *(long *)&y;
-    i = 0x5f3759df - (i >> 1);
-    y = *(float *)&i;
-    y = y * (1.5f - (x * y * y));
-
-    return y;
-}
+//// https://codegolf.stackexchange.com/questions/85555/the-fastest-square-root-calculator
+//float fast_sqrt(float n) {
+//    n = 1.0f / n;
+//    long i;
+//    float x, y;
+//
+//    x = n * 0.5f;
+//    y = n;
+//    i = *(long *)&y;
+//    i = 0x5f3759df - (i >> 1);
+//    y = *(float *)&i;
+//    y = y * (1.5f - (x * y * y));
+//
+//    return y;
+//}
