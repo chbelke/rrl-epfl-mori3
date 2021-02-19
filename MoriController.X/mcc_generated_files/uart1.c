@@ -114,8 +114,8 @@ void UART1_Initialize(void)
     U1MODE = (0x8008 & ~(1<<15));  // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U1STA = 0x00;
-    // BaudRate = 115200; Frequency = 3686400 Hz; BRG 7; 
-    U1BRG = 0x07;
+    // BaudRate = 460800; Frequency = 3686400 Hz; BRG 1; 
+    U1BRG = 0x01;
 
     txHead = txQueue;
     txTail = txQueue;
@@ -246,6 +246,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt( void )
     {
         U1STAbits.OERR = 0;
     }
+    
     IFS4bits.U1EIF = 0;
 }
 

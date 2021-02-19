@@ -113,8 +113,8 @@ void UART2_Initialize(void)
     U2MODE = (0x8008 & ~(1<<15));  // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U2STA = 0x00;
-    // BaudRate = 115200; Frequency = 3686400 Hz; BRG 7; 
-    U2BRG = 0x07;
+    // BaudRate = 460800; Frequency = 3686400 Hz; BRG 1; 
+    U2BRG = 0x01;
     
     txHead = txQueue;
     txTail = txQueue;
@@ -244,6 +244,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2ErrInterrupt( void )
     {
         U2STAbits.OERR = 0;
     }   
+    
     IFS4bits.U2EIF = 0;
 }
 
