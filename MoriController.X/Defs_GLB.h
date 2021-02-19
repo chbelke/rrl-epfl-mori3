@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'F' // module name by letter
+#define MODULE 'I' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -57,7 +57,9 @@
 #define ERR_NeighbourToldMe 2
 #define ERR_NeighbourConAfterAct 3
 #define ERR_I2CAngleFailed 4
-#define ERR_ESPToldMe 5
+#define ERR_I2CLedDriverFailed 5
+#define ERR_I2CAccelerometerFailed 6
+#define ERR_ESPToldMe 99
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered

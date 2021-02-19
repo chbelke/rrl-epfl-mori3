@@ -1,6 +1,8 @@
+#include <string.h>
 #include "Sens_ACC.h"
 #include "Defs_GLB.h"
 #include "Mnge_RGB.h"
+#include "Mnge_ERR.h"
 #include "math.h"
 #include "dsp.h"
 
@@ -66,7 +68,9 @@ void Sens_ACC_Setup(void) {
 
         __delay_us(1);
     }
-
+    
+    if (status != I2C1_MESSAGE_COMPLETE)
+        Mnge_ERR_ActivateStop(0, ERR_I2CAccelerometerFailed);
 }
 
 void Sens_ACC_Read(void) {
@@ -109,6 +113,9 @@ void Sens_ACC_Read(void) {
 
         __delay_us(1);
     }
+    
+    if (status != I2C1_MESSAGE_COMPLETE)
+        Mnge_ERR_ActivateStop(0, ERR_I2CAccelerometerFailed);
 
     uint8_t i;
     for (i = 0; i < 5; i += 2) {
@@ -128,14 +135,14 @@ uint16_t Sens_ACC_GetAngle(uint8_t angle){
          
     // 0 = alpha (about x), 1 = beta (about y), 2 = gamma (about z); right hand rule
     if (angle == 0){
-//        float sqrt_denom = fast_sqrt(accX*accX + accZ*accZ);
-        float sqrt_denom = sqrt(accX*accX + accZ*accZ);
+        float sqrt_denom = fast_sqrt(accX*accX + accZ*accZ);
+//        float sqrt_denom = sqrtf(accX*accX + accZ*accZ);
         if(sqrt_denom < epsilon)
             return (uint16_t) 0;
         return (uint16_t) 10.f*((atan2_approximation1(accY, sqrt_denom)*inv_Pi_times_180) + 180.f);
     } else if (angle == 1) {
-//        float sqrt_denom = fast_sqrt(accY*accY + accZ*accZ);
-        float sqrt_denom = sqrt(accY*accY + accZ*accZ);
+        float sqrt_denom = fast_sqrt(accY*accY + accZ*accZ);
+//        float sqrt_denom = sqrtf(accY*accY + accZ*accZ);
         if(sqrt_denom < epsilon)
             return (uint16_t) 0;
         return (uint16_t) 10.f*(-(atan2_approximation1(accX, sqrt_denom)*inv_Pi_times_180) + 180.f);
@@ -177,18 +184,20 @@ float atan2_approximation1(float y, float x)
 }
 
 // From below:
-//// https://codegolf.stackexchange.com/questions/85555/the-fastest-square-root-calculator
-//float fast_sqrt(float n) {
-//    n = 1.0f / n;
-//    long i;
-//    float x, y;
-//
-//    x = n * 0.5f;
-//    y = n;
+// https://codegolf.stackexchange.com/questions/85555/the-fastest-square-root-calculator
+float fast_sqrt(float n) {
+    n = 1.0f / n;
+    long i;
+    float x, y;
+
+    x = n * 0.5f;
+    y = n;
 //    i = *(long *)&y;
-//    i = 0x5f3759df - (i >> 1);
+    memcpy(&i, &y, sizeof y);
+    i = 0x5f3759df - (i >> 1);
+    memcpy(&y, &i, sizeof i);
 //    y = *(float *)&i;
-//    y = y * (1.5f - (x * y * y));
-//
-//    return y;
-//}
+    y = y * (1.5f - (x * y * y));
+
+    return y;
+}

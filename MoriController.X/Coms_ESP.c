@@ -18,18 +18,13 @@
 #include "Sens_ENC.h"
 
 uint8_t EspInCase = 0; // switch case variable
-uint8_t EspInAloc = 0; // incoming allocation byte (explanation below)
-uint8_t EspInBits = 0; // bit count in allocation byte
-uint8_t EspInByts = 0; // incoming byte count
-uint16_t EspInLost = 0; // counting lost byte instances since start
-uint16_t EspIn0End = 0; // counting instances of no end byte since start
 
 int8_t DrivePWM[3] = {0, 0, 0}; // manual drive mode PWM values by edge
 uint8_t DriveSpd, DriveCrv = 0; // automatic drive mode speed and curve
 
 uint8_t RgbPWM[3] = {0, 0, 0}; // rgb led values
 
-uint8_t ESP_IDexpected[6] = {ID1, ID2, ID3, ID4, ID5, ID6};
+const uint8_t ESP_IDexpected[6] = {ID1, ID2, ID3, ID4, ID5, ID6};
 bool Flg_Booted_Up = false;
 
 uint8_t WIFI_LED_STATE[3] = {0, 0, 0};
@@ -61,7 +56,6 @@ void Coms_ESP_Eval() { // called in main
         return;
     }
        
-    static uint8_t EspInCase = 0;
     uint8_t EspIn = 50;
     if(EspInCase != 7)
         EspIn = UART4_Read(); // Incoming byte
@@ -103,7 +97,7 @@ void Coms_ESP_Eval() { // called in main
 
         case 1:
             if (EspIn == ESP_End)
-                Mnge_ERR_ActivateStop(ERR_ESPToldMe);
+                Mnge_ERR_ActivateStop(0, ERR_ESPToldMe);
             EspInCase = 0;
             break;
             
@@ -375,8 +369,8 @@ void Coms_ESP_Request_Orient() {
 void Coms_ESP_Write_Orient() {
     uint8_t i;
     for (i = 0; i < 3; i++) {    
-//        UART4_Write16(Sens_ACC_GetAngle(i));
-        UART4_Write16(Acts_ROT_TempSPDMonitor(i));
+        UART4_Write16(Sens_ACC_GetAngle(i));
+//        UART4_Write16(Acts_ROT_TempSPDMonitor(i));
     }
 }
 
@@ -455,18 +449,18 @@ void Coms_ESP_StateUpdate(void) {
     uint8_t ESP_Update_Reset_Trigger = 0;    
     if (ESP_DataLog_Time_Angle >= ESP_Update_Delay_Angle) {
         ESP_Update_Reset_Trigger |= 0b00000001;
-//        ESP_DataLog_Time_Angle %= ESP_Update_Delay_Angle;
-        ESP_DataLog_Time_Angle = 0;
+        ESP_DataLog_Time_Angle %= ESP_Update_Delay_Angle;
+//        ESP_DataLog_Time_Angle = 0;
     }
     if (ESP_DataLog_Time_Edge >= ESP_Update_Delay_Edge) {
         ESP_Update_Reset_Trigger |= 0b00000010;
-//        ESP_DataLog_Time_Edge %= ESP_Update_Delay_Edge;
-        ESP_DataLog_Time_Edge = 0;
+        ESP_DataLog_Time_Edge %= ESP_Update_Delay_Edge;
+//        ESP_DataLog_Time_Edge = 0;
     }
     if (ESP_DataLog_Time_Orient >= ESP_Update_Delay_Orient) {
         ESP_Update_Reset_Trigger |= 0b00000100;
-//        ESP_DataLog_Time_Orient %= ESP_Update_Delay_Orient;
-        ESP_DataLog_Time_Orient = 0;
+        ESP_DataLog_Time_Orient %= ESP_Update_Delay_Orient;
+//        ESP_DataLog_Time_Orient = 0;
     }
 
     // If no fields need update
@@ -558,6 +552,7 @@ bool Coms_ESP_SendErrorCode(uint8_t byte){
     if (byte == ESP_End) {
         UART4_Write(0b10000000);
         UART4_Write(Mnge_ERR_GetErrorCode());
+        UART4_Write(Mnge_ERR_GetErrorEdge());
         UART4_Write(ESP_End);
     } else {
         Coms_ESP_OverflowError();

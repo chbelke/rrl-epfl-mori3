@@ -6,11 +6,13 @@
 #include "Coms_123.h"
 
 uint8_t errCode = 0;
+uint8_t errEdge = 0;
 
-void Mnge_ERR_ActivateStop(uint8_t code){
+void Mnge_ERR_ActivateStop(uint8_t edge, uint8_t code){
     if (!FLG_Emergency){
         FLG_Emergency = true;
         errCode = code;
+        errEdge = edge;
         
         uint8_t e;
         for (e = 0; e < 3; e++)
@@ -33,4 +35,8 @@ void Mnge_ERR_ActivateStop(uint8_t code){
 
 uint8_t Mnge_ERR_GetErrorCode(){
     return errCode;
+}
+
+uint8_t Mnge_ERR_GetErrorEdge(){
+    return errEdge;
 }

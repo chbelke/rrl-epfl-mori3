@@ -11,31 +11,27 @@
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
 uint8_t Speed_100[3] = {MotRot_SpeedInit, MotRot_SpeedInit, MotRot_SpeedInit};
-float Speed_DEG[3] = {(((float) MotRot_SpeedInit) / 100.0f) * MotRot_SpeedMax * MotRot_PID_period,
-    (((float) MotRot_SpeedInit) / 100.0f) * MotRot_SpeedMax * MotRot_PID_period,
-    (((float) MotRot_SpeedInit) / 100.0f) * MotRot_SpeedMax * MotRot_PID_period};
+float Speed_DEG[3] = {(((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period,
+    (((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period,
+    (((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period};
 uint8_t DrvInterval[3] = {0, 0, 0};
 float PID_I[3] = {0, 0, 0}; // integral error variable
-//float SPD_I[3] = {0, 0, 0}; // speed control integral
 
 volatile bool SPD_AvgFlag[3] = {false, false, false};
 volatile int8_t SPD_AvgOut[3] = {0, 0, 0};
 volatile int8_t SPD_AvgIn[3] = {0, 0, 0};
 
-bool OffsetUpdateFlag = false;
+volatile bool OffsetUpdateFlag = false;
 
 volatile int16_t SPD_PID_Monitor[3] = {0, 0, 0};
 
-uint8_t TMP_SpeedReg_GainD = 0;
-uint8_t TMP_SpeedReg_GainI = 15;
-uint8_t TMP_SpeedReg_GainP = 0;
-uint8_t TMP_Switch = 0;
+float TMP_SpeedReg_GainI = 15.0f;
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9f // output speed factor for non-primary wheels (tune curve)
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
-void Acts_ROT_Out(uint8_t edge, int16_t duty) {
+void Acts_ROT_Out(const uint8_t edge, int16_t duty) {
     if (!MODE_MotRot_Active || !FLG_MotRot_Active) duty = 0; // rotary motors off
     switch (edge) {
         case 0:
@@ -62,20 +58,13 @@ void Acts_ROT_Out(uint8_t edge, int16_t duty) {
 }
 
 /* ******************** ROTARY MOTOR PID ************************************ */
-void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
+void Acts_ROT_PID(const uint8_t edge, const float current, uint16_t target) {
     static float errorOld[3] = {0, 0, 0}; // previous error (derivative gain)
-//    static float outPOld[3] = {0, 0, 0}; // speed control switch detect variable
-//    static float errorSPDOld5[3] = {0, 0, 0};
-//    static float errorSPDOld4[3] = {0, 0, 0};
-//    static float errorSPDOld3[3] = {0, 0, 0};
-//    static float errorSPDOld2[3] = {0, 0, 0};
-//    static float errorSPDOld1[3] = {0, 0, 0};
 
     // avoid bad control inputs
-    if (target < MotRot_AngleIntMIN) target = MotRot_AngleIntMIN;
-    else if (target > MotRot_AngleIntMAX) target = MotRot_AngleIntMAX;
+    target = clamp_ui16(target, MotRot_AngleIntMIN, MotRot_AngleIntMAX);
 
-    float error = ((float) target) * 0.1f - 180.0f - current;
+    const float error = ((float) target) * 0.1f - 180.0f - current;
 
     // avoid integral build up when far away
     if (fabsf(error) < 7.0f) // if error is >6.69, kp results in max (ignoring kd)
@@ -83,363 +72,67 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     else PID_I[edge] = 0;
 
     // limit integral component
-    if (PID_I[edge] < -MotRot_PID_Imax) PID_I[edge] = -MotRot_PID_Imax;
-    else if (PID_I[edge] > MotRot_PID_Imax) PID_I[edge] = MotRot_PID_Imax;
+    PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax, MotRot_PID_Imax);
 
     // derivative component
     float PID_D = (error - errorOld[edge]) * MotRot_PID_freq;
     errorOld[edge] = error;
 
     // limit derivative component
-    if (PID_D < -MotRot_PID_Dmax) PID_D = -MotRot_PID_Dmax;
-    else if (PID_D > MotRot_PID_Dmax) PID_D = MotRot_PID_Dmax;
+    PID_D = clamp_f(PID_D, -MotRot_PID_Dmax, MotRot_PID_Dmax);
 
     // PID output
     float outP = MotRot_PID_kP * error + MotRot_PID_kI * PID_I[edge] + MotRot_PID_kD * PID_D;
 
     // limit duty cycle
-    if (outP < -MotRot_PID_Max) outP = -MotRot_PID_Max;
-    else if (outP > MotRot_PID_Max) outP = MotRot_PID_Max;
+    outP = clamp_f(outP, -MotRot_PID_Max, MotRot_PID_Max);
 
     float OUT = outP; // position pwm output
     
-    static uint16_t loopsSinceLastOffset = 0;
-    loopsSinceLastOffset++;
-    if (OffsetUpdateFlag){
-        SPD_PID_Monitor[1] = loopsSinceLastOffset;
-        loopsSinceLastOffset = 0;
-        OffsetUpdateFlag = false;
-    }
-
     // speed control
-//    if ((Speed_100[edge] != 100) && (fabs(error) > 1.0f)) {
     if ((Speed_100[edge] != 100) && (fabsf(error) >= 1.0f)) {
         static uint16_t targetOld = 0;
+        static uint8_t newTargetCount[3] = {0, 0, 0};
         static float SpeedReg_I[3] = {0, 0, 0};
-//        static float SpeedReg_D0[3] = {0, 0, 0};
-//        static float SpeedReg_D1[3] = {0, 0, 0};
-//        static float SpeedReg_D2[3] = {0, 0, 0};
-//        static float SpeedReg_Delta[3][5] = {
-//            {0, 0, 0, 0, 0},
-//            {0, 0, 0, 0, 0},
-//            {0, 0, 0, 0, 0}
-//        };
-        
-        // initialise speed regulation with feed forward
-//        if (target != targetOld){
-//            SpeedReg_I[edge] = sgn(outP) * MotRot_SPD_Max * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
-////            SpeedReg_D0[edge] = 0;
-//            targetOld = target;
-//        }
-        
-        
-//        uint8_t i;
-//        for (i = 0; i < 4; i++){
-//            SpeedReg_Delta[edge][i] = SpeedReg_Delta[edge][i+1];
-//        }
-//        SpeedReg_Delta[edge][4] = Sens_ENC_GetDelta(edge);
-        
-//        float angleDelta = Sens_ENC_GetDelta(edge);
-//        float angleDelta = 0.2f * (SpeedReg_Delta[edge][0]
-//                + SpeedReg_Delta[edge][1] + SpeedReg_Delta[edge][2]
-//                + SpeedReg_Delta[edge][3] + SpeedReg_Delta[edge][4]);
-        
-//        // only update speed control every 5 iterations (= 20Hz))
-//        if (SpeedReg_Count[edge] < 4){
-//            SpeedReg_Delta[edge][SpeedReg_Count[edge]] = Sens_ENC_GetDelta(edge);
-//            SpeedReg_Count[edge]++;
-//        } else {
-//            SpeedReg_Delta[edge][SpeedReg_Count[edge]] = Sens_ENC_GetDelta(edge);
-//            SpeedReg_Count[edge] = 0;
-//            
-//            float angleDelta = 0.2f * (SpeedReg_Delta[edge][0]
-//                    + SpeedReg_Delta[edge][1] + SpeedReg_Delta[edge][2]
-//                    + SpeedReg_Delta[edge][3] + SpeedReg_Delta[edge][4]);
-        
-        
-        /**********************************************************************/
+
         if (target != targetOld){
-//            SpeedReg_I[edge] = sgn(outP) * MotRot_SPD_Max * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
             SpeedReg_I[edge] = copysgn(MotRot_SPD_Max, outP) * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
-            
             targetOld = target;
         }
-        float angleDelta = Sens_ENC_GetDelta(edge);
 
-        
-        float angleDeltaOut = angleDelta * 500.0f;
-        SPD_PID_Monitor[0] = (int16_t) angleDeltaOut;
+        // speed PID components
+        SpeedReg_I[edge] += TMP_SpeedReg_GainI * (copysgn(Speed_DEG[edge], outP) - Sens_ENC_GetDelta(edge));
 
-//        float errorSPD = sgn(outP) * Speed_DEG[edge] - angleDelta;        
-        float errorSPD = copysgn(Speed_DEG[edge], outP) - angleDelta;
-        
-            // speed PID components
-//            SpeedReg_P0[edge] = 10.0f * ((float)TMP_SpeedReg_GainP) * errorSPD;
-        SpeedReg_I[edge] += ((float)TMP_SpeedReg_GainI) * errorSPD;
-//            SpeedReg_D0[edge] = ((float)TMP_SpeedReg_GainD) * (errorSPD - errorSPDOld1[edge]) / MotRot_PID_period;
-//        errorSPDOld1[edge] = errorSPD;
-            
-
-//        // limit proportional
-//        if (SpeedReg_P0[edge] < -MotRot_SPD_Pmax) SpeedReg_P0[edge] = -MotRot_SPD_Pmax;
-//        else if (SpeedReg_P0[edge] > MotRot_SPD_Pmax) SpeedReg_P0[edge] = MotRot_SPD_Pmax;
-        
         // limit integral
-        if (SpeedReg_I[edge] < -MotRot_SPD_Imax) SpeedReg_I[edge] = -MotRot_SPD_Imax;
-        else if (SpeedReg_I[edge] > MotRot_SPD_Imax) SpeedReg_I[edge] = MotRot_SPD_Imax;
-        //ok
-        int16_t AverageSpeedOut = (int16_t)SpeedReg_I[edge] / 2;
-        Acts_ROT_SetSPDAvgOut(edge, (int8_t)AverageSpeedOut);
-//        Acts_ROT_SetSPDAvgOut(edge, 0);
-        
-        // limit derivative
-//        if (SpeedReg_D0[edge] < -MotRot_SPD_Dmax) SpeedReg_D0[edge] = -MotRot_SPD_Dmax;
-//        else if (SpeedReg_D0[edge] > MotRot_SPD_Dmax) SpeedReg_D0[edge] = MotRot_SPD_Dmax;
-        
-        // speed controller output
-//        float outS = SpeedReg_P0[edge] + SpeedReg_I[edge] + SpeedReg_D0[edge];
-//        float outS = SpeedReg_I[edge] + SpeedReg_D0[edge];
-        float outS = SpeedReg_I[edge];
-//        
-////        if (outS < -MotRot_SPD_Max) outS = -MotRot_SPD_Max;
-////        else if (outS > MotRot_SPD_Max) outS = MotRot_SPD_Max;
-//                
-        // ensure speed never changes target direction from position PID
-        if ((OUT > 0) && (outS < 0)) outS = 0;
-        else if ((OUT < 0) && (outS > 0)) outS = 0;
+        SpeedReg_I[edge] = clamp_f(SpeedReg_I[edge], -MotRot_SPD_Imax, MotRot_SPD_Imax);
+
+        Acts_ROT_SetSPDAvgOut(edge, (int8_t)(SpeedReg_I[edge] * 0.5f));
 
         // speed controller output scaled by position controller output
-//        OUT = fabs(outP) * MotRot_PID_OneOverMax * outS;
-        OUT = fabsf(outP) * MotRot_PID_OneOverMax * outS;
-//        
-////        SPD_PID_Monitor[0] = (int16_t)(Sens_ENC_GetDelta(edge) * 500);
-////        static uint16_t loopsSinceLastOffset = 0;
-////        loopsSinceLastOffset++;
-////        if (OffsetUpdateFlag){
-////            SPD_PID_Monitor[1] = loopsSinceLastOffset;
-////            loopsSinceLastOffset = 0;
-////            OffsetUpdateFlag = false;
-////        }
-//        
-        SPD_PID_Monitor[2] = (int16_t)SpeedReg_I[edge];
-////        SPD_PID_Monitor[2] = (int16_t)SpeedReg_D0[edge];
-//
+        OUT = fabsf(outP) * MotRot_PID_OneOverMax * SpeedReg_I[edge];
+        
+        // ensure speed never changes target direction from position PID
+        if ((OUT > 0) && (SpeedReg_I[edge] < 0)) OUT = 0;
+        else if ((OUT < 0) && (SpeedReg_I[edge] > 0)) OUT = 0;
+        
+        SPD_PID_Monitor[0] = (int16_t) (Sens_ENC_GetDelta(edge) * 500.0f);
+        SPD_PID_Monitor[2] = (int16_t) SpeedReg_I[edge];
+
         if (SPD_AvgFlag[edge]){
-            SPD_AvgFlag[edge] = false;
-            SpeedReg_I[edge] = SpeedReg_I[edge] * 0.5f + Acts_ROT_GetSPDAvgNeighbour(edge);
-//            SpeedReg_I[edge] = SpeedReg_I[edge] * 0.5f + SpeedReg_I[edge] * 0.5f;
+            if (newTargetCount[edge] >= 7){
+                SPD_AvgFlag[edge] = false;
+                SpeedReg_I[edge] = SpeedReg_I[edge] * 0.5f + Acts_ROT_GetSPDAvgNeighbour(edge);
+                newTargetCount[edge] = 0;
+            } else {
+                newTargetCount[edge]++;
+            }
         }
-        /**********************************************************************/
-        
-//        float delta = Sens_ENC_GetDelta(edge); // change in angle reading
-        // Speed_DEG is const, sign dictates direction of outP
-//        float errorSPD = ((float)sgn(outP)) * Speed_DEG[edge] - delta;
-//        
-//        SPD_I[edge]  += ((float)TMP_SpeedReg_GainI) * errorSPD * MotRot_PID_period;
-//        float SPD_D = ((float)TMP_SpeedReg_GainD) * (errorSPD - errorSPDOld1[edge]) / MotRot_PID_period;
-//        
-//        if (SPD_I[edge] < -MotRot_SPD_Imax) SPD_I[edge] = -MotRot_SPD_Imax;
-//        else if (SPD_I[edge] > MotRot_SPD_Imax) SPD_I[edge] = MotRot_SPD_Imax;
-//        
-//        if (SPD_D < -MotRot_SPD_Dmax) SPD_D = -MotRot_SPD_Dmax;
-//        else if (SPD_D > MotRot_SPD_Dmax) SPD_D = MotRot_SPD_Dmax;
-//        
-//        float outS = 10.f * TMP_SpeedReg_GainP * errorSPD + SPD_I[edge] + SPD_D;
-//        
-//        OUT = (OUT / ((float)MotRot_PID_Max)) * outS;
-//        
-        /**********************************************************************/
-        
-//        // first errorSPD will be Speed_DEG
-//        // second errorSPD will likely be same direction as Speed_deg
-//        // Eventually, errorSPD is negative as initial speed is quite fast
-//        // feed forward of output speed (proportional to set speed)
-//        // Speed_100 causes outP to shrink to small (80 at 20 spd)
-////        OUT = outP * (((float) Speed_100[edge]) / 255.0);
-//        
-//        float errorSPD = ((float)sgn(outP)) * Speed_DEG[edge] - Sens_ENC_GetDelta(edge);
-//
-//        // initialise speed regulation to max when new target
-////        if ((TMP_Switch == 2) || (TMP_Switch == 3))
-////        if (target != targetOld) SpeedReg_I[edge] = sgn(OUT)*MotRot_SPD_Max - OUT;
-//        if (target != targetOld){
-//            SpeedReg_I[edge] = ((float)sgn(outP)) * MotRot_SPD_Max * (((float) Speed_100[edge]) / 255.0f);
-//            SpeedReg_D0[edge] = 0;
-//            SpeedReg_D1[edge] = 0;
-//            SpeedReg_D2[edge] = 0;
-//            SpeedReg_P0[edge] = 0;
-//            SpeedReg_P1[edge] = 0;
-//            SpeedReg_P2[edge] = 0;
-//        }
-//        targetOld = target;
-//        
-//        // update proportional moving average
-//        SpeedReg_P4[edge] = SpeedReg_P3[edge];
-//        SpeedReg_P3[edge] = SpeedReg_P2[edge];
-//        SpeedReg_P2[edge] = SpeedReg_P1[edge];
-//        SpeedReg_P1[edge] = SpeedReg_P0[edge];
-//        
-//        // update derivative moving average
-//        SpeedReg_D2[edge] = SpeedReg_D1[edge];
-//        SpeedReg_D1[edge] = SpeedReg_D0[edge];
-//        
-//        // PID components
-//        SpeedReg_P0[edge] = 100.0f * ((float)TMP_SpeedReg_GainP) * errorSPD;
-//        SpeedReg_I[edge] += ((float)TMP_SpeedReg_GainI) * errorSPD;
-//        SpeedReg_D0[edge] = ((float)TMP_SpeedReg_GainD) * (errorSPD - errorSPDOld1[edge]) / MotRot_PID_period;
-//        errorSPDOld1[edge] = errorSPD;
-//        
-//        // limit proportional
-//        if (SpeedReg_P0[edge] < -MotRot_SPD_Pmax) SpeedReg_P0[edge] = -MotRot_SPD_Pmax;
-//        else if (SpeedReg_P0[edge] > MotRot_SPD_Pmax) SpeedReg_P0[edge] = MotRot_SPD_Pmax;
-//        
-//        // average proportional component
-//        float SpeedReg_P = 0.33f * (SpeedReg_P0[edge] + SpeedReg_P1[edge]
-//                + SpeedReg_P2[edge]);
-//        
-//        // limit integral
-//        if (SpeedReg_I[edge] < -MotRot_SPD_Imax) SpeedReg_I[edge] = -MotRot_SPD_Imax;
-//        else if (SpeedReg_I[edge] > MotRot_SPD_Imax) SpeedReg_I[edge] = MotRot_SPD_Imax;
-//        
-//        // limit derivative
-//        if (SpeedReg_D0[edge] < -MotRot_SPD_Dmax) SpeedReg_D0[edge] = -MotRot_SPD_Dmax;
-//        else if (SpeedReg_D0[edge] > MotRot_SPD_Dmax) SpeedReg_D0[edge] = MotRot_SPD_Dmax;
-//        
-//        float SpeedReg_D = 0.33f * (SpeedReg_D0[edge] + SpeedReg_D1[edge]
-//                + SpeedReg_D2[edge]);
-//        
-//        // speed controller output
-//        float outS = SpeedReg_P + SpeedReg_I[edge] + SpeedReg_D;
-//        
-//        if (outS < -MotRot_SPD_Max) outS = -MotRot_SPD_Max;
-//        else if (outS > MotRot_SPD_Max) outS = MotRot_SPD_Max;
-//                
-//        // ensure speed never changes target direction from position PID
-//        if ((OUT > 0) && (outS < 0)) outS = 0;
-//        else if ((OUT < 0) && (outS > 0)) outS = 0;
-//
-//        // speed controller output scaled by position controller output
-//        OUT = (fabs(outP) / ((float)MotRot_PID_Max)) * outS;
-//        
-////        SPD_PID_Monitor[0] = (int16_t)SpeedReg_P;
-//        SPD_PID_Monitor[0] = (int16_t)(Sens_ENC_GetDelta(edge) * 500);
-//        SPD_PID_Monitor[1] = (int16_t)SpeedReg_I[edge];
-//        SPD_PID_Monitor[2] = (int16_t)SpeedReg_D;
-        
-        /**********************************************************************/
-
-        /**********************************************************************/
-        
-//        // first errorSPD will be Speed_DEG
-//        // second errorSPD will likely be same direction as Speed_deg
-//        // Eventually, errorSPD is negative as initial speed is quite fast
-//        // feed forward of output speed (proportional to set speed)
-//        // Speed_100 causes outP to shrink to small (80 at 20 spd)
-//        OUT = outP * (((float) Speed_100[edge]) / 255.0);
-//        
-//        // initialise speed regulation to max when new target
-////        if ((TMP_Switch == 2) || (TMP_Switch == 3))
-////        if (target != targetOld) SpeedReg_I[edge] = sgn(OUT)*MotRot_SPD_Max - OUT;
-//        if (target != targetOld) SpeedReg_I[edge] = 0;
-//        targetOld = target;
-//        float derrr  = 0;
-//
-//
-//        derrr = ((float)TMP_SpeedReg_GainD) * (errorSPD - errorSPDOld1[edge]) / MotRot_PID_period;
-//        SpeedReg_I[edge] += ((float)TMP_SpeedReg_GainI) * errorSPD * MotRot_PID_period;
-//
-//        errorSPDOld1[edge] = errorSPD;
-//        
-//        if (sgn(SpeedReg_I[edge]) != sgn(OUT)){
-//            if (fabs(OUT) - (fabs(SpeedReg_I[edge])) < 0)
-//                SpeedReg_I[edge] = -OUT;
-//        } else if (fabs(OUT + SpeedReg_I[edge]) > MotRot_SPD_Max){
-//            SpeedReg_I[edge] = sgn(OUT)*MotRot_SPD_Max - OUT;
-//        }
-//        
-//        float outS = OUT + SpeedReg_I[edge] + derrr;
-//
-//        // ensure speed never changes target direction from position PID
-//        if ((OUT > 0) && (outS < 0)) outS = 0;
-//        else if ((OUT < 0) && (outS > 0)) outS = 0;
-//        
-        /**********************************************************************/
-        
-        // if desired direction change, reset integral and derivative
-//        if (((outPOld[edge] > 0) && (outP <= 0))
-//                || ((outPOld[edge] < 0) && (outP >= 0))){
-//            SPD_I[edge] = 0;
-//            errorSPDOld5[edge] = 0;
-//            errorSPDOld4[edge] = 0;
-//            errorSPDOld3[edge] = 0;
-//            errorSPDOld2[edge] = 0;
-//            errorSPDOld1[edge] = 0;
-//        }
-//        outPOld[edge] = outP;
-
-        // integral component
-//        SPD_I[edge] += errorSPD * MotRot_SPD_kI;
-//        SPD_I[edge] += errorSPD * TMP_GainI;
-//        float SPD_P = MotRot_SPD_kP * errorSPD;
-//        if (SPD_I[edge] < (-MotRot_SPD_Max - OUT - SPD_P))
-//            SPD_I[edge] = -MotRot_SPD_Max - OUT - SPD_P;
-//        else if (SPD_I[edge] > (MotRot_SPD_Max - OUT - SPD_P))
-//            SPD_I[edge] = MotRot_SPD_Max - OUT - SPD_P;
-//        if (SPD_I[edge] < (-MotRot_SPD_Max))
-//            SPD_I[edge] = -MotRot_SPD_Max;
-//        else if (SPD_I[edge] > (MotRot_SPD_Max))
-//            SPD_I[edge] = MotRot_SPD_Max;
-//        
-//        if (TMP_Switch == 1){
-//            if ((SPD_I[edge] > 0) && (OUT > 0)){
-//                if ((SPD_I[edge] + OUT) > MotRot_SPD_Max)
-//                    SPD_I[edge] = MotRot_SPD_Max - OUT;
-//            } else if ((SPD_I[edge] < 0) && (OUT < 0)) {
-//                if ((SPD_I[edge] + OUT) < -MotRot_SPD_Max)
-//                    SPD_I[edge] = -MotRot_SPD_Max - OUT;
-//            }
-//        }
-        
-        // derivative reduction of integral term
-//        float SPD_D = ((errorSPD - errorSPDOld1[edge]) +
-//                (errorSPDOld1[edge] - errorSPDOld2[edge]) +
-//                (errorSPDOld2[edge] - errorSPDOld3[edge]) +
-//                (errorSPDOld3[edge] - errorSPDOld4[edge]) +
-//                (errorSPDOld4[edge] - errorSPDOld5[edge])) / 5;
-//        errorSPDOld5[edge] = errorSPDOld4[edge];
-//        errorSPDOld4[edge] = errorSPDOld3[edge];
-//        errorSPDOld3[edge] = errorSPDOld2[edge];
-//        errorSPDOld2[edge] = errorSPDOld1[edge];
-//        errorSPDOld1[edge] = errorSPD;
-//        SPD_I[edge] += SPD_D * MotRot_SPD_kD / MotRot_PID_period;
-        
-        // if change in error is less than 10% of desired speed 
-        // and speed error bigger than 90% of desired speed - boost to start
-//        if ((fabs(SPD_D) < fabs(0.1*Speed_DEG[edge])) 
-//                && (fabs(errorSPD) > fabs(0.9*Speed_DEG[edge])))
-//            SPD_I[edge] += sgn(errorSPD)*5;
-        
-//        float outS = OUT + SPD_I[edge] + SPD_P + SPD_D * MotRot_SPD_kD / MotRot_PID_period;;
-//        float outS = OUT + SPD_I[edge];
-        
-//        // limit speed duty cycle
-//        if (outS < -MotRot_SPD_Max) OUT = -MotRot_SPD_Max;
-//        else if (outS > MotRot_SPD_Max) OUT = MotRot_SPD_Max;
-//        else OUT = outS;
-//    } else { // reset integral
-//        SPD_I[edge] = 0;
     }
     Acts_ROT_Out(edge, (int16_t) OUT); // output pwm value
 }
 
 void Acts_ROT_TempUpdateControl(uint8_t select, uint8_t value){
-    if (select == 0) TMP_SpeedReg_GainP = value;
-    else if (select == 1) TMP_SpeedReg_GainI = value;
-    else if (select == 2) TMP_SpeedReg_GainD = value;
-}
-
-uint8_t Acts_ROT_ReturnTempSwitch(){
-    return TMP_Switch;
+    if (select == 1) TMP_SpeedReg_GainI = (float)value;
 }
 
 int16_t Acts_ROT_TempSPDMonitor(uint8_t i){
@@ -617,62 +310,56 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
 uint16_t Acts_ROT_GetAngle(uint8_t edge, bool WithLiveOffset) {
-    int16_t rawAngle = (int16_t)(10*Sens_ENC_Get(edge, WithLiveOffset));
-    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
+    return (uint16_t) ((int16_t)(10 * Sens_ENC_Get(edge, WithLiveOffset)) + 1800);
+//    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
-bool Acts_ROT_InRange(uint8_t edge) {
-    uint16_t diff = abs(Acts_ROT_GetAngle(edge, true) - Acts_ROT_GetTarget(edge));
+bool Acts_ROT_InRange(const uint8_t edge) {
+    const uint16_t diff = abs(Acts_ROT_GetAngle(edge, true) - Acts_ROT_GetTarget(edge));
     if (diff <= MotRot_OkRange) return true;
     return false;
 }
 
-float sgn(float value){
+float sgn(const float value){
     if (value > 0) return 1.0f;
     if (value < 0) return -1.0f;
     return 0.0f;
 }
 
 
-float copysgn(float value, float check){
+float copysgn(const float value, const float check){
     if (check > 0.0f) return value;
     if (check < 0.0f) return -value;
     return 0.0f;
 }
-//
-//uint8_t Acts_ROT_GetSPDIntegral(uint8_t edge){
-//    return (uint8_t)((int16_t)(SpeedReg_I[edge]/2) + 127);
-//}
-//
-//void Acts_ROT_AvgSPDIntegral(uint8_t edge, uint8_t value){
-//    SpeedReg_I[edge] = (SpeedReg_I[edge] + ((float)(((int16_t)value) - 127)*2)) / 2;
-//}
+
+// https://stackoverflow.com/questions/427477/fastest-way-to-clamp-a-real-fixed-floating-point-value
+float clamp_f(const float d, const float min, const float max) {
+  const float t = d < min ? min : d;
+  return t > max ? max : t;
+}
+
+uint16_t clamp_ui16(const uint16_t d, const uint16_t min, const uint16_t max) {
+  const uint16_t t = d < min ? min : d;
+  return t > max ? max : t;
+}
 
 
-//int8_t Acts_ROT_GetSPDIntegral(uint8_t edge){
-//    return (int8_t)(SpeedReg_I[edge] / 2.0f);
-//}
-//
-//void Acts_ROT_AvgSPDIntegral(uint8_t edge, int8_t value){
-//    SpeedReg_I[edge] = (SpeedReg_I[edge] + (((float)(value)) * 2.0f)) / 2.0f;
-//}
-
-
-void Acts_ROT_SetSPDAvgOut(uint8_t edge, int8_t value){
+void Acts_ROT_SetSPDAvgOut(const uint8_t edge, const int8_t value){
     SPD_AvgOut[edge] = value;
 }
 
-uint8_t Acts_ROT_GetSPDAvgOut(uint8_t edge){
+uint8_t Acts_ROT_GetSPDAvgOut(const uint8_t edge){
     return (uint8_t)SPD_AvgOut[edge];
 }
 
-void Acts_ROT_SetSPDAvgNeighbour(uint8_t edge, uint8_t value){
+void Acts_ROT_SetSPDAvgNeighbour(const uint8_t edge, const uint8_t value){
     SPD_AvgFlag[edge] = true;
     SPD_AvgIn[edge] = (int8_t)value;
 }
 
-int8_t Acts_ROT_GetSPDAvgNeighbour(uint8_t edge){
+int8_t Acts_ROT_GetSPDAvgNeighbour(const uint8_t edge){
     return SPD_AvgIn[edge];
 }
 
