@@ -11,11 +11,6 @@
 // Encoder AS5048B
 volatile float ENC_Data[3] = {1, 2, 3};
 volatile float ENC_DataOld[3] = {1, 2, 3};
-//float ENC_DataAvg0[3] = {1, 2, 3};
-//float ENC_DataAvg1[3] = {1, 2, 3};
-//float ENC_DataAvg2[3] = {1, 2, 3};
-//float ENC_DataAvg3[3] = {1, 2, 3};
-//float ENC_DataAvg4[3] = {1, 2, 3};
 volatile int8_t ENC_GlobOffset[3] = {0, 0, 0};
 volatile int8_t ENC_LiveOffset[3] = {0, 0, 0};
 
@@ -84,7 +79,7 @@ void Sens_ENC_Read(uint8_t edge) {
     }
     
     if ((status != I2C1_MESSAGE_COMPLETE) && Flg_EdgeAct[edge])
-        Mnge_ERR_ActivateStop(ERR_I2CAngleFailed);
+        Mnge_ERR_ActivateStop(edge, ERR_I2CAngleFailed);
     
     // combine 14 bit result
     uint16_t angleINT = ((uint16_t) readBuffer[0]) << 6;
@@ -92,30 +87,13 @@ void Sens_ENC_Read(uint8_t edge) {
     
     // convert to float
     float angleFLT = (float) 0x3FFF - angleINT;
-    if (angleFLT < 0.0f) angleFLT = 0.0f;
-    else if (angleFLT > AS5048B_Res) angleFLT = AS5048B_Res;
-//    angleFLT = (angleFLT / AS5048B_Res) * 360.0f - 180.0f;
+    angleFLT = clamp_f(angleFLT, 0.0f, AS5048B_Res);
+//    if (angleFLT < 0.0f) angleFLT = 0.0f;
+//    else if (angleFLT > AS5048B_Res) angleFLT = AS5048B_Res;
     angleFLT = angleFLT * AS5048B_360OverRes - 180.0f;
 
-//    // five-reading moving average
-//    ENC_DataAvg4[edge] = ENC_DataAvg3[edge];
-//    ENC_DataAvg3[edge] = ENC_DataAvg2[edge];
-//    ENC_DataAvg2[edge] = ENC_DataAvg1[edge];
-//    ENC_DataAvg1[edge] = ENC_DataAvg0[edge];
-//    ENC_DataAvg0[edge] = angleFLT;
-    
-    // update old value
-//    ENC_DataOld[edge] = ENC_Data[edge];
-    Sens_ENC_UpdateOld(edge);
-    
-    // five-count rolling average
-//    ENC_Data[edge] -= ENC_Data[edge] * 0.2f;
-//    ENC_Data[edge] += angleFLT * 0.2f;
-    Sens_ENC_UpdateNew(edge, angleFLT);
-    
-    // update new reading
-//    ENC_Data[edge] = 0.2f * (ENC_DataAvg0[edge] + ENC_DataAvg1[edge]
-//            + ENC_DataAvg2[edge] + ENC_DataAvg3[edge] + ENC_DataAvg4[edge]);
+    Sens_ENC_UpdateOld(edge); // update old value
+    Sens_ENC_UpdateNew(edge, angleFLT); // rolling average
 }
 
 /* ******************** GET CURRENT ANGLE *********************************** */
@@ -146,9 +124,8 @@ void Sens_ENC_SetGlobalOffset(uint8_t edge){
 }
 
 void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
-    int16_t angleOffset = ((int16_t) Acts_ROT_GetAngle(edge, false) - nbrAngVal) / 2;
+    const int16_t angleOffset = ((int16_t) Acts_ROT_GetAngle(edge, false) - nbrAngVal) / 2;
     ENC_LiveOffset[edge] = (int8_t) angleOffset;
-    Acts_ROT_ResetOffsetInterval();
 }
 
 void Sens_ENC_UpdateOld(uint8_t edge){

@@ -11,7 +11,7 @@ void Sens_ACC_Read(void);
 uint16_t Sens_ACC_GetRaw(uint8_t);
 uint16_t Sens_ACC_GetAngle(uint8_t);
 float atan2_approximation1(float, float);
-//float fast_sqrt(float);
+float fast_sqrt(float);
 
 #endif	/* Sens_ACC_H */
 

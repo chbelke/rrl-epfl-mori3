@@ -1,14 +1,18 @@
+#include <string.h>
 #include "Sens_ACC.h"
 #include "Defs_GLB.h"
 #include "Mnge_RGB.h"
+#include "Mnge_ERR.h"
 #include "math.h"
 #include "dsp.h"
 
 // Accelerometer MMA8452Q
 volatile int16_t ACC_Data[3] = {0, 0, 0};
-const float smol_PI = 3.141592;
-const float inv_Pi_times_180 = 57.2957795;
-const float epsilon = 1e-10;
+#define smol_PI 3.141592f
+#define INV_PI_x1800 572.957795f
+#define epsilon 1e-10f
+#define ONEQTR_PI 0.785398f
+#define THRQTR_PI 2.356194f
 
 void Sens_ACC_Setup(void) {
     uint8_t MMAinitReg1[2] = {MMA8452Q_CTRL_REG1_ADDR, MMA8452Q_CTRL_REG1_STBY};
@@ -66,7 +70,9 @@ void Sens_ACC_Setup(void) {
 
         __delay_us(1);
     }
-
+    
+    if (status != I2C1_MESSAGE_COMPLETE)
+        Mnge_ERR_ActivateStop(0, ERR_I2CAccelerometerFailed);
 }
 
 void Sens_ACC_Read(void) {
@@ -109,6 +115,9 @@ void Sens_ACC_Read(void) {
 
         __delay_us(1);
     }
+    
+    if (status != I2C1_MESSAGE_COMPLETE)
+        Mnge_ERR_ActivateStop(0, ERR_I2CAccelerometerFailed);
 
     uint8_t i;
     for (i = 0; i < 5; i += 2) {
@@ -122,73 +131,49 @@ uint16_t Sens_ACC_GetRaw(uint8_t axis) { //axis 0 corresponds to x, 1 to y, 2 to
 }
 
 uint16_t Sens_ACC_GetAngle(uint8_t angle){ 
-    float accX = (float)ACC_Data[0];
-    float accY = (float)ACC_Data[1];
-    float accZ = (float)ACC_Data[2];
+    const float accX = (float)ACC_Data[0];
+    const float accY = (float)ACC_Data[1];
+    const float accZ = (float)ACC_Data[2];
          
     // 0 = alpha (about x), 1 = beta (about y), 2 = gamma (about z); right hand rule
     if (angle == 0){
-//        float sqrt_denom = fast_sqrt(accX*accX + accZ*accZ);
-        float sqrt_denom = sqrt(accX*accX + accZ*accZ);
-        if(sqrt_denom < epsilon)
-            return (uint16_t) 0;
-        return (uint16_t) 10.f*((atan2_approximation1(accY, sqrt_denom)*inv_Pi_times_180) + 180.f);
+        const float sqrt_denom = fast_sqrt(accX*accX + accZ*accZ);
+        return (uint16_t) ((int16_t)(atan2_approximation1(accY, sqrt_denom)*INV_PI_x1800) + 1800);
     } else if (angle == 1) {
-//        float sqrt_denom = fast_sqrt(accY*accY + accZ*accZ);
-        float sqrt_denom = sqrt(accY*accY + accZ*accZ);
-        if(sqrt_denom < epsilon)
-            return (uint16_t) 0;
-        return (uint16_t) 10.f*(-(atan2_approximation1(accX, sqrt_denom)*inv_Pi_times_180) + 180.f);
+        const float sqrt_denom = fast_sqrt(accY*accY + accZ*accZ);
+        return (uint16_t) ((int16_t)-(atan2_approximation1(accX, sqrt_denom)*INV_PI_x1800) + 1800);
     } else if (angle == 2) {
-        if(accZ < epsilon)
-            return (uint16_t) 0;
-        return (uint16_t) 10.f*(-(atan2_approximation1(-accY, accZ)*inv_Pi_times_180) + 180.f);
+        return (uint16_t) ((int16_t)-(atan2_approximation1(-accY, accZ)*INV_PI_x1800) + 1800);
     } else {
         return 999;
     }
 }
 
-// From below:
-// https://gist.github.com/volkansalma/2972237
-float atan2_approximation1(float y, float x)
-{
-    //http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
-    //Volkan SALMA
-
-    const float ONEQTR_PI = smol_PI / 4.0;
-	const float THRQTR_PI = 3.0 * smol_PI / 4.0;
+// From: https://gist.github.com/volkansalma/2972237
+float atan2_approximation1(float y, float x) {
+    //http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html Volkan SALMA
 	float r, angle;
-	float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
-	if ( x < 0.0f )
-	{
+	const float abs_y = fabs(y) + epsilon;      // kludge to prevent 0/0 condition
+	if ( x < 0.0f ){
 		r = (x + abs_y) / (abs_y - x);
 		angle = THRQTR_PI;
-	}
-	else
-	{
+	} else {
 		r = (x - abs_y) / (x + abs_y);
 		angle = ONEQTR_PI;
 	}
 	angle += (0.1963f * r * r - 0.9817f) * r;
-	if ( y < 0.0f )
-		return( -angle );     // negate if in quad III or IV
-	else
-		return( angle );
+	if ( y < 0.0f ) return(-angle); // negate if in quad III or IV
+	else return(angle);
 }
 
-// From below:
-//// https://codegolf.stackexchange.com/questions/85555/the-fastest-square-root-calculator
-//float fast_sqrt(float n) {
-//    n = 1.0f / n;
-//    long i;
-//    float x, y;
-//
-//    x = n * 0.5f;
-//    y = n;
-//    i = *(long *)&y;
-//    i = 0x5f3759df - (i >> 1);
-//    y = *(float *)&i;
-//    y = y * (1.5f - (x * y * y));
-//
-//    return y;
-//}
+// From: https://codegolf.stackexchange.com/questions/85555/the-fastest-square-root-calculator
+float fast_sqrt(float n) {
+    long i;
+    float y = 1.0f / n;
+    const float x = y * 0.5f;
+    memcpy(&i, &y, sizeof y); // i = *(long *)&y;
+    i = 0x5f3759df - (i >> 1);
+    memcpy(&y, &i, sizeof i); // y = *(float *)&i;
+    y = y * (1.5f - (x * y * y)); 
+    return y;
+}

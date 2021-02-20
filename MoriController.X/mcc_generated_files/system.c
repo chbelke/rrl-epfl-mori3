@@ -100,9 +100,9 @@ void SYSTEM_Initialize(void)
     PIN_MANAGER_Initialize();
     CLOCK_Initialize();
     INTERRUPT_Initialize();
+    PWM_Initialize();
     UART1_Initialize();
     UART3_Initialize();
-    PWM_Initialize();
     EXT_INT_Initialize();
     UART2_Initialize();
     I2C1_Initialize();

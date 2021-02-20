@@ -17,9 +17,10 @@ uint16_t Acts_ROT_GetAngle(uint8_t, bool);
 bool Acts_ROT_InRange(uint8_t);
 float sgn(float);
 float copysgn(float, float);
+float clamp_f(float, float, float);
+uint16_t clamp_ui16(uint16_t, uint16_t, uint16_t);
 
 void Acts_ROT_TempUpdateControl(uint8_t, uint8_t);
-uint8_t Acts_ROT_ReturnTempSwitch();
 int16_t Acts_ROT_TempSPDMonitor(uint8_t);
 
 void Acts_ROT_SetSPDAvgOut(uint8_t, int8_t);

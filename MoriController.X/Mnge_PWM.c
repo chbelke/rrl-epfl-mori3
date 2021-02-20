@@ -1,8 +1,5 @@
 #include "Mnge_PWM.h"
-//#include <xc.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <libpic30.h>
+#include "Mnge_ERR.h"
 #include "Defs_GLB.h"
 
 volatile uint8_t PWM_Values[8] =
@@ -112,6 +109,9 @@ void Mnge_PWM_Write(void) {
 
         __delay_us(10);
     }
+    
+    if (status != I2C1_MESSAGE_COMPLETE)
+        Mnge_ERR_ActivateStop(0, ERR_I2CLedDriverFailed);
 }
 
 /* ******************** SET PWM VALUES ************************************* */

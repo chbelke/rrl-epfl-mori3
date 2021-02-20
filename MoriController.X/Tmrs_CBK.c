@@ -37,9 +37,10 @@ void Tmrs_CBK_Timer3_Handle(void) {
             Flg_EdgeReq_Cpl[edge] = false;
             Flg_EdgeReq_CplNbrWait[edge] = false;
         }
+         // coupling controller when open coupling sma controller
+        if (Acts_CPL_IsOpen(edge)) Acts_CPL_Ctrl(edge);
     }
-    Acts_CPL_Ctrl(); // coupling sma controller
-
+    
     ADC1_Update(); // read analog potentiometer inputs
     for (edge = 0; edge < 3; edge++) { // extension control loops
         if (Flg_EdgeReq_Ext[edge] && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
