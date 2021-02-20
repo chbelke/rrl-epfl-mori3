@@ -245,6 +245,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt( void )
     if ((U1STAbits.OERR == 1))
     {
         U1STAbits.OERR = 0;
+        LED_R = LED_On;
     }
     
     IFS4bits.U1EIF = 0;

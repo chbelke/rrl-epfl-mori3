@@ -21,17 +21,17 @@ volatile bool SPD_AvgFlag[3] = {false, false, false};
 volatile int8_t SPD_AvgOut[3] = {0, 0, 0};
 volatile int8_t SPD_AvgIn[3] = {0, 0, 0};
 
-volatile bool OffsetUpdateFlag = false;
-
 volatile int16_t SPD_PID_Monitor[3] = {0, 0, 0};
 
-float TMP_SpeedReg_GainI = 15.0f;
+float SPD_Gain = 15.0f;
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9f // output speed factor for non-primary wheels (tune curve)
+#define INV_THREE 0.333333f // division avoidance
+#define INV255_x180 0.705882f // factor for 255 to 180pwm conversion
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
-void Acts_ROT_Out(const uint8_t edge, int16_t duty) {
+void Acts_ROT_Out(uint8_t edge, int16_t duty) {
     if (!MODE_MotRot_Active || !FLG_MotRot_Active) duty = 0; // rotary motors off
     switch (edge) {
         case 0:
@@ -58,9 +58,10 @@ void Acts_ROT_Out(const uint8_t edge, int16_t duty) {
 }
 
 /* ******************** ROTARY MOTOR PID ************************************ */
-void Acts_ROT_PID(const uint8_t edge, const float current, uint16_t target) {
+void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     static float errorOld[3] = {0, 0, 0}; // previous error (derivative gain)
-
+    float OUT; // pwm output variable
+    
     // avoid bad control inputs
     target = clamp_ui16(target, MotRot_AngleIntMIN, MotRot_AngleIntMAX);
 
@@ -68,71 +69,66 @@ void Acts_ROT_PID(const uint8_t edge, const float current, uint16_t target) {
 
     // avoid integral build up when far away
     if (fabsf(error) < 7.0f) // if error is >6.69, kp results in max (ignoring kd)
-        PID_I[edge] += error * MotRot_PID_period;
+        PID_I[edge] += error * MotRot_PID_period; // integral component
     else PID_I[edge] = 0;
-
-    // limit integral component
-    PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax, MotRot_PID_Imax);
 
     // derivative component
     float PID_D = (error - errorOld[edge]) * MotRot_PID_freq;
     errorOld[edge] = error;
 
-    // limit derivative component
+    // limit integral and derivative
+    PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax, MotRot_PID_Imax);
     PID_D = clamp_f(PID_D, -MotRot_PID_Dmax, MotRot_PID_Dmax);
 
-    // PID output
+    // PID position output
     float outP = MotRot_PID_kP * error + MotRot_PID_kI * PID_I[edge] + MotRot_PID_kD * PID_D;
+    outP = clamp_f(outP, -MotRot_PID_Max, MotRot_PID_Max); // limit output
 
-    // limit duty cycle
-    outP = clamp_f(outP, -MotRot_PID_Max, MotRot_PID_Max);
-
-    float OUT = outP; // position pwm output
-    
     // speed control
-    if ((Speed_100[edge] != 100) && (fabsf(error) >= 1.0f)) {
-        static uint16_t targetOld = 0;
+    if (Speed_100[edge] != 100) {
+        static uint16_t targetOld[3] = {0, 0, 0};
         static uint8_t newTargetCount[3] = {0, 0, 0};
-        static float SpeedReg_I[3] = {0, 0, 0};
+        static int8_t SPD_Dir[3] = {0, 0, 0}; // set with new value
+        static float SPD[3] = {0, 0, 0}; // speed control integral term
 
-        if (target != targetOld){
-            SpeedReg_I[edge] = copysgn(MotRot_SPD_Max, outP) * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
-            targetOld = target;
+        // when new target, set speed direction and feed forward
+        if (target != targetOld[edge]){
+            SPD_Dir[edge] = copysgn(1, outP);
+            SPD[edge] = SPD_Dir[edge] * MotRot_SPD_Max * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
+            targetOld[edge] = target;
+            newTargetCount[edge] = 0;
         }
 
-        // speed PID components
-        SpeedReg_I[edge] += TMP_SpeedReg_GainI * (copysgn(Speed_DEG[edge], outP) - Sens_ENC_GetDelta(edge));
+        // speed control (integral)
+        SPD[edge] += SPD_Gain * (Speed_DEG[edge] * SPD_Dir[edge] - Sens_ENC_GetDelta(edge));
+        SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Imax, MotRot_SPD_Imax);
+        Acts_ROT_SetSPDAvgOut(edge, (int8_t)(SPD[edge] * 0.5f));
 
-        // limit integral
-        SpeedReg_I[edge] = clamp_f(SpeedReg_I[edge], -MotRot_SPD_Imax, MotRot_SPD_Imax);
-
-        Acts_ROT_SetSPDAvgOut(edge, (int8_t)(SpeedReg_I[edge] * 0.5f));
-
-        // speed controller output scaled by position controller output
-        OUT = fabsf(outP) * MotRot_PID_OneOverMax * SpeedReg_I[edge];
-        
-        // ensure speed never changes target direction from position PID
-        if ((OUT > 0) && (SpeedReg_I[edge] < 0)) OUT = 0;
-        else if ((OUT < 0) && (SpeedReg_I[edge] > 0)) OUT = 0;
-        
-        SPD_PID_Monitor[0] = (int16_t) (Sens_ENC_GetDelta(edge) * 500.0f);
-        SPD_PID_Monitor[2] = (int16_t) SpeedReg_I[edge];
-
+        // average speed integral 
         if (SPD_AvgFlag[edge]){
-            if (newTargetCount[edge] >= 7){
+            if (newTargetCount[edge] >= 16){ // ignore first loops before averaging
                 SPD_AvgFlag[edge] = false;
-                SpeedReg_I[edge] = SpeedReg_I[edge] * 0.5f + Acts_ROT_GetSPDAvgNeighbour(edge);
-                newTargetCount[edge] = 0;
-            } else {
-                newTargetCount[edge]++;
-            }
+                SPD[edge] = SPD[edge] * 0.5f + Acts_ROT_GetSPDAvgNeighbour(edge);
+            } else newTargetCount[edge]++;
         }
+        
+        // whichever is smallest
+        if (((SPD[edge] > 0) && (outP < SPD[edge]))
+                || ((SPD[edge] < 0) && (outP > SPD[edge])))
+            OUT = outP;
+        else OUT = SPD[edge];
+
+        SPD_PID_Monitor[0] = (int16_t) (Sens_ENC_GetDelta(edge) * 500.0f);
+        SPD_PID_Monitor[1] = (int16_t) outP;
+        SPD_PID_Monitor[2] = (int16_t) SPD[edge];
+    } else {
+        OUT = outP; // full speed position output
     }
-    Acts_ROT_Out(edge, (int16_t) OUT); // output pwm value
+    Acts_ROT_Out(edge, (int16_t) OUT); // output pwm
 }
 
 void Acts_ROT_TempUpdateControl(uint8_t select, uint8_t value){
-    if (select == 1) TMP_SpeedReg_GainI = (float)value;
+    if (select == 1) SPD_Gain = (float)value;
 }
 
 int16_t Acts_ROT_TempSPDMonitor(uint8_t i){
@@ -170,8 +166,8 @@ void Acts_ROT_Wiggle(uint8_t edge) {
 /* ******************** DRIVE FUNCTION ************************************** */
 void Acts_ROT_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float a, b, c; // extension values from 180
-    float Mo = curve * 137.9;
-    float Sa = speed * 4;
+    const float Mo = curve * 137.9f;
+    float Sa = speed * INV255_x180; // 255 to 180 max
     if (!direc) Sa = -1 * Sa; // inwards or outwards
 
     switch (edge) {
@@ -198,35 +194,32 @@ void Acts_ROT_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     }
 
     // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
-    float beta = acosf((a * a + c * c - b * b) / (2 * a * c));
-    float gamm = acosf((a * a + b * b - c * c) / (2 * a * b));
+    const float beta = acosf((a * a + c * c - b * b) / (2 * a * c));
+    const float gamm = acosf((a * a + b * b - c * c) / (2 * a * b));
 
     // wheel coordinates (for a: [WHEEL, 0])
-    float Wb[2] = {(b - WHEEL) * cosf(gamm), (b - WHEEL) * sinf(gamm)};
-    float Wc[2] = {a - WHEEL * cosf(beta), WHEEL * sinf(beta)};
+    const float Wb[2] = {(b - WHEEL) * cosf(gamm), (b - WHEEL) * sinf(gamm)};
+    const float Wc[2] = {a - WHEEL * cosf(beta), WHEEL * sinf(beta)};
 
     // second point in wheel direction
-    float Wb2[2] = {Wb[0] - cosf(PI / 2 - gamm), Wb[1] + sinf(PI / 2 - gamm)};
-    float Wc2[2] = {Wc[0] + cosf(PI / 2 - beta), Wc[1] + sinf(PI / 2 - beta)};
+    const float Wb2[2] = {Wb[0] - cosf(PI * 0.5f - gamm), Wb[1] + sinf(PI * 0.5f - gamm)};
+    const float Wc2[2] = {Wc[0] + cosf(PI * 0.5f - beta), Wc[1] + sinf(PI * 0.5f  - beta)};
 
     // centroid coordinates
-    float D[2] = {(b * cosf(gamm) + a) / 3, b * sinf(gamm) / 3};
+    const float D[2] = {(b * cosf(gamm) + a) * INV_THREE, b * sinf(gamm) * INV_THREE};
 
     // moment arm of wheel force to centroid
-    float Da = fabsf(D[0] - WHEEL);
-    float Db = fabsf((Wb2[1] - Wb[1]) * D[0]
+    const float Da = fabsf(D[0] - WHEEL);
+    const float Db = fabsf((Wb2[1] - Wb[1]) * D[0]
             - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] - Wb2[1] * Wb[0])
             / sqrtf(powf(Wb2[1] - Wb[1], 2) + powf(Wb2[0] - Wb[0], 2));
-    float Dc = fabsf((Wc2[1] - Wc[1]) * D[0]
+    const float Dc = fabsf((Wc2[1] - Wc[1]) * D[0]
             - (Wc2[0] - Wc[0]) * D[1] + Wc2[0] * Wc[1] - Wc2[1] * Wc[0])
             / sqrtf(powf(Wc2[1] - Wc[1], 2) + powf(Wc2[0] - Wc[0], 2));
 
     // wheel speeds
-    float Sc = (Mo - Sa * Da) / (Db * cosf(PI / 2 - beta) / cosf(PI / 2 - gamm) + Dc);
-    float Sb = Sc * cosf(PI / 2 - beta) / cosf(PI / 2 - gamm);
-
-    Sc = SxOUT*Sc;
-    Sb = SxOUT*Sb;
+    float Sc = SxOUT*((Mo - Sa * Da) / (Db * cosf(PI * 0.5f - beta) / cosf(PI * 0.5f - gamm) + Dc));
+    float Sb = SxOUT*(Sc * cosf(PI * 0.5f - beta) / cosf(PI * 0.5f - gamm));
 
     uint8_t i;
     for (i = 0; i < 3; i++) Acts_ROT_SetDrvInterval(i, 5); // lasts for 1 sec
@@ -305,7 +298,6 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
     Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ang[edge] = true;
     PID_I[edge] = 0;
-//    SPD_I[edge] = 0;
 }
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
@@ -315,54 +307,42 @@ uint16_t Acts_ROT_GetAngle(uint8_t edge, bool WithLiveOffset) {
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
-bool Acts_ROT_InRange(const uint8_t edge) {
+bool Acts_ROT_InRange(uint8_t edge) {
     const uint16_t diff = abs(Acts_ROT_GetAngle(edge, true) - Acts_ROT_GetTarget(edge));
     if (diff <= MotRot_OkRange) return true;
     return false;
 }
 
-float sgn(const float value){
-    if (value > 0) return 1.0f;
-    if (value < 0) return -1.0f;
-    return 0.0f;
-}
-
-
-float copysgn(const float value, const float check){
+float copysgn(float value, float check){
     if (check > 0.0f) return value;
     if (check < 0.0f) return -value;
     return 0.0f;
 }
 
 // https://stackoverflow.com/questions/427477/fastest-way-to-clamp-a-real-fixed-floating-point-value
-float clamp_f(const float d, const float min, const float max) {
+float clamp_f(float d, float min, float max) {
   const float t = d < min ? min : d;
   return t > max ? max : t;
 }
 
-uint16_t clamp_ui16(const uint16_t d, const uint16_t min, const uint16_t max) {
+uint16_t clamp_ui16(uint16_t d, uint16_t min, uint16_t max) {
   const uint16_t t = d < min ? min : d;
   return t > max ? max : t;
 }
 
-
-void Acts_ROT_SetSPDAvgOut(const uint8_t edge, const int8_t value){
+void Acts_ROT_SetSPDAvgOut(uint8_t edge, int8_t value){
     SPD_AvgOut[edge] = value;
 }
 
-uint8_t Acts_ROT_GetSPDAvgOut(const uint8_t edge){
+uint8_t Acts_ROT_GetSPDAvgOut(uint8_t edge){
     return (uint8_t)SPD_AvgOut[edge];
 }
 
-void Acts_ROT_SetSPDAvgNeighbour(const uint8_t edge, const uint8_t value){
+void Acts_ROT_SetSPDAvgNeighbour(uint8_t edge, uint8_t value){
     SPD_AvgFlag[edge] = true;
     SPD_AvgIn[edge] = (int8_t)value;
 }
 
-int8_t Acts_ROT_GetSPDAvgNeighbour(const uint8_t edge){
+int8_t Acts_ROT_GetSPDAvgNeighbour(uint8_t edge){
     return SPD_AvgIn[edge];
-}
-
-void Acts_ROT_ResetOffsetInterval(){
-    OffsetUpdateFlag = true;
 }

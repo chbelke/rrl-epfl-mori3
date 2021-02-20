@@ -37,7 +37,7 @@ const uint8_t ModuleIDs[NUM_MODS][6] = {
 };
 
 /* ******************** READ ENCODER **************************************** */
-void Sens_ENC_Read(const uint8_t edge) {
+void Sens_ENC_Read(uint8_t edge) {
     static I2C1_MESSAGE_STATUS status;
     static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
     static uint8_t writeBuffer, readBuffer[2], *pWrite, *pRead;
@@ -97,7 +97,7 @@ void Sens_ENC_Read(const uint8_t edge) {
 }
 
 /* ******************** GET CURRENT ANGLE *********************************** */
-float Sens_ENC_Get(const uint8_t edge, const bool WithLiveOffset) {
+float Sens_ENC_Get(uint8_t edge, bool WithLiveOffset) {
     if (WithLiveOffset)
         return (float) ENC_Data[edge] - ENC_LiveOffset[edge] * 0.1f - ENC_GlobOffset[edge] * 0.1f;
     else
@@ -105,12 +105,12 @@ float Sens_ENC_Get(const uint8_t edge, const bool WithLiveOffset) {
 }
 
 /* ******************** GET ANGLE DELTA ************************************* */
-float Sens_ENC_GetDelta(const uint8_t edge) {
+float Sens_ENC_GetDelta(uint8_t edge) {
     return (ENC_Data[edge] - ENC_DataOld[edge]);
 }
 
 /* ******************** UPDATE ANGLE OFFSET BY NEIGHBOUR ******************** */
-void Sens_ENC_SetGlobalOffset(const uint8_t edge){
+void Sens_ENC_SetGlobalOffset(uint8_t edge){
     uint8_t *neighbours;
     uint8_t i;
     neighbours = Coms_123_GetNeighbourIDs();
@@ -123,17 +123,16 @@ void Sens_ENC_SetGlobalOffset(const uint8_t edge){
     }
 }
 
-void Sens_ENC_SetLiveOffset(const uint8_t edge, const uint16_t nbrAngVal) {
-    int16_t angleOffset = ((int16_t) Acts_ROT_GetAngle(edge, false) - nbrAngVal) / 2;
+void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
+    const int16_t angleOffset = ((int16_t) Acts_ROT_GetAngle(edge, false) - nbrAngVal) / 2;
     ENC_LiveOffset[edge] = (int8_t) angleOffset;
-    Acts_ROT_ResetOffsetInterval();
 }
 
-void Sens_ENC_UpdateOld(const uint8_t edge){
+void Sens_ENC_UpdateOld(uint8_t edge){
     ENC_DataOld[edge] = ENC_Data[edge];
 }
 
-void Sens_ENC_UpdateNew(const uint8_t edge, const float value){
+void Sens_ENC_UpdateNew(uint8_t edge, float value){
     ENC_Data[edge] -= ENC_Data[edge] * 0.2f;
     ENC_Data[edge] += value * 0.2f;
 }

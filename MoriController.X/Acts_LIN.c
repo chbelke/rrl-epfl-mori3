@@ -13,11 +13,11 @@ volatile bool Flg_InRange_L[3] = {true, true, true};
 
 /* ******************** ARDUINO MAP FUNCTION ******************************** */
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
-  return (x - in_min) * ((out_max - out_min) / (in_max - in_min)) + out_min;
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 /* ******************** LINEAR MOTOR OUTPUTS ******************************** */
-void Acts_LIN_Out(const uint8_t edge, int16_t duty) {
+void Acts_LIN_Out(uint8_t edge, int16_t duty) {
     static int16_t oldDuty[3] = {0, 0, 0};
     if (!MODE_MotLin_Active || !FLG_MotLin_Active) duty = 0; // linear motors off
     int16_t out = 0;
@@ -65,7 +65,7 @@ void Acts_LIN_Out(const uint8_t edge, int16_t duty) {
 }
 
 /* ******************** LINEAR MOTOR PID ************************************ */
-void Acts_LIN_PID(const uint8_t edge, const uint16_t current, uint8_t target) {
+void Acts_LIN_PID(uint8_t edge, uint16_t current, uint8_t target) {
     static float errorOld[3] = {0, 0, 0};
     static float PID_I[3] = {0, 0, 0};
     float PID_D = 0;

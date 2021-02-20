@@ -73,15 +73,15 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
  */
 
 /* ******************** EDGE COMMAND EVALUATION ***************************** */
-void Coms_123_Eval(const uint8_t edge) { // called in main
+void Coms_123_Eval(uint8_t edge) { // called in main
     static uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 //    static uint8_t EdgInIdleBytes[3] = {0, 0, 0};
     uint8_t EdgIn = 50;
-    uint8_t bytes_read = 0;
-
-    while(bytes_read < 33) { // ActHandle sends max 11 bytes at 20Hz (allow 3)
-        bytes_read++;
-        if (bytes_read >= 33) LED_R = LED_On;
+//    uint8_t bytes_read = 0;
+//
+//    while(bytes_read < 33) { // ActHandle sends max 11 bytes at 20Hz (allow 3)
+//        bytes_read++;
+//        if (bytes_read >= 33) LED_R = LED_On;
 
         if (!Coms_123_Ready(edge)) return; // check if byte received
         if (EdgInCase[edge] != 40) //Only read alloc byte if in relay
@@ -279,10 +279,10 @@ void Coms_123_Eval(const uint8_t edge) { // called in main
                 EdgInCase[edge] = 50;
                 break;
         }
-    }
+//    }
 }
 
-void Coms_123_ResetIntervals(const uint8_t edge) {
+void Coms_123_ResetIntervals(uint8_t edge) {
     EdgIdlCnt[edge] = 0; // reset interval
     EdgConCnt[edge] = 0; // reset interval
 }
@@ -343,13 +343,13 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_123_Write(edge, byte);
             if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
                 Coms_123_WriteID(edge);
-            if (byte == COMS_123_Idle){
+//            if (byte == COMS_123_Idle){
                 // send angle reading for averagivng
 //                uint16_t selfAngle = (uint16_t) map((int16_t)(10*Sens_ENC_Get(edge)), -1800, 1800, 0, 3600);
 //                uint16_t selfAngle = Acts_ROT_GetAngle(edge, false);
 //                Coms_123_Write(edge, (uint8_t)((selfAngle >> 8) & 0x00FF));
 //                Coms_123_Write(edge, (uint8_t)(selfAngle & 0x00FF));
-            }
+//            }
             Coms_123_Write(edge, EDG_End);
         }
     }
@@ -435,7 +435,7 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
 }
 
 /* ******************** NEIGHBOUR ACTION VERIFY ***************************** */
-void Coms_123_ActVerify(const uint8_t edge) {
+void Coms_123_ActVerify(uint8_t edge) {
     bool NbrCmdNoGo = false;
     if (NbrCmdIDn[edge] != CMD_ID){
         NbrCmdNoGo = true;
@@ -512,7 +512,7 @@ void Coms_123_ActVerify(const uint8_t edge) {
 }
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */
-void Coms_123_Write(const uint8_t edge, const uint8_t byte) {
+void Coms_123_Write(uint8_t edge, uint8_t byte) {
     switch (edge) { // send byte to specific UART based on edge
         case 0:
             UART1_Write(byte);
@@ -527,7 +527,7 @@ void Coms_123_Write(const uint8_t edge, const uint8_t byte) {
 }
 
 /* ******************** WRITE ID TO EDGE ************************************ */
-void Coms_123_WriteID(const uint8_t edge) { // called in Coms_123_ConHandle
+void Coms_123_WriteID(uint8_t edge) { // called in Coms_123_ConHandle
     uint8_t i;
     for (i = 0; i < 6; i++) { // loop through 6 ID bytes
         Coms_123_Write(edge, (uint8_t) Coms_ESP_ReturnID(i)); // write to edge
@@ -536,7 +536,7 @@ void Coms_123_WriteID(const uint8_t edge) { // called in Coms_123_ConHandle
 }
 
 /* ******************** READ BYTE FROM EDGE ********************************* */
-uint8_t Coms_123_Read(const uint8_t edge) {
+uint8_t Coms_123_Read(uint8_t edge) {
     uint8_t byte;
     switch (edge) {
         case 0:
@@ -555,7 +555,7 @@ uint8_t Coms_123_Read(const uint8_t edge) {
     return byte;
 }
 
-bool Coms_123_Ready(const uint8_t edge) {
+bool Coms_123_Ready(uint8_t edge) {
     switch (edge) {
         case 0:
             return UART1_IsRxReady();
@@ -567,13 +567,13 @@ bool Coms_123_Ready(const uint8_t edge) {
     return false;
 }
 
-void Coms_123_purge_uart(const uint8_t edge) {
+void Coms_123_purge_uart(uint8_t edge) {
     while (Coms_123_Ready(edge)) {
         Coms_123_Read(edge);
     }
 }
 
-void Coms_123_Disconnected(const uint8_t edge) {
+void Coms_123_Disconnected(uint8_t edge) {
     Flg_EdgeCon[edge] = false;
     Flg_EdgeSyn[edge] = false;
     Flg_EdgeAct[edge] = false;

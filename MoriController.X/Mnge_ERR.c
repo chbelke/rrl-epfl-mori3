@@ -12,7 +12,7 @@ void Mnge_ERR_ActivateStop(uint8_t edge, uint8_t code){
     if (!FLG_Emergency){
         FLG_Emergency = true;
         errCode = code;
-        errEdge = edge;
+        errEdge = edge + 1;
         
         uint8_t e;
         for (e = 0; e < 3; e++)
