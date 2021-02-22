@@ -770,8 +770,7 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte, uint8_t *state) {
                     // update leds
                     for (m = 0; m <= 2; m++) {
                         if ((alloc[edge] >> (2 - m)) & 0b00000001) {
-//                            Mnge_RGB_Set(m, RgbPWM[edge][m]);
-                            Acts_ROT_TempUpdateControl(m, RgbPWM[edge][m]);
+                            Mnge_RGB_Set(m, RgbPWM[edge][m]);
                         }
                     }
                 } else {

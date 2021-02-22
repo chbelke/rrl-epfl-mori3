@@ -47,6 +47,8 @@
 */
 #include <xc.h>
 #include "traps.h"
+#include "uart4.h"
+#include "../Defs_GLB.h"
 
 #define ERROR_HANDLER __attribute__((interrupt, no_auto_psv, keep, section("error_handler")))
 #define FAILSAFE_STACK_GUARDSIZE 8
@@ -68,8 +70,13 @@ void __attribute__((weak)) TRAPS_halt_on_error(uint16_t code)
     __builtin_software_breakpoint();
     /* If we are in debug mode, cause a software breakpoint in the debugger */
 #endif
-    while(1);
     
+    LED_R = LED_On;
+    UART4_Write(0b10000000);
+    UART4_Write((uint8_t) ((code >> 8) & 0x00FF));
+    UART4_Write((uint8_t) (code & 0x00FF));
+    UART4_Write(ESP_End);
+    while(1);
 }
 
 /**

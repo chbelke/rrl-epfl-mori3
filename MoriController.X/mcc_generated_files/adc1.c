@@ -46,11 +46,11 @@
   Section: Included Files
  */
 
-#include <xc.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <libpic30.h>
+//#include <xc.h>
+//#include <stdbool.h>
+//#include <stdint.h>
+//#include <stdlib.h>
+//#include <libpic30.h>
 #include "adc1.h"
 #include "../Defs_GLB.h"
 #include "../Defs_MOD.h"
@@ -68,13 +68,14 @@ static void (*ADC1_DefaultInterruptHandler)(void) = NULL;
   Section: Driver Interface
  */
 
-void ADC1_Initialize(void) {
+void ADC1_Initialize (void)
+{
     // ASAM enabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Sequential; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Internal counter ends sampling and starts conversion; AD12B 10-bit; ADON enabled; SSRCG disabled; 
     AD1CON1 = 0x80E4;
     // CSCNA disabled; VCFG0 AVDD; VCFG1 AVSS; ALTS disabled; BUFM disabled; SMPI Generates interrupt after completion of every sample/conversion operation; CHPS 1 Channel; 
     AD1CON2 = 0x00;
-    // SAMC 12; ADRC FOSC/2; ADCS 0; 
-    AD1CON3 = 0xC00;
+    // SAMC 12; ADRC FOSC/2; ADCS 14; 
+    AD1CON3 = 0xC0E;
     // CH0SA AN29; CH0SB OA2/AN0; CH0NB VREFL; CH0NA VREFL; 
     AD1CHS0 = 0x1D;
     // CSS26 disabled; CSS25 disabled; CSS24 disabled; CSS31 disabled; CSS30 disabled; CSS29 disabled; CSS28 disabled; CSS27 disabled; 
@@ -130,19 +131,22 @@ void ADC1_Update(void) {
     ADC1_ValuesC[1] = ADC1_ValuesC[0];
 
     ADC1_Enable();
+    uint16_t i;
 
     ADC1_ChannelSelect(AI_A);
     ADC1_SoftwareTriggerEnable();
-//    for (i = 0; i < 1000; i++) {
-//    }
+    for (i = 0; i < 1000; i++) {
+    }
+    __delay_us(10);
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_A));
     ADC1_ValuesA[0] = ADC1_ConversionResultGet(AI_A);
 
     ADC1_ChannelSelect(AI_B);
     ADC1_SoftwareTriggerEnable();
-//    for (i = 0; i < 1000; i++) {
-//    }
+    for (i = 0; i < 1000; i++) {
+    }
+    __delay_us(10);
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_B));
     ADC1_ValuesB[0] = ADC1_ConversionResultGet(AI_B);
@@ -151,6 +155,7 @@ void ADC1_Update(void) {
     ADC1_SoftwareTriggerEnable();
 //    for (i = 0; i < 1000; i++) {
 //    }
+    __delay_us(10);
     ADC1_SoftwareTriggerDisable();
     while (!ADC1_IsConversionComplete(AI_C));
     ADC1_ValuesC[0] = ADC1_ConversionResultGet(AI_C);

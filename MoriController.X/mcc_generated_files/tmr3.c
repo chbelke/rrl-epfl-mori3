@@ -106,8 +106,8 @@ static TMR_OBJ tmr3_obj;
 void TMR3_Initialize(void) {
     //TMR3 0; 
     TMR3 = 0x00;
-    //Period = 0.05 s; Frequency = 3686400 Hz; PR3 2880; 
-    PR3 = 0xB40;
+    //Period = 0.05 s; Frequency = 36864000 Hz; PR3 28799; 
+    PR3 = 0x707F;
     //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
     T3CON = 0x8020;
 

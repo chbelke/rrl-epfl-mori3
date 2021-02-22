@@ -30,7 +30,7 @@ uint8_t NbrIDCount[3] = {0, 0, 0};
 uint8_t NbrCmdExt[3] = {0, 0, 0}; // extension command received by neighbour
 uint8_t NbrValExt[3] = {0, 0, 0}; // current extension received by neighbour
 uint8_t NbrValSpd[3] = {0, 0, 0}; // speed value received by neighbour
-uint8_t NbrValInt[3] = {0, 0, 0}; // integral value received by neighbour
+uint16_t NbrValInt[3] = {0, 0, 0}; // integral value received by neighbour
 uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
 uint16_t NbrValAng[3] = {0, 0, 0}; // angle reading by neighbour used for averaging
 uint8_t NbrCmdIDn[3] = {0, 0, 0};
@@ -46,9 +46,6 @@ volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening
 #define COMS_123_IDOk 0b10001100
 #define COMS_123_Idle 0b01100000
 #define COMS_123_Emrg 0b00011111
-
-#define WHEEL 68.15f // wheel distance from vertex
-#define SxOUT 0.9 // output speed factor for non-primary wheels
 
 // EdgInAloc Explanation
 /* EdgInAloc: 
@@ -77,11 +74,11 @@ void Coms_123_Eval(uint8_t edge) { // called in main
     static uint8_t EdgInCase[3] = {0, 0, 0}; // switch case variable
 //    static uint8_t EdgInIdleBytes[3] = {0, 0, 0};
     uint8_t EdgIn = 50;
-//    uint8_t bytes_read = 0;
-//
-//    while(bytes_read < 33) { // ActHandle sends max 11 bytes at 20Hz (allow 3)
-//        bytes_read++;
-//        if (bytes_read >= 33) LED_R = LED_On;
+    uint8_t bytes_read = 0;
+
+    while(bytes_read < 17) { // ActHandle sends max 11 bytes at 20Hz (allow 3)
+        bytes_read++;
+        if (bytes_read >= 17) LED_R = LED_On;
 
         if (!Coms_123_Ready(edge)) return; // check if byte received
         if (EdgInCase[edge] != 40) //Only read alloc byte if in relay
@@ -142,7 +139,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                 break;
 
             case 4:
-                NbrValAng[edge] = (NbrValAng[edge] | (((uint16_t)EdgIn) & 0x00FF));
+                NbrValAng[edge] = NbrValAng[edge] | (uint16_t) EdgIn ;
                 EdgInCase[edge] = 5;
                 break;
 
@@ -178,12 +175,18 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                 }
             case 10:
                 if (EdgInAloc[edge] & 0b00001000) {
-                    NbrValInt[edge] = EdgIn;
+                    NbrValInt[edge] = 0xFF00 & (((uint16_t)EdgIn) << 8);
                     EdgInCase[edge] = 11;
                     break;
                 }
-
-            case 11: // verify action command
+            case 11:
+                if (EdgInAloc[edge] & 0b00001000) {
+                    NbrValInt[edge] = NbrValInt[edge] | (uint16_t) EdgIn;
+                    EdgInCase[edge] = 12;
+                    break;
+                }
+                
+            case 12: // verify action command
                 if (EdgIn == EDG_End) {
                     EdgActCnt[edge] = 0; // reset act interval
                     Coms_123_ResetIntervals(edge); // reset con and syn intervals
@@ -279,7 +282,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                 EdgInCase[edge] = 50;
                 break;
         }
-//    }
+    }
 }
 
 void Coms_123_ResetIntervals(uint8_t edge) {
@@ -343,13 +346,6 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
             Coms_123_Write(edge, byte);
             if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
                 Coms_123_WriteID(edge);
-//            if (byte == COMS_123_Idle){
-                // send angle reading for averagivng
-//                uint16_t selfAngle = (uint16_t) map((int16_t)(10*Sens_ENC_Get(edge)), -1800, 1800, 0, 3600);
-//                uint16_t selfAngle = Acts_ROT_GetAngle(edge, false);
-//                Coms_123_Write(edge, (uint8_t)((selfAngle >> 8) & 0x00FF));
-//                Coms_123_Write(edge, (uint8_t)(selfAngle & 0x00FF));
-//            }
             Coms_123_Write(edge, EDG_End);
         }
     }
@@ -424,7 +420,9 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
                     Coms_123_Write(edge, (uint8_t) ((AngTemp & 0xFF00) >> 8));
                     Coms_123_Write(edge, (uint8_t) (AngTemp & 0x00FF));
                     Coms_123_Write(edge, Acts_ROT_GetSpeedLimit(edge));
-                    Coms_123_Write(edge, Acts_ROT_GetSPDAvgOut(edge));
+                    uint16_t SpdTemp = Acts_ROT_GetSPDAvgOut(edge);
+                    Coms_123_Write(edge, (uint8_t) ((SpdTemp & 0xFF00) >> 8));
+                    Coms_123_Write(edge, (uint8_t) (SpdTemp & 0x00FF));
                 }
                 Coms_123_Write(edge, EDG_End);
             } else {

@@ -113,8 +113,8 @@ void UART3_Initialize(void)
     U3MODE = (0x8008 & ~(1<<15));  // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U3STA = 0x00;
-    // BaudRate = 460800; Frequency = 3686400 Hz; BRG 1; 
-    U3BRG = 0x01;
+    // BaudRate = 460800; Frequency = 36864000 Hz; BRG 19; 
+    U3BRG = 0x13;
 
     txHead = txQueue;
     txTail = txQueue;

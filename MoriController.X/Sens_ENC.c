@@ -61,7 +61,7 @@ void Sens_ENC_Read(uint8_t edge) {
 
         // wait for the message to be sent or status has changed.
         while(status == I2C1_MESSAGE_PENDING) {
-            __delay_us(1); // add some delay here
+            __delay_us(100); // add some delay here
             // timeout checking
             if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
                 slaveTimeOut = 0;
@@ -75,7 +75,7 @@ void Sens_ENC_Read(uint8_t edge) {
         if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
         else timeOut++;
 
-        __delay_us(1);
+        __delay_us(10);
     }
     
     if ((status != I2C1_MESSAGE_COMPLETE) && Flg_EdgeAct[edge])
@@ -88,8 +88,6 @@ void Sens_ENC_Read(uint8_t edge) {
     // convert to float
     float angleFLT = (float) 0x3FFF - angleINT;
     angleFLT = clamp_f(angleFLT, 0.0f, AS5048B_Res);
-//    if (angleFLT < 0.0f) angleFLT = 0.0f;
-//    else if (angleFLT > AS5048B_Res) angleFLT = AS5048B_Res;
     angleFLT = angleFLT * AS5048B_360OverRes - 180.0f;
 
     Sens_ENC_UpdateOld(edge); // update old value
@@ -126,6 +124,10 @@ void Sens_ENC_SetGlobalOffset(uint8_t edge){
 void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
     const int16_t angleOffset = ((int16_t) Acts_ROT_GetAngle(edge, false) - nbrAngVal) / 2;
     ENC_LiveOffset[edge] = (int8_t) angleOffset;
+}
+
+int8_t Sens_ENC_GetLiveOffset(uint8_t edge) {
+    return ENC_LiveOffset[edge];
 }
 
 void Sens_ENC_UpdateOld(uint8_t edge){

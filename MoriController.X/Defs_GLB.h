@@ -9,7 +9,7 @@
 #ifndef DEFS_GLB_H
 #define	DEFS_GLB_H
 
-#define FCY 3686400UL               // cycle frequency
+#define FCY 36864000UL               // cycle frequency
 
 #include <xc.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'F' // module name by letter
+#define MODULE 'M' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -49,8 +49,8 @@
 
 // RGB LED Default values
 #define RGB_Default_Red 0
-#define RGB_Default_Green 5
-#define RGB_Default_Blue 10
+#define RGB_Default_Green 10
+#define RGB_Default_Blue 2
 
 /* ******************** ERROR CODES ***************************************** */
 #define ERR_NeighbourLost 1
@@ -207,22 +207,16 @@ extern volatile uint8_t CMD_ID;
 
 #define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_freq 100.0f      // timer period
-#define MotRot_PID_kP 26.9f        // proportional gain (was 153)
-#define MotRot_PID_kI 9.5f         // integral gain (was 53.9)
-#define MotRot_PID_kD 0.6f          // derivative gain (was 3.4))
-#define MotRot_PID_Dmax 180.0f      // derivative limit (was 1024)
-#define MotRot_PID_Imax 180.0f      // integral limit (was 1024)
-#define MotRot_PID_Max 180.0f       // duty cycle limit (was 1024)
-#define MotRot_PID_OneOverMax 0.0055556f
+#define MotRot_PID_kP 268.9f        // proportional gain (was 153 for OutMax 1024)
+#define MotRot_PID_kI 94.7f         // integral gain (was 53.9 for OutMax 1024)
+#define MotRot_PID_kD 6.0f          // derivative gain (was 3.4 for OutMax 1024)
+#define MotRot_PID_Dmax 1800.0f      // derivative limit (was 1024)
+#define MotRot_PID_Imax 1800.0f      // integral limit (was 1024)
+#define MotRot_PID_Max 1800.0f       // duty cycle limit (was 1024)
 
-//#define MotRot_SPD_kP 60.0f         // speed control proportional gain
-//#define MotRot_SPD_kI 15.0f         // speed control integral gain
-//#define MotRot_SPD_kD 8.0f          // speed control derivative gain
-#define MotRot_SPD_Pmax 180.0f        // speed integral limit
-#define MotRot_SPD_Imax 180.0f        // speed integral limit
-#define MotRot_SPD_Dmax 180.0f        // speed integral limit
-#define MotRot_SPD_Max 180.0f         // speed duty cycle limit
-#define MotRot_SPD_OneOverMax 0.0055556f
+#define MotRot_SPD_k 150.0f         // speed control proportional gain
+#define MotRot_SPD_Max 1800.0f         // speed duty cycle limit
+#define MotRot_SPD_OneOverMax 0.0005556f
 #define MotRot_SpeedInit 100          // limit speed at start-up (/100)
 #define MotRot_SpeedMax 58.3f         // max speed (degrees/second) (@tau=149)
 

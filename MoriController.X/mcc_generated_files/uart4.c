@@ -112,8 +112,8 @@ void UART4_Initialize(void)
     U4MODE = (0x8008 & ~(1<<15));  // disabling UART ON bit
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U4STA = 0x00;
-    // BaudRate = 460800; Frequency = 3686400 Hz; BRG 1; 
-    U4BRG = 0x01;
+    // BaudRate = 460800; Frequency = 36864000 Hz; BRG 19; 
+    U4BRG = 0x13;
 
     txHead = txQueue;
     txTail = txQueue;
