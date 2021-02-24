@@ -18,17 +18,13 @@ uint8_t DrvInterval[3] = {0, 0, 0};
 float PID_I[3] = {0, 0, 0}; // integral error variable
 
 volatile bool SPD_AvgFlag[3] = {false, false, false};
-volatile int8_t SPD_AvgOut[3] = {0, 0, 0};
-volatile int8_t SPD_AvgIn[3] = {0, 0, 0};
-
-volatile int16_t SPD_PID_Monitor[3] = {0, 0, 0};
-
-float SPD_Gain = 15.0f;
+volatile int16_t SPD_AvgOut[3] = {0, 0, 0};
+volatile int16_t SPD_AvgIn[3] = {0, 0, 0};
 
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9f // output speed factor for non-primary wheels (tune curve)
 #define INV_THREE 0.333333f // division avoidance
-#define INV255_x180 0.705882f // factor for 255 to 180pwm conversion
+#define INV255_x180 7.058824f // factor for 255 to 180pwm conversion
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
@@ -100,15 +96,15 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         }
 
         // speed control (integral)
-        SPD[edge] += SPD_Gain * (Speed_DEG[edge] * SPD_Dir[edge] - Sens_ENC_GetDelta(edge));
-        SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Imax, MotRot_SPD_Imax);
-        Acts_ROT_SetSPDAvgOut(edge, (int8_t)(SPD[edge] * 0.5f));
+        SPD[edge] += MotRot_SPD_k * (Speed_DEG[edge] * SPD_Dir[edge] - Sens_ENC_GetDelta(edge));
+        SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, MotRot_SPD_Max);
+        Acts_ROT_SetSPDAvgOut(edge, (int16_t)(SPD[edge]));
 
         // average speed integral 
         if (SPD_AvgFlag[edge]){
             if (newTargetCount[edge] >= 16){ // ignore first loops before averaging
                 SPD_AvgFlag[edge] = false;
-                SPD[edge] = SPD[edge] * 0.5f + Acts_ROT_GetSPDAvgNeighbour(edge);
+                SPD[edge] = (SPD[edge] + Acts_ROT_GetSPDAvgNeighbour(edge)) * 0.5f;
             } else newTargetCount[edge]++;
         }
         
@@ -118,21 +114,10 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
             OUT = outP;
         else OUT = SPD[edge];
 
-        SPD_PID_Monitor[0] = (int16_t) (Sens_ENC_GetDelta(edge) * 500.0f);
-        SPD_PID_Monitor[1] = (int16_t) outP;
-        SPD_PID_Monitor[2] = (int16_t) SPD[edge];
     } else {
         OUT = outP; // full speed position output
     }
     Acts_ROT_Out(edge, (int16_t) OUT); // output pwm
-}
-
-void Acts_ROT_TempUpdateControl(uint8_t select, uint8_t value){
-    if (select == 1) SPD_Gain = (float)value;
-}
-
-int16_t Acts_ROT_TempSPDMonitor(uint8_t i){
-    return SPD_PID_Monitor[i];
 }
 
 /* ******************** EXECUTE WIGGLE ************************************** */
@@ -330,19 +315,19 @@ uint16_t clamp_ui16(uint16_t d, uint16_t min, uint16_t max) {
   return t > max ? max : t;
 }
 
-void Acts_ROT_SetSPDAvgOut(uint8_t edge, int8_t value){
+void Acts_ROT_SetSPDAvgOut(uint8_t edge, int16_t value){
     SPD_AvgOut[edge] = value;
 }
 
-uint8_t Acts_ROT_GetSPDAvgOut(uint8_t edge){
-    return (uint8_t)SPD_AvgOut[edge];
+uint16_t Acts_ROT_GetSPDAvgOut(uint8_t edge){
+    return (uint16_t)(SPD_AvgOut[edge] + 1800);
 }
 
-void Acts_ROT_SetSPDAvgNeighbour(uint8_t edge, uint8_t value){
+void Acts_ROT_SetSPDAvgNeighbour(uint8_t edge, uint16_t value){
     SPD_AvgFlag[edge] = true;
-    SPD_AvgIn[edge] = (int8_t)value;
+    SPD_AvgIn[edge] = ((int16_t)value) - 1800;
 }
 
-int8_t Acts_ROT_GetSPDAvgNeighbour(uint8_t edge){
+int16_t Acts_ROT_GetSPDAvgNeighbour(uint8_t edge){
     return SPD_AvgIn[edge];
 }

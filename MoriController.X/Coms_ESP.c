@@ -369,8 +369,7 @@ void Coms_ESP_Request_Orient() {
 void Coms_ESP_Write_Orient() {
     uint8_t i;
     for (i = 0; i < 3; i++) {    
-//        UART4_Write16(Sens_ACC_GetAngle(i));
-        UART4_Write16(Acts_ROT_TempSPDMonitor(i));
+        UART4_Write16(Sens_ACC_GetAngle(i));
     }
 }
 

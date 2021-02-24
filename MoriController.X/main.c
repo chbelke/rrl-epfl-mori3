@@ -114,7 +114,7 @@ volatile uint8_t CMD_ID = 0;
  */
 int main(void) {
     uint8_t edge;
-    __delay_ms(1000); // start-up delay
+    __delay_ms(100); // start-up delay
     SYSTEM_Initialize(); // initialize the device
 
     LED_R = LED_Off;

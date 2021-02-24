@@ -54,7 +54,7 @@ void Sens_ACC_Setup(void) {
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
-            __delay_us(1); // add some delay here
+            __delay_us(100); // add some delay here
             // timeout checking
             if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
                 slaveTimeOut = 0;
@@ -68,7 +68,7 @@ void Sens_ACC_Setup(void) {
         if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
         else timeOut++;
 
-        __delay_us(1);
+        __delay_us(10);
     }
     
     if (status != I2C1_MESSAGE_COMPLETE)
@@ -99,7 +99,7 @@ void Sens_ACC_Read(void) {
 
         // wait for the message to be sent or status has changed.
         while (status == I2C1_MESSAGE_PENDING) {
-            __delay_us(1); // add some delay here
+            __delay_us(100); // add some delay here
             // timeout checking
             if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
                 slaveTimeOut = 0;
@@ -113,7 +113,7 @@ void Sens_ACC_Read(void) {
         if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
         else timeOut++;
 
-        __delay_us(1);
+        __delay_us(10);
     }
     
     if (status != I2C1_MESSAGE_COMPLETE)

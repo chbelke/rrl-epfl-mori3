@@ -131,8 +131,8 @@ void PWM_Initialize (void)
     PHASE3 = 0x00;
     // PHASE4 0; 
     PHASE4 = 0x00;
-    // PHASE5 180; 
-    PHASE5 = 0xB4;
+    // PHASE5 1800; 
+    PHASE5 = 0x708;
     // PHASE6 0; 
     PHASE6 = 0x00;
     // DTR1 0; 
@@ -177,10 +177,10 @@ void PWM_Initialize (void)
     SPHASE2 = 0x400;
     // SPHASE3 1024; 
     SPHASE3 = 0x400;
-    // SPHASE4 180; 
-    SPHASE4 = 0xB4;
-    // SPHASE5 180; 
-    SPHASE5 = 0xB4;
+    // SPHASE4 1800; 
+    SPHASE4 = 0x708;
+    // SPHASE5 1800; 
+    SPHASE5 = 0x708;
     // SPHASE6 0; 
     SPHASE6 = 0x00;
     // TRGCMP 0; 

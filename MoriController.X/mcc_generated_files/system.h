@@ -43,7 +43,7 @@
 */
 
 #ifndef _XTAL_FREQ
-#define _XTAL_FREQ  7372800UL
+#define _XTAL_FREQ  73728000UL
 #endif
 
 #include <xc.h>

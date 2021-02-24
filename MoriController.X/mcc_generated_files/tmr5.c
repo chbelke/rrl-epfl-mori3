@@ -98,10 +98,10 @@ void TMR5_Initialize (void)
 {
     //TMR5 0; 
     TMR5 = 0x00;
-    //Period = 0.2 s; Frequency = 3686400 Hz; PR5 11520; 
-    PR5 = 0x2D00;
-    //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T5CON = 0x8020;
+    //Period = 0.2 s; Frequency = 36864000 Hz; PR5 28799; 
+    PR5 = 0x707F;
+    //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T5CON = 0x8030;
 
     if(TMR5_InterruptHandler == NULL)
     {
