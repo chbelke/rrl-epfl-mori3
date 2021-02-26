@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'M' // module name by letter
+#define MODULE 'H' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -32,7 +32,7 @@
 #define TMR3_f 20
 #define TMR5_f 5
 
-// I2C MCC modification
+// I2C MCC modification // not updated since fosc boost
 /* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
  * is as follows: ((1/0.4 - 0.120)*3.6864)-2 = 6.77
  * FRM: http://ww1.microchip.com/downloads/en/DeviceDoc/70000195g.pdf*/
@@ -48,18 +48,19 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 0
+#define RGB_Default_Red 5
 #define RGB_Default_Green 10
-#define RGB_Default_Blue 2
+#define RGB_Default_Blue 0
 
 /* ******************** ERROR CODES ***************************************** */
 #define ERR_NeighbourLost 1
 #define ERR_NeighbourToldMe 2
 #define ERR_NeighbourConAfterAct 3
-#define ERR_I2CAngleFailed 4
-#define ERR_I2CLedDriverFailed 5
-#define ERR_I2CAccelerometerFailed 6
-#define ERR_ESPToldMe 99
+#define ERR_NeighbourAckAfterAct 4
+#define ERR_I2CAngleFailed 20
+#define ERR_I2CLedDriverFailed 21
+#define ERR_I2CAccelerometerFailed 22
+#define ERR_ESPToldMe 90
 
 /* ******************** BATTERY ********************************************* */
 #define BatCountMax 10 // seconds of continuos low bat before flag is triggered
@@ -94,6 +95,9 @@ extern volatile bool Flg_EdgeReq_Ext[3];
 extern volatile bool Flg_EdgeReq_Cpl[3];
 extern volatile bool Flg_EdgeReq_CplNbrWait[3];
 extern volatile bool Flg_EdgeNbr_Offset[3];
+extern volatile bool Flg_AllEdgRdy[3];
+extern volatile bool Flg_NbrEdgRdy[3];
+
 
 extern volatile bool Flg_ID_check;
 

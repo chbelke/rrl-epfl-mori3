@@ -636,8 +636,8 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte, uint8_t *state) {
             if (byte == ESP_End) {
                 if ((EspInByts[edge] == (3 + EspInBits[edge] + EspInBits2[edge]))
                         && (CmdIDnTemp != 0)){
+                    CMD_ID = CmdIDnTemp; // update command ID
                     Coms_CMD_SetEdge(edge, alloc[edge]); // implement command
-                    CMD_ID = CmdIDnTemp;
                 } else {
                     EspInLost[edge] = EspInLost[edge] + 1; // data lost
                 }

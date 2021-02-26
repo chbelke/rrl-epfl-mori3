@@ -92,6 +92,8 @@ volatile bool Flg_EdgeReq_Ext[3] = {false, false, false};
 volatile bool Flg_EdgeReq_Cpl[3] = {false, false, false};
 volatile bool Flg_EdgeReq_CplNbrWait[3] = {true, true, true};
 volatile bool Flg_EdgeNbr_Offset[3] = {false, false, false};
+volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready
+volatile bool Flg_NbrEdgRdy[3] = {false, false, false}; // neighbour edges ready
 
 volatile bool Flg_ID_check = false;
 
