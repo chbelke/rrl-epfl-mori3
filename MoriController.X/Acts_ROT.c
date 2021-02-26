@@ -109,8 +109,8 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         }
         
         // whichever is smallest
-        if (((SPD[edge] > 0) && (outP < SPD[edge]))
-                || ((SPD[edge] < 0) && (outP > SPD[edge])))
+        if (((SPD[edge] > 0) && (SPD_Dir[edge] > 0) && (outP < SPD[edge]))
+                || ((SPD[edge] < 0) && (SPD_Dir[edge] < 0) && (outP > SPD[edge])))
             OUT = outP;
         else OUT = SPD[edge];
 
@@ -126,7 +126,7 @@ void Acts_ROT_Wiggle(uint8_t edge) {
     Wgl_Count[edge]++;
     if (Wgl_Count[edge] <= (MotRot_WiggleTime * 100)) {
         if (Wgl_Count[edge] <= MotRot_WiggleTime * 60) {
-            Acts_ROT_Out(edge, 30);
+            Acts_ROT_Out(edge, 300);
             if (Flg_EdgeSyn[edge]) {
                 Wgl_Count[edge] = MotRot_WiggleTime * 61;
                 if (Flg_DriveAndCouple[edge]) {
@@ -135,11 +135,11 @@ void Acts_ROT_Wiggle(uint8_t edge) {
                 }
             }
         } else if (Wgl_Count[edge] <= MotRot_WiggleTime * 90)
-            Acts_ROT_Out(edge, -30);
+            Acts_ROT_Out(edge, -300);
         else if (Wgl_Count[edge] <= MotRot_WiggleTime * 98)
-            Acts_ROT_Out(edge, 30);
+            Acts_ROT_Out(edge, 300);
         else
-            Acts_ROT_Out(edge, -30);
+            Acts_ROT_Out(edge, -300);
     } else {
         Acts_ROT_Out(edge, 0);
         Mnge_DAC_Set(edge, Trq_Limit[edge]);
@@ -263,6 +263,7 @@ void Acts_ROT_SetCurrentLimit(uint8_t edge, uint8_t limit) {
 /* ******************** SET ROTARY MOTOR SPEED LIMIT ************************ */
 void Acts_ROT_SetSpeedLimit(uint8_t edge, uint8_t limit) {
     if (limit > 100) limit = 100;
+    else if (limit < 1) limit = 1;
     Speed_DEG[edge] = ((float) limit) * 0.01f * MotRot_SpeedMax * MotRot_PID_period;
     Speed_100[edge] = limit;
 }

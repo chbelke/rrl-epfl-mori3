@@ -43,7 +43,9 @@ void Tmrs_CBK_Timer3_Handle(void) {
     
     ADC1_Update(); // read analog potentiometer inputs
     for (edge = 0; edge < 3; edge++) { // extension control loops
-        if (Flg_EdgeReq_Ext[edge] && (Flg_EdgeAct[edge] || !Flg_EdgeCon[edge]))
+        if (Flg_EdgeReq_Ext[edge] && (Flg_EdgeAct[edge] || (!Flg_EdgeCon[edge] 
+                && Flg_AllEdgRdy[0] && Flg_AllEdgRdy[1] && Flg_AllEdgRdy[2]
+                && Flg_NbrEdgRdy[0] && Flg_NbrEdgRdy[1] && Flg_NbrEdgRdy[2])))
             Acts_LIN_PID(edge, ADC1_Return(edge), Acts_LIN_GetTarget(edge));
         else
             Acts_LIN_Out(edge, 0);// make sure motors are off

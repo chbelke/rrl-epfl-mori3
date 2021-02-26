@@ -21,7 +21,6 @@ volatile uint8_t EdgConCnt[3] = {0, 0, 0}; // no conn/ackn byte received counter
 volatile uint8_t EdgActCnt[3] = {0, 0, 0}; // no idle byte received counter
 volatile bool Flg_IDCnfd[3] = {false, false, false}; // ID received by neighbour flag
 volatile bool Flg_IDRcvd[3] = {false, false, false}; // ID received from neighbour flag
-volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready send
 
 // Neighbour ID variables
 uint8_t NbrID[21] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // (6 characters plus edge) x3
@@ -35,7 +34,6 @@ uint16_t NbrCmdAng[3] = {0, 0, 0}; // angle command received by neighbour
 uint16_t NbrValAng[3] = {0, 0, 0}; // angle reading by neighbour used for averaging
 uint8_t NbrCmdIDn[3] = {0, 0, 0};
 volatile bool NbrCmdMatch[3] = {false, false, false};
-volatile bool NbrEdgesRdy[3] = {false, false, false};
 
 volatile uint8_t CplCmdWait[3] = {4, 4, 4}; // wait 0.6s before opening coupling
 volatile bool CplCmdRnng[3] = {false, false, false}; // wait 0.6s before opening coupling
@@ -239,7 +237,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                     } else {
                         if (EdgIn == EDG_End) {
                             // should never get here when flag act is set on this edge
-                            if (Flg_EdgeAct[edge]) Mnge_ERR_ActivateStop(edge, ERR_NeighbourConAfterAct);
+                            if (Flg_EdgeAct[edge]) Mnge_ERR_ActivateStop(edge, ERR_NeighbourAckAfterAct);
 
                             uint8_t i;
                             for (i = 0 + 7 * edge; i <= 6 + 7 * edge; i++) {
@@ -341,7 +339,7 @@ void Coms_123_ConHandle() { // called in tmr5 at 5Hz
         if (!Flg_ID_check) byte = COMS_123_Conn;
         if (FLG_Emergency) byte = COMS_123_Emrg;
 
-        if (Flg_EdgeAct[edge] == false) {
+        if (!Flg_EdgeAct[edge]) {
             // write byte (ID if in con but no sync) and end byte
             Coms_123_Write(edge, byte);
             if ((byte == COMS_123_Ackn) || (byte == COMS_123_IDOk))
@@ -371,7 +369,7 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
                     Flg_AllEdgRdy[edge] = false;
             } else { // not connected or no command received, other edges can go
                 Flg_AllEdgRdy[edge] = true;
-                NbrEdgesRdy[edge] = true;
+                Flg_NbrEdgRdy[edge] = true;
             }
         }
         for (edge = 0; edge < 3; edge++) {
@@ -397,7 +395,7 @@ void Coms_123_ActHandle() { // called in tmr3 at 20Hz
                     if (FLG_WaitAllEdges) {
                         if (Flg_AllEdgRdy[0] && Flg_AllEdgRdy[1] && Flg_AllEdgRdy[2]) {
                             byte = byte | 0b00000001; // my edges are ready, wait
-                            if (NbrEdgesRdy[0] && NbrEdgesRdy[1] && NbrEdgesRdy[2])
+                            if (Flg_NbrEdgRdy[0] && Flg_NbrEdgRdy[1] && Flg_NbrEdgRdy[2])
                                 byte = byte | 0b00000010; // my nbrs are ready, go
                         }
                     } else {
@@ -492,18 +490,18 @@ void Coms_123_ActVerify(uint8_t edge) {
         NbrCmdMatch[edge] = true;
         if ((EdgInAloc[edge] & 0b00000011) == 3) { // good to go
             Flg_EdgeAct[edge] = true;
-            NbrEdgesRdy[edge] = true;
+            Flg_NbrEdgRdy[edge] = true;
             if ((EdgInAloc[edge] & 0b00001000) && (Flg_EdgeReq_Ang[edge]))
                 Acts_ROT_SetSPDAvgNeighbour(edge, NbrValInt[edge]);
         } else {
             Flg_EdgeAct[edge] = false;
             if ((EdgInAloc[edge] & 0b00000011) == 1) // nbr ready
-                NbrEdgesRdy[edge] = true;
+                Flg_NbrEdgRdy[edge] = true;
             else
-                NbrEdgesRdy[edge] = false;
+                Flg_NbrEdgRdy[edge] = false;
         }
     } else {
-        NbrEdgesRdy[edge] = false;
+        Flg_NbrEdgRdy[edge] = false;
         NbrCmdMatch[edge] = false;
         Flg_EdgeAct[edge] = false;
     }
