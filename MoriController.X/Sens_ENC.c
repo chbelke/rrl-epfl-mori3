@@ -61,9 +61,9 @@ void Sens_ENC_Read(uint8_t edge) {
 
         // wait for the message to be sent or status has changed.
         while(status == I2C1_MESSAGE_PENDING) {
-            __delay_us(100); // add some delay here
+            __delay_us(5); // add some delay here
             // timeout checking
-            if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
+            if (slaveTimeOut >= SLAVE_I2C_ENCODER_DEVICE_TIMEOUT){
                 slaveTimeOut = 0;
                 break;
             } else slaveTimeOut++;
@@ -72,10 +72,8 @@ void Sens_ENC_Read(uint8_t edge) {
         if (status == I2C1_MESSAGE_COMPLETE) break;
 
         // check for max retry and skip this byte
-        if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
+        if (timeOut >= SLAVE_I2C_ENCODER_RETRY_MAX) break;
         else timeOut++;
-
-        __delay_us(10);
     }
     
     if ((status != I2C1_MESSAGE_COMPLETE) && Flg_EdgeAct[edge])
@@ -84,14 +82,16 @@ void Sens_ENC_Read(uint8_t edge) {
     // combine 14 bit result
     uint16_t angleINT = ((uint16_t) readBuffer[0]) << 6;
     angleINT += (uint16_t)(readBuffer[1] & 0x3F);
+    angleINT = clamp_ui16(angleINT, 0, AS5048B_Res);
     
     // convert to float
-    float angleFLT = (float) 0x3FFF - angleINT;
-    angleFLT = clamp_f(angleFLT, 0.0f, AS5048B_Res);
+    float angleFLT = (float) (0x3FFF - angleINT);
+//    angleFLT = clamp_f(angleFLT, 0.0f, AS5048B_Res);
     angleFLT = angleFLT * AS5048B_360OverRes - 180.0f;
 
     Sens_ENC_UpdateOld(edge); // update old value
     Sens_ENC_UpdateNew(edge, angleFLT); // rolling average
+    Mnge_ERR_checkReal(angleFLT, 1);
 }
 
 /* ******************** GET CURRENT ANGLE *********************************** */

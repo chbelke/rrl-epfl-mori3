@@ -28,7 +28,7 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
 
         // wait for the message to be sent or status has changed.
         while(status == I2C1_MESSAGE_PENDING) {
-            __delay_us(100); // add some delay here
+            __delay_us(5); // add some delay here
             // timeout checking
             if (slaveTimeOut >= SLAVE_I2C_GENERIC_DEVICE_TIMEOUT){
                 slaveTimeOut = 0;
@@ -41,8 +41,6 @@ void Mnge_DAC_Write(uint8_t channel, uint8_t value) {
         // check for max retry and skip this byte
         if (timeOut >= SLAVE_I2C_GENERIC_RETRY_MAX) break;
         else timeOut++;
-        
-        __delay_us(10);
     }
 }
 

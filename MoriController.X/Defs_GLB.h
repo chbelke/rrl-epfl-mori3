@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'H' // module name by letter
+#define MODULE 'K' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -48,9 +48,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 5
-#define RGB_Default_Green 10
-#define RGB_Default_Blue 0
+#define RGB_Default_Red 10
+#define RGB_Default_Green 0
+#define RGB_Default_Blue 5
 
 /* ******************** ERROR CODES ***************************************** */
 #define ERR_NeighbourLost 1
@@ -97,6 +97,7 @@ extern volatile bool Flg_EdgeReq_CplNbrWait[3];
 extern volatile bool Flg_EdgeNbr_Offset[3];
 extern volatile bool Flg_AllEdgRdy[3];
 extern volatile bool Flg_NbrEdgRdy[3];
+extern volatile bool Flg_ByteReadOverran[3];
 
 
 extern volatile bool Flg_ID_check;
@@ -207,7 +208,7 @@ extern volatile uint8_t CMD_ID;
 
 #define MotRot_AngleIntMIN 600      // minimum input range in degrees *10 (uint16_t)
 #define MotRot_AngleIntMAX 3000      // maximum input range in degrees *10 (uint16_t)
-#define MotRot_OkRange 15           // +- (0.1*degrees) (automatic CMD update)
+#define MotRot_OkRange 10           // +- (0.1*degrees) (automatic CMD update)
 
 #define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_freq 100.0f      // timer period
@@ -233,15 +234,17 @@ extern volatile uint8_t CMD_ID;
 
 
 /* ******************** I2C ************************************************* */
-#define SLAVE_I2C_GENERIC_RETRY_MAX 5
-#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT 20
+#define SLAVE_I2C_GENERIC_RETRY_MAX 3
+#define SLAVE_I2C_GENERIC_DEVICE_TIMEOUT 50
+#define SLAVE_I2C_ENCODER_RETRY_MAX 3
+#define SLAVE_I2C_ENCODER_DEVICE_TIMEOUT 50
 // IF > 255 must change timeouts to uint16_t in all i2c
 
 /* ******************** ENCODERS AS5048B ************************************ */
 #define AS5048B_Address 0x40
 #define AS5048B_Reg_AngleMSB 0xFE
-#define AS5048B_Res 16384.0f
-#define AS5048B_360OverRes 0.02197265625f
+#define AS5048B_Res 16383
+#define AS5048B_360OverRes 0.021974f
 
 
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */

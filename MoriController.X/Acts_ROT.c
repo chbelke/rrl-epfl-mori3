@@ -7,6 +7,7 @@
 #include "Coms_ESP.h"
 #include "math.h"
 #include "dsp.h"
+#include "Mnge_ERR.h"
 
 uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
@@ -57,11 +58,22 @@ void Acts_ROT_Out(uint8_t edge, int16_t duty) {
 void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     static float errorOld[3] = {0, 0, 0}; // previous error (derivative gain)
     float OUT; // pwm output variable
+    static bool SPD_Flag[3] = {false, false, false}; // speed controller on flag
+    static bool SPD_Used[3] = {false, false, false}; // speed output used flag
     
     // avoid bad control inputs
     target = clamp_ui16(target, MotRot_AngleIntMIN, MotRot_AngleIntMAX);
 
     const float error = ((float) target) * 0.1f - 180.0f - current;
+    
+        // stop speed controller when target reached
+    if (SPD_Flag[edge] && fabs(error) < 0.1f){
+        SPD_Flag[edge] = false;
+        if (SPD_Used[edge]) PID_I[edge] = 0;
+        /* if it gets to target without position controller used
+         * (ie SPD output was always smaller than position), reset
+         * position PID to avoid overshoot */
+    }
 
     // avoid integral build up when far away
     if (fabsf(error) < 7.0f) // if error is >6.69, kp results in max (ignoring kd)
@@ -93,27 +105,41 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
             SPD[edge] = SPD_Dir[edge] * MotRot_SPD_Max * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
             targetOld[edge] = target;
             newTargetCount[edge] = 0;
+            SPD_Flag[edge] = true;
         }
 
         // speed control (integral)
-        SPD[edge] += MotRot_SPD_k * (Speed_DEG[edge] * SPD_Dir[edge] - Sens_ENC_GetDelta(edge));
-        SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, MotRot_SPD_Max);
+        SPD[edge] += MotRot_SPD_k * (Speed_DEG[edge] * copysgn(1, error) - Sens_ENC_GetDelta(edge));
+//        SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, MotRot_SPD_Max);
+        // ignore other direction (no additional breaking under load)
+        if (error > 0.0f) SPD[edge] = clamp_f(SPD[edge], 0.0f, MotRot_SPD_Max);
+        else if (error < -0.0f) SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, -0.0f);
         Acts_ROT_SetSPDAvgOut(edge, (int16_t)(SPD[edge]));
 
         // average speed integral 
         if (SPD_AvgFlag[edge]){
             if (newTargetCount[edge] >= 16){ // ignore first loops before averaging
                 SPD_AvgFlag[edge] = false;
-                SPD[edge] = (SPD[edge] + Acts_ROT_GetSPDAvgNeighbour(edge)) * 0.5f;
+                SPD[edge] = (SPD[edge] + ((float)Acts_ROT_GetSPDAvgNeighbour(edge))) * 0.5f;
             } else newTargetCount[edge]++;
         }
         
         // whichever is smallest
-        if (((SPD[edge] > 0) && (SPD_Dir[edge] > 0) && (outP < SPD[edge]))
-                || ((SPD[edge] < 0) && (SPD_Dir[edge] < 0) && (outP > SPD[edge])))
+//        if (((SPD[edge] > 0) && (SPD_Dir[edge] > 0) && (outP < SPD[edge]))
+//                || ((SPD[edge] < 0) && (SPD_Dir[edge] < 0) && (outP > SPD[edge])))
+//            OUT = outP;
+//        else OUT = SPD[edge];
+        
+        // whichever is smallest in direction of target
+        if (SPD_Flag[edge] && // if target has not been reached yet
+                (((error > 0) && (SPD[edge] < outP)) ||
+                ((error < 0) && (SPD[edge] > outP)))){
+            OUT = SPD[edge];
+            SPD_Used[edge] = true;
+        } else {
             OUT = outP;
-        else OUT = SPD[edge];
-
+            SPD_Used[edge] = false;
+        }
     } else {
         OUT = outP; // full speed position output
     }
@@ -288,6 +314,7 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
 
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
 uint16_t Acts_ROT_GetAngle(uint8_t edge, bool WithLiveOffset) {
+    Mnge_ERR_checkReal(Sens_ENC_Get(edge, WithLiveOffset),2 + (uint8_t)WithLiveOffset);
     return (uint16_t) ((int16_t)(10 * Sens_ENC_Get(edge, WithLiveOffset)) + 1800);
 //    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
 }

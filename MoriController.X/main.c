@@ -94,6 +94,7 @@ volatile bool Flg_EdgeReq_CplNbrWait[3] = {true, true, true};
 volatile bool Flg_EdgeNbr_Offset[3] = {false, false, false};
 volatile bool Flg_AllEdgRdy[3] = {false, false, false}; // own edges ready
 volatile bool Flg_NbrEdgRdy[3] = {false, false, false}; // neighbour edges ready
+volatile bool Flg_ByteReadOverran[3] = {false, false, false};
 
 volatile bool Flg_ID_check = false;
 
@@ -118,7 +119,7 @@ int main(void) {
     uint8_t edge;
     __delay_ms(100); // start-up delay
     SYSTEM_Initialize(); // initialize the device
-
+    
     LED_R = LED_Off;
     WIFI_EN = WIFI_On;
 

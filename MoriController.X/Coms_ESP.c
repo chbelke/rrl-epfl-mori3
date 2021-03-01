@@ -368,11 +368,18 @@ void Coms_ESP_Request_Orient() {
 
 void Coms_ESP_Write_Orient() {
     uint8_t i;
-    for (i = 0; i < 3; i++) {    
+    for (i = 0; i < 3; i++) {
+//        UART4_Write16(Coms_123_GetFlagState(i));
         UART4_Write16(Sens_ACC_GetAngle(i));
     }
 }
 
+
+void Coms_ESP_SendSerialOverflow(uint8_t edge) {
+    UART4_Write(0b10000001);
+    UART4_Write(edge);
+    UART4_Write(ESP_End);
+}
 
 void Coms_ESP_Request_Neighbour(uint8_t edge)
 {

@@ -29,6 +29,7 @@ void Coms_ESP_Request_Angles();
 void Coms_ESP_Write_Angles();
 void Coms_ESP_Request_Orient();
 void Coms_ESP_Write_Orient();
+void Coms_ESP_SendSerialOverflow(uint8_t);
 void Coms_ESP_Request_Neighbour(uint8_t);
 void Coms_ESP_Request_WiFiEdge();
 void Coms_ESP_Neighbour_Disconnected(uint8_t);

@@ -77,6 +77,10 @@ print("Count: {}".format(len(logData.keys())))
 
 print("".rjust(10) + "Angle".rjust(5) + "Ext".rjust(10) + "Orient".rjust(10) + "Count".rjust(10))
 for esp in logData.keys():
+    #if checkName(esp) != 'Carl':
+    if checkName(esp) != 'Carl':
+        continue
+
     init = int(init_time[esp])
     time_ang = []
     ang1 = []
@@ -136,15 +140,15 @@ for esp in logData.keys():
 
 
     plt.figure(1)
-    plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="ang1 "+esp)
-    plt.plot(time_ang, ang2, linestyle='-', linewidth=2, label="ang2 "+esp)
-    plt.plot(time_ang, ang3, linestyle='-', linewidth=2, label="ang3 "+esp)
-    plt.figure(2)
-    plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label="P "+esp)  
-    plt.plot(time_orient, orient2, linestyle='-', linewidth=2, label="I "+esp)  
-    plt.plot(time_orient, orient3, linestyle='-', linewidth=2, label="D "+esp)  
-    # plt.plot(time_ang, ext2, linestyle='-', linewidth=2, label=esp)  
-    # plt.plot(time_ang, ext3, linestyle='-', linewidth=2, label=esp)  
+    plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="ang1 "+checkName(esp))
+    plt.plot(time_ang, ang2, linestyle='-', linewidth=2, label="ang2 "+checkName(esp))
+    plt.plot(time_ang, ang3, linestyle='-', linewidth=2, label="ang3 "+checkName(esp))
+    # plt.figure(2)
+    # plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label="P "+esp)  
+    # plt.plot(time_orient, orient2, linestyle='-', linewidth=2, label="I "+esp)  
+    # plt.plot(time_orient, orient3, linestyle='-', linewidth=2, label="D "+esp)  
+    # plt.plot(time_ext, ext2, linestyle='-', linewidth=2, label=esp)  
+    # plt.plot(time_ext, ext3, linestyle='-', linewidth=2, label=esp)  
     # plt.plot(time_ext, ext1, linestyle='-', linewidth=2, label=esp)  
     # plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label=checkName(esp))  
 	
