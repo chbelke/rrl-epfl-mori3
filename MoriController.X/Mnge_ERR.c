@@ -4,6 +4,7 @@
 #include "Mnge_RGB.h"
 #include "Coms_ESP.h"
 #include "Coms_123.h"
+#include <string.h>
 
 uint8_t errCode = 0;
 uint8_t errEdge = 0;
@@ -39,4 +40,18 @@ uint8_t Mnge_ERR_GetErrorCode(){
 
 uint8_t Mnge_ERR_GetErrorEdge(){
     return errEdge;
+}
+
+void Mnge_ERR_checkReal(float f, uint8_t id)
+{
+    long l;
+//    l = *(long *)&f;
+    memcpy(&l, &f, sizeof f); // i = *(long *)&y;
+    if (l == 0x7F800000) // +inf
+        Mnge_ERR_ActivateStop(0, 80 + id);
+    if (l == 0xFF800000) // -inf
+        Mnge_ERR_ActivateStop(1, 80 + id);
+    if ((l & 0x7F800000)==0x7F800000) // NaN (valid because +/-Inf already tested for) (or use f!=f)
+        Mnge_ERR_ActivateStop(2, 80 + id);
+    return;
 }

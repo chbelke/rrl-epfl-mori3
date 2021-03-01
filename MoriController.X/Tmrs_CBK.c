@@ -28,7 +28,7 @@ void Tmrs_CBK_Evaluate_Timers(void) {
 
 void Tmrs_CBK_Timer3_Handle(void) {
     Coms_123_ActHandle(); // action synchronisation handle
-
+    
     uint8_t edge;
     for (edge = 0; edge < 3; edge++) { // open coupling if requested
         if ((Flg_EdgeReq_Cpl[edge]) && ((!Flg_EdgeCon[edge]) ||

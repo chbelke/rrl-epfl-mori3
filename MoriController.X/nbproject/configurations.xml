@@ -408,7 +408,7 @@
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="true"/>
       </C30Global>
-      <item path="Coms_123.c" ex="false" overriding="false">
+      <item path="Coms_123.c" ex="false" overriding="true">
         <C30>
           <property key="code-model" value="default"/>
           <property key="const-model" value="default"/>
@@ -441,7 +441,7 @@
           <property key="oXC16gcc-sfr-warn" value="false"/>
           <property key="oXC16gcc-smar-io-lvl" value="1"/>
           <property key="oXC16gcc-smart-io-fmt" value=""/>
-          <property key="optimization-level" value="3"/>
+          <property key="optimization-level" value="1"/>
           <property key="post-instruction-scheduling" value="default"/>
           <property key="pre-instruction-scheduling" value="default"/>
           <property key="preprocessor-macros" value=""/>
@@ -715,7 +715,6 @@
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

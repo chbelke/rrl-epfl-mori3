@@ -13,5 +13,6 @@
 void Mnge_ERR_ActivateStop(uint8_t, uint8_t);
 uint8_t Mnge_ERR_GetErrorCode();
 uint8_t Mnge_ERR_GetErrorEdge();
+void Mnge_ERR_checkReal(float, uint8_t);
 
 #endif	/* MNGE_ERR_H */
