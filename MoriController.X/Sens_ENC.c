@@ -9,8 +9,9 @@
 #include "Mnge_ERR.h"
 
 // Encoder AS5048B
-volatile float ENC_Data[3] = {1, 2, 3};
-volatile float ENC_DataOld[3] = {1, 2, 3};
+volatile float ENC_Data[3] = {0, 0, 0};
+volatile float ENC_DataOld[3] = {0, 0, 0};
+volatile float ENC_DataAvg[3][5] = {{0, 0, 0, 0, 0},{0, 0, 0, 0, 0},{0, 0, 0, 0, 0}};
 volatile int8_t ENC_GlobOffset[3] = {0, 0, 0};
 volatile int8_t ENC_LiveOffset[3] = {0, 0, 0};
 
@@ -86,12 +87,10 @@ void Sens_ENC_Read(uint8_t edge) {
     
     // convert to float
     float angleFLT = (float) (0x3FFF - angleINT);
-//    angleFLT = clamp_f(angleFLT, 0.0f, AS5048B_Res);
     angleFLT = angleFLT * AS5048B_360OverRes - 180.0f;
 
     Sens_ENC_UpdateOld(edge); // update old value
     Sens_ENC_UpdateNew(edge, angleFLT); // rolling average
-    Mnge_ERR_checkReal(angleFLT, 1);
 }
 
 /* ******************** GET CURRENT ANGLE *********************************** */
@@ -131,10 +130,19 @@ int8_t Sens_ENC_GetLiveOffset(uint8_t edge) {
 }
 
 void Sens_ENC_UpdateOld(uint8_t edge){
-    ENC_DataOld[edge] = ENC_Data[edge];
+//    ENC_DataOld[edge] = ENC_Data[edge];
+    ENC_DataAvg[edge][4] = ENC_DataAvg[edge][3];
+    ENC_DataAvg[edge][3] = ENC_DataAvg[edge][2];
+    ENC_DataAvg[edge][2] = ENC_DataAvg[edge][1];
+    ENC_DataAvg[edge][1] = ENC_DataAvg[edge][0];
 }
 
 void Sens_ENC_UpdateNew(uint8_t edge, float value){
-    ENC_Data[edge] -= ENC_Data[edge] * 0.2f;
-    ENC_Data[edge] += value * 0.2f;
+//    ENC_Data[edge] -= ENC_Data[edge] * 0.2f;
+//    ENC_Data[edge] += value * 0.2f;
+    ENC_DataOld[edge] = ENC_Data[edge];
+    ENC_DataAvg[edge][0] = value;
+    ENC_Data[edge] = (ENC_DataAvg[edge][4] + ENC_DataAvg[edge][3]
+            + ENC_DataAvg[edge][2] + ENC_DataAvg[edge][1]
+            + ENC_DataAvg[edge][0]) * 0.2f;
 }

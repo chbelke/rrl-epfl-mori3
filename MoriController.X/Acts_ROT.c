@@ -67,7 +67,7 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     const float error = ((float) target) * 0.1f - 180.0f - current;
     
         // stop speed controller when target reached
-    if (SPD_Flag[edge] && fabs(error) < 0.1f){
+    if (SPD_Flag[edge] && (fabsf(error) < 0.1f)){
         SPD_Flag[edge] = false;
         if (SPD_Used[edge]) PID_I[edge] = 0;
         /* if it gets to target without position controller used
@@ -109,8 +109,7 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         }
 
         // speed control (integral)
-        SPD[edge] += MotRot_SPD_k * (Speed_DEG[edge] * copysgn(1, error) - Sens_ENC_GetDelta(edge));
-//        SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, MotRot_SPD_Max);
+        SPD[edge] += MotRot_SPD_k * (copysgn(Speed_DEG[edge], error) - Sens_ENC_GetDelta(edge));
         // ignore other direction (no additional breaking under load)
         if (error > 0.0f) SPD[edge] = clamp_f(SPD[edge], 0.0f, MotRot_SPD_Max);
         else if (error < -0.0f) SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, -0.0f);
@@ -124,16 +123,10 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
             } else newTargetCount[edge]++;
         }
         
-        // whichever is smallest
-//        if (((SPD[edge] > 0) && (SPD_Dir[edge] > 0) && (outP < SPD[edge]))
-//                || ((SPD[edge] < 0) && (SPD_Dir[edge] < 0) && (outP > SPD[edge])))
-//            OUT = outP;
-//        else OUT = SPD[edge];
-        
         // whichever is smallest in direction of target
         if (SPD_Flag[edge] && // if target has not been reached yet
-                (((error > 0) && (SPD[edge] < outP)) ||
-                ((error < 0) && (SPD[edge] > outP)))){
+                (((error > 0.0f) && (SPD[edge] < outP)) ||
+                ((error < -0.0f) && (SPD[edge] > outP)))){
             OUT = SPD[edge];
             SPD_Used[edge] = true;
         } else {

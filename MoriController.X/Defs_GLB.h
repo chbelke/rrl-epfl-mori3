@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'K' // module name by letter
+#define MODULE 'L' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -213,7 +213,7 @@ extern volatile uint8_t CMD_ID;
 #define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_freq 100.0f      // timer period
 #define MotRot_PID_kP 268.9f        // proportional gain (was 153 for OutMax 1024)
-#define MotRot_PID_kI 94.7f         // integral gain (was 53.9 for OutMax 1024)
+#define MotRot_PID_kI 500.0f//94.7f         // integral gain (was 53.9 for OutMax 1024)
 #define MotRot_PID_kD 6.0f          // derivative gain (was 3.4 for OutMax 1024)
 #define MotRot_PID_Dmax 1800.0f      // derivative limit (was 1024)
 #define MotRot_PID_Imax 1800.0f      // integral limit (was 1024)
