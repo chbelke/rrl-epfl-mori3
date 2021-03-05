@@ -62,11 +62,12 @@ void Tmrs_CBK_Timer5_Handle(void) {
     Coms_123_ConHandle(); // inter-module connection handler
     Acts_ROT_DrvHandle();
     
-    for (edge = 0; edge < 3; edge++)
+    for (edge = 0; edge < 3; edge++){
         if (Flg_EdgeNbr_Offset[edge]){
             Sens_ENC_SetGlobalOffset(edge);
             Flg_EdgeNbr_Offset[edge] = false;
         }
+    }
             
     
     Battery_Check(); // check if LBO has been trigger for interval

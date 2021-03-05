@@ -31,6 +31,8 @@ void Mnge_ERR_ActivateStop(uint8_t edge, uint8_t code){
         LED_R = LED_On;
         
         Coms_ESP_TurnOnWifi();
+        
+        Coms_ESP_SendErrorCode(ESP_End);
     }
 }
 

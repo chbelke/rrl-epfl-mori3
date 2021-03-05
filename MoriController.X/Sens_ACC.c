@@ -10,7 +10,6 @@
 volatile int16_t ACC_Data[3] = {0, 0, 0};
 #define smol_PI 3.141592f
 #define INV_PI_x1800 572.957795f
-#define epsilon 1e-10f
 #define ONEQTR_PI 0.785398f
 #define THRQTR_PI 2.356194f
 

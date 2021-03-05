@@ -84,7 +84,7 @@ void Coms_123_Eval(uint8_t edge) { // called in main
         if (bytes_read >= 36) {
             Flg_ByteReadOverran[edge] = true;
             Coms_ESP_SendSerialOverflow(edge);
-        }        
+        }
 
         switch (EdgInCase[edge]) { // select case set by previous byte
             case 0: // INPUT ALLOCATION ********************************************
@@ -107,14 +107,13 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                         Coms_CMD_Handle(edge, EdgInAloc[edge] & 0b00011111);
                         EdgInCase[edge] = 30;
                         break;
-                    case 7: // xxx == 111, relay
-                        if (Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111)) {
-                            EdgInCase[edge] = 0;
-                        } else {
-                            EdgInCase[edge] = 40;
-                        }
-
-                        break;
+//                    case 7: // xxx == 111, relay
+//                        if (Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111)) {
+//                            EdgInCase[edge] = 0;
+//                        } else {
+//                            EdgInCase[edge] = 40;
+//                        }
+//                        break;
                     default:
                         EdgInCase[edge] = 50;
                         break;
@@ -511,23 +510,6 @@ void Coms_123_ActVerify(uint8_t edge) {
     }
 }
 
-
-uint16_t Coms_123_GetFlagState(uint8_t edge) {
-    uint16_t tmp = 0;
-    tmp += ((uint16_t)Flg_EdgeCon[edge]);
-    tmp += ((uint16_t)Flg_EdgeSyn[edge]) << 1;
-    tmp += ((uint16_t)Flg_EdgeAct[edge]) << 2;
-    tmp += ((uint16_t)Flg_EdgeWig[edge]) << 3;
-    tmp += ((uint16_t)Flg_EdgeReq_Ang[edge]) << 4;
-    tmp += ((uint16_t)Flg_EdgeReq_Ext[edge]) << 5;
-    tmp += ((uint16_t)Flg_EdgeReq_Cpl[edge]) << 6;
-    tmp += ((uint16_t)Flg_EdgeReq_CplNbrWait[edge]) << 7;
-    tmp += ((uint16_t)Flg_EdgeNbr_Offset[edge]) << 8;
-    tmp += ((uint16_t)Flg_AllEdgRdy[edge]) << 9;
-    tmp += ((uint16_t)Flg_NbrEdgRdy[edge]) << 10;
-    tmp += ((uint16_t)Flg_ByteReadOverran[edge]) << 11;
-    return tmp;
-}
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */
 void Coms_123_Write(uint8_t edge, uint8_t byte) {

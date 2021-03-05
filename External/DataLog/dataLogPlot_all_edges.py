@@ -9,34 +9,30 @@ import csv
 
 import names
 
-# colors = ['xkcd:light navy',
-#             'xkcd:green',
-#             'xkcd:gold',
-#             'xkcd:crimson',
-#             'xkcd:dark beige',
-#             'xkcd:lavender']          
-
-# color_iter = 0
-
-
-# hub_name_dict =  {
-#     "00056375": "Huzzah1",
-#     "0005659D": "Huzzah2",
-#     "000AC171": "Alfred",
-#     "000AC172": "1 Away",
-#     "00D00BD5": "4 Away",
-#     "000AC175": "3 Away",
-#     "000AC170": "Hub",
-#     "000AC173": "2 Away"
-# }
-
-# order_dict =  {
-#     "1 Away": 1,
-#     "4 Away": 4,
-#     "3 Away": 3,
-#     "Hub": 0,
-#     "2 Away": 2
-# }
+colors = ['xkcd:navy',
+            'xkcd:green',
+            'xkcd:gold',
+            'xkcd:crimson',
+            'xkcd:beige',
+            'xkcd:lavender',
+            'xkcd:pink',
+            'xkcd:purple',
+            'xkcd:orange',
+            'xkcd:turquoise',
+            'xkcd:grey'
+            ]
+dark_colors = ['xkcd:dark navy',
+            'xkcd:dark green',
+            'xkcd:dark gold',
+            'xkcd:dark red',
+            'xkcd:dark beige',
+            'xkcd:dark lavender',
+            'xkcd:dark pink',
+            'xkcd:dark purple',
+            'xkcd:dark orange',
+            'xkcd:dark turquoise',
+            'xkcd:dark grey'
+            ]
 
 # pltNum = [None]*6
 
@@ -76,10 +72,10 @@ print([checkName(esp) for esp in logData.keys()])
 print("Count: {}".format(len(logData.keys())))
 
 print("".rjust(10) + "Angle".rjust(5) + "Ext".rjust(10) + "Orient".rjust(10) + "Count".rjust(10))
-for esp in logData.keys():
+for i, esp in enumerate(logData.keys()):
     #if checkName(esp) != 'Carl':
-    if checkName(esp) != 'Carl':
-        continue
+    # if checkName(esp) != 'Carl':
+    #     continue
 
     init = int(init_time[esp])
     time_ang = []
@@ -140,13 +136,14 @@ for esp in logData.keys():
 
 
     plt.figure(1)
-    plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="ang1 "+checkName(esp))
-    plt.plot(time_ang, ang2, linestyle='-', linewidth=2, label="ang2 "+checkName(esp))
-    plt.plot(time_ang, ang3, linestyle='-', linewidth=2, label="ang3 "+checkName(esp))
+    # plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="a1 "+checkName(esp))
+    plt.plot(time_ang, ang2, linestyle='-', linewidth=2, marker=".", label="a2 "+checkName(esp), color=colors[i])
+    plt.plot(time_ang, ang3, linestyle='-', linewidth=2, marker=".", label="a3 "+checkName(esp), color=dark_colors[i])
+    
     # plt.figure(2)
-    # plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label="P "+esp)  
-    # plt.plot(time_orient, orient2, linestyle='-', linewidth=2, label="I "+esp)  
-    # plt.plot(time_orient, orient3, linestyle='-', linewidth=2, label="D "+esp)  
+    # plt.plot(time_orient, orient1, linestyle='-', linewidth=2, label="o1 "+esp)  
+    # plt.plot(time_orient, orient2, linestyle='-', linewidth=2, label="o2 "+checkName(esp), color=colors[i])  
+    # plt.plot(time_orient, orient3, linestyle='-', linewidth=2, label="o3 "+checkName(esp), color=dark_colors[i])  
     # plt.plot(time_ext, ext2, linestyle='-', linewidth=2, label=esp)  
     # plt.plot(time_ext, ext3, linestyle='-', linewidth=2, label=esp)  
     # plt.plot(time_ext, ext1, linestyle='-', linewidth=2, label=esp)  
@@ -158,7 +155,12 @@ for esp in logData.keys():
     print(np.mean(orient2))
     print(np.mean(orient3))
 
-
+lgnd = plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left', numpoints=1, fontsize=10)
+lgnd.legendHandles[0]._legmarker.set_markersize(8)
+lgnd.legendHandles[1]._legmarker.set_markersize(8)
+plt.ylim(600, 3000)
+plt.show()
+    
 # # labels = [checkName(x) for x in pingData.keys()]
 # labels = [hub_name_dict[x] for x in pingData.keys()]
 # handles, _ = ax.get_legend_handles_labels()

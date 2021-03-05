@@ -29,6 +29,26 @@ bool Coms_CMD_Handle(uint8_t edge, uint8_t byte) {
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
             break;
 
+        case 8:
+            if (Coms_CMD_SetAngleOkRange(byte, &state[edge]))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+            
+        case 9:
+            if (Coms_CMD_SetPIDGains(byte, &state[edge]))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+            
+        case 10:
+            if (Coms_CMD_SetSPDGain(byte, &state[edge]))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+            
+        case 11:
+            if (Coms_CMD_SetRotDeadband(byte, &state[edge]))
+                return Coms_CMD_Reset(&state[edge], &alloc[edge]);
+            break;
+            
         case 12:
             if (Coms_CMD_SetRotCurrentLimit(byte, &state[edge]))
                 return Coms_CMD_Reset(&state[edge], &alloc[edge]);
@@ -316,6 +336,101 @@ bool Coms_CMD_SetMotRotOff(uint8_t byte, uint8_t *state) {
     return true;
 }
 
+bool Coms_CMD_SetAngleOkRange(uint8_t byte, uint8_t *state) {
+    static bool byteReceived = false;
+    static uint8_t ANG_OkRange;
+    if (!byteReceived) {
+        ANG_OkRange = byte;
+        byteReceived = true;
+    } else {
+        if (byte == ESP_End) {
+            Acts_ROT_SetOkRange(ANG_OkRange);
+            byteReceived = false;
+            return true;
+        } else {
+            Coms_CMD_OverflowError(state);
+        }
+        byteReceived = false;
+    }
+    return false;
+}
+
+bool Coms_CMD_SetPIDGains(uint8_t byte, uint8_t *state) {
+    static uint8_t count = 0;
+    static uint8_t flags;
+    static uint8_t storage[3] = {0, 0, 0};
+    static uint8_t len;
+    if (count == 0) {
+        flags = byte;
+        len = 0;
+        len += (flags & 0b00000001);
+        len += ((flags & 0b00000010) >> 1);
+        len += ((flags & 0b00000100) >> 2);
+    }
+    else if (count < (len+1)){
+        storage[count - 1] = byte;
+    } else {
+        if (byte == ESP_End) {
+            uint8_t i=0;
+            if (flags & 0b00000001){
+                Acts_ROT_SetPIDGains(0, storage[i]);
+                i++;
+            }
+            if (flags & 0b00000010) {
+                Acts_ROT_SetPIDGains(1, storage[i]);
+                i++;                    
+            }
+            if (flags & 0b00000100) {
+                Acts_ROT_SetPIDGains(2, storage[i]);
+                i++;                    
+            }
+            count = 0;
+            return true;
+        } else {
+            Coms_CMD_OverflowError(state);
+        }
+    }
+    count++;
+    return false;    
+}
+
+bool Coms_CMD_SetSPDGain(uint8_t byte, uint8_t *state) {
+    static bool byteReceived = false;
+    static uint8_t SPD_Gain;
+    if (!byteReceived) {
+        SPD_Gain = byte;
+        byteReceived = true;
+    } else {
+        if (byte == ESP_End) {
+            Acts_ROT_SetSPDGain(SPD_Gain);
+            byteReceived = false;
+            return true;
+        } else {
+            Coms_CMD_OverflowError(state);
+        }
+        byteReceived = false;
+    }
+    return false;
+}
+
+bool Coms_CMD_SetRotDeadband(uint8_t byte, uint8_t *state) {
+    static bool byteReceived = false;
+    static uint8_t deadbandValue;
+    if (!byteReceived) {
+        deadbandValue = byte;
+        byteReceived = true;
+    } else {
+        if (byte == ESP_End) {
+            Acts_ROT_SetAngleDeadband(deadbandValue);
+            byteReceived = false;
+            return true;
+        } else {
+            Coms_CMD_OverflowError(state);
+        }
+        byteReceived = false;
+    }
+    return false;
+}
 
 bool Coms_CMD_SetRotCurrentLimit(uint8_t byte, uint8_t *state) {
     static uint8_t count = 0;
