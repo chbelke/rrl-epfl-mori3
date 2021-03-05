@@ -9,7 +9,9 @@
 #include "dsp.h"
 #include "Mnge_ERR.h"
 
-uint16_t Ang_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
+uint16_t ANG_Desired[3] = {1800, 1800, 1800}; // -180.0 to 180.0 deg = 0 to 3600
+volatile float ANG_Deadband = MotRot_PID_Deadband;
+volatile float ANG_DeadbandInverse = 1.0f / MotRot_PID_Deadband;
 uint8_t Trq_Limit[3] = {0, 0, 0}; // save torque limit during wiggle
 uint8_t Speed_100[3] = {MotRot_SpeedInit, MotRot_SpeedInit, MotRot_SpeedInit};
 float Speed_DEG[3] = {(((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period,
@@ -17,6 +19,13 @@ float Speed_DEG[3] = {(((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * M
     (((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period};
 uint8_t DrvInterval[3] = {0, 0, 0};
 float PID_I[3] = {0, 0, 0}; // integral error variable
+
+float PID_GainP = MotRot_PID_kP;
+float PID_GainI = MotRot_PID_kI;
+float PID_GainD = MotRot_PID_kD;
+float SPD_Gain = MotRot_SPD_k;
+
+uint8_t ANG_OkRange = MotRot_OkRange;
 
 volatile bool SPD_AvgFlag[3] = {false, false, false};
 volatile int16_t SPD_AvgOut[3] = {0, 0, 0};
@@ -26,6 +35,7 @@ volatile int16_t SPD_AvgIn[3] = {0, 0, 0};
 #define SxOUT 0.9f // output speed factor for non-primary wheels (tune curve)
 #define INV_THREE 0.333333f // division avoidance
 #define INV255_x180 7.058824f // factor for 255 to 180pwm conversion
+
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
@@ -69,29 +79,37 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         // stop speed controller when target reached
     if (SPD_Flag[edge] && (fabsf(error) < 0.1f)){
         SPD_Flag[edge] = false;
-        if (SPD_Used[edge]) PID_I[edge] = 0;
+        if (SPD_Used[edge]) PID_I[edge] = 0.0f;
         /* if it gets to target without position controller used
          * (ie SPD output was always smaller than position), reset
          * position PID to avoid overshoot */
     }
 
-    // avoid integral build up when far away
-    if (fabsf(error) < 7.0f) // if error is >6.69, kp results in max (ignoring kd)
-        PID_I[edge] += error * MotRot_PID_period; // integral component
-    else PID_I[edge] = 0;
+    // integral component
+    if (fabsf(error) < Acts_ROT_GetAngleDeadband()) {
+        // only allow wind-down within deadband
+        if ((sgn(PID_I[edge]) != sgn(error)) && (fabsf(PID_I[edge]) < epsilon))
+            PID_I[edge] += error * MotRot_PID_period;
+        // clamp to max output value in deadband
+        if (error < 0) PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax * fabsf(error) * Acts_ROT_GetAngleDeadbandInverse(), 0.0f);
+        else if (error > 0) PID_I[edge] = clamp_f(PID_I[edge], 0.0f, MotRot_PID_Imax * fabsf(error) * Acts_ROT_GetAngleDeadbandInverse());
+    } else if (fabsf(error) < 7.0f){
+        // avoid integral build up when far away (if error >6.69, kp maxes PWM)
+        PID_I[edge] += error * MotRot_PID_period;
+        PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax, MotRot_PID_Imax);
+    } else PID_I[edge] = 0.0f;
 
     // derivative component
     float PID_D = (error - errorOld[edge]) * MotRot_PID_freq;
     errorOld[edge] = error;
 
-    // limit integral and derivative
-    PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax, MotRot_PID_Imax);
+    // limit derivative
     PID_D = clamp_f(PID_D, -MotRot_PID_Dmax, MotRot_PID_Dmax);
 
     // PID position output
-    float outP = MotRot_PID_kP * error + MotRot_PID_kI * PID_I[edge] + MotRot_PID_kD * PID_D;
+    float outP = PID_GainP * error + PID_GainI * PID_I[edge] + PID_GainD * PID_D;
     outP = clamp_f(outP, -MotRot_PID_Max, MotRot_PID_Max); // limit output
-
+    
     // speed control
     if (Speed_100[edge] != 100) {
         static uint16_t targetOld[3] = {0, 0, 0};
@@ -109,7 +127,7 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
         }
 
         // speed control (integral)
-        SPD[edge] += MotRot_SPD_k * (copysgn(Speed_DEG[edge], error) - Sens_ENC_GetDelta(edge));
+        SPD[edge] += SPD_Gain * (copysgn(Speed_DEG[edge], error) - Sens_ENC_GetDelta(edge));
         // ignore other direction (no additional breaking under load)
         if (error > 0.0f) SPD[edge] = clamp_f(SPD[edge], 0.0f, MotRot_SPD_Max);
         else if (error < -0.0f) SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, -0.0f);
@@ -136,6 +154,9 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     } else {
         OUT = outP; // full speed position output
     }
+    // scale output down towards zero within deadband
+    if (fabsf(error) < Acts_ROT_GetAngleDeadband())
+        OUT *= fabsf(error) * Acts_ROT_GetAngleDeadbandInverse();
     Acts_ROT_Out(edge, (int16_t) OUT); // output pwm
 }
 
@@ -279,7 +300,7 @@ void Acts_ROT_SetCurrentLimit(uint8_t edge, uint8_t limit) {
     Mnge_DAC_Set(edge, limit);
 }
 
-/* ******************** SET ROTARY MOTOR SPEED LIMIT ************************ */
+/* ******************** SPEED LIMIT ***************************************** */
 void Acts_ROT_SetSpeedLimit(uint8_t edge, uint8_t limit) {
     if (limit > 100) limit = 100;
     else if (limit < 1) limit = 1;
@@ -287,36 +308,37 @@ void Acts_ROT_SetSpeedLimit(uint8_t edge, uint8_t limit) {
     Speed_100[edge] = limit;
 }
 
-/* ******************** RETURN ROTARY MOTOR SPEED LIMIT ********************* */
 uint8_t Acts_ROT_GetSpeedLimit(uint8_t edge) {
     return Speed_100[edge];
 }
 
-/* ******************** GET DESIRED ANGLE *********************************** */
-uint16_t Acts_ROT_GetTarget(uint8_t edge) {
-    return Ang_Desired[edge];
-}
-
-/* ******************** SET DESIRED ANGLE *********************************** */
+/* ******************** DESIRED ANGLE *************************************** */
 void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
-    Ang_Desired[edge] = desired;
+    ANG_Desired[edge] = desired;
     Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ang[edge] = true;
     PID_I[edge] = 0;
 }
 
+uint16_t Acts_ROT_GetTarget(uint8_t edge) {
+    return ANG_Desired[edge];
+}
+
 /* ******************** RETURN FORMATTED ANGLE ****************************** */
-uint16_t Acts_ROT_GetAngle(uint8_t edge, bool WithLiveOffset) {
-    Mnge_ERR_checkReal(Sens_ENC_Get(edge, WithLiveOffset),2 + (uint8_t)WithLiveOffset);
-    return (uint16_t) ((int16_t)(10 * Sens_ENC_Get(edge, WithLiveOffset)) + 1800);
-//    return (uint16_t) map(rawAngle, -1800, 1800, 0, 3600);
+uint16_t Acts_ROT_GetAngle(uint8_t edge, bool withLiveOffset) {
+    return (uint16_t)(10.0f * Sens_ENC_Get(edge, withLiveOffset) + 1800.0f);
 }
 
 /* ******************** RETURN WHETHER ALL IN DESIRED RANGE ***************** */
 bool Acts_ROT_InRange(uint8_t edge) {
     const uint16_t diff = abs(Acts_ROT_GetAngle(edge, true) - Acts_ROT_GetTarget(edge));
-    if (diff <= MotRot_OkRange) return true;
+    if (diff <= ANG_OkRange) return true;
     return false;
+}
+
+/* ******************** MATH FUNCTIONS ************************************** */
+int8_t sgn(float value){
+    return (value > 0) - (value < 0);
 }
 
 float copysgn(float value, float check){
@@ -325,7 +347,7 @@ float copysgn(float value, float check){
     return 0.0f;
 }
 
-// https://stackoverflow.com/questions/427477/fastest-way-to-clamp-a-real-fixed-floating-point-value
+/* https://stackoverflow.com/questions/427477/fastest-way-to-clamp-a-real-fixed-floating-point-value */
 float clamp_f(float d, float min, float max) {
   const float t = d < min ? min : d;
   return t > max ? max : t;
@@ -336,6 +358,7 @@ uint16_t clamp_ui16(uint16_t d, uint16_t min, uint16_t max) {
   return t > max ? max : t;
 }
 
+/* ******************** SPEED AVERAGING ************************************* */
 void Acts_ROT_SetSPDAvgOut(uint8_t edge, int16_t value){
     SPD_AvgOut[edge] = value;
 }
@@ -351,4 +374,44 @@ void Acts_ROT_SetSPDAvgNeighbour(uint8_t edge, uint16_t value){
 
 int16_t Acts_ROT_GetSPDAvgNeighbour(uint8_t edge){
     return SPD_AvgIn[edge];
+}
+
+/* ******************** DEADBAND ******************************************** */
+// https://deltamotion.com/support/webhelp/rmctools/Registers/Register_Descriptions/Axis_Parameter_Registers/Output/Param_Deadband_Tolerance.htm
+void Acts_ROT_SetAngleDeadband(uint8_t value){
+    ANG_Deadband = ((float) value) * 0.1f;
+    ANG_DeadbandInverse = 1.0f / ANG_Deadband;
+}
+
+float Acts_ROT_GetAngleDeadband(){
+    return ANG_Deadband;
+}
+
+float Acts_ROT_GetAngleDeadbandInverse(){
+    return ANG_DeadbandInverse;
+}
+
+void Acts_ROT_SetOkRange(uint8_t value){
+    ANG_OkRange = value;
+}
+
+/* ******************** ADJUST GAINS **************************************** */
+void Acts_ROT_SetPIDGains(uint8_t pid, uint8_t value){
+    switch (pid){
+        case 0:
+            PID_GainP = (float)value;
+            break;
+        case 1:
+            PID_GainI = (float)value;
+            break;
+        case 2:
+            PID_GainD = (float)value;
+            break;
+        default:
+            break;
+    }
+}
+
+void Acts_ROT_SetSPDGain(uint8_t value){
+    SPD_Gain = (float)value;
 }

@@ -81,13 +81,13 @@ void Coms_ESP_Eval() { // called in main
                     Coms_CMD_Handle(ESP_URT_NUM, EspIn & 0b00011111);
                     EspInCase = 6;
                     break;
-                case 7: // xxx == 111, relay
-                    if(Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111)){
-                        EspInCase = 0;
-                    } else {
-                        EspInCase = 7;
-                    }
-                    break;
+//                case 7: // xxx == 111, relay
+//                    if(Coms_REL_Handle(ESP_URT_NUM, EspIn & 0b00011111)){
+//                        EspInCase = 0;
+//                    } else {
+//                        EspInCase = 7;
+//                    }
+//                    break;
                     
                 default:
                     EspInCase = 50;
@@ -369,7 +369,6 @@ void Coms_ESP_Request_Orient() {
 void Coms_ESP_Write_Orient() {
     uint8_t i;
     for (i = 0; i < 3; i++) {
-//        UART4_Write16(Coms_123_GetFlagState(i));
         UART4_Write16(Sens_ACC_GetAngle(i));
     }
 }

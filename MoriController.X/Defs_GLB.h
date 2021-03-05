@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'L' // module name by letter
+#define MODULE 'H' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -31,6 +31,7 @@
 #define TMR1_f 100
 #define TMR3_f 20
 #define TMR5_f 5
+#define epsilon 1e-10f
 
 // I2C MCC modification // not updated since fosc boost
 /* I2C1BRG changed from MCC calculated 0x08 to 0x07, as FRM calculation
@@ -48,9 +49,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 10
-#define RGB_Default_Green 0
-#define RGB_Default_Blue 5
+#define RGB_Default_Red 5
+#define RGB_Default_Green 15
+#define RGB_Default_Blue 0
 
 /* ******************** ERROR CODES ***************************************** */
 #define ERR_NeighbourLost 1
@@ -207,23 +208,24 @@ extern volatile uint8_t CMD_ID;
 #define ROT_DIR_3 LATAbits.LATA10
 
 #define MotRot_AngleIntMIN 600      // minimum input range in degrees *10 (uint16_t)
-#define MotRot_AngleIntMAX 3000      // maximum input range in degrees *10 (uint16_t)
+#define MotRot_AngleIntMAX 3000     // maximum input range in degrees *10 (uint16_t)
 #define MotRot_OkRange 10           // +- (0.1*degrees) (automatic CMD update)
 
+#define MotRot_PID_Deadband 1.0f    // +- deadband tolerance in deg.
 #define MotRot_PID_period 0.01f     // timer period
 #define MotRot_PID_freq 100.0f      // timer period
-#define MotRot_PID_kP 268.9f        // proportional gain (was 153 for OutMax 1024)
-#define MotRot_PID_kI 500.0f//94.7f         // integral gain (was 53.9 for OutMax 1024)
+#define MotRot_PID_kP 255.0f        // proportional gain (was 153 for OutMax 1024)
+#define MotRot_PID_kI 95.0f         // integral gain (was 53.9 for OutMax 1024)
 #define MotRot_PID_kD 6.0f          // derivative gain (was 3.4 for OutMax 1024)
-#define MotRot_PID_Dmax 1800.0f      // derivative limit (was 1024)
-#define MotRot_PID_Imax 1800.0f      // integral limit (was 1024)
-#define MotRot_PID_Max 1800.0f       // duty cycle limit (was 1024)
+#define MotRot_PID_Dmax 1800.0f     // derivative limit (was 1024)
+#define MotRot_PID_Imax 1800.0f     // integral limit (was 1024)
+#define MotRot_PID_Max 1800.0f      // duty cycle limit (was 1024)
 
 #define MotRot_SPD_k 150.0f         // speed control proportional gain
-#define MotRot_SPD_Max 1800.0f         // speed duty cycle limit
+#define MotRot_SPD_Max 1800.0f      // speed duty cycle limit
 #define MotRot_SPD_OneOverMax 0.0005556f
-#define MotRot_SpeedInit 100          // limit speed at start-up (/100)
-#define MotRot_SpeedMax 58.3f         // max speed (degrees/second) (@tau=149)
+#define MotRot_SpeedInit 100        // limit speed at start-up (/100)
+#define MotRot_SpeedMax 58.3f       // max speed (degrees/second) (@tau=149)
 
 // Maxon motor torque limit - 237 stall, 149 GPX safe, 63 backdrive safe
 #define MotRot_TorqueLimit 149      // (/255)
@@ -244,7 +246,7 @@ extern volatile uint8_t CMD_ID;
 #define AS5048B_Address 0x40
 #define AS5048B_Reg_AngleMSB 0xFE
 #define AS5048B_Res 16383
-#define AS5048B_360OverRes 0.021974f
+#define AS5048B_360ResInverse 0.021973f
 
 
 /* ******************** ACCELEROMETER MMA8452Q ****************************** */

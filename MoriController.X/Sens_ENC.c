@@ -12,8 +12,8 @@
 volatile float ENC_Data[3] = {0, 0, 0};
 volatile float ENC_DataOld[3] = {0, 0, 0};
 volatile float ENC_DataAvg[3][5] = {{0, 0, 0, 0, 0},{0, 0, 0, 0, 0},{0, 0, 0, 0, 0}};
-volatile int8_t ENC_GlobOffset[3] = {0, 0, 0};
-volatile int8_t ENC_LiveOffset[3] = {0, 0, 0};
+volatile float ENC_GlobOffset[3] = {0, 0, 0};
+volatile float ENC_LiveOffset[3] = {0, 0, 0};
 
 const int8_t ModuleOffsetData[3][NUM_MODS*3] = {
     {Off1_A1, Off1_A2, Off1_A3, Off1_B1, Off1_B2, Off1_B3, Off1_C1, Off1_C2, Off1_C3, Off1_D1, Off1_D2, Off1_D3, Off1_E1, Off1_E2, Off1_E3, Off1_F1, Off1_F2, Off1_F3, Off1_G1, Off1_G2, Off1_G3, Off1_H1, Off1_H2, Off1_H3, Off1_I1, Off1_I2, Off1_I3, Off1_J1, Off1_J2, Off1_J3, Off1_K1, Off1_K2, Off1_K3, Off1_L1, Off1_L2, Off1_L3, Off1_M1, Off1_M2, Off1_M3, Off1_N1, Off1_N2, Off1_N3},
@@ -39,26 +39,29 @@ const uint8_t ModuleIDs[NUM_MODS][6] = {
 
 /* ******************** READ ENCODER **************************************** */
 void Sens_ENC_Read(uint8_t edge) {
-    static I2C1_MESSAGE_STATUS status;
-    static I2C1_TRANSACTION_REQUEST_BLOCK TRB[2];
-    static uint8_t writeBuffer, readBuffer[2], *pWrite, *pRead;
+    I2C1_MESSAGE_STATUS status;
+    static I2C1_TRANSACTION_REQUEST_BLOCK TRB[3][2];
+    static uint8_t writeBuffer[3], readBuffer[3][2], *pWrite[3], *pRead[3];
     uint8_t timeOut = 0, slaveTimeOut = 0;
+    
+    uint16_t angleINT = 0;
+    float angleFLT = 0;
     
     // this initial value is important
     status = I2C1_MESSAGE_PENDING;
 
     // fill write buffer with register and declare pointers
-    writeBuffer = AS5048B_Reg_AngleMSB;
-    pWrite = &writeBuffer;
-    pRead = readBuffer;
+    writeBuffer[edge] = AS5048B_Reg_AngleMSB;
+    pWrite[edge] = &writeBuffer[edge];
+    pRead[edge] = readBuffer[edge];
         
     // build TRB for writing and reading
-    I2C1_MasterWriteTRBBuild(&TRB[0], pWrite, 1, AS5048B_Address | edge);
-    I2C1_MasterReadTRBBuild(&TRB[1], pRead, 2, AS5048B_Address | edge);
+    I2C1_MasterWriteTRBBuild(&TRB[edge][0], pWrite[edge], 1, AS5048B_Address | edge);
+    I2C1_MasterReadTRBBuild(&TRB[edge][1], pRead[edge], 2, AS5048B_Address | edge);
 
     while(status != I2C1_MESSAGE_FAIL) {
         // now send the transactions
-        I2C1_MasterTRBInsert(2, TRB, &status);
+        I2C1_MasterTRBInsert(2, TRB[edge], &status);
 
         // wait for the message to be sent or status has changed.
         while(status == I2C1_MESSAGE_PENDING) {
@@ -81,13 +84,14 @@ void Sens_ENC_Read(uint8_t edge) {
         Mnge_ERR_ActivateStop(edge, ERR_I2CAngleFailed);
     
     // combine 14 bit result
-    uint16_t angleINT = ((uint16_t) readBuffer[0]) << 6;
-    angleINT += (uint16_t)(readBuffer[1] & 0x3F);
+    angleINT = ((((uint16_t) readBuffer[edge][0]) << 6) & 0x3FC0) | ((uint16_t)(readBuffer[edge][1] & 0x003F));
+//    angleINT[edge] += (uint16_t)(readBuffer[edge][1] & 0x003F);
     angleINT = clamp_ui16(angleINT, 0, AS5048B_Res);
     
     // convert to float
-    float angleFLT = (float) (0x3FFF - angleINT);
-    angleFLT = angleFLT * AS5048B_360OverRes - 180.0f;
+    angleFLT = (float) (0x3FFF - angleINT);
+    angleFLT = angleFLT * AS5048B_360ResInverse - 180.0f;
+    angleFLT = clamp_f(angleFLT, -180.0f, 180.0f);
 
     Sens_ENC_UpdateOld(edge); // update old value
     Sens_ENC_UpdateNew(edge, angleFLT); // rolling average
@@ -96,9 +100,9 @@ void Sens_ENC_Read(uint8_t edge) {
 /* ******************** GET CURRENT ANGLE *********************************** */
 float Sens_ENC_Get(uint8_t edge, bool WithLiveOffset) {
     if (WithLiveOffset)
-        return (float) ENC_Data[edge] - ENC_LiveOffset[edge] * 0.1f - ENC_GlobOffset[edge] * 0.1f;
+        return (float) ENC_Data[edge] - ENC_LiveOffset[edge] - ENC_GlobOffset[edge];
     else
-        return (float) ENC_Data[edge] - ENC_GlobOffset[edge] * 0.1f;
+        return (float) ENC_Data[edge] - ENC_GlobOffset[edge];
 }
 
 /* ******************** GET ANGLE DELTA ************************************* */
@@ -113,7 +117,7 @@ void Sens_ENC_SetGlobalOffset(uint8_t edge){
     neighbours = Coms_123_GetNeighbourIDs();
     for (i = 0; i < NUM_MODS; i++){
         if (!memcmp(neighbours+edge*7, ModuleIDs[i], 6)){
-            ENC_GlobOffset[edge] = ModuleOffsetData[edge][i*3+(*(neighbours+6+7*edge)-48)];
+            ENC_GlobOffset[edge] = (float)(ModuleOffsetData[edge][i*3+(*(neighbours+6+7*edge)-48)]) * 0.1f;
             // 48 is ascii protection against 0 in Coms_123
             break;
         }
@@ -121,16 +125,15 @@ void Sens_ENC_SetGlobalOffset(uint8_t edge){
 }
 
 void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
-    const int16_t angleOffset = ((int16_t) Acts_ROT_GetAngle(edge, false) - nbrAngVal) / 2;
-    ENC_LiveOffset[edge] = (int8_t) angleOffset;
+    ENC_LiveOffset[edge] = (((float)Acts_ROT_GetAngle(edge, false)) 
+            - ((float)nbrAngVal)) * 0.05f; // *0.5 to divide by two, *0.1 to translate to degrees
 }
 
-int8_t Sens_ENC_GetLiveOffset(uint8_t edge) {
+float Sens_ENC_GetLiveOffset(uint8_t edge) {
     return ENC_LiveOffset[edge];
 }
 
 void Sens_ENC_UpdateOld(uint8_t edge){
-//    ENC_DataOld[edge] = ENC_Data[edge];
     ENC_DataAvg[edge][4] = ENC_DataAvg[edge][3];
     ENC_DataAvg[edge][3] = ENC_DataAvg[edge][2];
     ENC_DataAvg[edge][2] = ENC_DataAvg[edge][1];
@@ -138,8 +141,6 @@ void Sens_ENC_UpdateOld(uint8_t edge){
 }
 
 void Sens_ENC_UpdateNew(uint8_t edge, float value){
-//    ENC_Data[edge] -= ENC_Data[edge] * 0.2f;
-//    ENC_Data[edge] += value * 0.2f;
     ENC_DataOld[edge] = ENC_Data[edge];
     ENC_DataAvg[edge][0] = value;
     ENC_Data[edge] = (ENC_DataAvg[edge][4] + ENC_DataAvg[edge][3]
