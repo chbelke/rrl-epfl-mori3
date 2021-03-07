@@ -52,7 +52,8 @@ char *cmdLine[] = {"mac", "gver", "bver", "spudp", "hello",
                 "f1f", "f2t", "f2f", "f3t", "f3f", 
                 "f4t", "f4f", "f5t", "f5f", "wiggles",
                 "drcoup", "dlflag", "dlperiod", "cops", "name",
-                "spd", "stp", "torque", "rer"};
+                "spd", "stp", "torque", "rer", "dbd",
+                "pid", "ksp", "rok"};  // ksp == kerbel space program == gain for speed control
 int numCmds;
 
 char stringIP[16];
@@ -90,7 +91,7 @@ Led led_blue(5);
 void setup()
 {
   numCmds = sizeof(cmdLine)/sizeof(cmdLine[0]);
-  Serial.begin(115200);
+  Serial.begin(460800);
   Serial.setRxBufferSize(1024);
   // Serial.setTxBufferSize(1024);
   delay(500);
@@ -197,10 +198,13 @@ void loop()
       break;
   }
 
-  if (client.connected())
+  if (client.connected()) {
     client.loop();
-  else if (runState == 3)
+  }
+  else if (runState == 3) {
     startMQTT();
+    client.publish(publishName, "INFO: Reconnected to MQTT");
+  }
 }
 
 

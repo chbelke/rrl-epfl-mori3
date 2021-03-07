@@ -274,6 +274,22 @@ void commands(uint8_t* payload, unsigned int len)
       requestErrorCode();  
       break;      
 
+    case 59:  //rer
+      setPIDdeadband(payload, len);  
+      break;
+
+    case 60:  //set pid gains
+      setPIDgains(payload, len);  
+      break;     
+
+    case 61:  //ksp
+      setSpeedGain(payload, len);  
+      break;     
+
+    case 62:  //rok  - stable range
+      setOKRange(payload, len);  
+      break;           
+
     default:
       publish("ERR: Command not understood");
   }
@@ -740,7 +756,7 @@ void wiggleCoupling(uint8_t* payload, unsigned int len)
 void setDatalogFlag(uint8_t* payload, unsigned int len) 
 {
   bool successFlag = true;
-  uint8_t flag = (byte)extractFollowingNumber(payload, len, &successFlag, " ");
+  uint8_t flag = (uint8_t)extractFollowingNumber(payload, len, &successFlag, " ");
   if(successFlag)
     serial_write_two(DLG_CMD_FLAG_SET, flag);
 }
@@ -754,7 +770,7 @@ void setDatalogPeriod(uint8_t* payload, unsigned int len)
   char request = payload[byte_count];
   bool successFlag = true;
   int tmp = extractFollowingNumber(payload+byte_count, len-byte_count, &successFlag, " ");
-  uint8_t freq = (byte)(tmp/10);
+  uint8_t freq = (uint8_t)(tmp/10);
   if(successFlag)
   {
     char r_data = 0;
@@ -829,4 +845,60 @@ void setRotTorque(uint8_t* payload, unsigned int len) {
     write_to_buffer(values[i]);
   }
   write_to_buffer(END_BYTE);
+}
+
+
+void setPIDdeadband(uint8_t* payload, unsigned int len) {
+  bool successFlag = true;
+  uint8_t deadband = (uint8_t)extractFollowingNumber(payload, len, &successFlag, " ");
+  if(successFlag){
+    serial_write_two(SET_CMD_DEADBND, deadband);
+    char buff[50];
+    sprintf(buff, "INFO: Deadband set to +/- %.1f", float(deadband)/10.0f);
+    publish(buff);
+  }
+}
+
+
+void setPIDgains(uint8_t* payload, unsigned int len) {
+  uint8_t alloc2 = 0;
+  uint8_t alloc_mask = SET_CMD_PID_MASK;
+  uint8_t num_following = 0;
+  uint8_t values[6];
+  
+  if(!extractValuesForShape(payload, len, alloc_mask, &alloc2, &num_following, values, false)) {
+    return;
+  }
+
+  write_to_buffer(SET_CMD_PID_ALLOC);
+  write_to_buffer(alloc2);
+  for(uint8_t i=0; i< num_following; i++)
+  {
+    write_to_buffer(values[i]);
+  }
+  write_to_buffer(END_BYTE);
+}
+
+
+void setSpeedGain(uint8_t* payload, unsigned int len) {
+  bool successFlag = true;
+  uint8_t speedgain = (uint8_t)extractFollowingNumber(payload, len, &successFlag, " ");
+  if(successFlag){
+    serial_write_two(SET_CMD_SPDGAIN, speedgain);
+    char buff[50];
+    sprintf(buff, "INFO: Speed gain set to %d", int(speedgain));
+    publish(buff);
+  }
+}
+
+
+void setOKRange(uint8_t* payload, unsigned int len) {
+  bool successFlag = true;
+  uint8_t okRange = (uint8_t)extractFollowingNumber(payload, len, &successFlag, " ");
+  if(successFlag){
+    serial_write_two(SET_CMD_OKRNGE, okRange);
+    char buff[50];
+    sprintf(buff, "INFO: Stable range set to +/- %.1f", float(okRange)/10.0f);
+    publish(buff);
+  }
 }

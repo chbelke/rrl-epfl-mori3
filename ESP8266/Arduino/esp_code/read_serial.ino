@@ -351,7 +351,7 @@ bool stateInfo(uint8_t c)
   static uint8_t readCase = 0;
   static uint8_t state;
   static uint8_t count;
-  static uint8_t storage[10];
+  static uint8_t storage[40];
   static bool alloc = true;
   static char serial_packet[100];
 
@@ -365,11 +365,31 @@ bool stateInfo(uint8_t c)
 
   switch (state) {  //request
     case 0:
+      if ((c == char(END_BYTE)) && (count == 3))
+      {
+        sprintf(serial_packet, "ERR: Code = %d, E%d", int(storage[0]), int(storage[1])); 
+        publish(serial_packet);
+        memset(storage, 0, sizeof(storage));
+        count = 0;
+        alloc = true;
+        return true;          
+      } else if (count <= 2) {
+        storage[count-1]=c;
+        count++;
+      } else {
+        publish("ERR: Info Case 0");
+        count = 0;
+        alloc = true;
+        return true;
+      }
+      break;
+
+    case 1:
       if ((c == char(END_BYTE)) && (count == 2))
       {
-        sprintf(serial_packet, "ERR: Code = %d", int(storage[0])); 
+        sprintf(serial_packet, "ERR: Coms123 Overflow, Edge %d", int(storage[0])); 
         publish(serial_packet);
-        sprintf(publishName, "%c/p", clientLetter);
+        memset(serial_packet, 0, sizeof(serial_packet));
         memset(storage, 0, sizeof(storage));
         count = 0;
         alloc = true;
@@ -378,12 +398,13 @@ bool stateInfo(uint8_t c)
         storage[0]=c;
         count++;
       } else {
-        publish("ERR: Info Case 17");
+        publish("ERR: Info Case 1");
         count = 0;
         alloc = true;
         return true;
       }
       break;
+
 
 
     case 12:
