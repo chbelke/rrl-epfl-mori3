@@ -111,9 +111,9 @@ class MoriGui(tk.Frame):
 
         self.frame_datalog = DataLog(frame_dl, self.wifi_host)
         self.frame_party = PartyFrame(frame_pt, self.wifi_host)
-        self.frame_start = StartStop(frame_st, self.wifi_host)
-        self.frame_pinglog = PingLog(frame_pl, self.wifi_host)
         self.frame_input = InputFlag(frame_in, self.wifi_host)
+        self.frame_start = StartStop(frame_st, self.wifi_host, self.frame_input)
+        self.frame_pinglog = PingLog(frame_pl, self.wifi_host)
 
         frame_st.pack(side="left", fill=tk.BOTH, expand=True)
         frame_pt.pack(side="left", fill=tk.BOTH, expand=True)

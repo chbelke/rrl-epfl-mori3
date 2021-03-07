@@ -7,8 +7,9 @@ from morigui.localSettings import *
 
 class StartStop(tk.Frame):
 
-    def __init__(self, frame, mqtthost):
+    def __init__(self, frame, mqtthost, emergencyFrame):
         self.frame = frame
+        self.emergencyFrame = emergencyFrame
         self.mqtthost = mqtthost
         self.load()
 
@@ -29,7 +30,9 @@ class StartStop(tk.Frame):
 
     def emergencyStop(self):
         print(colored("EMERGENCY STOP", "red"))
+        self.mqtthost.disableExternalInput()
         self.mqtthost.publishGlobal("stp")
+        self.emergencyFrame.inputFlagButton.configure(text="Off", fg="red")
 
 
     def picReset(self):
