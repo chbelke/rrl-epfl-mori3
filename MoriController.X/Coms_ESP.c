@@ -455,17 +455,14 @@ void Coms_ESP_StateUpdate(void) {
     if (ESP_DataLog_Time_Angle >= ESP_Update_Delay_Angle) {
         ESP_Update_Reset_Trigger |= 0b00000001;
         ESP_DataLog_Time_Angle %= ESP_Update_Delay_Angle;
-//        ESP_DataLog_Time_Angle = 0;
     }
     if (ESP_DataLog_Time_Edge >= ESP_Update_Delay_Edge) {
         ESP_Update_Reset_Trigger |= 0b00000010;
         ESP_DataLog_Time_Edge %= ESP_Update_Delay_Edge;
-//        ESP_DataLog_Time_Edge = 0;
     }
     if (ESP_DataLog_Time_Orient >= ESP_Update_Delay_Orient) {
         ESP_Update_Reset_Trigger |= 0b00000100;
         ESP_DataLog_Time_Orient %= ESP_Update_Delay_Orient;
-//        ESP_DataLog_Time_Orient = 0;
     }
 
     // If no fields need update

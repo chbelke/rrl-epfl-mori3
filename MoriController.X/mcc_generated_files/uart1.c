@@ -84,8 +84,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART1_CONFIG_TX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
-#define UART1_CONFIG_RX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
+#define UART1_CONFIG_TX_BYTEQ_LENGTH (254+1)
+#define UART1_CONFIG_RX_BYTEQ_LENGTH (254+1)
 
 /** UART Driver Queue
 
@@ -241,7 +241,6 @@ void __attribute__ ((weak)) UART1_Receive_CallBack(void)
 
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt( void )
 {
-//    char message = "error";
     if ((U1STAbits.OERR == 1))
     {
         U1STAbits.OERR = 0;
@@ -331,7 +330,7 @@ bool UART1_IsTxDone(void)
 
  *******************************************************************************/
 
-static uint16_t UART1_RxDataAvailable(void)
+static uint8_t UART1_RxDataAvailable(void)
 {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
@@ -361,8 +360,10 @@ static uint8_t UART1_TxDataAvailable(void)
     if (txTail < snapshot_txHead)
     {
         size = (snapshot_txHead - txTail - 1);
-    } else {
-        size = (UART1_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1);
+    }
+    else
+    {
+        size = ( UART1_CONFIG_TX_BYTEQ_LENGTH - (txTail - snapshot_txHead) - 1 );
     }
 
     if(size > 0xFF)
@@ -412,8 +413,8 @@ unsigned int __attribute__((deprecated)) UART1_WriteBuffer( uint8_t *buffer , un
 UART1_TRANSFER_STATUS __attribute__((deprecated)) UART1_TransferStatusGet (void )
 {
     UART1_TRANSFER_STATUS status = 0;
-    uint16_t rx_count = UART1_RxDataAvailable();
-    uint16_t tx_count = UART1_TxDataAvailable();
+    uint8_t rx_count = UART1_RxDataAvailable();
+    uint8_t tx_count = UART1_TxDataAvailable();
 
     switch(rx_count)
     {
@@ -443,7 +444,7 @@ UART1_TRANSFER_STATUS __attribute__((deprecated)) UART1_TransferStatusGet (void 
     return status;
 }
 
-uint8_t UART1_Peek(uint16_t offset)
+uint8_t __attribute__((deprecated)) UART1_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
 
@@ -486,7 +487,7 @@ unsigned int __attribute__((deprecated)) UART1_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int UART1_ReceiveBufferSizeGet(void)
+unsigned int __attribute__((deprecated)) UART1_ReceiveBufferSizeGet(void)
 {
     if(UART1_RxDataAvailable() != 0)
     {
