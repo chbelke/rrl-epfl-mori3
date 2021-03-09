@@ -83,8 +83,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART3_CONFIG_TX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
-#define UART3_CONFIG_RX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
+#define UART3_CONFIG_TX_BYTEQ_LENGTH (254+1)
+#define UART3_CONFIG_RX_BYTEQ_LENGTH (254+1)
 
 /** UART Driver Queue
 
@@ -329,7 +329,7 @@ bool UART3_IsTxDone(void)
 
  *******************************************************************************/
 
-static uint16_t UART3_RxDataAvailable(void)
+static uint8_t UART3_RxDataAvailable(void)
 {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
@@ -412,8 +412,8 @@ unsigned int __attribute__((deprecated)) UART3_WriteBuffer( uint8_t *buffer , un
 UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet (void )
 {
     UART3_TRANSFER_STATUS status = 0;
-    uint16_t rx_count = UART3_RxDataAvailable();
-    uint16_t tx_count = UART3_TxDataAvailable();
+    uint8_t rx_count = UART3_RxDataAvailable();
+    uint8_t tx_count = UART3_TxDataAvailable();
 
     switch(rx_count)
     {
@@ -443,7 +443,7 @@ UART3_TRANSFER_STATUS __attribute__((deprecated)) UART3_TransferStatusGet (void 
     return status;
 }
 
-uint8_t UART3_Peek(uint16_t offset)
+uint8_t __attribute__((deprecated)) UART3_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
 
@@ -486,7 +486,7 @@ unsigned int __attribute__((deprecated)) UART3_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int UART3_ReceiveBufferSizeGet(void)
+unsigned int __attribute__((deprecated)) UART3_ReceiveBufferSizeGet(void)
 {
     if(UART3_RxDataAvailable() != 0)
     {

@@ -83,8 +83,8 @@ static bool volatile rxOverflowed;
  * when head == tail.  So full will result in head/tail being off by one due to
  * the extra byte.
  */
-#define UART2_CONFIG_TX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
-#define UART2_CONFIG_RX_BYTEQ_LENGTH (UART_BUFF_SIZE+1)
+#define UART2_CONFIG_TX_BYTEQ_LENGTH (254+1)
+#define UART2_CONFIG_RX_BYTEQ_LENGTH (254+1)
 
 /** UART Driver Queue
 
@@ -329,7 +329,7 @@ bool UART2_IsTxDone(void)
 
 *******************************************************************************/
 
-static uint16_t UART2_RxDataAvailable(void)
+static uint8_t UART2_RxDataAvailable(void)
 {
     uint16_t size;
     uint8_t *snapshot_rxTail = (uint8_t*)rxTail;
@@ -343,9 +343,9 @@ static uint16_t UART2_RxDataAvailable(void)
         size = ( (snapshot_rxTail - rxHead));
     }
     
-    if(size > 0xFFFF)
+    if(size > 0xFF)
     {
-        return 0xFFFF;
+        return 0xFF;
     }
     
     return size;
@@ -412,8 +412,8 @@ unsigned int __attribute__((deprecated)) UART2_WriteBuffer( uint8_t *buffer , un
 UART2_TRANSFER_STATUS __attribute__((deprecated)) UART2_TransferStatusGet (void )
 {
     UART2_TRANSFER_STATUS status = 0;
-    uint16_t rx_count = UART2_RxDataAvailable();
-    uint16_t tx_count = UART2_TxDataAvailable();
+    uint8_t rx_count = UART2_RxDataAvailable();
+    uint8_t tx_count = UART2_TxDataAvailable();
     
     switch(rx_count)
     {
@@ -443,7 +443,7 @@ UART2_TRANSFER_STATUS __attribute__((deprecated)) UART2_TransferStatusGet (void 
     return status;    
 }
 
-uint8_t UART2_Peek(uint16_t offset)
+uint8_t __attribute__((deprecated)) UART2_Peek(uint16_t offset)
 {
     uint8_t *peek = rxHead + offset;
     
@@ -486,7 +486,7 @@ unsigned int __attribute__((deprecated)) UART2_TransmitBufferSizeGet(void)
     return 0;
 }
 
-unsigned int UART2_ReceiveBufferSizeGet(void)
+unsigned int __attribute__((deprecated)) UART2_ReceiveBufferSizeGet(void)
 {
     if(UART2_RxDataAvailable() != 0)
     {

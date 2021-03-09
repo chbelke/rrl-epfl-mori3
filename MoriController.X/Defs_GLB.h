@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'H' // module name by letter
+#define MODULE 'C' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -49,9 +49,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 5
-#define RGB_Default_Green 15
-#define RGB_Default_Blue 0
+#define RGB_Default_Red 0
+#define RGB_Default_Green 20
+#define RGB_Default_Blue 5
 
 /* ******************** ERROR CODES ***************************************** */
 #define ERR_NeighbourLost 1

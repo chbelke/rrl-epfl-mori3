@@ -107,13 +107,13 @@ void Coms_123_Eval(uint8_t edge) { // called in main
                         Coms_CMD_Handle(edge, EdgInAloc[edge] & 0b00011111);
                         EdgInCase[edge] = 30;
                         break;
-//                    case 7: // xxx == 111, relay
+/*                    case 7: // xxx == 111, relay
 //                        if (Coms_REL_Handle(edge, EdgInAloc[edge] & 0b00011111)) {
 //                            EdgInCase[edge] = 0;
 //                        } else {
 //                            EdgInCase[edge] = 40;
 //                        }
-//                        break;
+//                        break; */
                     default:
                         EdgInCase[edge] = 50;
                         break;

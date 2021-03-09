@@ -13,5 +13,7 @@ float Sens_ENC_GetLiveOffset(uint8_t);
 void Sens_ENC_UpdateOld(uint8_t);
 void Sens_ENC_UpdateNew(uint8_t, float);
 
+float Sens_ENC_GetLrgOffsetMult(uint8_t);
+
 #endif	/* Sens_ENC_H */
 

@@ -7,6 +7,7 @@
 #include "Acts_ROT.h"
 #include "mcc_generated_files/i2c1.h"
 #include "Mnge_ERR.h"
+#include "math.h"
 
 // Encoder AS5048B
 volatile float ENC_Data[3] = {0, 0, 0};
@@ -14,6 +15,8 @@ volatile float ENC_DataOld[3] = {0, 0, 0};
 volatile float ENC_DataAvg[3][5] = {{0, 0, 0, 0, 0},{0, 0, 0, 0, 0},{0, 0, 0, 0, 0}};
 volatile float ENC_GlobOffset[3] = {0, 0, 0};
 volatile float ENC_LiveOffset[3] = {0, 0, 0};
+
+volatile float ENC_LrgOffsetMult[3] = {1, 1, 1};
 
 const int8_t ModuleOffsetData[3][NUM_MODS*3] = {
     {Off1_A1, Off1_A2, Off1_A3, Off1_B1, Off1_B2, Off1_B3, Off1_C1, Off1_C2, Off1_C3, Off1_D1, Off1_D2, Off1_D3, Off1_E1, Off1_E2, Off1_E3, Off1_F1, Off1_F2, Off1_F3, Off1_G1, Off1_G2, Off1_G3, Off1_H1, Off1_H2, Off1_H3, Off1_I1, Off1_I2, Off1_I3, Off1_J1, Off1_J2, Off1_J3, Off1_K1, Off1_K2, Off1_K3, Off1_L1, Off1_L2, Off1_L3, Off1_M1, Off1_M2, Off1_M3, Off1_N1, Off1_N2, Off1_N3},
@@ -127,6 +130,13 @@ void Sens_ENC_SetGlobalOffset(uint8_t edge){
 void Sens_ENC_SetLiveOffset(uint8_t edge, uint16_t nbrAngVal) {
     ENC_LiveOffset[edge] = (((float)Acts_ROT_GetAngle(edge, false)) 
             - ((float)nbrAngVal)) * 0.05f; // *0.5 to divide by two, *0.1 to translate to degrees
+    
+    // if angle offset between neightbours bigger than 10 deg,
+    // scale output PWM down (zero at 30 deg diff)
+    if (fabsf(ENC_LiveOffset[edge]) > 5.0f){ 
+        ENC_LrgOffsetMult[edge] = 1.0f - (fabsf(ENC_LiveOffset[edge]) - 5.0f) / 10.0f;
+        ENC_LrgOffsetMult[edge] = clamp_f(ENC_LrgOffsetMult[edge], 0.0f, 1.0f);
+    } else ENC_LrgOffsetMult[edge] = 1.0f;
 }
 
 float Sens_ENC_GetLiveOffset(uint8_t edge) {
@@ -146,4 +156,8 @@ void Sens_ENC_UpdateNew(uint8_t edge, float value){
     ENC_Data[edge] = (ENC_DataAvg[edge][4] + ENC_DataAvg[edge][3]
             + ENC_DataAvg[edge][2] + ENC_DataAvg[edge][1]
             + ENC_DataAvg[edge][0]) * 0.2f;
+}
+
+float Sens_ENC_GetLrgOffsetMult(uint8_t edge){
+    return ENC_LrgOffsetMult[edge];
 }

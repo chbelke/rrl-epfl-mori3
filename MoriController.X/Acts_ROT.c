@@ -18,7 +18,6 @@ float Speed_DEG[3] = {(((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * M
     (((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period,
     (((float) MotRot_SpeedInit) * 0.01f) * MotRot_SpeedMax * MotRot_PID_period};
 uint8_t DrvInterval[3] = {0, 0, 0};
-float PID_I[3] = {0, 0, 0}; // integral error variable
 
 float PID_GainP = MotRot_PID_kP;
 float PID_GainI = MotRot_PID_kI;
@@ -66,17 +65,19 @@ void Acts_ROT_Out(uint8_t edge, int16_t duty) {
 
 /* ******************** ROTARY MOTOR PID ************************************ */
 void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
-    static float errorOld[3] = {0, 0, 0}; // previous error (derivative gain)
     float OUT; // pwm output variable
+    static float PID_I[3] = {0, 0, 0}; // integral error variable
     static bool SPD_Flag[3] = {false, false, false}; // speed controller on flag
     static bool SPD_Used[3] = {false, false, false}; // speed output used flag
+    static float errorOld[3] = {0, 0, 0}; // previous error (derivative gain)
+    static uint16_t targetOld1[3] = {0, 0, 0};
     
     // avoid bad control inputs
     target = clamp_ui16(target, MotRot_AngleIntMIN, MotRot_AngleIntMAX);
 
     const float error = ((float) target) * 0.1f - 180.0f - current;
     
-        // stop speed controller when target reached
+    // stop speed controller when target reached
     if (SPD_Flag[edge] && (fabsf(error) < 0.1f)){
         SPD_Flag[edge] = false;
         if (SPD_Used[edge]) PID_I[edge] = 0.0f;
@@ -85,15 +86,23 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
          * position PID to avoid overshoot */
     }
 
+    // reset integral component when target new
+    if (target != targetOld1[edge]){
+        PID_I[edge] = 0.0f;
+        targetOld1[edge] = target;
+    }
+    
     // integral component
     if (fabsf(error) < Acts_ROT_GetAngleDeadband()) {
         // only allow wind-down within deadband
         if ((sgn(PID_I[edge]) != sgn(error)) && (fabsf(PID_I[edge]) < epsilon))
             PID_I[edge] += error * MotRot_PID_period;
         // clamp to max output value in deadband
-        if (error < 0) PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax * fabsf(error) * Acts_ROT_GetAngleDeadbandInverse(), 0.0f);
-        else if (error > 0) PID_I[edge] = clamp_f(PID_I[edge], 0.0f, MotRot_PID_Imax * fabsf(error) * Acts_ROT_GetAngleDeadbandInverse());
-    } else if (fabsf(error) < 7.0f){
+        if (error < 0) PID_I[edge] = clamp_f(PID_I[edge], 
+                -MotRot_PID_Imax * fabsf(error) * Acts_ROT_GetAngleDeadbandInverse(), 0.0f);
+        else if (error > 0) PID_I[edge] = clamp_f(PID_I[edge], 
+                0.0f, MotRot_PID_Imax * fabsf(error) * Acts_ROT_GetAngleDeadbandInverse());
+    } else if (fabsf(error) < 7.0f){ 
         // avoid integral build up when far away (if error >6.69, kp maxes PWM)
         PID_I[edge] += error * MotRot_PID_period;
         PID_I[edge] = clamp_f(PID_I[edge], -MotRot_PID_Imax, MotRot_PID_Imax);
@@ -112,25 +121,26 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
     
     // speed control
     if (Speed_100[edge] != 100) {
-        static uint16_t targetOld[3] = {0, 0, 0};
+        static uint16_t targetOld2[3] = {0, 0, 0};
         static uint8_t newTargetCount[3] = {0, 0, 0};
-        static int8_t SPD_Dir[3] = {0, 0, 0}; // set with new value
         static float SPD[3] = {0, 0, 0}; // speed control integral term
 
         // when new target, set speed direction and feed forward
-        if (target != targetOld[edge]){
-            SPD_Dir[edge] = copysgn(1, outP);
-            SPD[edge] = SPD_Dir[edge] * MotRot_SPD_Max * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
-            targetOld[edge] = target;
+        if (target != targetOld2[edge]){
+            SPD[edge] = copysgn(MotRot_SPD_Max, error) * (((float) Acts_ROT_GetSpeedLimit(edge)) * 0.01f);
+            targetOld2[edge] = target;
             newTargetCount[edge] = 0;
             SPD_Flag[edge] = true;
+        } else {
+            // speed control (integral)
+            SPD[edge] += SPD_Gain * (copysgn(Speed_DEG[edge], error) - Sens_ENC_GetDelta(edge));
+            if (sgn(error) != sgn(SPD[edge])) SPD[edge] = 0;
         }
-
-        // speed control (integral)
-        SPD[edge] += SPD_Gain * (copysgn(Speed_DEG[edge], error) - Sens_ENC_GetDelta(edge));
+        
         // ignore other direction (no additional breaking under load)
         if (error > 0.0f) SPD[edge] = clamp_f(SPD[edge], 0.0f, MotRot_SPD_Max);
         else if (error < -0.0f) SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, -0.0f);
+        else SPD[edge] = 0.0f;
         Acts_ROT_SetSPDAvgOut(edge, (int16_t)(SPD[edge]));
 
         // average speed integral 
@@ -141,22 +151,33 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
             } else newTargetCount[edge]++;
         }
         
+        if (error > 0.0f) SPD[edge] = clamp_f(SPD[edge], 0.0f, MotRot_SPD_Max);
+        else if (error < -0.0f) SPD[edge] = clamp_f(SPD[edge], -MotRot_SPD_Max, -0.0f);
+        else SPD[edge] = 0.0f;
+        
         // whichever is smallest in direction of target
         if (SPD_Flag[edge] && // if target has not been reached yet
-                (((error > 0.0f) && (SPD[edge] < outP)) ||
-                ((error < -0.0f) && (SPD[edge] > outP)))){
+                (fabsf(SPD[edge]) < fabsf(outP))){
             OUT = SPD[edge];
             SPD_Used[edge] = true;
         } else {
             OUT = outP;
             SPD_Used[edge] = false;
+            
+            // if target reached, scale down PWM by half to lightly hold position 
+            if (!SPD_Flag[edge]) OUT *= 0.6;
         }
     } else {
         OUT = outP; // full speed position output
     }
-    // scale output down towards zero within deadband
+    
+    // scale down PWM towards zero within deadband
     if (fabsf(error) < Acts_ROT_GetAngleDeadband())
         OUT *= fabsf(error) * Acts_ROT_GetAngleDeadbandInverse();
+    
+    // scale down pwm at large offset with neighbour
+    OUT *= Sens_ENC_GetLrgOffsetMult(edge);
+    
     Acts_ROT_Out(edge, (int16_t) OUT); // output pwm
 }
 
@@ -317,7 +338,6 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
     ANG_Desired[edge] = desired;
     Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ang[edge] = true;
-    PID_I[edge] = 0;
 }
 
 uint16_t Acts_ROT_GetTarget(uint8_t edge) {
