@@ -5,6 +5,7 @@
 #include "Acts_LIN.h"
 #include "Acts_ROT.h"
 #include "Coms_ESP.h"
+#include "Coms_123.h"
 #include "math.h"
 #include "dsp.h"
 #include "Mnge_ERR.h"
@@ -33,8 +34,8 @@ volatile int16_t SPD_AvgIn[3] = {0, 0, 0};
 #define WHEEL 68.15f // wheel distance from vertex
 #define SxOUT 0.9f // output speed factor for non-primary wheels (tune curve)
 #define INV_THREE 0.333333f // division avoidance
-#define INV255_x180 7.058824f // factor for 255 to 180pwm conversion
-
+#define INV255_x1800 7.058824f // factor for 255 to 180pwm conversion
+#define SMALL_PI 3.141592f
 
 /* ******************** ROTARY MOTOR OUTPUTS ******************************** */
 void Acts_ROT_Out(uint8_t edge, int16_t duty) {
@@ -165,7 +166,7 @@ void Acts_ROT_PID(uint8_t edge, float current, uint16_t target) {
             SPD_Used[edge] = false;
             
             // if target reached, scale down PWM by half to lightly hold position 
-            if (!SPD_Flag[edge]) OUT *= 0.6;
+            if (FLG_ReducePWMatTarget && (!SPD_Flag[edge])) OUT *= 0.6;
         }
     } else {
         OUT = outP; // full speed position output
@@ -212,60 +213,62 @@ void Acts_ROT_Wiggle(uint8_t edge) {
 /* ******************** DRIVE FUNCTION ************************************** */
 void Acts_ROT_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     float a, b, c; // extension values from 180
-    const float Mo = curve * 137.9f;
-    float Sa = speed * INV255_x180; // 255 to 180 max
-    if (!direc) Sa = -1 * Sa; // inwards or outwards
+    float Mo = curve * 242.4;//137.9f;
+    float Sa = speed * INV255_x1800; // 255 to 180 max
+    if (!direc) Sa = -1.0f * Sa; // inwards or outwards
+    
+    // max Da = 31.725
 
     switch (edge) {
         case 0:
             a = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(1))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(2))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             break;
         case 1:
-            a = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-            b = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            a = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(1))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            b = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(2))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             c = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
             break;
         case 2:
-            a = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            a = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(2))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
             b = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-            c = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
+            c = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(1))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
             break;
         default:
-            a = 180 + (MotLin_MAX_1 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_1 - MotLin_MIN_1);
-            b = 180 + (MotLin_MAX_2 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_2 - MotLin_MIN_2);
-            c = 180 + (MotLin_MAX_3 - Acts_LIN_GetTarget(0))*12 / (MotLin_MAX_3 - MotLin_MIN_3);
+            a = 180;
+            b = 180;
+            c = 180;
             break;
     }
 
     // vertex angles (float alpha = acosf((b*b + c*c - a*a)/(2*b*c));)
-    const float beta = acosf((a * a + c * c - b * b) / (2 * a * c));
-    const float gamm = acosf((a * a + b * b - c * c) / (2 * a * b));
+    float beta = acosf((a * a + c * c - b * b) / (2 * a * c));
+    float gamm = acosf((a * a + b * b - c * c) / (2 * a * b));
 
     // wheel coordinates (for a: [WHEEL, 0])
-    const float Wb[2] = {(b - WHEEL) * cosf(gamm), (b - WHEEL) * sinf(gamm)};
-    const float Wc[2] = {a - WHEEL * cosf(beta), WHEEL * sinf(beta)};
+    float Wb[2] = {(b - WHEEL) * cosf(gamm), (b - WHEEL) * sinf(gamm)};
+    float Wc[2] = {a - WHEEL * cosf(beta), WHEEL * sinf(beta)};
 
     // second point in wheel direction
-    const float Wb2[2] = {Wb[0] - cosf(PI * 0.5f - gamm), Wb[1] + sinf(PI * 0.5f - gamm)};
-    const float Wc2[2] = {Wc[0] + cosf(PI * 0.5f - beta), Wc[1] + sinf(PI * 0.5f  - beta)};
+    float Wb2[2] = {Wb[0] - cosf(SMALL_PI * 0.5f - gamm), Wb[1] + sinf(SMALL_PI * 0.5f - gamm)};
+    float Wc2[2] = {Wc[0] + cosf(SMALL_PI * 0.5f - beta), Wc[1] + sinf(SMALL_PI * 0.5f  - beta)};
 
     // centroid coordinates
-    const float D[2] = {(b * cosf(gamm) + a) * INV_THREE, b * sinf(gamm) * INV_THREE};
+    float D[2] = {(b * cosf(gamm) + a) * INV_THREE, b * sinf(gamm) * INV_THREE};
 
     // moment arm of wheel force to centroid
-    const float Da = fabsf(D[0] - WHEEL);
-    const float Db = fabsf((Wb2[1] - Wb[1]) * D[0]
+    float Da = fabsf(D[0] - WHEEL);
+    float Db = fabsf((Wb2[1] - Wb[1]) * D[0]
             - (Wb2[0] - Wb[0]) * D[1] + Wb2[0] * Wb[1] - Wb2[1] * Wb[0])
             / sqrtf(powf(Wb2[1] - Wb[1], 2) + powf(Wb2[0] - Wb[0], 2));
-    const float Dc = fabsf((Wc2[1] - Wc[1]) * D[0]
+    float Dc = fabsf((Wc2[1] - Wc[1]) * D[0]
             - (Wc2[0] - Wc[0]) * D[1] + Wc2[0] * Wc[1] - Wc2[1] * Wc[0])
             / sqrtf(powf(Wc2[1] - Wc[1], 2) + powf(Wc2[0] - Wc[0], 2));
 
     // wheel speeds
-    float Sc = SxOUT*((Mo - Sa * Da) / (Db * cosf(PI * 0.5f - beta) / cosf(PI * 0.5f - gamm) + Dc));
-    float Sb = SxOUT*(Sc * cosf(PI * 0.5f - beta) / cosf(PI * 0.5f - gamm));
+    float Sc = SxOUT*((Mo - Sa * Da) / (Db * cosf(SMALL_PI * 0.5f - beta) / cosf(SMALL_PI * 0.5f - gamm) + Dc));
+    float Sb = SxOUT*(Sc * cosf(SMALL_PI * 0.5f - beta) / cosf(SMALL_PI * 0.5f - gamm));
 
     uint8_t i;
     for (i = 0; i < 3; i++) Acts_ROT_SetDrvInterval(i, 5); // lasts for 1 sec
@@ -273,19 +276,19 @@ void Acts_ROT_Drive(uint8_t speed, int8_t curve, uint8_t edge, uint8_t direc) {
     // output depending on driving edge
     switch (edge) {
         case 0:
-            Acts_ROT_Out(0, Sa);
-            Acts_ROT_Out(1, Sb);
-            Acts_ROT_Out(2, Sc);
+            Acts_ROT_Out(0, (int16_t)(Sa));
+            Acts_ROT_Out(1, (int16_t)(Sb));
+            Acts_ROT_Out(2, (int16_t)(Sc));
             break;
         case 1:
-            Acts_ROT_Out(1, Sa);
-            Acts_ROT_Out(2, Sb);
-            Acts_ROT_Out(0, Sc);
+            Acts_ROT_Out(1, (int16_t)(Sa));
+            Acts_ROT_Out(2, (int16_t)(Sb));
+            Acts_ROT_Out(0, (int16_t)(Sc));
             break;
         case 2:
-            Acts_ROT_Out(2, Sa);
-            Acts_ROT_Out(0, Sb);
-            Acts_ROT_Out(1, Sc);
+            Acts_ROT_Out(2, (int16_t)(Sa));
+            Acts_ROT_Out(0, (int16_t)(Sb));
+            Acts_ROT_Out(1, (int16_t)(Sc));
             break;
         default:
             break;
@@ -327,6 +330,7 @@ void Acts_ROT_SetSpeedLimit(uint8_t edge, uint8_t limit) {
     else if (limit < 1) limit = 1;
     Speed_DEG[edge] = ((float) limit) * 0.01f * MotRot_SpeedMax * MotRot_PID_period;
     Speed_100[edge] = limit;
+    Coms_123_ResetCmdMatch(edge);
 }
 
 uint8_t Acts_ROT_GetSpeedLimit(uint8_t edge) {
@@ -338,6 +342,9 @@ void Acts_ROT_SetTarget(uint8_t edge, uint16_t desired) {
     ANG_Desired[edge] = desired;
     Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ang[edge] = true;
+    Flg_AllEdgRdy[edge] = false;
+    Flg_NbrEdgRdy[edge] = false;
+    Coms_123_ResetCmdMatch(edge);
 }
 
 uint16_t Acts_ROT_GetTarget(uint8_t edge) {

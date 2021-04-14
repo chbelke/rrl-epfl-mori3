@@ -19,9 +19,31 @@ colors = ['xkcd:navy',
             'xkcd:purple',
             'xkcd:orange',
             'xkcd:turquoise',
+            'xkcd:grey',
+            'xkcd:navy',
+            'xkcd:green',
+            'xkcd:gold',
+            'xkcd:crimson',
+            'xkcd:beige',
+            'xkcd:lavender',
+            'xkcd:pink',
+            'xkcd:purple',
+            'xkcd:orange',
+            'xkcd:turquoise',
             'xkcd:grey'
             ]
 dark_colors = ['xkcd:dark navy',
+            'xkcd:dark green',
+            'xkcd:dark gold',
+            'xkcd:dark red',
+            'xkcd:dark beige',
+            'xkcd:dark lavender',
+            'xkcd:dark pink',
+            'xkcd:dark purple',
+            'xkcd:dark orange',
+            'xkcd:dark turquoise',
+            'xkcd:dark grey',
+            'xkcd:dark navy',
             'xkcd:dark green',
             'xkcd:dark gold',
             'xkcd:dark red',
@@ -136,7 +158,7 @@ for i, esp in enumerate(logData.keys()):
 
 
     plt.figure(1)
-    # plt.plot(time_ang, ang1, linestyle='-', linewidth=2, label="a1 "+checkName(esp))
+    plt.plot(time_ang, ang1, linestyle='-', linewidth=2, marker=".", label="a1 "+checkName(esp), color=colors[i])
     plt.plot(time_ang, ang2, linestyle='-', linewidth=2, marker=".", label="a2 "+checkName(esp), color=colors[i])
     plt.plot(time_ang, ang3, linestyle='-', linewidth=2, marker=".", label="a3 "+checkName(esp), color=dark_colors[i])
     

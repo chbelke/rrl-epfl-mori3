@@ -19,7 +19,7 @@
 
 
 /* ******************** MODULE ********************************************** */
-#define MODULE 'C' // module name by letter
+#define MODULE 'F' // module name by letter
 
 
 /* ******************** NOTES *********************************************** */
@@ -49,9 +49,9 @@
 #define MODE_Cplngs_Active true
 
 // RGB LED Default values
-#define RGB_Default_Red 0
-#define RGB_Default_Green 20
-#define RGB_Default_Blue 5
+#define RGB_Default_Red 15
+#define RGB_Default_Green 5
+#define RGB_Default_Blue 15
 
 /* ******************** ERROR CODES ***************************************** */
 #define ERR_NeighbourLost 1
@@ -79,6 +79,7 @@ extern volatile bool FLG_MotLin_Active;
 extern volatile bool FLG_MotRot_Active;
 extern volatile bool FLG_Verbose;
 extern volatile bool FLG_Emergency;
+extern volatile bool FLG_ReducePWMatTarget;
 
 extern volatile bool Flg_BatLow;
 extern volatile bool Flg_Button;
@@ -146,7 +147,7 @@ extern volatile uint8_t CMD_ID;
 #define EDG_ConIntrvl 10            // con check at 5Hz, 10 = 2 sec = con lost
 #define EDG_ActIntrvl 3             // act check at 20Hz, 3 = 
 #define EDG_ExtNbrRng 6             // current neighbour ext. must be (own +-)
-#define EDG_ExtSlwRng 3             // if nbr < this > EDG_ExtNbrRng, slw down
+#define EDG_ExtSlwRng 2             // if nbr < this > EDG_ExtNbrRng, slw down
 #define EDG_ExtSlwVal 512           // slow down to this 
 
 
