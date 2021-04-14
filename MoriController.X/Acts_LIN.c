@@ -2,6 +2,7 @@
 #include "dsp.h"
 #include "Defs_GLB.h"
 #include "Defs_MOD.h"
+#include "Coms_123.h"
 #include "mcc_generated_files/pwm.h"
 #include "mcc_generated_files/adc1.h"
 
@@ -182,6 +183,9 @@ void Acts_LIN_SetTarget(uint8_t edge, uint8_t desired) {
     Ext_Desired[edge] = desired;
     Flg_EdgeAct[edge] = false; // reset act flag until cmd verified with neighbour
     Flg_EdgeReq_Ext[edge] = true; //  relevant when coupled
+    Flg_AllEdgRdy[edge] = false;
+    Flg_NbrEdgRdy[edge] = false;
+    Coms_123_ResetCmdMatch(edge);
 }
 
 /* ******************** SET MAX PWM VALUE *********************************** */

@@ -558,7 +558,7 @@ bool Coms_CMD_SetFlags(uint8_t edge, uint8_t byte, uint8_t *state) {
             break;            
 
         case 4: // f3
-            // Flag3 = flag_set[edge];
+            FLG_ReducePWMatTarget = flag_set[edge];
             break;            
 
         case 5: // f4
@@ -670,6 +670,10 @@ bool Coms_CMD_Shape(uint8_t edge, uint8_t byte, uint8_t *state) {
                     for (EspInBits[edge] = 0; EspInAlocTmp; EspInBits[edge]++) {
                         EspInAlocTmp &= EspInAlocTmp - 1; // clear the LSB set
                     }
+                } else {
+                    EspInCase[edge] = 43;
+                    EspInBits[edge] = 0;
+                    EspInBits2[edge] = 0;
                 }
             }
             EspInByts[edge] = EspInByts[edge] + 1;

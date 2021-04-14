@@ -35,7 +35,7 @@
     #define Off1_H1 0
     #define Off1_H2 0
     #define Off1_H3 0
-    #define Off1_I1 0
+    #define Off1_I1 -15
     #define Off1_I2 0
     #define Off1_I3 0
     #define Off1_J1 0
@@ -91,7 +91,7 @@
     #define Off2_L3 0
     #define Off2_M1 0
     #define Off2_M2 0
-    #define Off2_M3 0
+    #define Off2_M3 -12
     #define Off2_N1 2
     #define Off2_N2 0
     #define Off2_N3 0
@@ -110,7 +110,7 @@
     #define Off3_E1 0
     #define Off3_E2 0
     #define Off3_E3 0
-    #define Off3_F1 0
+    #define Off3_F1 -5
     #define Off3_F2 0
     #define Off3_F3 0
     #define Off3_G1 0
@@ -123,13 +123,13 @@
     #define Off3_I2 0
     #define Off3_I3 0
     #define Off3_J1 0
-    #define Off3_J2 0
+    #define Off3_J2 -9
     #define Off3_J3 0
     #define Off3_K1 0
     #define Off3_K2 0
     #define Off3_K3 0
     #define Off3_L1 0
-    #define Off3_L2 0
+    #define Off3_L2 -16
     #define Off3_L3 0
     #define Off3_M1 -17
     #define Off3_M2 0
@@ -332,7 +332,7 @@
     #define Off2_H2 0
     #define Off2_H3 0
     #define Off2_I1 0
-    #define Off2_I2 0
+    #define Off2_I2 -11
     #define Off2_I3 0
     #define Off2_J1 0
     #define Off2_J2 0
@@ -405,7 +405,7 @@
     #define Off1_D2 0
     #define Off1_D3 0
     #define Off1_E1 0
-    #define Off1_E2 0
+    #define Off1_E2 -12
     #define Off1_E3 0
     #define Off1_F1 0
     #define Off1_F2 0
@@ -570,7 +570,7 @@
     #define Off2_C1 0
     #define Off2_C2 0
     #define Off2_C3 0
-    #define Off2_D1 0
+    #define Off2_D1 -12
     #define Off2_D2 -10
     #define Off2_D3 0
     #define Off2_E1 0
@@ -629,7 +629,7 @@
     #define Off3_H3 0
     #define Off3_I1 0
     #define Off3_I2 0
-    #define Off3_I3 0
+    #define Off3_I3 -1
     #define Off3_J1 0
     #define Off3_J2 0
     #define Off3_J3 0
@@ -648,7 +648,7 @@
 #elif MODULE == 'F'
     #define Off1_A1 0
     #define Off1_A2 0
-    #define Off1_A3 0
+    #define Off1_A3 -5
     #define Off1_B1 0
     #define Off1_B2 0
     #define Off1_B3 0
@@ -752,7 +752,7 @@
     #define Off3_G2 0
     #define Off3_G3 0
     #define Off3_H1 0
-    #define Off3_H2 0
+    #define Off3_H2 -16
     #define Off3_H3 0
     #define Off3_I1 0
     #define Off3_I2 0
@@ -761,10 +761,10 @@
     #define Off3_J2 0
     #define Off3_J3 0
     #define Off3_K1 0
-    #define Off3_K2 0
+    #define Off3_K2 -4
     #define Off3_K3 0
     #define Off3_L1 0
-    #define Off3_L2 0
+    #define Off3_L2 -5
     #define Off3_L3 0
     #define Off3_M1 0
     #define Off3_M2 0
@@ -803,13 +803,13 @@
     #define Off1_J1 0
     #define Off1_J2 0
     #define Off1_J3 0
-    #define Off1_K1 0
+    #define Off1_K1 -14
     #define Off1_K2 0
     #define Off1_K3 0
-    #define Off1_L1 0
+    #define Off1_L1 -11
     #define Off1_L2 0
     #define Off1_L3 0
-    #define Off1_M1 0
+    #define Off1_M1 -9
     #define Off1_M2 0
     #define Off1_M3 0
     #define Off1_N1 0
@@ -889,7 +889,7 @@
     #define Off3_J3 0
     #define Off3_K1 0
     #define Off3_K2 0
-    #define Off3_K3 0
+    #define Off3_K3 -16
     #define Off3_L1 0
     #define Off3_L2 -12
     #define Off3_L3 0
@@ -959,7 +959,7 @@
     #define Off2_E3 0
     #define Off2_F1 0
     #define Off2_F2 0
-    #define Off2_F3 0
+    #define Off2_F3 -16
     #define Off2_G1 -14
     #define Off2_G2 0
     #define Off2_G3 -23
@@ -1027,7 +1027,7 @@
     #define Off3_N2 0
     #define Off3_N3 0
 #elif MODULE == 'I'
-    #define Off1_A1 0
+    #define Off1_A1 -15
     #define Off1_A2 0
     #define Off1_A3 0
     #define Off1_B1 0
@@ -1076,7 +1076,7 @@
     #define Off2_B2 0
     #define Off2_B3 0
     #define Off2_C1 0
-    #define Off2_C2 0
+    #define Off2_C2 -11
     #define Off2_C3 0
     #define Off2_D1 0
     #define Off2_D2 0
@@ -1100,7 +1100,7 @@
     #define Off2_J2 0
     #define Off2_J3 -14
     #define Off2_K1 0
-    #define Off2_K2 0
+    #define Off2_K2 -4
     #define Off2_K3 0
     #define Off2_L1 0
     #define Off2_L2 0
@@ -1125,7 +1125,7 @@
     #define Off3_D3 0
     #define Off3_E1 0
     #define Off3_E2 0
-    #define Off3_E3 0
+    #define Off3_E3 -1
     #define Off3_F1 0
     #define Off3_F2 0
     #define Off3_F3 0
@@ -1145,7 +1145,7 @@
     #define Off3_K2 0
     #define Off3_K3 0
     #define Off3_L1 0
-    #define Off3_L2 0
+    #define Off3_L2 -4
     #define Off3_L3 0
     #define Off3_M1 0
     #define Off3_M2 0
@@ -1188,7 +1188,7 @@
     #define Off1_K2 0
     #define Off1_K3 0
     #define Off1_L1 0
-    #define Off1_L2 0
+    #define Off1_L2 -1
     #define Off1_L3 0
     #define Off1_M1 0
     #define Off1_M2 0
@@ -1198,7 +1198,7 @@
     #define Off1_N3 0
     #define Off2_A1 0
     #define Off2_A2 0
-    #define Off2_A3 0
+    #define Off2_A3 -9
     #define Off2_B1 0
     #define Off2_B2 0
     #define Off2_B3 0
@@ -1229,7 +1229,7 @@
     #define Off2_K1 0
     #define Off2_K2 -23
     #define Off2_K3 -10
-    #define Off2_L1 0
+    #define Off2_L1 -9
     #define Off2_L2 0
     #define Off2_L3 0
     #define Off2_M1 0
@@ -1299,7 +1299,7 @@
     #define Off1_F1 0
     #define Off1_F2 0
     #define Off1_F3 0
-    #define Off1_G1 0
+    #define Off1_G1 -14
     #define Off1_G2 0
     #define Off1_G3 0
     #define Off1_H1 0
@@ -1340,7 +1340,7 @@
     #define Off2_E3 0
     #define Off2_F1 0
     #define Off2_F2 0
-    #define Off2_F3 0
+    #define Off2_F3 -4
     #define Off2_G1 0
     #define Off2_G2 0
     #define Off2_G3 0
@@ -1348,7 +1348,7 @@
     #define Off2_H2 0
     #define Off2_H3 0
     #define Off2_I1 0
-    #define Off2_I2 0
+    #define Off2_I2 -4
     #define Off2_I3 0
     #define Off2_J1 0
     #define Off2_J2 -23
@@ -1385,7 +1385,7 @@
     #define Off3_F3 0
     #define Off3_G1 0
     #define Off3_G2 0
-    #define Off3_G3 0
+    #define Off3_G3 -16
     #define Off3_H1 0
     #define Off3_H2 0
     #define Off3_H3 0
@@ -1399,7 +1399,7 @@
     #define Off3_K2 0
     #define Off3_K3 0
     #define Off3_L1 0
-    #define Off3_L2 0
+    #define Off3_L2 -14
     #define Off3_L3 10
     #define Off3_M1 0
     #define Off3_M2 0
@@ -1426,7 +1426,7 @@
     #define Off1_F1 0
     #define Off1_F2 0
     #define Off1_F3 0
-    #define Off1_G1 0
+    #define Off1_G1 -11
     #define Off1_G2 0
     #define Off1_G3 0
     #define Off1_H1 0
@@ -1436,7 +1436,7 @@
     #define Off1_I2 0
     #define Off1_I3 0
     #define Off1_J1 0
-    #define Off1_J2 0
+    #define Off1_J2 -9
     #define Off1_J3 0
     #define Off1_K1 0
     #define Off1_K2 0
@@ -1452,7 +1452,7 @@
     #define Off1_N3 0
     #define Off2_A1 0
     #define Off2_A2 0
-    #define Off2_A3 0
+    #define Off2_A3 -16
     #define Off2_B1 0
     #define Off2_B2 0
     #define Off2_B3 0
@@ -1467,7 +1467,7 @@
     #define Off2_E3 0
     #define Off2_F1 0
     #define Off2_F2 0
-    #define Off2_F3 0
+    #define Off2_F3 -5
     #define Off2_G1 0
     #define Off2_G2 0
     #define Off2_G3 -12
@@ -1476,19 +1476,19 @@
     #define Off2_H3 0
     #define Off2_I1 0
     #define Off2_I2 0
-    #define Off2_I3 0
-    #define Off2_J1 0
+    #define Off2_I3 -4
+    #define Off2_J1 -1
     #define Off2_J2 0
     #define Off2_J3 0
     #define Off2_K1 0
     #define Off2_K2 0
-    #define Off2_K3 0
+    #define Off2_K3 -14
     #define Off2_L1 0
     #define Off2_L2 0
     #define Off2_L3 0
     #define Off2_M1 0
     #define Off2_M2 -3
-    #define Off2_M3 10
+    #define Off2_M3 -20
     #define Off2_N1 0
     #define Off2_N2 0
     #define Off2_N3 0
@@ -1553,7 +1553,7 @@
     #define Off1_F1 0
     #define Off1_F2 0
     #define Off1_F3 0
-    #define Off1_G1 0
+    #define Off1_G1 -9
     #define Off1_G2 0
     #define Off1_G3 0
     #define Off1_H1 0
@@ -1574,8 +1574,8 @@
     #define Off1_M1 0
     #define Off1_M2 0
     #define Off1_M3 0
-    #define Off1_N1 0
-    #define Off1_N2 0
+    #define Off1_N1 1
+    #define Off1_N2 -5
     #define Off1_N3 0
     #define Off2_A1 0
     #define Off2_A2 0
@@ -1620,7 +1620,7 @@
     #define Off2_N2 0
     #define Off2_N3 0
     #define Off3_A1 0
-    #define Off3_A2 0
+    #define Off3_A2 -12
     #define Off3_A3 0
     #define Off3_B1 0
     #define Off3_B2 0
@@ -1653,7 +1653,7 @@
     #define Off3_K2 0
     #define Off3_K3 0
     #define Off3_L1 0
-    #define Off3_L2 10
+    #define Off3_L2 -20
     #define Off3_L3 0
     #define Off3_M1 0
     #define Off3_M2 0
@@ -1698,7 +1698,7 @@
     #define Off1_L1 0
     #define Off1_L2 0
     #define Off1_L3 0
-    #define Off1_M1 0
+    #define Off1_M1 1
     #define Off1_M2 0
     #define Off1_M3 0
     #define Off1_N1 0
@@ -1740,7 +1740,7 @@
     #define Off2_L1 0
     #define Off2_L2 0
     #define Off2_L3 0
-    #define Off2_M1 0
+    #define Off2_M1 -5
     #define Off2_M2 0
     #define Off2_M3 -9
     #define Off2_N1 0

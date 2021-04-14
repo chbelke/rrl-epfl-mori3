@@ -510,6 +510,9 @@ void Coms_123_ActVerify(uint8_t edge) {
     }
 }
 
+void Coms_123_ResetCmdMatch(uint8_t edge){
+    NbrCmdMatch[edge] = false;
+}
 
 /* ******************** WRITE BYTE TO EDGE ********************************** */
 void Coms_123_Write(uint8_t edge, uint8_t byte) {
