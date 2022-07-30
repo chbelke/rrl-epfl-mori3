@@ -69,7 +69,7 @@ The files are located in `ProgramInputs/MoriIK`.
 
 The `trajectory_4_move.m` script generates a csv which was used as inputs for the manipulator experiment of the paper. 
 
-`example.m` shows an example on the CCD algorithm. The script  first as a trajectory between two points and then a second time generating subdivisions through following a trajectory (). The example outputs trajectories, animations, and figures defining joint torques. The first section takes <1min to execute and <10min for the latter.
+`example.m` shows an example on the CCD algorithm. The script first generates a trajectory between two points. Then, it generates smaller subdivisions along an more sparse trajectory. The example outputs trajectories, animations, and figures defining joint torques. The first section takes <1min to execute and <10min for the latter.
 
 
 # Publications
