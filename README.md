@@ -49,6 +49,17 @@ Follow the firewall configuration instructions given here:
 
  The broker should have a fixed local IP of *192.168.1.2*
 
+## Recreating figures
+Graphs in the Mori3 publication are generated from in the `ProgramInputs` folder. All necessary data is within the folders.
+ 
+All have been executed using MATLAB 2020b.
+
+The reconfigurable surface graph is within the `SurfaceFigure` folder and generated via executing `Mori3_SurfacePlot_04.m` with `HexUpData.mat` in the working directory.
+
+The manupulator graph is within the `ManipulatorFigure` folder and generated via seperate `Arm_Overhead_2.m` and `Arm_Analysis_4.m` scripts.
+
+The track graph is within the `TrackFigure` folder and generated via `Track_Analysis_4.m` with `Track_Data.m` and `Track_model.m` in the working directories.
+
 # Publications
 
 ### Hardware:
