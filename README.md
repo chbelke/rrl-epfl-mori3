@@ -60,6 +60,18 @@ The manupulator graph is within the `ManipulatorFigure` folder and generated via
 
 The track graph is within the `TrackFigure` folder and generated via `Track_Analysis_4.m` with `Track_Data.m` and `Track_model.m` in the working directories.
 
+## Inverse Kinematics / CCD
+Cyclic coordinate decent generates the inverse kinematics for the Mori3 manipulator experiments.
+
+All experiments were executed on MATLAB 2020b.
+
+The files are located in `ProgramInputs/MoriIK`.
+
+The `trajectory_4_move.m` script generates a csv which was used as inputs for the manipulator experiment of the paper. 
+
+`example.m` shows an example on the CCD algorithm. The script  first as a trajectory between two points and then a second time generating subdivisions through following a trajectory (). The example outputs trajectories, animations, and figures defining joint torques. The first section takes <1min to execute and <10min for the latter.
+
+
 # Publications
 
 ### Hardware:
