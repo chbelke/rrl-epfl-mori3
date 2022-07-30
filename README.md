@@ -6,9 +6,10 @@ This repo contains all the code relevant to controlling and communication with t
 
 
 # Overview
- - MoriController.X: Main low-level controller
  - ESP8266: Control for ESP8266EX wifi chip
  - External: Overall external control
+ - MoriController.X: Main low-level controller
+ - ProgramInputs: Trajectory and figure generation
 
  ## Mori controller
 The main controller of a module consists of a microcontroller driving all core functionalities that interfaces with an ESP8266 over Serial. The 16-bit microcontroller from Microchip, dsPIC33EP512GM604 ([datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/70000689d.pdf)), is programmed via ([MPLAB X IDE](https://www.microchip.com/mplab/mplab-x-ide)).
